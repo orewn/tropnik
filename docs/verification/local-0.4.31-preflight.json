@@ -1,0 +1,128 @@
+{
+  "checkedAt": "2026-11-13T06:54:28.344719+00:00",
+  "scope": "local candidate checks; separate main/browser/device gates remain required",
+  "androidCandidateCommit": "d6f9bfd461be4e74c892847cdea2f54b07ea2b89",
+  "androidCandidateTree": "e0f268d51b4d88053d4baa08cf97cab4d7ad886d",
+  "webTests": {
+    "passed": 934,
+    "failed": 0,
+    "skipped": 0
+  },
+  "webToolingTests": {
+    "passed": 365,
+    "failed": 0,
+    "skipped": 0
+  },
+  "androidPythonTests": {
+    "passed": 105,
+    "failed": 0
+  },
+  "androidNodeTests": {
+    "passed": 37,
+    "failed": 0
+  },
+  "typescript": {
+    "web": "passed",
+    "static": "passed"
+  },
+  "eslint": "passed in serial run",
+  "static": {
+    "buildId": "3a0579a4bbe9ac6d",
+    "sourceCommit": null,
+    "pages": 718,
+    "referenceRoutes": 685,
+    "httpChecks": 71,
+    "browserRenderingTested": false,
+    "backendConnected": false
+  },
+  "sharedMap": {
+    "sourceInputsSha256": "9817ae7b12ccd679de08b887a1258542de6f5e1807b6c192dbc5712c018df10d",
+    "manifestSha256": "b8e84436d8fe83a7992448ba97658581f5963e66c05bd3200d404e704020d1d1",
+    "catalogSha256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0"
+  },
+  "earlierAttempts": [
+    {
+      "gate": "full web",
+      "result": "failed",
+      "passed": 914,
+      "fileLoadFailures": 2,
+      "resolution": "Resolve the new canonical transport alias and retain an explicit .ts suffix in two existing test loaders. Both affected files then passed20 actual cases; the complete934-case run above passed."
+    },
+    {
+      "gate": "parallel lint",
+      "result": "killed",
+      "processExitCode": 137,
+      "resolution": "Reran the unchanged lint command serially and it passed; the killed attempt is not counted as a pass."
+    }
+  ],
+  "logs": {
+    "web": {
+      "filename": "web-031-audit-final-green-tests.log",
+      "sha256": "5d24f17e2500137339cf1f66063f376aae62040fb620088e37c0188a88bb7576",
+      "bytes": 96073
+    },
+    "tooling": {
+      "filename": "pages-031-audit-final-tests.log",
+      "sha256": "1d81f40aaca5b40cc974853943ba6cf1eea1c2e9e7d9a06f30cdb1af9dde1f96",
+      "bytes": 48324
+    },
+    "lint": {
+      "filename": "web-031-audit-final-lint-serial.log",
+      "sha256": "7a52c6eaae53f1dc110842e74fbd3d95fd1293d174c3192c07e098bb21454ffc",
+      "bytes": 56
+    },
+    "staticBuild": {
+      "filename": "static-031-audit-final-build.log",
+      "sha256": "6a2013a84c49e41c7632defaa218ae1dacf3c4ef965dddc04c36e02d31ec7d81",
+      "bytes": 11920
+    },
+    "nodeDependencyCompatibility": {
+      "filename": "dependency-compatibility-031-final.log",
+      "sha256": "1c3171dae4097702a0faa3dcf8eb7c98674d6305b34073d6f9a4372027dc8b3c",
+      "bytes": 427
+    },
+    "siteBuild": {
+      "filename": "site-031-audit-final-build.log",
+      "sha256": "8d3393cd5397b81bdd665d6d9459a4838aef68f2ee0da07a589f9cbcabd3d924",
+      "bytes": 14699
+    }
+  },
+  "siteBuild": {
+    "status": "passed",
+    "command": "official build-site.mjs with the existing project build script",
+    "workerCompiled": true,
+    "published": false
+  },
+  "manualPreview": {
+    "scope": "Vite development preview and previously registered browser service worker; not exact-byte publication proof",
+    "savedRouteId": "kolyma-black-creek",
+    "savedIndicatorRetained": true,
+    "savedCardUpdated": true,
+    "savedCardOpened": true,
+    "coastalLineVisible": true,
+    "networkDisconnected": false,
+    "note": "The browser showed an active connection. No cold-network-off claim is made; exact build offline coverage belongs to the required CI."
+  },
+  "finalProvenanceAdjustment": {
+    "reason": "Remove stale upstream source-map references from the modified OG loader entries.",
+    "sharedMapCodeChanged": false,
+    "sourceInputsSha256": "e0d83901a027444c2e0f0541280f5ac97c8bd01e55eba90a091850549d5c314e",
+    "manifestSha256": "9c5cfd479072beb7da22dbdf6151890f6c6bf6b9cb73ec2a35a4a7e5e9f7872b",
+    "catalogSha256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0",
+    "realNodeAndWorkerCompatibilityTestsPassed": 4,
+    "productionAndAllDependencyAdvisories": 0,
+    "note": "The earlier candidate hashes above remain unchanged as historical local evidence. Final main CI must bind the adjusted provenance to its exact APK and web output."
+  },
+  "nativeDeviceFixPreflight": {
+    "candidateCommit": "9d3918d5d2718e3db80bc4954dd23ca7d9586220",
+    "candidateTree": "c787c653cd07e7a2ea1763fb6a55c0bf18b5964f",
+    "receipt": "android-0.4.31-local-preflight.json",
+    "pythonPassed": 105,
+    "nodePassed": 41,
+    "offlineAndWorkflowInputTestsPassed": 16,
+    "offlineAndWorkflowInputLogSha256": "cc3945b1d40a29c016f0cc87b6f87652b309d7180b5b24408047c8a18d887aaf",
+    "sourceInputsSha256": "8088b0a2d30faef6ef54ca1f121b0a3d86b89397bacbf36608ccb0fc1cbdc588",
+    "manifestSha256": "367928b2aa44f903ece4745c85b5149cf040c5546732f5a7f46382eb59b3128f",
+    "mainReleaseVerified": false
+  }
+}

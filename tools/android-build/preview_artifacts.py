@@ -37,11 +37,11 @@ FILES = APK_NAMES + REPORT_NAMES
 SOURCE_INPUTS = (
     "android/app", "android/gradle", "android/gradlew", "android/gradlew.bat",
     "android/build.gradle.kts", "android/settings.gradle.kts", "android/gradle.properties",
-    "tools/android-build", "tools/map-package", "data/terrain-pilot/runtime", "data/pilot-map",
+    "tools/android-build", "tools/map-package", "tools/import-data", "data",
     "web/lib", "web/public/data", "web/public/maps", "web/public/offline-map",
     "web/public/terrain", "web/public/custom-map", "web/package.json", "web/pnpm-lock.yaml", "web/pnpm-workspace.yaml",
     "web/app/custom-map.css", "web/app/map-direction-marker.css", "web/app/map-detail.css",
-    ".github/workflows/android.yml",
+    "web/scripts", "web/patches", "web/tsconfig.json", ".github/workflows/android.yml", ".gitignore",
 )
 
 

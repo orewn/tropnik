@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-postgis-runtime-role-and-account-closure-gate",
+  "sourceCommit": "0f8eac8ca041db8fdaf95e38cf1e2b5234ae4d2b",
+  "workflowRunId": 43365008492,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/43365008492",
+  "jobId": 131687242216,
+  "conclusion": "success",
+  "goVersion": "1.27.3",
+  "commands": ["go test -race -count=1 ./...", "go vet ./...", "bash infra/run-integration.sh"],
+  "unitAndRaceGate": "passed; package summaries were read, individual unit count not inferred",
+  "nativeIntegration": {"topLevelPassed": 38, "passedEventsIncludingSubtests": 69, "failures": 0, "skipped": 0},
+  "newExecutedTests": [
+    "TestAccountDeletionWithdrawsInterestAndRetainsParticipationHistory",
+    "TestConcurrentAccountDisableCannotAddRecruitmentInterest",
+    "TestRuntimePolicyRejectsExcessAndMissingGrants",
+    "TestRuntimePolicyRejectsOwnersAndReachableRoles",
+    "TestRuntimePolicyRejectsOwnerConnectionWithSelectedRuntimeRole"
+  ],
+  "artifact": {
+    "id": 14009728266,
+    "name": "tropnik-native-postgis-0f8eac8ca041db8fdaf95e38cf1e2b5234ae4d2b",
+    "bytes": 3412,
+    "sha256": "4c32591865dabd204664fa4acd3a0658e2103556db7a8b79111d26f7c29c0dc1",
+    "independentlyDownloadedAndHashed": true
+  },
+  "rawNativeLog": {
+    "path": "docs/verification/backend-0.4.31-native.txt",
+    "bytes": 22060,
+    "sha256": "9ecb67becb9a703191bdac3f302250fd2ab4acb239d3e08e697e726df599d6f9"
+  },
+  "boundaries": [
+    "Native PostgreSQL/PostGIS ran in the workflow's disposable test stack. Local authoring has no native Go/PostGIS toolchain.",
+    "The metadata-only role tests do not execute protected server file or process capabilities.",
+    "This proof does not establish a live production deployment, SMTP delivery, encrypted backup restore, operator monitoring or end-to-end client service."
+  ]
+}

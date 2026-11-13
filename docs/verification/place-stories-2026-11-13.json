@@ -1,0 +1,426 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-13",
+  "scope": "18 additional Russian editorial facts for the nine directions previously without stories, plus source/license attribution for all 17 photographs used by the 42-story catalogue.",
+  "textSources": {
+    "method": "Each of the 13 source pages was opened and its relevant Russian text read. Claims are paraphrased. Unavailable alternatives were replaced by accessible primary sources; search snippets alone were not accepted.",
+    "priorFacts": "The original 24 text entries retain their 2026-11-07 check dates and wording. This review does not redate or claim to reverify those older text sources.",
+    "exclusions": [
+      "No trail geometry, route availability, permit, booking, live wildlife count or glacier-size claims were added.",
+      "Illustrations show the named place or region; a photograph does not verify a hiking route.",
+      "No images were copied from museum, reserve, tourism or scientific websites without a free licence."
+    ]
+  },
+  "coverage": {
+    "originalStoryCount": 24,
+    "addedStoryCount": 18,
+    "totalStoryCount": 42,
+    "directionCount": 15,
+    "addedDirectionIds": [
+      "voronezh",
+      "primorye",
+      "kaliningrad",
+      "krasnoyarsk",
+      "sakhalin",
+      "murmansk",
+      "adygea",
+      "karachay-cherkessia",
+      "kabardino-balkaria"
+    ],
+    "minimumStoriesPerDirection": 2
+  },
+  "facts": [
+    {
+      "id": "voronezh-chalk",
+      "regionId": "voronezh",
+      "source": "Музей-заповедник «Дивногорье»",
+      "sourceUrl": "https://divnogor.ru/sights/nature/",
+      "checkedAt": "2026-11-13",
+      "evidence": "Раздел «Природа»: меловые останцы-дивы, овраги, степные участки и пойменные луга.",
+      "photoFileName": "Kreidefelsen.jpg"
+    },
+    {
+      "id": "voronezh-caves",
+      "regionId": "voronezh",
+      "source": "Музей-заповедник «Дивногорье»",
+      "sourceUrl": "https://divnogor.ru/sights/architec/",
+      "checkedAt": "2026-11-13",
+      "evidence": "Раздел «Архитектура»: шесть рукотворных пещерных комплексов; длина крупнейшего — 351 м.",
+      "photoFileName": "Kreidefelsen.jpg"
+    },
+    {
+      "id": "primorye-watershed",
+      "regionId": "primorye",
+      "source": "Сихотэ-Алинский государственный заповедник",
+      "sourceUrl": "https://www.sikhote-alin.ru/about_reserve?language=ru",
+      "checkedAt": "2026-11-13",
+      "evidence": "«Геологическое строение и рельеф»: асимметрия макросклонов и направления стока.",
+      "photoFileName": "Forest Stream in Sikhote-Alin.jpg"
+    },
+    {
+      "id": "primorye-lysaya-forests",
+      "regionId": "primorye",
+      "source": "Сихотэ-Алинский государственный заповедник",
+      "sourceUrl": "https://www.sikhote-alin.ru/visitors/routes-and-excursions/lysaya-mountain",
+      "checkedAt": "2026-11-13",
+      "evidence": "Описание горы Лысой: высота 893 м и последовательность растительных поясов. Условия и обещания посещения из карточки не перенесены.",
+      "photoFileName": "Forest Stream in Sikhote-Alin.jpg"
+    },
+    {
+      "id": "kaliningrad-dune-forest",
+      "regionId": "kaliningrad",
+      "source": "Национальный парк «Куршская коса»",
+      "sourceUrl": "https://www.park-kosa.ru/kk_alm20210618demo_RUS-ENG.pdf",
+      "checkedAt": "2026-11-13",
+      "evidence": "Альманах «Куршская коса как уникальный природный объект трансграничного региона», русские разделы на с. 28–30: облесенные дюны, горная сосна на Болотной, памятник Мюллеру, закрепление дюн.",
+      "photoFileName": "Curonian Spit - Dunes view from Epha Berg.jpg"
+    },
+    {
+      "id": "kaliningrad-bird-ringing",
+      "regionId": "kaliningrad",
+      "source": "Национальный парк «Куршская коса»",
+      "sourceUrl": "https://www.park-kosa.ru/kk_alm20210618demo_RUS-ENG.pdf",
+      "checkedAt": "2026-11-13",
+      "evidence": "Русские разделы альманаха на с. 27–29: открытие станции в 1901 г., массовое кольцевание и исследование миграций.",
+      "photoFileName": "Curonian Spit - Dunes view from Epha Berg.jpg"
+    },
+    {
+      "id": "krasnoyarsk-syenite",
+      "regionId": "krasnoyarsk",
+      "source": "Музей геологии Средней Сибири",
+      "sourceUrl": "https://museum.krasfond.ru/library/geologicheskie-pamyatniki-prirody-krasnoyarskogo-kraya.html",
+      "checkedAt": "2026-11-13",
+      "evidence": "Раздел «Заповедник „Столбы“»: сиенитовый массив, тектоническое поднятие и разрушение осадочных пород. Спорные датировки пород не использованы.",
+      "photoFileName": "Krasnoyarsk, Krasnoyarsk Stolby, Russia.jpg"
+    },
+    {
+      "id": "krasnoyarsk-protection",
+      "regionId": "krasnoyarsk",
+      "source": "Национальный парк «Красноярские Столбы»",
+      "sourceUrl": "https://kras-stolby.ru/o-parke/istoriya/",
+      "checkedAt": "2026-11-13",
+      "evidence": "Хронология 1919 и 1925 гг.: ходатайство общественных организаций и постановление от 30 июня 1925 г.",
+      "photoFileName": "Krasnoyarsk, Krasnoyarsk Stolby, Russia.jpg"
+    },
+    {
+      "id": "sakhalin-busse-lagoon",
+      "regionId": "sakhalin",
+      "source": "СахНИРО, журнал «Биология моря»",
+      "sourceUrl": "https://sciencejournals.ru/view-article/?a=BioMor2102005Kim&j=biomor&n=2&v=47&y=2021",
+      "checkedAt": "2026-11-13",
+      "evidence": "А. Ч. Ким, «Биология моря», 2021, т. 47, № 2, с. 138–140: связь с заливом Анива, приток рек и протока Аракуль. Численность устриц и правовые режимы из публикации 2021 г. не представлены как актуальные.",
+      "photoFileName": "Лагуна Буссе1, август 2016.jpg"
+    },
+    {
+      "id": "sakhalin-busse-oysters",
+      "regionId": "sakhalin",
+      "source": "СахНИРО, журнал «Биология моря»",
+      "sourceUrl": "https://sciencejournals.ru/view-article/?a=BioMor2102005Kim&j=biomor&n=2&v=47&y=2021",
+      "checkedAt": "2026-11-13",
+      "evidence": "Та же первичная статья: Crassostrea gigas как ценозообразующий вид и цели исследования размерного и возрастного состава. Нет приглашения к сбору или употреблению моллюсков.",
+      "photoFileName": "Лагуна Буссе1, август 2016.jpg"
+    },
+    {
+      "id": "murmansk-altitude",
+      "regionId": "murmansk",
+      "source": "Кольский научный центр РАН",
+      "sourceUrl": "https://www.ksc.ru/press-sluzhba/novosti/novosti-nauki/kak-pravilno-gulyat-po-botanicheskomu-sadu-14-06-22/",
+      "checkedAt": "2026-11-13",
+      "evidence": "Материал КНЦ РАН от 14 июня 2022 г. о научном путеводителе: смена природных поясов и климатических условий.",
+      "photoFileName": "Khibiny Mountains.jpg"
+    },
+    {
+      "id": "murmansk-glacial-terraces",
+      "regionId": "murmansk",
+      "source": "Кольский научный центр РАН",
+      "sourceUrl": "https://www.ksc.ru/press-sluzhba/novosti/novosti-nauki/kak-pravilno-gulyat-po-botanicheskomu-sadu-14-06-22/",
+      "checkedAt": "2026-11-13",
+      "evidence": "Описание географии экологической тропы: берег Вудъяврйока, террасы древнего ледникового озера, склон Вудъяврчорра. Время прохождения и доступность не обещаются.",
+      "photoFileName": "Khibiny Mountains.jpg"
+    },
+    {
+      "id": "adygea-ancient-reefs",
+      "regionId": "adygea",
+      "source": "Кавказский государственный заповедник",
+      "sourceUrl": "https://www.kavkazzapoved.ru/geologicheskoe-stroenie-territorii-kavkazskogo-zapovednika",
+      "checkedAt": "2026-11-13",
+      "evidence": "Раздел о верхнеюрских осадочных породах Лагонакского нагорья и остатках барьерных рифов.",
+      "photoFileName": "Lago-Naki.jpg"
+    },
+    {
+      "id": "adygea-karst",
+      "regionId": "adygea",
+      "source": "Кавказский государственный заповедник",
+      "sourceUrl": "https://www.kavkazzapoved.ru/geologicheskoe-stroenie-territorii-kavkazskogo-zapovednika",
+      "checkedAt": "2026-11-13",
+      "evidence": "Описание карстовых ландшафтов Лагонакского нагорья: воронки, колодцы, пещеры и подземные реки. Новые маршруты к ним не заявлены.",
+      "photoFileName": "Lago-Naki.jpg"
+    },
+    {
+      "id": "karachay-cherkessia-bta",
+      "regionId": "karachay-cherkessia",
+      "source": "Специальная астрофизическая обсерватория РАН",
+      "sourceUrl": "https://www.sao.ru/Doc-k8/Telescopes/bta/descrip.html",
+      "checkedAt": "2026-11-13",
+      "evidence": "Описание БТА: гора Пастухова, высота 2070 м, номинальный диаметр зеркала 6 м (технический — 6,05 м). Мировые рейтинги телескопов не использованы.",
+      "photoFileName": "Arkhyz. Large Altazimuth Telescope (BTA-6) P5110554 2350.jpg"
+    },
+    {
+      "id": "karachay-cherkessia-ratan",
+      "regionId": "karachay-cherkessia",
+      "source": "Специальная астрофизическая обсерватория РАН",
+      "sourceUrl": "https://www.sao.ru/excursion/",
+      "checkedAt": "2026-11-13",
+      "evidence": "Раздел РАТАН-600: точный диаметр 576 м, высота 970 м и расположение. Расписание, стоимость и доступность экскурсий не перенесены.",
+      "photoFileName": "RATAN 600.jpg"
+    },
+    {
+      "id": "kabardino-balkaria-elbrus-summits",
+      "regionId": "kabardino-balkaria",
+      "source": "Национальный атлас России",
+      "sourceUrl": "https://nationalatlas.ru/tom1/201.html",
+      "checkedAt": "2026-11-13",
+      "evidence": "Том 1, «Приэльбрусье»: высоты двух вершин. Разница 21 м получена вычитанием. Устаревающее описание вулканической активности не использовано.",
+      "photoFileName": "Elbrus summits from south - panoramio.jpg"
+    },
+    {
+      "id": "kabardino-balkaria-glacier-rivers",
+      "regionId": "kabardino-balkaria",
+      "source": "Национальный атлас России",
+      "sourceUrl": "https://nationalatlas.ru/tom1/201.html",
+      "checkedAt": "2026-11-13",
+      "evidence": "Том 1, «Приэльбрусье»: ледники и питание истоков Кубани, Малки, Баксана; горные ущелья. Современные площади и длины ледников не заявлены.",
+      "photoFileName": "Elbrus summits from south - panoramio.jpg"
+    }
+  ],
+  "photographs": [
+    {
+      "fileName": "Altai Mountains, Russia - 29180202402.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Altai_Mountains%2C_Russia_-_29180202402.jpg",
+      "author": "miketnorton",
+      "credit": "Фото: miketnorton / Wikimedia Commons",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Western Caucasus-118318.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Western_Caucasus-118318.jpg",
+      "author": "Guy Debonnet",
+      "credit": "Фото: Guy Debonnet / UNESCO / Wikimedia Commons",
+      "license": "CC BY-SA 3.0 IGO",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/igo/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Тисо-самшитовая роща.JPG",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%A2%D0%B8%D1%81%D0%BE-%D1%81%D0%B0%D0%BC%D1%88%D0%B8%D1%82%D0%BE%D0%B2%D0%B0%D1%8F_%D1%80%D0%BE%D1%89%D0%B0.JPG",
+      "author": "JuliaBesedina",
+      "credit": "Фото: JuliaBesedina / Wikimedia Commons",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Kizhi Pogost P7110210 2200.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kizhi_Pogost_P7110210_2200.jpg",
+      "author": "Alexxx1979",
+      "credit": "Фото: Alexxx1979 / Wikimedia Commons",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Karadag, Crimea.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Karadag%2C_Crimea.jpg",
+      "author": "Vyacheslav Argenberg",
+      "credit": "Фото: © Vyacheslav Argenberg / vascoplanet.com / Wikimedia Commons",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Lake Baikal, Russia.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_Baikal%2C_Russia.jpg",
+      "author": "Vyacheslav Argenberg",
+      "credit": "Фото: © Vyacheslav Argenberg / Wikimedia Commons",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Kamchatka Volcanoes (18170609638).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kamchatka_Volcanoes_(18170609638).jpg",
+      "author": "kuhnmi",
+      "credit": "Фото: kuhnmi / Wikimedia Commons",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Kreidefelsen.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kreidefelsen.jpg",
+      "author": "High Contrast",
+      "credit": "Фото: High Contrast / Wikimedia Commons",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Forest Stream in Sikhote-Alin.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Forest_Stream_in_Sikhote-Alin.jpg",
+      "author": "Ruslan V. Albitsky",
+      "credit": "Фото: Ruslan V. Albitsky (pauk) / Wikimedia Commons",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Curonian Spit - Dunes view from Epha Berg.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Curonian_Spit_-_Dunes_view_from_Epha_Berg.jpg",
+      "author": "Alexander Grebenkov",
+      "credit": "Фото: Alexander Grebenkov / Wikimedia Commons",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Krasnoyarsk, Krasnoyarsk Stolby, Russia.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Krasnoyarsk%2C_Krasnoyarsk_Stolby%2C_Russia.jpg",
+      "author": "Vyacheslav Argenberg",
+      "credit": "Фото: © Vyacheslav Argenberg / Wikimedia Commons",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Лагуна Буссе1, август 2016.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:%D0%9B%D0%B0%D0%B3%D1%83%D0%BD%D0%B0_%D0%91%D1%83%D1%81%D1%81%D0%B51%2C_%D0%B0%D0%B2%D0%B3%D1%83%D1%81%D1%82_2016.jpg",
+      "author": "Анна Голованова",
+      "credit": "Фото: Анна Голованова / Wikimedia Commons",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Khibiny Mountains.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Khibiny_Mountains.jpg",
+      "author": "Konstantin Malanchev",
+      "credit": "Фото: Konstantin Malanchev / Wikimedia Commons",
+      "license": "CC BY 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/2.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Lago-Naki.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lago-Naki.jpg",
+      "author": "Afonin",
+      "credit": "Фото: Afonin / Wikimedia Commons",
+      "license": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Arkhyz. Large Altazimuth Telescope (BTA-6) P5110554 2350.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Arkhyz._Large_Altazimuth_Telescope_(BTA-6)_P5110554_2350.jpg",
+      "author": "Alexxx1979",
+      "credit": "Фото: Alexxx1979 / Wikimedia Commons",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "RATAN 600.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:RATAN_600.jpg",
+      "author": "александр с кавказа",
+      "credit": "Фото: александр с кавказа / Wikimedia Commons",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    },
+    {
+      "fileName": "Elbrus summits from south - panoramio.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Elbrus_summits_from_south_-_panoramio.jpg",
+      "author": "Evgeny Fedorov",
+      "credit": "Фото: Evgeny Fedorov / Wikimedia Commons",
+      "license": "CC BY 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/3.0/deed.en",
+      "checkedAt": "2026-11-13",
+      "displayChanges": "The existing card crops the image to its frame with CSS object-fit; no modified bitmap is distributed."
+    }
+  ],
+  "licenceReview": "All listed Commons description pages were opened, their authors and individual image licences read, and the six linked Creative Commons licence deeds opened. Only the image-specific licence applies, not the general Commons page-text footer.",
+  "unavailableAlternatives": [
+    {
+      "url": "https://pabgi.ru/pabsi-eto/istoriya/",
+      "result": "403 during open; not used",
+      "replacement": "https://www.ksc.ru/press-sluzhba/novosti/novosti-nauki/kak-pravilno-gulyat-po-botanicheskomu-sadu-14-06-22/"
+    },
+    {
+      "url": "https://park-kosa.ru/istoriya-ornitologicheskix-issledovanij",
+      "result": "500 during open; not used",
+      "replacement": "https://www.park-kosa.ru/kk_alm20210618demo_RUS-ENG.pdf"
+    },
+    {
+      "url": "https://online.gosakhalin.ru/excursion/10476-gastronomicheskaya-ekskursiya-laguna-busse/",
+      "result": "Timeout during open; not used",
+      "replacement": "https://sciencejournals.ru/view-article/?a=BioMor2102005Kim&j=biomor&n=2&v=47&y=2021"
+    }
+  ],
+  "limits": "Checks establish editorial support and photo attribution from the opened public pages. They do not certify permanent third-party uptime or conditions for visiting the places.",
+  "validation": {
+    "focusedStoriesTest": {
+      "command": "node --experimental-strip-types --test tests/place-stories.test.mjs",
+      "passed": 7,
+      "failed": 0
+    },
+    "lint": {
+      "command": "node node_modules/eslint/bin/eslint.js lib/facts.ts app/terms/page.tsx tests/place-stories.test.mjs",
+      "result": "PASS"
+    },
+    "preservation": {
+      "baseline": "49d31a15ad0d419911a3444e39a6e175c1ed439b",
+      "originalFacts": 24,
+      "fields": [
+        "id",
+        "regionId",
+        "place",
+        "title",
+        "body",
+        "source",
+        "sourceUrl",
+        "checkedAt",
+        "routeIds"
+      ],
+      "result": "Unchanged; compared programmatically with the baseline module."
+    },
+    "coverage": {
+      "stories": 42,
+      "directions": 15,
+      "photographs": 17,
+      "maximumAdditionalBodyCharacters": 220
+    },
+    "renderedTerms": {
+      "textReferences": 42,
+      "uniquePhotoReferences": 17,
+      "sourceAndLicenceBoundToCredit": true
+    },
+    "scope": "Focused data, filtering and rendered attribution checks. The parent release gate is responsible for full build, browser and native validation."
+  }
+}

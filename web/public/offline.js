@@ -1,4 +1,4 @@
-import {RUSSIA_BOUNDS,russiaCamera,russiaPadding,displayGeoJSON,inRussiaCoverage,coveredRussiaBounds,russiaLongitude} from '/maps/russia-viewport.js';
+import {RUSSIA_BOUNDS,russiaCamera,russiaPadding,inRussiaCoverage,coveredRussiaBounds,russiaLongitude} from '/maps/russia-viewport.js';
 
 const byId=id=>document.getElementById(id),status=text=>{byId('map-status').textContent=text;};
 const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -40,9 +40,9 @@ function observeMap(resize){
 }
 async function createMap(){
  mapVisible(false);
- const {CustomMapEngine}=await import('/custom-map/map-runtime.js');
+ const {CustomMapEngine,readRouteGeometry,verifyReviewedCoastalRoute}=await import('/custom-map/map-runtime.js');
  const element=byId('map'),wrapper=element.parentElement,countryBounds=[...RUSSIA_BOUNDS[0],...RUSSIA_BOUNDS[1]];
- let floor=cameraView(256).camera,fullView=true,map,ready=false,disposed=false,pilotOutline;
+ let floor=cameraView(256).camera,fullView=true,map,ready=false,disposed=false,pilotOutline,routeRevision=0,navigationRevision=0;
  let stopObserver=()=>{},stopCoverage=()=>{};
  const sameCamera=(a,b)=>Math.abs(a.zoom-b.zoom)<1e-7&&Math.abs(a.center[0]-b.center[0])<1e-7&&Math.abs(a.center[1]-b.center[1])<1e-7&&Math.abs(a.bearingDegrees||0)<1e-7;
  const syncOutline=()=>{
@@ -59,28 +59,42 @@ async function createMap(){
   map.setObstacles(rectangles);
  };
  const overview=(animate=!reduced)=>{
+  navigationRevision++;
   const view=cameraView(256);floor=view.camera;fullView=true;map.setFloor(floor);map.setPitch(0);map.setMode('detail');
   map.fit(countryBounds,view.padding,floor.zoom,animate);syncObstacles();
  };
- const draw=(geometry,fit=true)=>{
-  const data=geometry?displayGeoJSON(geometry):undefined;
-  map.setRoute(data,geometry?selected?.id:undefined);wrapper.dataset.mapRoute=geometry?'selected':'none';
-  if(!geometry||!fit)return;
-  coverage=map.getCoverage()?.area??coverage;
-  const bounds=coveredBounds(data);
-  if(!bounds){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
-  fullView=false;map.fit(bounds,cameraView(256).padding,14,!reduced);
+ const draw=async(geometry,fit=true)=>{
+  if(disposed)return;
+  const revision=++routeRevision,navigation=navigationRevision,pack=selected;
+  map.setRoute(undefined);wrapper.dataset.mapRoute='none';
+  if(!geometry)return;
+  try{
+   // Re-issue the capability from saved coordinates, never from a stored flag.
+   // Preserve the same exact geometry object for verification and the renderer.
+   const data=readRouteGeometry(geometry),coastal=await verifyReviewedCoastalRoute(pack?.trail?.geometryUrl,data);
+   if(disposed||revision!==routeRevision||selected!==pack)return;
+   map.setRoute(data,pack?.id,coastal);wrapper.dataset.mapRoute='selected';
+   if(!fit||navigation!==navigationRevision)return;
+   coverage=map.getCoverage()?.area??coverage;
+   const bounds=coastal?.bounds??coveredBounds(data);
+   if(!bounds){status('У этой линии нет точек внутри покрытия России. Карточка остаётся доступной.');return;}
+   fullView=false;map.fit(bounds,cameraView(256).padding,14,!reduced);
+  }catch{
+   if(!disposed&&revision===routeRevision&&selected===pack)status('Сохранённая линия не прошла проверку. Карточка доступна; сохраните её заново при подключении.');
+  }
  };
  const driver={
   draw,overview:()=>overview(),zoomIn:()=>map.zoomBy(.75),zoomOut:()=>map.zoomBy(-.75),
   locate:position=>{
    const {longitude,latitude}=position.coords;coverage=map.getCoverage()?.area??coverage;
    if(!inRussiaCoverage(longitude,latitude,coverage))return false;
+   navigationRevision++;
    const coordinate=[russiaLongitude(longitude),latitude];
    map.setMarkers([{id:'offline-position',coordinate,label:'Моё местоположение',kind:'position'}]);
    fullView=false;map.setCamera({center:coordinate,zoom:13,bearingDegrees:0},!reduced);return true;
   },
   pilot:async()=>{
+   navigationRevision++;
    map.setMode('detail');map.setLayers({paths:true,boundaries:true,relief:true});
    if(!pilotOutline){
     pilotOutline=document.createElementNS('http://www.w3.org/2000/svg','svg');pilotOutline.setAttribute('aria-hidden','true');
@@ -90,7 +104,7 @@ async function createMap(){
     pilotOutline.appendChild(polygon);element.insertBefore(pilotOutline,map.canvas.nextSibling);
    }
    fullView=false;map.fit([40.29,43.64,40.49,43.82],cameraView(256).padding,14,!reduced);syncOutline();
-   if(selected?.geometry)draw(selected.geometry);
+   if(selected?.geometry)await draw(selected.geometry);
   },
   destroy:()=>{if(disposed)return;disposed=true;stopObserver();stopCoverage();pilotOutline?.remove();map?.destroy();},
  };
@@ -112,7 +126,7 @@ async function createMap(){
      });
      startupSettled=true;resolve(driver);
     },
-    onGesture:()=>{fullView=false;},
+    onGesture:()=>{fullView=false;navigationRevision++;},
     onSettled:camera=>{fullView=sameCamera(camera,floor);wrapper.dataset.mapDetail=camera.zoom>=10?'close':'overview';},
     onFrame:()=>{if(!disposed&&ready){mapVisible(true);syncOutline();}},
     onState:state=>{if(disposed||!state.error)return;if(!ready)startupFailure(state.error);else status(state.error);},
@@ -159,7 +173,7 @@ else{byId('map').setAttribute('aria-busy','false');status('Не удалось �
 if(results[1].status==='fulfilled')saved=results[1].value;
 for(const pack of saved){const option=document.createElement('option');option.value=pack.id;option.textContent=pack.title;byId('saved').append(option);}
 byId('pilot').hidden=!hasPilot;byId('pilot').disabled=!driver;
-byId('summary').textContent=results[1].status==='fulfilled'?`На устройстве ${saved.length} карточек.${hasPilot?' Подробная карта Бзерпинского района сохранена.':' Доступен обзор. Подробный пакет ещё не скачан.'}`:'Список карточек недоступен. Откройте управление картами при подключении.';
+byId('summary').textContent=results[1].status==='fulfilled'?`Сохранённых карточек: ${saved.length}.${hasPilot?' Подробная карта Бзерпинского района сохранена.':' Доступен обзор. Подробный пакет ещё не скачан.'}`:'Список карточек недоступен. Откройте управление картами при подключении.';
 const params=new URLSearchParams(location.search);
 if(params.get('map')==='pilot'&&hasPilot)await pilot();
 if(params.has('route')){byId('saved').value=params.get('route');show(saved.find(pack=>pack.id===params.get('route')));}

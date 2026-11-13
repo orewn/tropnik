@@ -13,7 +13,9 @@ services:
       - postgres-data:/var/lib/postgresql
       - ./db/01-runtime-role.sh:/docker-entrypoint-initdb.d/01-runtime-role.sh:ro
     healthcheck:
-      test: [CMD-SHELL, "pg_isready -U tropa_owner -d tropa"]
+      # The image starts a socket-only server while initialization scripts run.
+      # Wait for the final TCP listener before migrations use the runtime role.
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U tropa_owner -d tropa"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -43,6 +45,7 @@ services:
       TROPA_PROXY_TOKEN: ${TROPA_PROXY_TOKEN:-}
       TROPA_AUTH_RATE_KEY: ${TROPA_AUTH_RATE_KEY:?Generate a stable independent auth HMAC key}
       TROPA_SAFETY_DATA_KEY: ${TROPA_SAFETY_DATA_KEY:?Generate and back up an independent safety encryption key}
+      TROPA_ACCOUNT_MAIL_KEY: ${TROPA_ACCOUNT_MAIL_KEY:-}
     depends_on:
       migrate: { condition: service_completed_successfully }
     ports: ["127.0.0.1:8080:8080"]

@@ -33,5 +33,23 @@ overrides:
   'fast-uri@>=3.0.0 <3.1.9': 3.1.9
   'fflate@>=0.7.0 <0.7.5': 0.7.5
   'esbuild@>=0.28.0 <0.28.1': 0.28.1
+  # Scoped compatibility checks cover the actual Wrangler bundler, Drizzle TS
+  # loader, SVG/PNG renderer and TypeScript ESLint glob consumer in this project.
+  # GHSA-g7r4-m6w7-qqqr / GHSA-67mh-4wv8-2f99
+  wrangler>esbuild: 0.28.1
+  '@esbuild-kit/core-utils>esbuild': 0.28.1
+  # GHSA-wx4j-mvgx-mqwp / GHSA-g3hv-75wg-m249
+  # @vercel/og bundles Satori: overriding only its declared dependency leaves
+  # the old renderer in the shipped bundle. Upgrade the actual consumer too.
+  'vinext>@vercel/og': 1.0.3
+  '@typescript-eslint/typescript-estree>minimatch': 11.0.1
   # The hooks plugin explicitly supports either Zod 3 or 4; retain the patched branch.
   eslint-plugin-react-hooks>zod: 4.6.6
+# The fixed OG bundle needs HarfBuzz's declared binary at its own boundary.
+# This is the same pinned version already used by Satori, not a second engine.
+packageExtensions:
+  '@vercel/og@1.0.3':
+    dependencies:
+      harfbuzzjs: 0.10.0
+patchedDependencies:
+  '@vercel/og@1.0.3': patches/@vercel__og@1.0.3.patch

@@ -59,7 +59,11 @@ class SourceCheckoutTests(unittest.TestCase):
     def test_untracked_native_code_and_shared_assets_are_not_part_of_git_archive(self):
         with patch.dict(os.environ, self.env):
             for name in ("android/app/src/main/java/Injected.kt", "web/public/data/routes/new.geojson",
-                         "tools/android-build/untracked-generator.py"):
+                         "tools/android-build/untracked-generator.py",
+                         "tools/import-data/untracked-recovery.py",
+                         "data/catalog/coverage-recovery/untracked-source.json",
+                         "web/scripts/untracked-generator.mjs", "web/patches/untracked.patch",
+                         "web/tsconfig.json"):
                 with self.subTest(path=name):
                     path = self.root / name
                     path.parent.mkdir(parents=True, exist_ok=True)
@@ -67,6 +71,16 @@ class SourceCheckoutTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "inputs differ"):
                         artifacts.source_checkout(self.root)
                     path.unlink()
+
+    def test_mutated_ignore_rules_cannot_hide_uncommitted_inputs(self):
+        with patch.dict(os.environ, self.env):
+            ignore = self.root / ".gitignore"
+            ignore.write_text(ignore.read_text() + "android/app/src/main/java/Injected.kt\n")
+            path = self.root / "android/app/src/main/java/Injected.kt"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("hidden by an uncommitted ignore rule\n")
+            with self.assertRaisesRegex(ValueError, "inputs differ"):
+                artifacts.source_checkout(self.root)
 
     def test_missing_malformed_and_foreign_workflow_commits_fail(self):
         for value in ("", "main", "0" * 40):

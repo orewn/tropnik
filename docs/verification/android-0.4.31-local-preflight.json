@@ -1,0 +1,103 @@
+{
+  "recordedAt": "2026-11-13T07:24:39.165013+00:00",
+  "reason": "Repeated frozen gates to retain complete stdout/stderr logs",
+  "androidCandidateHead": "9d3918d5d2718e3db80bc4954dd23ca7d9586220",
+  "androidCandidateTree": "c787c653cd07e7a2ea1763fb6a55c0bf18b5964f",
+  "sourceBytesUnchanged": true,
+  "sourceFilesSha256": {
+    "android/app/src/main/assets/catalog.json": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0",
+    "android/app/src/main/assets/custom-map/manifest.json": "367928b2aa44f903ece4745c85b5149cf040c5546732f5a7f46382eb59b3128f",
+    "web/public/custom-map/manifest.json": "367928b2aa44f903ece4745c85b5149cf040c5546732f5a7f46382eb59b3128f",
+    "web/public/sw.js": "640fab91dad70f8e76a5e8472adacb290fae2c6b05de489309c20c8dd6dd440e",
+    "android/app/src/main/java/ru/tropa/app/data/ConnectivityMonitor.kt": "800b1ff6cd289aa2582f496d064b239f034c735fdeee404dd708c2d0d7824c75",
+    "android/app/src/main/java/ru/tropa/app/data/DefaultNetworkConnection.kt": "6d53f0a26e0d1b5b9086c460d0bd39ff665cea0c5354ae09fc397243dd5dac77",
+    "android/app/src/test/java/ru/tropa/app/data/DefaultNetworkConnectionTest.kt": "f22a45c6308ac85cd55eb4c6784835224fcef3ae3d67abd7d44065712db6806b",
+    "android/app/src/androidTest/java/ru/tropa/app/SessionFaultHarness.kt": "de6747d7e9d16f2e563f475230f256bce71c1f5d2c56866ffef4739cb0383a16",
+    "android/app/src/androidTest/java/ru/tropa/app/LocalExperienceTest.kt": "d95a393f17b7c492ad22e687cb5d02829bc2a57fd0385e09f8c5eb4cc47210fc",
+    "android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt": "ad79df44d109f946b3aa167aa2be397f192b3e8ac75afad6fdb4402a7fc84374",
+    "tools/android-build/native-map-catalogue.ts": "cc2e95b78eb56a4ac692174cf9ee2aefa894e838f93cd44cbaa78399ec2b9694",
+    "tools/android-build/native-map-route.ts": "10165d65791d6de32ffc59df3cd1181e042a6113f10e50bac297e03f89350f46"
+  },
+  "results": [
+    {
+      "name": "python",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/android-build",
+        "-p",
+        "test_*.py"
+      ],
+      "startedAt": "2026-11-13T07:24:19.268422+00:00",
+      "seconds": 19.889,
+      "exitCode": 0,
+      "log": "python.log",
+      "logSha256": "c4d5ecf62d64c5063532ffc09150a774cf93cdd759dcd6d58dad98ba16e16b6f"
+    },
+    {
+      "name": "node",
+      "command": [
+        "node",
+        "--test",
+        "tools/android-build/test-catalog-regions.mjs",
+        "tools/android-build/test-custom-map.mjs",
+        "tools/android-build/test-landscape-bootstrap.mjs",
+        "tools/android-build/test-native-map-catalogue.mjs",
+        "tools/android-build/test-native-map-diagnostics.mjs",
+        "tools/android-build/test-native-map-route.mjs"
+      ],
+      "startedAt": "2026-11-13T07:24:19.268955+00:00",
+      "seconds": 7.55,
+      "exitCode": 0,
+      "log": "node.log",
+      "logSha256": "a5be5dc040eb111c393dc83436d8353a41f40a0c01cf38d4fec6a31d3d89da5e"
+    },
+    {
+      "name": "catalog-check",
+      "command": [
+        "node",
+        "tools/android-build/prepare-catalog.mjs",
+        "--check"
+      ],
+      "startedAt": "2026-11-13T07:24:19.269590+00:00",
+      "seconds": 3.861,
+      "exitCode": 0,
+      "log": "catalog-check.log",
+      "logSha256": "5181d0a87023b233271c28f7969c10041480c533de293a79427833db570aa4e9"
+    },
+    {
+      "name": "custom-map-check",
+      "command": [
+        "node",
+        "tools/android-build/prepare-custom-map.mjs",
+        "--check"
+      ],
+      "startedAt": "2026-11-13T07:24:23.130992+00:00",
+      "seconds": 4.138,
+      "exitCode": 0,
+      "log": "custom-map-check.log",
+      "logSha256": "32c4fa521e42ce5b0fea11e4d2289f7c7519dcdaa9d6adabb8be9677f186c7fd"
+    },
+    {
+      "name": "landscape-check",
+      "command": [
+        "python3",
+        "tools/android-build/prepare-landscape.py",
+        "--check"
+      ],
+      "startedAt": "2026-11-13T07:24:26.818912+00:00",
+      "seconds": 4.786,
+      "exitCode": 0,
+      "log": "landscape-check.log",
+      "logSha256": "23d69e8ca452e84610a0110c7061c089b8576a46c5f60b4861affd5244e0ad84"
+    }
+  ],
+  "scope": "Frozen local Android preflight; JVM, R8 and device execution are separate CI gates.",
+  "pythonTestsPassed": 105,
+  "nodeTestsPassed": 41,
+  "sourceInputsSha256": "8088b0a2d30faef6ef54ca1f121b0a3d86b89397bacbf36608ccb0fc1cbdc588",
+  "mainReleaseVerified": false
+}

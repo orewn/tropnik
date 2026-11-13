@@ -19,8 +19,8 @@ sealed interface ServerState {
     data class Unavailable(val reason: String) : ServerState
 }
 
-class ApiClient internal constructor(private val endpoint: () -> String, private val bearer: () -> String?, private val http: OkHttpClient) {
-    constructor(endpoint: () -> String, bearer: () -> String?) : this(endpoint, bearer,
+class ApiClient internal constructor(private val endpoint: () -> String, private val bearer: (String) -> String?, private val http: OkHttpClient) {
+    constructor(endpoint: () -> String, bearer: (String) -> String?) : this(endpoint, bearer,
         OkHttpClient.Builder().connectTimeout(8, TimeUnit.SECONDS).readTimeout(15, TimeUnit.SECONDS)
             .callTimeout(20, TimeUnit.SECONDS).followRedirects(false).followSslRedirects(false)
             .retryOnConnectionFailure(false).build())
@@ -40,12 +40,16 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
     } catch (failure: ApiFailure) { ServerState.Unavailable(failure.message) }
 
     suspend fun authenticate(email: String, password: String, displayName: String? = null, role: String = "tourist"): AccountSession {
+        val origin = baseUrl
         val body = JSONObject().put("email", email.trim()).put("password", password)
         if (displayName != null) body.put("displayName", displayName.trim()).put("role", role)
-        val response = request("POST", if (displayName == null) "/auth/login" else "/auth/register", body, authenticated = false).getJSONObject("data")
-        return AccountSession(baseUrl, response.getString("token"), response.getString("expiresAt"), Account.parse(response.getJSONObject("user")))
+        val response = request("POST", if (displayName == null) "/auth/login" else "/auth/register", body,
+            authenticated = false, requestOrigin = origin).getJSONObject("data")
+        return AccountSession(origin, response.getString("token"), response.getString("expiresAt"), Account.parse(response.getJSONObject("user")))
     }
-    suspend fun logout() { request("POST", "/auth/logout") }
+    // Revocation uses the captured old identity after local access is disabled.
+    // A server switch can never redirect this token to the newly selected host.
+    suspend fun logout(session: AccountSession? = null) { request("POST", "/auth/logout", revokingSession = session) }
     suspend fun me() = Account.parse(request("GET", "/me").getJSONObject("data"))
     suspend fun accountSummary() = AccountSummary.parse(request("GET", "/me/summary").getJSONObject("data"))
     suspend fun departureHistory(cursor: String? = null): DepartureHistoryPage {
@@ -63,13 +67,18 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
     suspend fun appeals() = request("GET", "/me/appeals").getJSONArray("data").objectList().map(Appeal::parse)
     suspend fun appeal(actionId: String, body: String) = Appeal.parse(request("POST", "/moderation-actions/${ApiAddress.segment(actionId)}/appeals", JSONObject().put("body", body.trim())).getJSONObject("data"))
     suspend fun updateProfile(name: String, role: String) = Account.parse(request("PATCH", "/me/profile", JSONObject().put("displayName", name.trim()).put("role", role)).getJSONObject("data"))
-    suspend fun routePage(cursor: String? = null): RoutePage {
+    suspend fun routePage(cursor: String? = null): RoutePage = withContext(Dispatchers.IO) {
+        val origin = baseUrl
         val query = if (cursor.isNullOrBlank()) "" else "&cursor=" + URLEncoder.encode(cursor, "UTF-8")
-        val response = request("GET", "/routes?limit=25$query", authenticated = false, expectedStatus = 200)
-        return RoutePage(response.getJSONArray("data").objectList().map { PublishedRoute.parse(it).copy(apiOrigin = baseUrl) }, response.optJSONObject("meta")?.stringOrNull("nextCursor"))
+        val response = request("GET", "/routes?limit=25$query", authenticated = false, expectedStatus = 200, requestOrigin = origin)
+        RoutePage(response.getJSONArray("data").objectList().map { PublishedRoute.parse(it).copy(apiOrigin = origin) }, response.optJSONObject("meta")?.stringOrNull("nextCursor"))
     }
-    suspend fun route(id: String) = PublishedRoute.parse(request("GET", "/routes/${ApiAddress.segment(id)}", authenticated = false,
-        expectedStatus = 200, successResponseBytes = ApiResponseBudget.FULL_ROUTE_BYTES).getJSONObject("data")).copy(apiOrigin = baseUrl)
+    suspend fun route(id: String): PublishedRoute = withContext(Dispatchers.IO) {
+        val origin = baseUrl
+        // Keep full-geometry JSONObject serialization off the UI dispatcher too.
+        PublishedRoute.parse(request("GET", "/routes/${ApiAddress.segment(id)}", authenticated = false,
+            expectedStatus = 200, requestOrigin = origin).getJSONObject("data")).copy(apiOrigin = origin)
+    }
     suspend fun departures(routeId: String? = null) = request("GET", "/departures" + (routeId?.let { "?route=${ApiAddress.segment(it)}" } ?: ""), authenticationOptional = true).getJSONArray("data").objectList().map(Departure::parse)
     suspend fun departure(id: String) = Departure.parse(request("GET", "/departures/${ApiAddress.segment(id)}", authenticationOptional = true).getJSONObject("data"))
     suspend fun participants(id: String) = request("GET", "/departures/${ApiAddress.segment(id)}/participants").getJSONArray("data").objectList().map(Participant::parse)
@@ -103,10 +112,11 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
 
     private suspend fun request(method: String, path: String, body: JSONObject? = null, authenticated: Boolean = true,
         authenticationOptional: Boolean = false, extraHeaders: Map<String, String> = emptyMap(), expectedStatus: Int? = null,
-        successResponseBytes: Int = ApiResponseBudget.DEFAULT_BYTES): JSONObject = withContext(Dispatchers.IO) {
-        if (!configured) throw ApiFailure("service_not_configured", "Сначала настройте подключение в профиле.")
-        val base = baseUrl
-        val token = if (authenticated) bearer() else null
+        requestOrigin: String? = null,
+        revokingSession: AccountSession? = null): JSONObject = withContext(Dispatchers.IO) {
+        val base = ApiAddress.normalize(revokingSession?.origin ?: requestOrigin ?: endpoint())
+        if (base.isBlank()) throw ApiFailure("service_not_configured", "Сначала настройте подключение в профиле.")
+        val token = if (authenticated) revokingSession?.token ?: bearer(base) else null
         if (authenticated && !authenticationOptional && token.isNullOrBlank()) throw ApiFailure("auth_required", "Войдите в аккаунт, чтобы продолжить.", 401)
         val requestBody = if (method in setOf("POST", "PATCH", "PUT")) (body?.toString() ?: "{}").toRequestBody("application/json; charset=utf-8".toMediaType()) else null
         val builder = Request.Builder().url(base + path).method(method, requestBody)
@@ -119,9 +129,9 @@ class ApiClient internal constructor(private val endpoint: () -> String, private
                     throw ApiFailure("unexpected_status", "Не удалось подключиться. Попробуйте позже.", response.code)
                 }
                 if (response.code == 204) return@withContext JSONObject()
-                // A full route has its own bounded geometry budget. Failure bodies
-                // and every other operation retain the smaller default limit.
-                val responseLimit = if (response.isSuccessful) successResponseBytes else ApiResponseBudget.DEFAULT_BYTES
+                // Larger budgets belong to exact successful response contracts.
+                // Error bodies and unrelated paths/methods keep the default.
+                val responseLimit = ApiResponseBudget.forResponse(path, method, response.isSuccessful)
                 if ((response.body?.contentLength() ?: -1L) > responseLimit) {
                     throw ApiFailure("response_too_large", "Не удалось загрузить данные. Обновите страницу или попробуйте позже.")
                 }

@@ -97,8 +97,9 @@ data class Catalog(val version: String, val regions: List<Region>, val routes: L
     }
 
     companion object {
-        fun load(context: Context): Catalog {
-            val json = context.assets.open("catalog.json").bufferedReader().use { JSONObject(it.readText()) }
+        fun load(context: Context): Catalog = context.assets.open("catalog.json").bufferedReader().use { parse(JSONObject(it.readText())) }
+
+        internal fun parse(json: JSONObject): Catalog {
             require(json.getInt("schemaVersion") == 1) { "Unsupported bundled catalog schema" }
             val regions = json.getJSONArray("regions").objects().map {
                 Region(it.getString("id"), it.getString("name"), it.getString("subtitle"),

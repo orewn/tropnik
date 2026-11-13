@@ -5,13 +5,14 @@ import (
 	"embed"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"tropa/backend/internal/policy"
 )
 
 //go:embed *.sql
 var Files embed.FS
 
 // RequiredVersion is also the readiness gate used by the running API.
-const RequiredVersion = 6
+const RequiredVersion = 8
 
 func Apply(ctx context.Context, pool *pgxpool.Pool) error {
 	c, e := pool.Acquire(ctx)
@@ -19,15 +20,15 @@ func Apply(ctx context.Context, pool *pgxpool.Pool) error {
 		return e
 	}
 	defer c.Release()
-	if _, e = c.Exec(ctx, "SELECT pg_advisory_lock(87071204)"); e != nil {
+	if _, e = c.Exec(ctx, "SELECT pg_advisory_lock($1)", int64(policy.MigrationLock)); e != nil {
 		return e
 	}
-	defer c.Exec(context.Background(), "SELECT pg_advisory_unlock(87071204)")
+	defer c.Exec(context.Background(), "SELECT pg_advisory_unlock($1)", int64(policy.MigrationLock))
 	var table *string
 	if e = c.QueryRow(ctx, "SELECT to_regclass(quote_ident(current_schema())||'.schema_migrations')::text").Scan(&table); e != nil {
 		return e
 	}
-	for version, name := range []string{"001_initial.sql", "002_moderation.sql", "003_auth_rate_limits.sql", "004_account_history.sql", "005_account_lifecycle.sql", "006_safety_passport.sql"} {
+	for version, name := range []string{"001_initial.sql", "002_moderation.sql", "003_auth_rate_limits.sql", "004_account_history.sql", "005_account_lifecycle.sql", "006_safety_passport.sql", "007_account_mail_outbox.sql", "008_active_memberships.sql"} {
 		if table != nil || version > 0 {
 			var exists bool
 			if e = c.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=$1)", version+1).Scan(&exists); e != nil {

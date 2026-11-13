@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "scope": "Recorded Android 0.4.31 device candidates; each result applies only to its exact source and artifact. This is not production signing or live API evidence.",
+  "iterations": [
+    {
+      "candidateCommit": "d6f9bfd461be4e74c892847cdea2f54b07ea2b89",
+      "testedCommit": "2c964499bcce9ce1ce7bb7d7fa89a963b5adaf90",
+      "tree": "e0f268d51b4d88053d4baa08cf97cab4d7ad886d",
+      "workflowRunId": "43381715504",
+      "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/43381715504",
+      "status": "failed-not-published",
+      "unitTests": {
+        "tests": 68,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "unsignedProductionBuildCheck": {
+        "passed": true,
+        "artifactId": "14016748259",
+        "artifactZipSha256": "5fcabb73bafe71620081870144b77628667a29cfdad9c25034d6a3c7ff2425c1",
+        "signatureVerified": false,
+        "productionPublished": false
+      },
+      "device": {
+        "artifactId": "14017382106",
+        "artifactZipSha256": "7cf804d4d956b455ed004f7940c077aab8afbfbedb72bb5b06b87c09ae81384d",
+        "artifactDigestIndependentlyMatched": true,
+        "tests": 11,
+        "failures": 5,
+        "errors": 0,
+        "skipped": 0,
+        "installedArtifactBytesVerified": true,
+        "testedApkSha256": "4ec7f94edc66c170a4a6b477f5443c82e705074646ea67deea714829a6e9a99b",
+        "testedApkBytes": 69223754,
+        "testedArchitecture": "x86_64",
+        "deviceExecutionVerified": false,
+        "physicalDeviceVerified": false,
+        "failedCases": [
+          "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+          "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+          "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+          "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+          "sessionTransitionsFailClosedAndDiscardLatePrivateWork"
+        ]
+      },
+      "observations": [
+        "The saved-pack scenario timed out waiting for OFFLINE after the emulator disabled Wi-Fi and cellular data. Later activity screenshots show the offline label.",
+        "Map screenshots show the local catalogue error panel; the native error panel overlaps normal map controls. Marker injection alone did not establish a successful trusted click.",
+        "The session scenario failed while seeding a fixture whose origin omitted the canonical /api/v1 suffix; the production SessionVault guard rejected it."
+      ],
+      "remediation": {
+        "nativeFetch": {
+          "cause": "A fetch function stored on a loader was invoked with the loader instance as its receiver. Both default and explicitly injected fetch were affected.",
+          "regressionsFailedBeforeFix": 4,
+          "loaderTestsPassedAfterFix": 15,
+          "localBrowserExecuted": false,
+          "deviceVerification": "requires a subsequent exact-artifact run",
+          "logs": {
+            "before": {
+              "filename": "native-fetch-receiver-red.log",
+              "sha256": "632de8c30c1c6f92b94a5ef77c920d2d1dc4aafc002725b432baf3ece1017edc",
+              "bytes": 4372
+            },
+            "after": {
+              "filename": "native-fetch-receiver-green.log",
+              "sha256": "0207236600e76aac200035cc98848a2a805fba125c1f82ebe28ae70a56c15d7e",
+              "bytes": 1500
+            },
+            "types": {
+              "filename": "native-fetch-receiver-types.log",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "bytes": 0
+            }
+          }
+        },
+        "connectivity": "Use the ordered default-network identity and callback-supplied capabilities; do not re-read synchronous ConnectivityManager state from network callbacks.",
+        "fixture": "Use the canonical /api/v1 origin; retain the production SessionVault origin guard.",
+        "errorPanel": "Keep the bounded error panel above normal map controls, with independent retry/close actions, scrollable message and measured attribution."
+      }
+    },
+    {
+      "candidateCommit": "9d3918d5d2718e3db80bc4954dd23ca7d9586220",
+      "testedCommit": "dba4d41f9d49723e8fb6a3601bcbf845077c47c0",
+      "tree": "c787c653cd07e7a2ea1763fb6a55c0bf18b5964f",
+      "workflowRunId": "43385191611",
+      "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/43385191611",
+      "status": "functional-gates-passed-visual-followup-required-not-published",
+      "toolchain": {
+        "gradle": "8.13",
+        "okhttp": "4.12.0"
+      },
+      "unitTests": {
+        "tests": 70,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "unsignedProductionBuildCheck": {
+        "passed": true,
+        "artifactId": "14018531817",
+        "artifactZipSha256": "d55f6ba96e3f8d2e0df01660016c37d1cfa97b17c607db082313401ef17e57b1",
+        "apkSha256": "9f25ae7ef5033f7d47b0d30ab88015df81ceeb53dba5507bea9f45bb09a08f89",
+        "signatureVerified": false,
+        "productionPublished": false
+      },
+      "device": {
+        "artifactId": "14018618460",
+        "artifactZipSha256": "5e1f55ce400957e3de2631b61fdd4e0f2bfd46161a8d8d0f9ba7c5bd29425829",
+        "artifactDigestIndependentlyMatched": true,
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "deviceExecutionVerified": true,
+        "installedArtifactBytesVerified": true,
+        "testedArchitecture": "x86_64",
+        "physicalDeviceVerified": false,
+        "testedApkSha256": "eeda9a1e5e6352c9accafad80516948cd272f601295f239b5473de56bc215a2c",
+        "testedApkBytes": 69227850
+      },
+      "observations": [
+        "The exact installed universal preview passed all eleven cases, including native physical touches on retry/close controls, offline network transition and durable session fault recovery.",
+        "Root visually checked the recovered error panel: the message, retry/close actions and attribution are visible separately.",
+        "Independent post-run screenshot review found no visible selected route in the coastal and saved-pack captures, despite route metadata reporting drawnRoute. Those frames are not accepted as selected-route pixel proof.",
+        "A following candidate must wait for native composition and verify route pixels against the exact source geometry within the existing scenario deadlines.",
+        "This passing run used Gradle 8.13 and OkHttp 4.12.0. It does not validate the subsequent Gradle 8.14.7 and OkHttp 4.12.1 security patches."
+      ],
+      "independentScreenshotReview": {
+        "controlEvidenceSha256": "fb01a7d9457c7568ef42936f63893a91b09b672d0ef0c4ff11783b2a033374e2",
+        "deviceEvidenceSummarySha256": "66019f2b92b7fc182b4d8384a426f0c34794ab78863911219a8aeb644f2a2c55",
+        "coastal": {
+          "eligibleCells": 47,
+          "matchedCells": 0,
+          "routeColorPixelsInRoi": 0,
+          "roiPixels": 229216
+        },
+        "savedRoute": {
+          "eligibleCells": 47,
+          "matchedCells": 0,
+          "routeColorPixelsInRoi": 0,
+          "roiPixels": 229216
+        },
+        "oldNativeBoundsReconstructedFromScreenshots": true,
+        "isolatedSkiaPositiveControlInkPixels": {
+          "coastal": 8847,
+          "savedRoute": 2308
+        },
+        "isolatedSkiaIsAndroidEvidence": false,
+        "interpretation": "The old captures fail the new source-aligned pixel criterion. A missed native composition barrier is a hypothesis until the following exact-device run; no renderer fix is inferred from the local control."
+      }
+    },
+    {
+      "status": "passed-preflight-not-published",
+      "candidateCommit": "944bfaa2ae7509f82180b606b71506f030aabc36",
+      "testedCommit": "be5606541f428b719fb80082f184b2bb4c51f8dc",
+      "tree": "b159055396a0592b1b730feb350b98ae95e2877d",
+      "workflowRunId": "43388775423",
+      "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/43388775423",
+      "unitTests": {
+        "tests": 70,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "buildArtifact": {
+        "id": "14019219826",
+        "bytes": 111850300,
+        "sha256": "f5edb797fbdd1ddedcb68457a5f0023560516956383d962ed0a341702c3d52b6"
+      },
+      "unsignedProductionBuildCheck": {
+        "passed": true,
+        "artifactId": "14019712899",
+        "artifactZipSha256": "5fa18a5b649d59dd4bcffc10fe1f9ed780a9453aa7c4cf1213e7f076ff5af78e",
+        "apkBytes": 60968761,
+        "apkSha256": "3ad9c15b5cae7f8cb7d15a02d628af98f989f2d0e1264051780de2d0e5caaae1",
+        "signatureVerified": false,
+        "productionPublished": false
+      },
+      "device": {
+        "artifactId": "14020452256",
+        "artifactZipBytes": 7653926,
+        "artifactZipSha256": "204c7c9cbb3493c2e11a8990fb7fec45457fc23f30e891df45fb605fba90dfc5",
+        "apiDigestsIndependentlyVerified": true,
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "deviceExecutionVerified": true,
+        "installedArtifactBytesVerified": true,
+        "releasePayloadDeviceVerified": true,
+        "testedArchitecture": "x86_64",
+        "physicalDeviceVerified": false,
+        "arm64DeviceExecutionVerified": false,
+        "testedApk": {
+          "bytes": 69227850,
+          "sha256": "e684a57a39d4ff31b3c99edbe9dffac80921ecda80884080857a21081b750993"
+        },
+        "visibleRoutePixels": {
+          "offline-pack-opened-snapshot": {
+            "passed": true,
+            "elapsedMs": 1252,
+            "samples": 47,
+            "matched": 47,
+            "fraction": 1,
+            "spanDp": 234.72940639486288,
+            "sourceSha256": "b67bd147317b95779ddbab33f04f68403c2d71760bf172185133339f9f94e6e9",
+            "receiptSha256": "87d536f5bfa539f9cca7deabb7dcdca6285f87bf301ca85111c80fd5f399c502",
+            "screenshotSha256": "103c756e1c8f19aad81e5e80556322331a814b83cffc72b0e2113c2b88a9631b",
+            "rootVisualReview": true
+          },
+          "map-native-catalogue-coastal": {
+            "passed": true,
+            "elapsedMs": 1011,
+            "samples": 47,
+            "matched": 47,
+            "fraction": 1,
+            "spanDp": 254.803510692778,
+            "sourceSha256": "de9dcb7a128b037e8000558efc83c926ac3e581473b62e41fdb725c73dddc46b",
+            "receiptSha256": "d86848c8e5a555a2e7eddc81b87f8c8e96f29d9852c0e079853be1ad3cd1b7a4",
+            "screenshotSha256": "38fdfa009314c9c2c8f1f96494808e1e5a12d09eb46fb13d2dafba4913656eca",
+            "rootVisualReview": true
+          }
+        }
+      },
+      "visualRegression": "R5 metadata-only captures had zero matched route cells; R6 synchronizes native composition and verifies pixels in the original shared 15-second deadlines. The production renderer was unchanged for this correction."
+    }
+  ]
+}

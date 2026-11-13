@@ -1,0 +1,55 @@
+{
+  "scope": "candidate dependency audit; not evidence for a later main commit or live deployment",
+  "checkedAt": "2026-11-13T06:44:49.392123+00:00",
+  "packageManager": "pnpm@11.25.0",
+  "lockfileSha256": "c2706502a2eaee1f3d86310f895ebca1ec924c5eb34131ab76716f03833da0eb",
+  "workspacePolicySha256": "1753e154defcca7dd6cb16cc9b495c3bcf058fdbe19f570c623b115755703edc",
+  "patchSha256": "22b21de24b85dbbad8076e84feab7b59b8bd01492dd7e389c909123bab6eafed",
+  "production": {
+    "advisories": {},
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "dependencies": 96,
+      "devDependencies": 0,
+      "optionalDependencies": 83,
+      "totalDependencies": 179
+    }
+  },
+  "allDependencies": {
+    "advisories": {},
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "dependencies": 144,
+      "devDependencies": 570,
+      "optionalDependencies": 170,
+      "totalDependencies": 749
+    }
+  },
+  "knownCompatibilityBoundaries": [
+    "ESLint 9.39.5 is the latest compatible patch for the declared eslint-plugin-react 7.37.5 peer range. ESLint 9 is EOL; no peer override or lint suppression was introduced to force ESLint 10.",
+    "Drizzle Kit retains deprecated esbuild-kit loader packages. Its compiler was patched and the real declared schema generation is exercised; removal requires upgrading the consuming CLI rather than dropping a declared useful module.",
+    "Registry advisory absence is not proof that all application bugs or vulnerabilities are absent."
+  ],
+  "primaryReferences": [
+    "https://github.com/react/react/security/advisories/GHSA-xqc2-xf4c-x3h3",
+    "https://github.com/react/react/security/advisories/GHSA-h3gv-c5rc-p453",
+    "https://github.com/vercel/satori/security/advisories/GHSA-wx4j-mvgx-mqwp",
+    "https://github.com/evanw/esbuild/security/advisories/GHSA-g7r4-m6w7-qqqr",
+    "https://github.com/evanw/esbuild/security/advisories/GHSA-67mh-4wv8-2f99",
+    "https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249",
+    "https://eslint.org/version-support/"
+  ],
+  "packagingAdjustment": "Modified OG loader entries no longer advertise unchanged upstream source maps. No dependency versions changed; actual Node and Vite/workerd render gates and registry audits repeated successfully."
+}

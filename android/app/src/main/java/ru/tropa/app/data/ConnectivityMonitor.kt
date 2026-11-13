@@ -13,20 +13,21 @@ enum class ConnectionState { ONLINE, LIMITED, OFFLINE }
 class ConnectivityMonitor(context: Context) {
     private val manager = context.getSystemService(ConnectivityManager::class.java)
 
-    private fun current(): ConnectionState {
-        val capabilities = manager.getNetworkCapabilities(manager.activeNetwork) ?: return ConnectionState.OFFLINE
-        return if (capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) ConnectionState.ONLINE
-        else ConnectionState.LIMITED
-    }
-
     val changes = callbackFlow {
+        val connection = DefaultNetworkConnection<Network>()
         val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) { trySend(current()) }
-            override fun onLost(network: Network) { trySend(current()) }
-            override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) { trySend(current()) }
+            override fun onAvailable(network: Network) { trySend(connection.available(network)) }
+            override fun onLost(network: Network) { connection.lost(network)?.let { trySend(it) } }
+            override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+                connection.capabilities(network, capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED))
+                    ?.let { trySend(it) }
+            }
         }
+        // API 26+ delivers capabilities after onAvailable. A synchronous read
+        // of activeNetwork inside a callback may still describe the lost
+        // network. Start offline and use only the ordered callback payloads.
+        trySend(ConnectionState.OFFLINE)
         manager.registerDefaultNetworkCallback(callback)
-        trySend(current())
         awaitClose { manager.unregisterNetworkCallback(callback) }
     }.distinctUntilChanged()
 }

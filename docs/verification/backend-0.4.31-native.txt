@@ -1,0 +1,327 @@
+ db Pulling 
+ 37fb86c2a767 Pulling fs layer 
+ e9dd37612d7b Pulling fs layer 
+ 369949eb0229 Pulling fs layer 
+ 7e0f86eb8508 Pulling fs layer 
+ da434b32d480 Pulling fs layer 
+ bcc75ab4e010 Pulling fs layer 
+ a28de24f57c0 Pulling fs layer 
+ 6d141360b363 Pulling fs layer 
+ fcd0e9514062 Pulling fs layer 
+ cbe0afc9eb7b Pulling fs layer 
+ fc6c21aca07c Pulling fs layer 
+ 2a59118cca0e Pulling fs layer 
+ eac25292b613 Pulling fs layer 
+ f5e66bd49762 Pulling fs layer 
+ 4f4fb700ef54 Pulling fs layer 
+ d44d3ada78bf Pulling fs layer 
+ 31e1b53988d6 Pulling fs layer 
+ cbe0afc9eb7b Waiting 
+ fc6c21aca07c Waiting 
+ 7e0f86eb8508 Waiting 
+ 2a59118cca0e Waiting 
+ da434b32d480 Waiting 
+ eac25292b613 Waiting 
+ bcc75ab4e010 Waiting 
+ fcd0e9514062 Waiting 
+ a28de24f57c0 Waiting 
+ f5e66bd49762 Waiting 
+ 6d141360b363 Waiting 
+ 4f4fb700ef54 Waiting 
+ d44d3ada78bf Waiting 
+ 31e1b53988d6 Waiting 
+ e9dd37612d7b Downloading [==================================================>]  1.168kB/1.168kB
+ e9dd37612d7b Verifying Checksum 
+ e9dd37612d7b Download complete 
+ 369949eb0229 Downloading [>                                                  ]  64.94kB/6.443MB
+ 37fb86c2a767 Downloading [>                                                  ]  310.7kB/29.86MB
+ 369949eb0229 Verifying Checksum 
+ 369949eb0229 Download complete 
+ 37fb86c2a767 Verifying Checksum 
+ 37fb86c2a767 Download complete 
+ 37fb86c2a767 Extracting [>                                                  ]  327.7kB/29.86MB
+ 7e0f86eb8508 Downloading [>                                                  ]  15.79kB/1.257MB
+ 7e0f86eb8508 Verifying Checksum 
+ 7e0f86eb8508 Download complete 
+ 37fb86c2a767 Extracting [===============>                                   ]  9.503MB/29.86MB
+ da434b32d480 Downloading [>                                                  ]  97.71kB/8.204MB
+ bcc75ab4e010 Downloading [>                                                  ]  15.79kB/1.312MB
+ da434b32d480 Verifying Checksum 
+ da434b32d480 Download complete 
+ bcc75ab4e010 Verifying Checksum 
+ bcc75ab4e010 Download complete 
+ 37fb86c2a767 Extracting [==========================>                        ]  16.06MB/29.86MB
+ a28de24f57c0 Download complete 
+ 6d141360b363 Downloading [==================================================>]  3.145kB/3.145kB
+ 6d141360b363 Verifying Checksum 
+ 6d141360b363 Download complete 
+ 37fb86c2a767 Extracting [===========================================>       ]  26.21MB/29.86MB
+ cbe0afc9eb7b Downloading [=========>                                         ]  3.501kB/19.43kB
+ cbe0afc9eb7b Downloading [==================================================>]  19.43kB/19.43kB
+ cbe0afc9eb7b Verifying Checksum 
+ cbe0afc9eb7b Download complete 
+ fcd0e9514062 Downloading [>                                                  ]  534.1kB/115.4MB
+ fc6c21aca07c Downloading [==================================================>]     127B/127B
+ fc6c21aca07c Verifying Checksum 
+ fc6c21aca07c Download complete 
+ fcd0e9514062 Downloading [=============>                                     ]  31.51MB/115.4MB
+ 37fb86c2a767 Extracting [================================================>  ]  29.16MB/29.86MB
+ 2a59118cca0e Downloading [============================>                      ]  3.502kB/6.107kB
+ 2a59118cca0e Downloading [==================================================>]  6.107kB/6.107kB
+ 2a59118cca0e Verifying Checksum 
+ 2a59118cca0e Download complete 
+ 37fb86c2a767 Extracting [==================================================>]  29.86MB/29.86MB
+ 37fb86c2a767 Pull complete 
+ e9dd37612d7b Extracting [==================================================>]  1.168kB/1.168kB
+ e9dd37612d7b Extracting [==================================================>]  1.168kB/1.168kB
+ fcd0e9514062 Downloading [========================>                          ]   56.1MB/115.4MB
+ eac25292b613 Downloading [==================================================>]     184B/184B
+ eac25292b613 Verifying Checksum 
+ eac25292b613 Download complete 
+ fcd0e9514062 Downloading [=====================================>             ]  85.97MB/115.4MB
+ f5e66bd49762 Downloading [>                                                  ]  532.1kB/82.76MB
+ 4f4fb700ef54 Downloading [==================================================>]      32B/32B
+ 4f4fb700ef54 Verifying Checksum 
+ 4f4fb700ef54 Download complete 
+ fcd0e9514062 Downloading [================================================>  ]  111.6MB/115.4MB
+ fcd0e9514062 Download complete 
+ f5e66bd49762 Downloading [====>                                              ]  6.967MB/82.76MB
+ e9dd37612d7b Pull complete 
+ f5e66bd49762 Downloading [==========>                                        ]  17.68MB/82.76MB
+ d44d3ada78bf Downloading [==================================================>]     806B/806B
+ d44d3ada78bf Verifying Checksum 
+ d44d3ada78bf Download complete 
+ 369949eb0229 Extracting [>                                                  ]  65.54kB/6.443MB
+ 31e1b53988d6 Downloading [==================================================>]  1.029kB/1.029kB
+ 31e1b53988d6 Verifying Checksum 
+ 31e1b53988d6 Download complete 
+ f5e66bd49762 Downloading [===============>                                   ]  25.73MB/82.76MB
+ 369949eb0229 Extracting [==>                                                ]  262.1kB/6.443MB
+ 369949eb0229 Extracting [==================================================>]  6.443MB/6.443MB
+ f5e66bd49762 Downloading [========================>                          ]  40.16MB/82.76MB
+ f5e66bd49762 Downloading [===============================>                   ]  51.97MB/82.76MB
+ f5e66bd49762 Downloading [=======================================>           ]  64.81MB/82.76MB
+ f5e66bd49762 Downloading [==============================================>    ]  77.69MB/82.76MB
+ f5e66bd49762 Verifying Checksum 
+ f5e66bd49762 Download complete 
+ 369949eb0229 Pull complete 
+ 7e0f86eb8508 Extracting [=>                                                 ]  32.77kB/1.257MB
+ 7e0f86eb8508 Extracting [==================================================>]  1.257MB/1.257MB
+ 7e0f86eb8508 Pull complete 
+ da434b32d480 Extracting [>                                                  ]   98.3kB/8.204MB
+ da434b32d480 Extracting [===================================>               ]  5.898MB/8.204MB
+ da434b32d480 Extracting [==================================================>]  8.204MB/8.204MB
+ da434b32d480 Pull complete 
+ bcc75ab4e010 Extracting [=>                                                 ]  32.77kB/1.312MB
+ bcc75ab4e010 Extracting [==================================================>]  1.312MB/1.312MB
+ bcc75ab4e010 Pull complete 
+ a28de24f57c0 Extracting [==================================================>]     116B/116B
+ a28de24f57c0 Extracting [==================================================>]     116B/116B
+ a28de24f57c0 Pull complete 
+ 6d141360b363 Extracting [==================================================>]  3.145kB/3.145kB
+ 6d141360b363 Extracting [==================================================>]  3.145kB/3.145kB
+ 6d141360b363 Pull complete 
+ fcd0e9514062 Extracting [>                                                  ]  557.1kB/115.4MB
+ fcd0e9514062 Extracting [====>                                              ]   9.47MB/115.4MB
+ fcd0e9514062 Extracting [======>                                            ]  16.15MB/115.4MB
+ fcd0e9514062 Extracting [==========>                                        ]  23.95MB/115.4MB
+ fcd0e9514062 Extracting [===============>                                   ]  35.65MB/115.4MB
+ fcd0e9514062 Extracting [====================>                              ]  47.91MB/115.4MB
+ fcd0e9514062 Extracting [=========================>                         ]  57.93MB/115.4MB
+ fcd0e9514062 Extracting [=============================>                     ]  69.07MB/115.4MB
+ fcd0e9514062 Extracting [===================================>               ]  82.44MB/115.4MB
+ fcd0e9514062 Extracting [=========================================>         ]  95.26MB/115.4MB
+ fcd0e9514062 Extracting [============================================>      ]  101.9MB/115.4MB
+ fcd0e9514062 Extracting [==============================================>    ]  108.1MB/115.4MB
+ fcd0e9514062 Extracting [================================================>  ]  111.4MB/115.4MB
+ fcd0e9514062 Extracting [=================================================> ]  113.6MB/115.4MB
+ fcd0e9514062 Extracting [=================================================> ]  115.3MB/115.4MB
+ fcd0e9514062 Extracting [==================================================>]  115.4MB/115.4MB
+ fcd0e9514062 Pull complete 
+ cbe0afc9eb7b Extracting [==================================================>]  19.43kB/19.43kB
+ cbe0afc9eb7b Extracting [==================================================>]  19.43kB/19.43kB
+ cbe0afc9eb7b Pull complete 
+ fc6c21aca07c Extracting [==================================================>]     127B/127B
+ fc6c21aca07c Extracting [==================================================>]     127B/127B
+ fc6c21aca07c Pull complete 
+ 2a59118cca0e Extracting [==================================================>]  6.107kB/6.107kB
+ 2a59118cca0e Extracting [==================================================>]  6.107kB/6.107kB
+ 2a59118cca0e Pull complete 
+ eac25292b613 Extracting [==================================================>]     184B/184B
+ eac25292b613 Extracting [==================================================>]     184B/184B
+ eac25292b613 Pull complete 
+ f5e66bd49762 Extracting [>                                                  ]  557.1kB/82.76MB
+ f5e66bd49762 Extracting [======>                                            ]  11.14MB/82.76MB
+ f5e66bd49762 Extracting [============>                                      ]  21.17MB/82.76MB
+ f5e66bd49762 Extracting [====================>                              ]  33.42MB/82.76MB
+ f5e66bd49762 Extracting [===========================>                       ]  45.68MB/82.76MB
+ f5e66bd49762 Extracting [===================================>               ]  57.93MB/82.76MB
+ f5e66bd49762 Extracting [========================================>          ]  66.29MB/82.76MB
+ f5e66bd49762 Extracting [==========================================>        ]  70.75MB/82.76MB
+ f5e66bd49762 Extracting [=================================================> ]  82.44MB/82.76MB
+ f5e66bd49762 Extracting [==================================================>]  82.76MB/82.76MB
+ f5e66bd49762 Pull complete 
+ 4f4fb700ef54 Extracting [==================================================>]      32B/32B
+ 4f4fb700ef54 Extracting [==================================================>]      32B/32B
+ 4f4fb700ef54 Pull complete 
+ d44d3ada78bf Extracting [==================================================>]     806B/806B
+ d44d3ada78bf Extracting [==================================================>]     806B/806B
+ d44d3ada78bf Pull complete 
+ 31e1b53988d6 Extracting [==================================================>]  1.029kB/1.029kB
+ 31e1b53988d6 Extracting [==================================================>]  1.029kB/1.029kB
+ 31e1b53988d6 Pull complete 
+ db Pulled 
+ Network tropa-it-5987-26410_default  Creating
+ Network tropa-it-5987-26410_default  Created
+ Container tropa-it-5987-26410-db-1  Creating
+ Container tropa-it-5987-26410-db-1  Created
+ Container tropa-it-5987-26410-db-1  Starting
+ Container tropa-it-5987-26410-db-1  Started
+ Container tropa-it-5987-26410-db-1  Waiting
+ Container tropa-it-5987-26410-db-1  Healthy
+=== RUN   TestHistoryCursorRoundTripKeepsTimestampAndTieBreaker
+--- PASS: TestHistoryCursorRoundTripKeepsTimestampAndTieBreaker (0.00s)
+=== RUN   TestHistoryCursorRejectsUnboundedMalformedAndUnusableValues
+--- PASS: TestHistoryCursorRejectsUnboundedMalformedAndUnusableValues (0.00s)
+=== RUN   TestSafetyEncryptionBindsCiphertextToDepartureAndVersion
+--- PASS: TestSafetyEncryptionBindsCiphertextToDepartureAndVersion (0.00s)
+=== RUN   TestSafetyKeysAndContactValidationFailClosed
+--- PASS: TestSafetyKeysAndContactValidationFailClosed (0.00s)
+=== RUN   TestAccountDeletionWithdrawsInterestAndRetainsParticipationHistory
+--- PASS: TestAccountDeletionWithdrawsInterestAndRetainsParticipationHistory (0.16s)
+=== RUN   TestConcurrentAccountDisableCannotAddRecruitmentInterest
+--- PASS: TestConcurrentAccountDisableCannotAddRecruitmentInterest (0.14s)
+=== RUN   TestPublicLifecycleHTTPRoundTripWithExplicitTestMailer
+--- PASS: TestPublicLifecycleHTTPRoundTripWithExplicitTestMailer (7.68s)
+=== RUN   TestAccountActionDigestExpiryReplacementAndPurpose
+--- PASS: TestAccountActionDigestExpiryReplacementAndPurpose (0.11s)
+=== RUN   TestPasswordResetAtomicallyRevokesSessionsAndAllLinks
+--- PASS: TestPasswordResetAtomicallyRevokesSessionsAndAllLinks (1.61s)
+=== RUN   TestAccountTokenSingleUseAcrossIndependentPools
+--- PASS: TestAccountTokenSingleUseAcrossIndependentPools (0.18s)
+=== RUN   TestResetAndCredentialFencedLoginCannotLeaveAnOldSession
+--- PASS: TestResetAndCredentialFencedLoginCannotLeaveAnOldSession (0.18s)
+=== RUN   TestAccountDeletionBlocksCommitmentsAndKeepsAnAnonymousHistory
+--- PASS: TestAccountDeletionBlocksCommitmentsAndKeepsAnAnonymousHistory (0.14s)
+=== RUN   TestConcurrentDeleteAndJoinCannotCreateADeletedParticipant
+--- PASS: TestConcurrentDeleteAndJoinCannotCreateADeletedParticipant (0.17s)
+=== RUN   TestAccountDeletionCannotOrphanAWithdrawnDepartureCreator
+--- PASS: TestAccountDeletionCannotOrphanAWithdrawnDepartureCreator (0.12s)
+=== RUN   TestRuntimeRoleCanCompleteLifecycleWithoutOperatorPrivileges
+--- PASS: TestRuntimeRoleCanCompleteLifecycleWithoutOperatorPrivileges (0.15s)
+=== RUN   TestLifecycleMailAndReauthenticationBudgetsUsePersistentScopes
+--- PASS: TestLifecycleMailAndReauthenticationBudgetsUsePersistentScopes (0.12s)
+=== RUN   TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly
+--- PASS: TestAuthenticationBudgetPersistsExpiresAndCleansBoundedly (0.12s)
+=== RUN   TestAuthenticationBudgetSerializesAcrossPools
+--- PASS: TestAuthenticationBudgetSerializesAcrossPools (0.20s)
+=== RUN   TestReadinessRequiresCurrentSchemaVersion
+--- PASS: TestReadinessRequiresCurrentSchemaVersion (0.11s)
+=== RUN   TestCompletedHistoryIsPrivateStableAndRetainsReviewedRevision
+--- PASS: TestCompletedHistoryIsPrivateStableAndRetainsReviewedRevision (0.13s)
+=== RUN   TestModerationCaseScopeMuteAndIndependentAppeal
+--- PASS: TestModerationCaseScopeMuteAndIndependentAppeal (0.18s)
+=== RUN   TestPersistentPostingBudgetAcrossConcurrentChannels
+--- PASS: TestPersistentPostingBudgetAcrossConcurrentChannels (0.23s)
+=== RUN   TestRestrictedRuntimeRoleCanOperateButCannotElevate
+--- PASS: TestRestrictedRuntimeRoleCanOperateButCannotElevate (0.16s)
+=== RUN   TestConcurrentLastPlacesAndReplay
+--- PASS: TestConcurrentLastPlacesAndReplay (0.21s)
+=== RUN   TestReviewedRoutePolicyCannotBeWeakened
+--- PASS: TestReviewedRoutePolicyCannotBeWeakened (0.12s)
+=== RUN   TestGuideWithdrawalAndPrivateChat
+--- PASS: TestGuideWithdrawalAndPrivateChat (0.13s)
+=== RUN   TestCompletionReviewsAndOfflineConflict
+--- PASS: TestCompletionReviewsAndOfflineConflict (0.15s)
+=== RUN   TestRecruitmentDoesNotSilentlyBookTourists
+--- PASS: TestRecruitmentDoesNotSilentlyBookTourists (0.13s)
+=== RUN   TestRealSessionsAndPendingGuide
+--- PASS: TestRealSessionsAndPendingGuide (0.11s)
+=== RUN   TestOverviewIsBoundedAndFullRouteRemainsAvailable
+--- PASS: TestOverviewIsBoundedAndFullRouteRemainsAvailable (0.15s)
+=== RUN   TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost
+--- PASS: TestRosterOnlyAssignedGuideAndRevokedInterestCannotPost (0.16s)
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/staff_column
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/qualification_insert
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/publication_column
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/reviewed_geometry
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/audit_modification
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/audit_reading
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/message_deletion
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/audit_truncation
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/trigger_installation
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/column_reference
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/grant_delegation
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/schema_creation
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/database_creation
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/sequence_rewriting
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/replication_capability
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/missing_session_write
+=== RUN   TestRuntimePolicyRejectsExcessAndMissingGrants/public_audit_grant
+--- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants (0.20s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/staff_column (0.01s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/qualification_insert (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/publication_column (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/reviewed_geometry (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/audit_modification (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/audit_reading (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/message_deletion (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/audit_truncation (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/trigger_installation (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/column_reference (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/grant_delegation (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/schema_creation (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/database_creation (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/sequence_rewriting (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/replication_capability (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/missing_session_write (0.00s)
+    --- PASS: TestRuntimePolicyRejectsExcessAndMissingGrants/public_audit_grant (0.00s)
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/ordinary_schema_owner
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/ordinary_table_owner
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/INHERIT_TRUE,_SET_FALSE
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/INHERIT_FALSE,_SET_TRUE
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/ADMIN_TRUE,_INHERIT_FALSE,_SET_FALSE
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_read_server_files
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_write_server_files
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_execute_server_program
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_read_all_data
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_write_all_data
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_signal_backend
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_maintain
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_monitor
+=== RUN   TestRuntimePolicyRejectsOwnersAndReachableRoles/owner_group_reachable_only_through_set_role
+--- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles (0.16s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/ordinary_schema_owner (0.01s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/ordinary_table_owner (0.01s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/INHERIT_TRUE,_SET_FALSE (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/INHERIT_FALSE,_SET_TRUE (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/ADMIN_TRUE,_INHERIT_FALSE,_SET_FALSE (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_read_server_files (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_write_server_files (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_execute_server_program (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_read_all_data (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_write_all_data (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_signal_backend (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_maintain (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/pg_monitor (0.00s)
+    --- PASS: TestRuntimePolicyRejectsOwnersAndReachableRoles/owner_group_reachable_only_through_set_role (0.00s)
+=== RUN   TestRuntimePolicyRejectsOwnerConnectionWithSelectedRuntimeRole
+--- PASS: TestRuntimePolicyRejectsOwnerConnectionWithSelectedRuntimeRole (0.16s)
+=== RUN   TestSafetyRequiredRouteAttendanceStartReturnAndEvidence
+--- PASS: TestSafetyRequiredRouteAttendanceStartReturnAndEvidence (2.14s)
+=== RUN   TestSafetyVersionedActionsAndIndependentConfirmation
+--- PASS: TestSafetyVersionedActionsAndIndependentConfirmation (0.15s)
+=== RUN   TestSafetyRosterAmendmentAndConcurrentConfirmation
+--- PASS: TestSafetyRosterAmendmentAndConcurrentConfirmation (0.18s)
+=== RUN   TestRestrictedRuntimeSafetyLifecycleRenewsExpiredContact
+--- PASS: TestRestrictedRuntimeSafetyLifecycleRenewsExpiredContact (2.14s)
+PASS
+ok  	tropa/backend/internal/store	19.187s
+ Container tropa-it-5987-26410-db-1  Stopping
+ Container tropa-it-5987-26410-db-1  Stopped
+ Container tropa-it-5987-26410-db-1  Removing
+ Container tropa-it-5987-26410-db-1  Removed
+ Network tropa-it-5987-26410_default  Removing
+ Network tropa-it-5987-26410_default  Removed

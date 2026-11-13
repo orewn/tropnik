@@ -37,14 +37,15 @@ export function GuideDirectory() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setReviews([]);
     setReviewError('');
-    if (!opened) return;
+    if (!opened) { setReviewLoading(false); return; }
+    let active = true;
     const controller = new AbortController();
     setReviewLoading(true);
     api<Review[]>('guides/' + encodeURIComponent(opened) + '/reviews', {signal: controller.signal})
-      .then(items => { if (!controller.signal.aborted) setReviews(items); })
-      .catch(error => { if (!isAbort(error)) setReviewError(errorText(error)); })
-      .finally(() => { if (!controller.signal.aborted) setReviewLoading(false); });
-    return () => controller.abort();
+      .then(items => { if (active && !controller.signal.aborted) setReviews(items); })
+      .catch(error => { if (active && !controller.signal.aborted && !isAbort(error)) setReviewError(errorText(error)); })
+      .finally(() => { if (active) setReviewLoading(false); });
+    return () => { active = false; controller.abort(); };
   }, [opened]);
 
   return <section>

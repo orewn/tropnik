@@ -13,8 +13,8 @@ for(const args of[['--experimental-strip-types','scripts/build-trail-overlay.mjs
  if(result.status!==0)process.exit(result.status??1);
 }
 // Worker static assets have a 25 MiB per-file limit. The /downloads/[file]
-// route redirects the selected APK to its pinned GitHub release. Pages uses
-// its separate builder and retains the checksum-verified local APK download.
+// route redirects the selected APK to its pinned GitHub release. Pages also
+// verifies a local APK input, then links its page to that versioned release.
 for(const file of ['tropnik-preview.apk','tropnik-arm64-preview.apk']) {
  rmSync(path.join(cwd,'dist/client/downloads',file),{force:true});
 }

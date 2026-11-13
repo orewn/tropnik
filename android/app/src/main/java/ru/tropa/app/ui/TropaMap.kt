@@ -6,12 +6,14 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -48,6 +51,7 @@ import ru.tropa.app.data.canUseOnlineMap
 import ru.tropa.app.data.Region
 import ru.tropa.app.data.TrailRoute
 import ru.tropa.app.data.prepareMapRouteGeometry
+import ru.tropa.app.data.MapCameraCheckpoint
 
 private const val ROUTE_GEOMETRY_ERROR = "Линия маршрута не загрузилась. Карточка и обзорная карта доступны."
 
@@ -59,6 +63,8 @@ fun TropaMap(
     position: PositionState = PositionState.Idle,
     connection: ConnectionState = ConnectionState.OFFLINE,
     onSelectRegion: ((String) -> Unit)? = null,
+    visibleTrails: List<TrailRoute> = emptyList(),
+    onSelectTrail: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -70,19 +76,34 @@ fun TropaMap(
     var fatal by remember(mapView) { mutableStateOf(false) }
     var onlineRequested by remember { mutableStateOf(true) }
     var onlineFailed by remember { mutableStateOf(false) }
-    val onlineMode = canUseOnlineMap(connection, onlineRequested, onlineFailed)
+    // One missing provider tile must not disable all remote sources. The shared
+    // renderer owns completeness, retained frames and its explicit retry state.
+    val onlineMode = canUseOnlineMap(connection, onlineRequested, failed = false)
+    val currentOnlineMode by rememberUpdatedState(onlineMode)
     var lastFittedFocus by remember(mapView) { mutableStateOf<String?>(null) }
-    var lastPositionTime by remember(mapView) { mutableStateOf<Long?>(null) }
-    var relief by remember { mutableStateOf(true) }
+    // A restarted renderer must resume the last completed view. The same GPS
+    // fix must not immediately override that recovered viewport.
+    var cameraCheckpoint by remember { mutableStateOf<MapCameraCheckpoint?>(null) }
+    var lastPositionTime by remember { mutableStateOf<Long?>(null) }
+    var mode by remember { mutableStateOf("detail") }
+    var paths by remember { mutableStateOf(true) }
+    var committedMode by remember(mapView) { mutableStateOf("detail") }
+    var effectiveOnline by remember(mapView) { mutableStateOf(false) }
+    var imagerySource by remember(mapView) { mutableStateOf("") }
+    var loading by remember(mapView) { mutableStateOf(false) }
+    var mapError by remember(mapView) { mutableStateOf<String?>(null) }
+    var overlayError by remember(mapView) { mutableStateOf<String?>(null) }
+    var rasterError by remember(mapView) { mutableStateOf<String?>(null) }
+    var routeAttempt by remember(mapView) { mutableStateOf(0) }
+    var dismissedError by remember(mapView) { mutableStateOf<String?>(null) }
     var eco by remember { mutableStateOf(context.getSystemService(ActivityManager::class.java)?.isLowRamDevice == true) }
-    var zoom by remember(mapView) { mutableStateOf(2.1) }
-    var tilted by remember(mapView) { mutableStateOf(false) }
     var rotated by remember(mapView) { mutableStateOf(false) }
-    var reliefArea by remember(mapView) { mutableStateOf(false) }
     var showAttribution by remember { mutableStateOf(false) }
     var scopeNotice by remember(mapView) { mutableStateOf<String?>(null) }
     var scopeError by remember(mapView) { mutableStateOf<String?>(null) }
     val selectRegion by rememberUpdatedState(onSelectRegion)
+    val selectTrail by rememberUpdatedState(onSelectTrail)
+    val visibleTrailIds = remember(visibleTrails) { visibleTrails.filterNot { it.illustrative }.map { it.id } }
     val sourceText = remember(context) { context.assets.open("SOURCES.txt").bufferedReader().use { it.readText() } }
     val countryBounds by produceState<JSONArray?>(null, context) {
         value = withContext(Dispatchers.IO) {
@@ -99,16 +120,25 @@ fun TropaMap(
     DisposableEffect(lifecycle, mapView) {
         mapView.onReady = { mapReady = true; fatal = false }
         mapView.onFailure = { message, terminal -> error = message;fatal = terminal;if (terminal) mapReady = false }
-        mapView.onOnlineFailure = { onlineFailed = true }
+        mapView.onOnlineFailure = { if (currentOnlineMode) onlineFailed = true }
         mapView.onMarker = { id -> selectRegion?.invoke(id) }
+        mapView.onTrail = { id -> selectTrail?.invoke(id) }
+        mapView.onOverlayError = { overlayError = it.takeIf(String::isNotBlank) }
+        mapView.onRasterError = { rasterError = it.takeIf(String::isNotBlank) }
+        mapView.onMapState = { state ->
+            effectiveOnline = state.optBoolean("online")
+            committedMode = state.optString("committedMode", "detail")
+            imagerySource = state.optString("imagerySource", "")
+            loading = state.optBoolean("loading") || state.optBoolean("imageryLoading")
+            mapError = state.optString("error").takeIf(String::isNotBlank)
+            if (!loading && mapError == null) onlineFailed = false
+        }
         mapView.onCamera = { state ->
             val camera = state.optJSONObject("camera")
             if (camera != null) {
-                zoom = camera.optDouble("zoom", zoom)
-                tilted = state.optDouble("pitch", 0.0) > 1.0
+                val focus = lastFittedFocus
+                if (mapReady && focus != null) MapCameraCheckpoint.capture(focus, camera)?.let { cameraCheckpoint = it }
                 rotated = kotlin.math.abs(camera.optDouble("bearingDegrees", 0.0)) > 1.0
-                val center = camera.optJSONArray("center")
-                reliefArea = center != null && center.optDouble(0) in 40.29..40.49 && center.optDouble(1) in 43.64..43.82
             }
         }
         mapView.onPosition = { inside, time ->
@@ -129,7 +159,9 @@ fun TropaMap(
     LaunchedEffect(connection) { if (connection == ConnectionState.ONLINE) onlineFailed = false }
     LaunchedEffect(mapView, onlineMode) { mapView.setOnline(onlineMode) }
     LaunchedEffect(mapView, eco) { mapView.command("eco", JSONObject().put("enabled", eco)) }
-    LaunchedEffect(mapView, relief) { mapView.command("layers", JSONObject().put("relief", relief)) }
+    LaunchedEffect(mapView, mode) { mapView.command("mode", JSONObject().put("mode", mode)) }
+    LaunchedEffect(mapView, paths) { mapView.command("layers", JSONObject().put("relief", true).put("paths", paths)) }
+    LaunchedEffect(mapView, visibleTrailIds) { mapView.setCatalogue(visibleTrailIds) }
 
     // Changing catalogue mode changes only the points. It neither reloads the
     // full route nor moves the camera, including while a native card is open.
@@ -139,7 +171,7 @@ fun TropaMap(
                 .put("coordinate", JSONArray(listOf(region.longitude, region.latitude))).put("active", region.id == selected?.id)
         }))
     }
-    LaunchedEffect(mapView, mapReady, countryBounds, selected?.id, route?.id, route?.apiRevisionId, route?.geometryAsset, route?.inlineGeometry) {
+    LaunchedEffect(mapView, mapReady, countryBounds, selected?.id, route?.id, route?.apiRevisionId, route?.geometryAsset, route?.inlineGeometry, routeAttempt) {
         if (!mapReady) return@LaunchedEffect
         val bounds = countryBounds ?: return@LaunchedEffect
         // A new card must not retain the previous line during native asset I/O.
@@ -159,7 +191,9 @@ fun TropaMap(
             if (lastFittedFocus == focusKey) return@withContext
             lastFittedFocus = focusKey
             scopeNotice = null
+            val restored = cameraCheckpoint?.cameraFor(focusKey)
             when {
+                restored != null -> mapView.command("camera", JSONObject().put("camera", restored).put("animate", false))
                 routeData?.frame != null -> {
                     val frame = routeData.frame
                     mapView.command("fit", JSONObject().put("bounds", JSONArray(listOf(frame.west, frame.south, frame.east, frame.north))).put("padding", 52).put("maxZoom", 17).put("animate", true))
@@ -179,16 +213,14 @@ fun TropaMap(
 
     Box(modifier.background(Palette.Water)) {
         key(mapView) { AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize()) }
-        val problem = error ?: scopeError
+        // Expected remote-detail failures in offline mode are described by the
+        // availability label. Local route/overlay and terminal errors remain
+        // actionable; they must not be hidden as a connectivity notice.
+        val candidate = error ?: scopeError ?: mapError?.takeIf { effectiveOnline || !mapReady } ?: overlayError ?: rasterError
+        val problem = candidate?.takeIf { fatal || it != dismissedError }
         if ((!mapReady || countryBounds == null) && problem == null) Text("Открываем карту России…", Modifier.align(Alignment.Center).background(Palette.Surface).padding(12.dp), style = MaterialTheme.typography.bodyMedium)
-        problem?.let { message ->
-            Column(Modifier.align(Alignment.Center).padding(16.dp).background(Palette.Surface), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(message, Modifier.padding(12.dp), color = Palette.Alert)
-                if (fatal) TrailTextButton(onClick = { retry += 1 }) { Text("Открыть карту снова") }
-            }
-        }
-        scopeNotice?.let { Text(it, Modifier.align(Alignment.Center).background(Palette.Surface).padding(12.dp), style = MaterialTheme.typography.bodySmall, color = Palette.Muted) }
-        if (mapReady) {
+        if (problem == null) scopeNotice?.let { Text(it, Modifier.align(Alignment.Center).background(Palette.Surface).padding(12.dp), style = MaterialTheme.typography.bodySmall, color = Palette.Muted) }
+        if (mapReady && problem == null) {
             Surface(Modifier.align(Alignment.CenterEnd).padding(end = 8.dp), color = Palette.Surface, shape = RoundedCornerShape(12.dp)) {
                 Column {
                     TrailIconButton(onClick = { mapView.command("zoom", JSONObject().put("delta", 1)) }) { TropaIcon(Glyph.ZOOM_IN, description = "Приблизить карту") }
@@ -197,29 +229,56 @@ fun TropaMap(
                 }
             }
             Text(when {
-                onlineFailed -> "Показана сохранённая карта"
-                onlineMode -> "Подробная карта"
-                connection == ConnectionState.LIMITED -> "Обзорная карта"
-                else -> "Карта без интернета"
+                loading && mode == "satellite" && effectiveOnline -> "Загружаем спутниковые снимки…"
+                committedMode == "satellite" -> if (imagerySource == "eox-bluemarble") "Спутник · Blue Marble" else "Спутник · EOX Sentinel"
+                loading && effectiveOnline -> "Загружаем рельеф…"
+                !effectiveOnline -> if (committedMode == "detail") "Сохранённый рельеф" else "Обзор без интернета"
+                onlineFailed -> "Часть карты недоступна"
+                onlineMode -> "Рельеф"
+                else -> "Обзор без интернета"
             }, Modifier.align(Alignment.BottomCenter).padding(bottom = 104.dp).background(Palette.Surface.copy(alpha = .96f)).padding(horizontal = 8.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.labelSmall, color = Palette.Muted)
             Row(Modifier.align(Alignment.BottomCenter).padding(bottom = 50.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TrailChoice(selected = onlineMode, onClick = {
-                    if (onlineFailed) { onlineFailed = false; onlineRequested = true } else onlineRequested = !onlineRequested
-                }, enabled = connection == ConnectionState.ONLINE, label = { Text("Подробная карта") }, modifier = Modifier.heightIn(min = 48.dp))
-                TrailChoice(selected = relief, onClick = { relief = !relief }, enabled = zoom < 6 || (reliefArea && zoom >= 7) || (onlineMode && zoom >= 5),
-                    label = { Text("Рельеф") }, modifier = Modifier.heightIn(min = 48.dp))
-                TrailChoice(selected = tilted, onClick = {
-                    mapView.command("pitch", JSONObject().put("tilted", !tilted))
-                }, enabled = zoom >= 10, label = { Text("Ракурс") }, modifier = Modifier.heightIn(min = 48.dp))
+                TrailChoice(selected = mode == "detail", onClick = { mode = "detail" },
+                    label = { Text("Рельеф") }, modifier = Modifier.heightIn(min = 48.dp).testTag("map_relief"))
+                TrailChoice(selected = mode == "satellite", onClick = { onlineFailed = false;onlineRequested = true;mode = "satellite" },
+                    enabled = connection == ConnectionState.ONLINE, label = { Text("Спутник") }, modifier = Modifier.heightIn(min = 48.dp).testTag("map_satellite"))
+                TrailChoice(selected = paths, onClick = { paths = !paths }, label = { Text("Тропы") }, modifier = Modifier.heightIn(min = 48.dp).testTag("map_paths"))
+                TrailChoice(selected = onlineMode, onClick = { onlineFailed = false;onlineRequested = !onlineRequested },
+                    enabled = connection == ConnectionState.ONLINE, label = { Text("Сеть") }, modifier = Modifier.heightIn(min = 48.dp))
                 TrailChoice(selected = eco, onClick = { eco = !eco }, label = { Text("Беречь заряд") }, modifier = Modifier.heightIn(min = 48.dp))
             }
         }
-        Surface(Modifier.align(Alignment.BottomStart), color = Palette.Surface.copy(alpha = .96f), shape = RoundedCornerShape(topEnd = 12.dp)) {
-            Row(Modifier.padding(start = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("© OpenStreetMap contributors", Modifier.weight(1f, fill = false), style = MaterialTheme.typography.labelSmall, color = Palette.Muted)
-                Spacer(Modifier.width(4.dp))
-                TrailIconButton(onClick = { showAttribution = true }) { TropaIcon(Glyph.INFO, description = "Источники карты и рельефа") }
+        // The actionable error is the final layer. Keep the parent map heading
+        // clear, reserve the attribution's measured height, and scroll only the
+        // message so retry/close cannot be covered by ordinary map controls.
+        Column(Modifier.align(Alignment.BottomStart).then(
+            if (problem == null) Modifier else Modifier.fillMaxSize().padding(top = 64.dp)
+        )) {
+            problem?.let { message ->
+                Surface(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 8.dp).testTag("map_error_panel"),
+                    color = Palette.Surface, shape = RoundedCornerShape(8.dp)) {
+                    Column(Modifier.fillMaxSize()) {
+                        Text(message, Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(12.dp),
+                            color = Palette.Alert, style = MaterialTheme.typography.bodyMedium)
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (fatal) TrailTextButton(onClick = { retry += 1 }, Modifier.weight(1f).testTag("map_reopen")) { Text("Открыть карту снова") }
+                            else TrailTextButton(onClick = {
+                                error = null;dismissedError = null;onlineFailed = false;routeAttempt += 1;mapView.command("retry")
+                            }, Modifier.weight(1f).testTag("map_retry")) { Text("Повторить загрузку") }
+                            if (!fatal && mapReady) TrailTextButton(onClick = { dismissedError = message },
+                                Modifier.weight(1f).testTag("map_error_close")) { Text("Закрыть") }
+                        }
+                    }
+                }
+            }
+            Surface(color = Palette.Surface.copy(alpha = .96f), shape = RoundedCornerShape(topEnd = 12.dp)) {
+                Row(Modifier.padding(start = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(if (committedMode == "satellite") if (imagerySource == "eox-bluemarble") "© OSM · NASA Blue Marble · EOX" else "© OSM · EOX · Sentinel · CC BY 4.0" else "© OpenStreetMap contributors",
+                        Modifier.weight(1f, fill = false), style = MaterialTheme.typography.labelSmall, color = Palette.Muted)
+                    Spacer(Modifier.width(4.dp))
+                    TrailIconButton(onClick = { showAttribution = true }) { TropaIcon(Glyph.INFO, description = "Источники карты и рельефа") }
+                }
             }
         }
     }

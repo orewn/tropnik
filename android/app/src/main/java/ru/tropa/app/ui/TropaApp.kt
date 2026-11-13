@@ -187,14 +187,15 @@ private fun BrandBar(state: AppState, onBack: () -> Unit) {
 
 @Composable
 private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () -> Unit) {
+    val catalogue = model.displayCatalog
     val selected = model.region(state.regionId)
     val showTerritories = state.catalogTerritories
-    val mapRegions = remember(model.catalog, showTerritories) { model.catalog.regions.filter { it.territory == showTerritories } }
-    val regions = remember(model.catalog, showTerritories, state.search) {
-        val choices = if (state.search.isBlank()) mapRegions else model.catalog.regions
+    val mapRegions = remember(catalogue, showTerritories) { catalogue.regions.filter { it.territory == showTerritories } }
+    val regions = remember(catalogue, showTerritories, state.search) {
+        val choices = if (state.search.isBlank()) mapRegions else catalogue.regions
         choices.filter { state.search.isBlank() || (it.name + " " + it.subtitle).contains(state.search.trim(), ignoreCase = true) }
     }
-    val regionRoutes = remember(model.catalog, state.search, selected?.id) { model.catalog.referenceRoutes(state.search, selected?.id) }
+    val regionRoutes = remember(catalogue, state.search, selected?.id) { catalogue.referenceRoutes(state.search, selected?.id) }
     val savedRouteIds = remember(state.savedRoutes) { state.savedRoutes.mapTo(mutableSetOf()) { it.routeId } }
     LazyColumn(
         Modifier.fillMaxSize().testTag("explore_list"),
@@ -205,6 +206,8 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Eyebrow(if (selected == null) "ПОХОДЫ ПО РОССИИ" else "ВЫБИРАЕМ РАЙОН")
                 Text(selected?.name ?: "Дальше начинается\nваша история.", style = MaterialTheme.typography.headlineLarge)
+                if (state.offlineSnapshot != null) Text("Сохранённая область · карточки и линии на этом телефоне",
+                    Modifier.testTag("saved_region_snapshot"), style = MaterialTheme.typography.bodySmall, color = Palette.Forest)
                 Text(selected?.subtitle ?: "Находите маршрут и людей, с которыми по пути.", color = Palette.Muted, style = MaterialTheme.typography.bodyLarge)
             }
         }
@@ -220,7 +223,8 @@ private fun ExploreScreen(model: MainViewModel, state: AppState, onLocation: () 
         }
         item {
             Box(Modifier.fillMaxWidth().height(if (selected == null) 280.dp else 320.dp).clip(RoundedCornerShape(16.dp))) {
-                TropaMap(mapRegions, selected, position = state.position, connection = state.connection, onSelectRegion = model::selectRegion, modifier = Modifier.fillMaxSize())
+                TropaMap(mapRegions, selected, position = state.position, connection = state.connection, onSelectRegion = model::selectRegion,
+                    visibleTrails = regionRoutes, onSelectTrail = model::selectRoute, modifier = Modifier.fillMaxSize())
                 Surface(Modifier.align(Alignment.TopStart).padding(12.dp), shape = RoundedCornerShape(8.dp), color = Palette.Surface) {
                     Text(if (selected == null) if (showTerritories) "Выберите территорию ниже" else "Выберите направление ниже" else "Обзор района", Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.labelSmall)
                 }
@@ -313,11 +317,13 @@ private fun RouteCard(route: TrailRoute, saved: Boolean, onClick: () -> Unit) {
 private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState, serviceMatches: Boolean,
                         onTrips: () -> Unit, onRecruitment: () -> Unit, landscape: Boolean, onLandscapeChange: (Boolean) -> Unit) {
     val context = LocalContext.current
+    val catalogue = model.displayCatalog
     val hasLandscape = route.id == "kavkaz-8a"
     val landscapeDocument by rememberLandscapeDocument(hasLandscape)
     val landscapeViewer = rememberLandscapeViewer(landscapeDocument, hasLandscape)
     val detailListState = rememberLazyListState()
     val region = model.region(route.regionId)
+    val nearbyTrails = remember(catalogue, route.regionId) { catalogue.referenceRoutes(regionId = route.regionId) }
     val saved = state.savedRoutes.any { it.routeId == route.id }
     Box(Modifier.fillMaxSize()) {
     if (hasLandscape) LocalLandscapeScene(landscapeViewer, visible = landscape) { onLandscapeChange(false) }
@@ -329,6 +335,8 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Eyebrow(if (route.illustrative) "УЧЕБНЫЙ ОБРАЗЕЦ" else (region?.name ?: "МАРШРУТ").uppercase(Locale("ru")))
                 Text(route.title, style = MaterialTheme.typography.headlineLarge)
+                if (state.offlineSnapshot != null) Text("Из сохранённой области",
+                    Modifier.testTag("saved_route_snapshot"), style = MaterialTheme.typography.bodySmall, color = Palette.Forest)
                 StatusPill(route.currentStatusLabel ?: if (route.accessStatus == "closed") "Посещение приостановлено" else if (route.illustrative) "Учебная карточка" else "Условия уточняются", caution = true)
                 Text(route.summary, style = MaterialTheme.typography.bodyLarge, color = Palette.Muted)
             }
@@ -348,8 +356,9 @@ private fun RouteDetail(route: TrailRoute, model: MainViewModel, state: AppState
         } }
         if (route.geometryAsset != null || route.inlineGeometry != null) item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.fillMaxWidth().height(320.dp).clip(RoundedCornerShape(16.dp))) {
-                    TropaMap(model.catalog.regions, region, route, connection = state.connection, modifier = Modifier.fillMaxSize())
+                Box(Modifier.fillMaxWidth().height(320.dp).clip(RoundedCornerShape(16.dp)).testTag("route_map")) {
+                    TropaMap(catalogue.regions, region, route, connection = state.connection,
+                        visibleTrails = nearbyTrails, onSelectTrail = model::selectRoute, modifier = Modifier.fillMaxSize())
                     Surface(Modifier.align(Alignment.TopStart).padding(12.dp), shape = RoundedCornerShape(8.dp), color = Palette.Surface) {
                         Text(if (route.currentAdvisory != null) "Доступ ограничен" else "Линия маршрута", Modifier.padding(8.dp), style = MaterialTheme.typography.labelSmall)
                     }
@@ -449,12 +458,13 @@ private fun OfflineAction(region: Region, model: MainViewModel, state: AppState)
             TropaIcon(if (installed != null) Glyph.CHECK else Glyph.SAVE)
             Text(if (installed != null) "Сохранено на телефоне" else "Возьмите карту с собой", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
         }
-        Text(if (detailed) "Сохраните карточки, обзор края и подробную карту района Бзерпинского карниза. Для подробной карты других районов понадобится интернет." else "Сохраните карточки и обзорную карту. Подробная карта доступна при подключении к интернету.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+        Text(if (detailed) "Сохраняются карточки и линии маршрутов. Обзор России и подробная карта района Бзерпинского карниза уже встроены в приложение. Для подробной карты других районов понадобится интернет." else "Сохраняются карточки и линии маршрутов. Обзорная карта уже встроена в приложение; подробная подложка этого района требует интернета.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+        if (installed != null && installed.version != model.catalog.version) Text("После обновления приложения обновите сохранённые данные этой области.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (installed != null) Text(sizeLabel(installed.sizeBytes), style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
         TrailOutlineButton(onClick = { model.saveRegion(region) }, enabled = state.busyId == null,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("save_pack"), shape = RoundedCornerShape(12.dp)) {
-            Text(if (busy) "Сохраняем карту…" else if (installed == null) "Сохранить офлайн" else "Обновить сохранённое")
+            Text(if (busy) "Сохраняем данные…" else if (installed == null) "Сохранить офлайн" else "Обновить сохранённые данные")
         }
         Text("Сохранение карты не подтверждает безопасность и актуальность условий маршрута.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
     }
@@ -463,9 +473,9 @@ private fun OfflineAction(region: Region, model: MainViewModel, state: AppState)
 @Composable
 private fun SavedScreen(model: MainViewModel, state: AppState) {
     var remove by remember { mutableStateOf<InstalledPackEntity?>(null) }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { PageHeading("Всё под рукой", "Карточки и карты хранятся на этом телефоне.") }
-        item { SectionHeading("Карты без интернета", "Сохранённые направления всегда под рукой") }
+    LazyColumn(Modifier.fillMaxSize().testTag("saved_list"), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        item { PageHeading("Всё под рукой", "Карточки и линии маршрутов хранятся на этом телефоне.") }
+        item { SectionHeading("Сохранённые области", "Откройте проверенную копию карточек и линий") }
         if (state.packs.isEmpty()) item { EmptyCard("Пока нет сохранённых областей", "Откройте регион на карте и нажмите «Сохранить офлайн».", Glyph.SAVE) }
         items(state.packs, key = { it.regionId }) { pack ->
             CardShell {
@@ -474,13 +484,16 @@ private fun SavedScreen(model: MainViewModel, state: AppState) {
                         Text(pack.title, style = MaterialTheme.typography.titleLarge)
                         Text("${sizeLabel(pack.sizeBytes)} · ${DateFormat.getDateInstance(DateFormat.MEDIUM, Locale("ru")).format(Date(pack.installedAt))}", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                     }
-                    TrailIconButton(onClick = { remove = pack }) { TropaIcon(Glyph.TRASH, description = "Удалить пакет ${pack.title}") }
+                    TrailIconButton(onClick = { remove = pack }, Modifier.testTag("remove_pack_${pack.regionId}"), enabled = state.busyId == null) { TropaIcon(Glyph.TRASH, description = "Удалить пакет ${pack.title}") }
                 }
-                Text(if (pack.includesTrailGeometry) "Карточки, обзорная карта и линии маршрутов." else "Карточки и обзорная карта.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                Text(if (pack.includesTrailGeometry) "Сохранённые карточки и линии маршрутов. Обзорная карта встроена в приложение." else "Сохранённые карточки. Обзорная карта встроена в приложение.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                if (pack.version != model.catalog.version) Text("Обновите сохранённые данные после обновления приложения.", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TrailTextButton(onClick = { model.selectRegion(pack.regionId) }) { Text("Открыть") }
-                    TrailTextButton(onClick = { model.verifyPack(pack) }) { Text("Проверить доступность") }
+                    TrailTextButton(onClick = { model.openPack(pack) }, Modifier.testTag("open_pack_${pack.regionId}"), enabled = state.busyId == null) { Text("Открыть") }
+                    TrailTextButton(onClick = { model.verifyPack(pack) }, Modifier.testTag("verify_pack_${pack.regionId}"), enabled = state.busyId == null) { Text("Проверить") }
+                    TrailTextButton(onClick = { model.selectRegion(pack.regionId) }, Modifier.testTag("update_pack_${pack.regionId}"), enabled = state.busyId == null) { Text("Обновить") }
                 }
+                if (state.busyId?.endsWith(":${pack.regionId}") == true) LinearProgressIndicator(Modifier.fillMaxWidth())
             }
         }
         item { SectionHeading("Сохранённые карточки", "Читаются даже после перезапуска без сети") }
@@ -489,9 +502,9 @@ private fun SavedScreen(model: MainViewModel, state: AppState) {
         item { InfoCard("Без интернета не обновляются условия, погода и состав группы. Отправка сообщений и подтверждение участия требуют связи.") }
     }
     remove?.let { pack -> TrailDialog(
-        onDismissRequest = { remove = null }, title = { Text("Удалить сохранённую карту?") },
-        text = { Text("Карта «${pack.title}» освободит ${sizeLabel(pack.sizeBytes)}. Сохранённые карточки останутся.") },
-        confirmButton = { TrailTextButton(onClick = { model.removePack(pack); remove = null }) { Text("Удалить") } },
+        onDismissRequest = { remove = null }, title = { Text("Удалить данные области?") },
+        text = { Text("Удаление области «${pack.title}» освободит ${sizeLabel(pack.sizeBytes)}. Отдельно сохранённые карточки останутся.") },
+        confirmButton = { TrailTextButton(onClick = { model.removePack(pack); remove = null }, Modifier.testTag("remove_pack_confirm"), enabled = state.busyId == null) { Text("Удалить") } },
         dismissButton = { TrailTextButton(onClick = { remove = null }) { Text("Оставить") } },
     ) }
 }

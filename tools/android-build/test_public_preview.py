@@ -4,7 +4,10 @@ import copy
 import hashlib
 import importlib.util
 import io
+import json
 from pathlib import Path
+import subprocess
+import tempfile
 import unittest
 
 HERE = Path(__file__).resolve().parent
@@ -23,10 +26,10 @@ class Response(io.BytesIO):
 def metadata_fixture():
     universal = {"bytes": 200, "sha256": "a" * 64}
     arm64 = {"bytes": 100, "sha256": "b" * 64}
-    build = {"sourceCommit": "c" * 40, "workflowRunId": "123", "signingCertificateSha256": "d" * 64,
+    build = {"sourceCommit": "c" * 40, "workflowRunId": "123", "signingCertificateSha256": "d" * 64, "applicationId": verifier.APP_ID,
              "files": {verifier.UNIVERSAL: universal, verifier.ARM64: arm64},
              "mapRuntime": {"mapRenderer": "tropnik-canvas", "mapRendererSharedWithWeb": True}}
-    metadata = {"architecture": "arm64-v8a", **arm64, "sourceCommit": build["sourceCommit"],
+    metadata = {"architecture": "arm64-v8a", **arm64, "sourceCommit": build["sourceCommit"], "applicationId": verifier.APP_ID,
                 "workflowRunId": 123, "signingCertificateSha256": build["signingCertificateSha256"],
                 "signature": "development / debug", "compatibleWithPreviousPreview": False,
                 "version": "0.4.24-preview", "versionCode": 12, "minSdk": 26, "targetSdk": 36}
@@ -36,7 +39,7 @@ def metadata_fixture():
         value = [513, 513] if destination == "sceneGridDimensions" else ("e" * 64 if "Sha256" in destination else index + 1)
         metadata[destination] = value
         verification[source] = copy.deepcopy(value)
-    device = {"tests": 8, "testedArtifact": verifier.UNIVERSAL, "testedArchitecture": "x86_64",
+    device = {"tests": len(verifier.instrumentation.EXPECTED), "testedArtifact": verifier.UNIVERSAL, "testedArchitecture": "x86_64",
               "testedApks": {verifier.UNIVERSAL: copy.deepcopy(universal)},
               "deviceExecutionVerified": True, "releasePayloadDeviceVerified": True,
               "installedArtifactBytesVerified": True, "physicalDeviceVerified": False,
@@ -104,7 +107,7 @@ class PublicPreviewTest(unittest.TestCase):
         self.assertEqual(result["sha256"], build["files"][verifier.UNIVERSAL]["sha256"])
         self.assertEqual(result["bytes"], 200)
         self.assertEqual(result["testedUniversalSha256"], result["sha256"])
-        self.assertEqual(result["deviceTestCount"], 8)
+        self.assertEqual(result["deviceTestCount"], len(verifier.instrumentation.EXPECTED))
         self.assertTrue(result["deviceExecutionVerified"])
         self.assertFalse(result["physicalDeviceVerified"])
         self.assertFalse(result["arm64DeviceExecutionVerified"])
@@ -115,11 +118,13 @@ class PublicPreviewTest(unittest.TestCase):
             lambda m, b, d, v: m.update(sourceCommit="f" * 40),
             lambda m, b, d, v: m.update(signingCertificateSha256="f" * 64),
             lambda m, b, d, v: m.update(compatibleWithPreviousPreview=True),
+            lambda m, b, d, v: m.update(applicationId="ru.tropa.app"),
             lambda m, b, d, v: v.update(abis=["arm64-v8a"]),
             lambda m, b, d, v: v.update(sha256="f" * 64),
             lambda m, b, d, v: v.update(sizeBytes=201),
             lambda m, b, d, v: v.update(catalogGeometryFilesVerified=999),
-            lambda m, b, d, v: d.update(tests=7),
+            lambda m, b, d, v: d.update(tests=len(verifier.instrumentation.EXPECTED) - 1),
+            lambda m, b, d, v: d.update(tests=len(verifier.instrumentation.EXPECTED) + 1),
             lambda m, b, d, v: d.update(testedArchitecture="arm64-v8a"),
             lambda m, b, d, v: d.update(deviceExecutionVerified=False),
             lambda m, b, d, v: d.update(physicalDeviceVerified=True),
@@ -130,6 +135,65 @@ class PublicPreviewTest(unittest.TestCase):
             mutate(*values)
             with self.assertRaises(ValueError):
                 verifier.universal_metadata(*values, "f" * 64)
+
+
+class PreviousPreviewIdentityTest(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.git("init", "-q")
+        gradle = self.root / "android/app/build.gradle.kts"
+        gradle.parent.mkdir(parents=True)
+        gradle.write_text('applicationId = "ru.tropa.app.preview"\nversionCode = 13\nversionName = "0.4.25-preview"\n')
+        self.git("add", ".")
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "Previous APK source")
+        source = self.git("rev-parse", "HEAD").strip()
+        self.previous = {"sourceCommit": source, "version": "0.4.25-preview", "versionCode": 13,
+                         "sha256": "a" * 64, "signingCertificateSha256": "b" * 64, "signature": "development / debug"}
+        self.path = self.root / verifier.PREVIOUS_MANIFEST
+        self.path.parent.mkdir(parents=True)
+        self.commit_manifest()
+        self.build = {"applicationId": verifier.APP_ID, "versionCode": 14, "signingCertificateSha256": "c" * 64}
+
+    def git(self, *args):
+        return subprocess.check_output(["git", *args], cwd=self.root, text=True, stderr=subprocess.DEVNULL)
+
+    def commit_manifest(self):
+        self.path.write_text(json.dumps(self.previous))
+        self.git("add", ".")
+        self.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-qm", "Published website baseline")
+
+    def test_comparison_uses_the_committed_published_version_and_not_a_historical_constant(self):
+        result = verifier.previous_preview_comparison(self.root, self.build)
+        self.assertEqual(result["previousPreview"]["version"], "0.4.25-preview")
+        self.assertEqual(result["previousSigningCertificateSha256"], "b" * 64)
+        self.assertTrue(result["sameApplicationIdAsPreviousPreview"])
+        self.assertTrue(result["versionCodeIncreases"])
+        self.assertFalse(result["sameCertificateAsPreviousPreview"])
+        self.assertFalse(result["updateIdentityRequirementsMet"])
+        self.assertFalse(result["updateInstallCompatibilityVerified"])
+        self.assertEqual(result["updateCompatibilityAssessment"], "signing-certificate-mismatch")
+
+    def test_matching_signer_never_proves_upgrade_or_accepts_a_downgrade(self):
+        build = {**self.build, "signingCertificateSha256": self.previous["signingCertificateSha256"]}
+        result = verifier.previous_preview_comparison(self.root, build)
+        self.assertTrue(result["updateIdentityRequirementsMet"])
+        self.assertFalse(result["updateInstallCompatibilityVerified"])
+        self.assertEqual(result["updateCompatibilityAssessment"], "identity-matches-upgrade-not-tested")
+        for code in (12, 13):
+            result = verifier.previous_preview_comparison(self.root, {**build, "versionCode": code})
+            self.assertFalse(result["updateIdentityRequirementsMet"])
+            self.assertEqual(result["updateCompatibilityAssessment"], "non-increasing-version-code")
+
+    def test_uncommitted_or_wrong_source_baselines_fail_closed(self):
+        self.path.write_text(json.dumps({**self.previous, "signingCertificateSha256": "e" * 64}))
+        with self.assertRaisesRegex(ValueError, "differs from the held source commit"):
+            verifier.previous_preview_comparison(self.root, self.build)
+        self.previous["versionCode"] = 99
+        self.commit_manifest()
+        with self.assertRaisesRegex(ValueError, "differs from its own source commit"):
+            verifier.previous_preview_comparison(self.root, self.build)
 
 
 if __name__ == "__main__":

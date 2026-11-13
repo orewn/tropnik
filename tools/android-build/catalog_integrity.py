@@ -157,6 +157,31 @@ def verify_catalog(manifest_bytes: bytes, read, *, actual_geometry=None, source_
     require(seen_ids == geometric, "Native geometry inventory is incomplete")
     if actual_geometry is not None:
         require(set(actual_geometry) == seen_paths, "Unlisted or stale native route geometry")
+    overlay = manifest.get("trailOverlay", {})
+    require(overlay.get("path") == "maps/catalogue/trail-overlay.json"
+            and isinstance(overlay.get("sha256"), str) and re.fullmatch(r"[a-f0-9]{64}", overlay["sha256"])
+            and overlay.get("url") == "/data/trail-overlay-" + overlay["sha256"][:16] + ".json"
+            and overlay.get("sourcePath") == "web/public" + overlay["url"]
+            and type(overlay.get("bytes")) is int and 0 < overlay["bytes"] <= 8 * 1024 * 1024,
+            "Native trail overview contract missing or invalid")
+    overlay_bytes = read(overlay["path"])
+    require(len(overlay_bytes) == overlay["bytes"] and digest(overlay_bytes) == overlay["sha256"], "Native trail overview bytes changed")
+    overview = json.loads(overlay_bytes)
+    by_source = {}
+    for record in records:
+        key = record["sourcePath"].removeprefix("web/public/data/")
+        entry = by_source.setdefault(key, {"ids": set(), "sha256": record["sha256"]})
+        require(entry["sha256"] == record["sha256"], "Conflicting native geometry source")
+        entry["ids"].add(record["routeId"])
+    sources = overview.get("sources", [])
+    require(overview.get("version") == 1 and len(sources) == len(by_source) == overlay.get("sourceCount")
+            and len({source.get("key") for source in sources}) == len(sources), "Native trail overview source inventory differs")
+    for source in sources:
+        expected = by_source.get(source.get("key"))
+        require(expected is not None and expected["sha256"] == source.get("sha256")
+                and expected["ids"] == set(source.get("ids", [])), "Native trail overview identity or geometry differs")
+    if source_read is not None:
+        require(source_read(overlay["sourcePath"]) == overlay_bytes, "Native trail overview differs from its web source")
     inputs = manifest.get("sourceInputs", [])
     require(isinstance(inputs, list) and 6 <= len(inputs) <= 100, "Catalogue source input inventory is missing")
     input_paths = set()
@@ -172,6 +197,8 @@ def verify_catalog(manifest_bytes: bytes, read, *, actual_geometry=None, source_
     require({"tools/android-build/prepare-catalog.mjs", "tools/android-build/fixtures/learning-route.json", "web/lib/content.ts",
              "web/lib/catalog.generated.json", "web/lib/route-points.generated.json", "web/public/data/russia-boundaries-provenance.json"} <= input_paths,
             "Catalogue omits a required source input")
+    require({"web/lib/trail-overlay.generated.json", overlay["sourcePath"]} <= input_paths,
+            "Catalogue omits shared trail overview provenance")
     if territory_ids:
         require({"tools/android-build/catalog-regions.mjs", "web/lib/territories.generated.json"} <= input_paths,
                 "Territory catalogue omits its membership source inputs")
@@ -181,5 +208,6 @@ def verify_catalog(manifest_bytes: bytes, read, *, actual_geometry=None, source_
             "catalogLearningRouteCount": len(learning), "catalogGeometryFilesVerified": len(records),
             "catalogReferenceOnlyRouteCount": len(reference_only),
             "catalogGeometryBytesVerified": size, "catalogGeometryVerticesVerified": vertices,
+            "catalogTrailOverlaySourcesVerified": len(sources), "catalogTrailOverlayBytesVerified": len(overlay_bytes),
             "catalogRegionMembership": membership, "catalogFieldVerifiedCount": 0, "catalogNavigationReadyCount": 0,
             "catalogSourceByteParityVerified": source_read is not None}

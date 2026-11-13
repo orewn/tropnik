@@ -20,7 +20,10 @@ type routePageMeta struct {
 // so the next request begins with that omitted route rather than skipping it.
 func routePageJSON(routes []domain.Route, requested int) ([]byte, error) {
 	const prefix = `{"data":[`
-	data := make([]byte, 0, domain.RoutePageResponseBytes)
+	// Small and empty catalogues should not reserve the entire 1 MiB wire
+	// budget. Grow from a row-count estimate, keeping capacity bounded too.
+	capacity := min(domain.RoutePageResponseBytes, 256+min(len(routes), 64)*1024)
+	data := make([]byte, 0, capacity)
 	data = append(data, prefix...)
 	meta := routePageMeta{Mode: "production"}
 	metaJSON, _ := json.Marshal(meta)
@@ -38,13 +41,19 @@ func routePageJSON(routes []domain.Route, requested int) ([]byte, error) {
 		if index > 0 {
 			separator = 1
 		}
-		if len(data)+separator+len(raw)+len(`],"meta":`)+len(candidateJSON)+len("}\n") > domain.RoutePageResponseBytes {
+		needed := len(data) + separator + len(raw) + len(`],"meta":`) + len(candidateJSON) + len("}\n")
+		if needed > domain.RoutePageResponseBytes {
 			if index == 0 {
 				// An oversized legacy/operator row must be corrected; dropping it
 				// would make the catalogue incomplete or trap clients in a loop.
 				return nil, errRouteResponseBudget
 			}
 			break
+		}
+		if needed > cap(data) {
+			next := make([]byte, len(data), min(domain.RoutePageResponseBytes, max(needed, 2*cap(data))))
+			copy(next, data)
+			data = next
 		}
 		if separator != 0 {
 			data = append(data, ',')

@@ -1,0 +1,145 @@
+{
+  "method": "Offline synthetic DTO fixtures; Python reproduces Go UTF-8/HTML escaping, compact JSON and final newline. No running Go or live service claimed.",
+  "sourceCandidate": "b3c41729acb41e8aec38608441ea0770e274169d",
+  "allSuccessfulOnly": true,
+  "longFractionImportedRouteBytes": 8384512,
+  "results": [
+    {
+      "fixture": "reviews-100.json",
+      "bytes": 1826240,
+      "MiB": 1.741638,
+      "capBytes": 8388608,
+      "sha256": "600190197836179814736a11364881515251902943f17258604ead589c190e77",
+      "pathsWithoutApiV1Prefix": [
+        "GET /departures/{id}/reviews",
+        "GET /guides/{id}/reviews"
+      ]
+    },
+    {
+      "fixture": "recruitment-100.json",
+      "bytes": 1284040,
+      "MiB": 1.224556,
+      "capBytes": 8388608,
+      "sha256": "8c7d183840b350c9b72ab30148b5ae82c260c532255173d54a231301832df935",
+      "pathsWithoutApiV1Prefix": [
+        "GET /recruitment-requests"
+      ]
+    },
+    {
+      "fixture": "my-reports-100.json",
+      "bytes": 2431040,
+      "MiB": 2.31842,
+      "capBytes": 8388608,
+      "sha256": "45568d6cc498f6f1266bb0e8e6628e42815081a745569ef26e4e5f517e612e54",
+      "pathsWithoutApiV1Prefix": [
+        "GET /me/reports"
+      ]
+    },
+    {
+      "fixture": "my-actions-100.json",
+      "bytes": 1238740,
+      "MiB": 1.181355,
+      "capBytes": 8388608,
+      "sha256": "7ffa6ce796a7a237de196b535e41da438946ccbfefc76ffcb37cae9774520ff2",
+      "pathsWithoutApiV1Prefix": [
+        "GET /me/moderation-actions"
+      ]
+    },
+    {
+      "fixture": "my-appeals-100.json",
+      "bytes": 2424240,
+      "MiB": 2.311935,
+      "capBytes": 8388608,
+      "sha256": "a97eaa76ca1f9ac44d011ef4d2bffa7b52875bbf8076298643a090320f06ad64",
+      "pathsWithoutApiV1Prefix": [
+        "GET /me/appeals"
+      ]
+    },
+    {
+      "fixture": "notifications-100.json",
+      "bytes": 1222340,
+      "MiB": 1.165714,
+      "capBytes": 8388608,
+      "sha256": "248277e7be146acf859eb9d68fa8d9a3e7b5b484d804bc1f79739ca6dd63f7f2",
+      "pathsWithoutApiV1Prefix": [
+        "GET /me/notifications"
+      ]
+    },
+    {
+      "fixture": "moderation-reports-100.json",
+      "bytes": 4946240,
+      "MiB": 4.717102,
+      "capBytes": 8388608,
+      "sha256": "080e19f776efb9480674a573730dc26c7ce696b15baf68399d33b190ef5327f1",
+      "pathsWithoutApiV1Prefix": [
+        "GET /moderation/reports"
+      ]
+    },
+    {
+      "fixture": "moderation-appeals-100.json",
+      "bytes": 3721040,
+      "MiB": 3.54866,
+      "capBytes": 8388608,
+      "sha256": "148c36c283f96646d8b173b654dd3f0605ce339105811216958dfbf74e46a174",
+      "pathsWithoutApiV1Prefix": [
+        "GET /moderation/appeals"
+      ]
+    },
+    {
+      "fixture": "messages-100.json",
+      "bytes": 2486752,
+      "MiB": 2.371552,
+      "capBytes": 4194304,
+      "sha256": "5f8165e00574647b2a314036ce0afc4b7acdbf53f4837921bee7ca900feca33f",
+      "pathsWithoutApiV1Prefix": [
+        "GET /departures/{id}/messages",
+        "GET /recruitment-requests/{id}/messages"
+      ]
+    },
+    {
+      "fixture": "safety-passport-max-text.json",
+      "bytes": 1679670,
+      "MiB": 1.601858,
+      "capBytes": 16777216,
+      "sha256": "f18006cb1d8bd8930ece29e4967577553783cbe479e3e3227e6702af48f72a81",
+      "pathsWithoutApiV1Prefix": [
+        "GET /departures/{id}/safety-passport",
+        "POST /departures/{id}/safety-passport/prepare",
+        "POST /departures/{id}/mchs/submission",
+        "POST /departures/{id}/mchs/confirmation",
+        "POST /departures/{id}/mchs/start-contact",
+        "POST /departures/{id}/mchs/return-report"
+      ]
+    },
+    {
+      "fixture": "emergency-card-max-text.json",
+      "bytes": 1360604,
+      "MiB": 1.297573,
+      "capBytes": 2097152,
+      "sha256": "805636927713cc59e76568e6b4c425d955050c6bb69bd634d93ab8632646e6ef",
+      "pathsWithoutApiV1Prefix": [
+        "GET /departures/{id}/emergency-card"
+      ]
+    },
+    {
+      "fixture": "safety-passport-long-rfc3339-fraction.json",
+      "bytes": 8512598,
+      "MiB": 8.118246,
+      "capBytes": 16777216,
+      "sha256": "2cb84caf9416f1d3e87ba012a87db63b3a9372c00fa6d897da3cdc9ac5cfe6c1",
+      "pathsWithoutApiV1Prefix": [
+        "GET /departures/{id}/safety-passport",
+        "POST /departures/{id}/safety-passport/prepare",
+        "POST /departures/{id}/mchs/submission",
+        "POST /departures/{id}/mchs/confirmation",
+        "POST /departures/{id}/mchs/start-contact",
+        "POST /departures/{id}/mchs/return-report"
+      ]
+    }
+  ],
+  "knownUnboundedFamilies": [
+    "regions: no LIMIT and no text length CHECK",
+    "guides activities: DISTINCT array has no count or activity length bound",
+    "departure participants: status!=cancelled includes historical no_show rows; active capacity50 does not bound history"
+  ]
+}

@@ -3,9 +3,18 @@ name: Public GitHub Pages
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - 'README.md'
+    # Include every web/compiler/data input, including the native catalogue
+    # manifest bound into the shared map. Backend-only and Kotlin-only changes
+    # have their own gates and do not republish an unchanged static client.
+    paths:
+      - 'web/**'
+      - 'tools/**'
+      - 'data/**'
+      - 'contracts/**'
+      - 'android/app/src/main/assets/catalog-manifest.json'
+      - 'docs/verification/place-stories-2026-11-13.json'
+      - '.github/workflows/pages.yml'
+      - '.gitignore'
   workflow_dispatch:
 
 permissions:
@@ -55,7 +64,7 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/tropnik-route-data"
           "$RUNNER_TEMP/tropnik-route-data/bin/python" -m pip install -r tools/map-package/requirements-territories.txt
-          "$RUNNER_TEMP/tropnik-route-data/bin/python" tools/import-data/recover_route_coverage.py build --archive data/catalog/coverage-recovery/source-responses.tar.gz --download-sources --check
+          "$RUNNER_TEMP/tropnik-route-data/bin/python" tools/import-data/recover_route_coverage.py build --archive data/catalog/coverage-recovery/source-responses.tar.gz --source-dir "$RUNNER_TEMP/tropnik-route-sources" --download-sources --check
           "$RUNNER_TEMP/tropnik-route-data/bin/python" -m unittest discover -s tools/import-data -p 'test_route_coverage_recovery.py'
           "$RUNNER_TEMP/tropnik-route-data/bin/python" -m unittest discover -s tools/map-package -p 'test_route_catalog_inputs.py'
       - name: Run web regression checks

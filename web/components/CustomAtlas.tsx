@@ -12,6 +12,7 @@ import {territoryForMapPoint} from '@/lib/territories';
 import {russiaView} from '@/lib/russia-map';
 import {loadPublicBytes,invalidatePublicMapResource} from '@/lib/map-preload';
 import {loadVerifiedRouteGeometry} from '@/lib/route-source-integrity';
+import {loadPublishedRouteGeometry} from '@/lib/published-route';
 import {TrailOverlayLoader} from '@/lib/map-trail-overlay';
 import trailOverlayMetadata from '@/lib/trail-overlay.generated.json';
 import {verifyReviewedCoastalRoute} from '@/lib/reviewed-coastal-routes';
@@ -136,7 +137,7 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
     if(!trail?.geometry&&!trail?.geometryUrl){if(changed)fitCurrent.current(!!region);return;}
     setRouteLoading(true);
     const controller=new AbortController();
-    const load=trail.geometry?Promise.resolve(trail.geometry):loadVerifiedRouteGeometry(trail.geometryUrl!,trailOverlayMetadata.sourceHashes,{load:loadPublicBytes,invalidate:invalidatePublicMapResource,signal:controller.signal});
+    const load=trail.publicationStatus==='published'?loadPublishedRouteGeometry(trail,controller.signal):trail.geometry?Promise.resolve(trail.geometry):loadVerifiedRouteGeometry(trail.geometryUrl!,trailOverlayMetadata.sourceHashes,{load:loadPublicBytes,invalidate:invalidatePublicMapResource,signal:controller.signal});
     let active=true;
     const ownsSelection=()=>active&&map===engine.current&&latest.current.trail===trail&&latest.current.region===region;
     void load.then(async payload=>{

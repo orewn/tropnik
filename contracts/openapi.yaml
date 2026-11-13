@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: TROPA API
-  version: 0.4.23
+  version: 0.4.31
   description: 'Server-authoritative guided hiking groups. Minimum four people includes the
 
     guide by default. No guide obtains verified status through self-registration.
@@ -16,6 +16,56 @@ info:
 servers:
 - url: /api/v1
 security: []
+x-tropnik-body-budgets:
+  description: >-
+    Browser, BFF, SSR and Android count decoded JSON stream bytes, independent
+    of gzip and Content-Length. Larger response budgets apply only to successful
+    responses for the exact method and path templates below. Query parameters
+    do not change the path family. Oversize is an explicit failure, never silent
+    truncation. MiB means 1048576 bytes. Request limits remain 1 MiB for every
+    method, including mutations returning a larger response.
+  requestBytes: 1048576
+  defaultResponseBytes: 1048576
+  errorResponseBytes: 1048576
+  success:
+  - method: GET
+    paths: ['/routes/{id}']
+    bytes: 8388608
+    reason: Complete reviewed route geometry; route list pages retain the 1 MiB default.
+  - method: GET
+    paths: ['/departures/{id}/messages', '/recruitment-requests/{id}/messages']
+    bytes: 4194304
+    reason: Latest 100 messages, at most 4000 Unicode characters each; Go HTML escaping may require six bytes per character.
+  - method: GET
+    paths:
+    - /departures/{id}/reviews
+    - /guides/{id}/reviews
+    - /recruitment-requests
+    - /me/reports
+    - /me/moderation-actions
+    - /me/appeals
+    - /me/notifications
+    - /moderation/reports
+    - /moderation/appeals
+    bytes: 8388608
+    reason: SQL-bounded latest-100 rich collections; combined report target text, reasons and names exceed 4 MiB after Go HTML escaping.
+  - method: GET
+    paths: ['/departures/{id}/emergency-card']
+    bytes: 2097152
+    reason: Up to 50 emergency exits and 50 control points with bounded names and descriptions.
+  - method: GET
+    paths: ['/departures/{id}/safety-passport']
+    bytes: 16777216
+    reason: Existing 8 MiB route metadata may contain long valid RFC3339 fractional strings; the passport adds private details.
+  - method: POST
+    paths:
+    - /departures/{id}/safety-passport/prepare
+    - /departures/{id}/mchs/submission
+    - /departures/{id}/mchs/confirmation
+    - /departures/{id}/mchs/start-contact
+    - /departures/{id}/mchs/return-report
+    bytes: 16777216
+    reason: These five mutations return the same complete safety passport, including idempotent replay.
 paths:
   /health/live:
     get:

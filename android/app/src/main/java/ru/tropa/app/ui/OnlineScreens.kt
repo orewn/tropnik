@@ -82,6 +82,15 @@ fun OnlineProfileScreen(model: OnlineViewModel, state: OnlineState, onSources: (
             }
         }
         item { OnlineError(state, model::clearError) }
+        if (state.sessionTransitionPending) item {
+            CardShell {
+                Text("Завершите действие", style = MaterialTheme.typography.titleLarge)
+                Text("Подключение к аккаунту приостановлено, пока сохранение настроек и очистка личных данных не завершатся.",
+                    style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
+                TrailButton(onClick = model::retrySessionTransition, enabled = !state.busy,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("retry_session_transition")) { Text("Повторить завершение") }
+            }
+        }
         if (state.user == null) {
             item {
                 CardShell {
@@ -540,6 +549,7 @@ private fun Field(value: String, onChange: (String) -> Unit, label: String, modi
 private fun ServiceStatus(state: OnlineState, onRefresh: () -> Unit) {
     val readiness = state.readiness
     val status = when {
+        state.sessionTransitionPending -> if (state.busy) "Завершаем действие…" else "Подключение приостановлено до завершения действия"
         !state.configured -> "Вход и запись на походы пока недоступны"
         state.connection == ConnectionState.OFFLINE -> "Без интернета доступны сохранённые данные"
         readiness == ServerState.Checking -> "Подключаемся…"

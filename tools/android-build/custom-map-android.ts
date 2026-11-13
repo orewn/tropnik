@@ -2,6 +2,9 @@ import {CustomMapEngine, inRussiaCoverage} from './custom-map-entry';
 import type {CustomMapCamera} from '../../web/lib/custom-map-camera';
 import type {CustomMapMarker} from '../../web/lib/custom-map-engine';
 import {NativeMapRouteLoader, type NativeMapRoute} from './native-map-route';
+import {NativeMapCatalogue} from './native-map-catalogue';
+import {NativeMapModeController} from './native-map-mode';
+import {TrailOverlayLoader} from '../../web/lib/map-trail-overlay';
 import {encodeDiagnosticMessage, prepareOutsideLabelEvidence, type OutsideLabelEvidence} from './native-map-diagnostics';
 
 // Only a native-owned, exact-origin transferred port can command this view.
@@ -10,7 +13,13 @@ const ORIGIN = 'https://map.tropnik.invalid';
 const element = document.getElementById('map')!;
 let port: MessagePort | undefined, generation = 0, sequence = 0;
 let engine: CustomMapEngine | undefined, debug = false;
-const routeLoader = new NativeMapRouteLoader(ORIGIN, (geometry, id) => engine?.setRoute(geometry, id));
+const catalogue = new NativeMapCatalogue(ORIGIN);
+const routeLoader = new NativeMapRouteLoader(ORIGIN, (geometry, id, coastal) => engine?.setRoute(geometry, id, coastal), fetch,
+  (bytes, geometry, id) => catalogue.verifyRoute(bytes, geometry, id));
+let trailOverlay: TrailOverlayLoader | undefined, preparingOverlay: Promise<void> | undefined;
+let visibleTrailIds: string[] = [], selectedRouteId: string | undefined, paths = true;
+let routeCommandVersion = 0;
+let modeController: NativeMapModeController | undefined;
 let error = '', frame = 0, initialized = false, sentSourceFrame = false;
 let position: [number, number] | null = null;
 let markerCoordinates = new Map<string, [number, number]>();
@@ -41,6 +50,22 @@ function installInputDiagnostics() {
 }
 
 function send(type: string, payload: unknown = {}) {port?.postMessage(JSON.stringify({version: 1, generation, type, payload}));}
+function refreshOverlay() {
+  const map = engine;if (!map?.getState().ready) return;
+  if (trailOverlay) trailOverlay.update({ids: paths && !labelFixture ? visibleTrailIds : [], selectedId: selectedRouteId, bounds: [...map.getBounds()], zoom: map.getCamera().zoom});
+  else if (visibleTrailIds.length && paths && !preparingOverlay) {
+    preparingOverlay = catalogue.manifest().then(manifest => {
+      if (engine !== map) return;
+      send('overlayError', {message: ''});
+      trailOverlay = new TrailOverlayLoader({url: manifest.overlay.url, sha256: manifest.overlay.sha256,
+        load: (url, priority, signal) => catalogue.load(url, priority, signal),
+        onChange: entries => {if (engine === map) map.setTrailOverlay(entries);},
+        onError: message => {if (engine === map) send('overlayError', {message});}});
+      refreshOverlay();
+    }).catch(caught => {if (engine === map && caught?.name !== 'AbortError') send('overlayError', {message: 'Линии троп не загрузились. Повторите загрузку карты.'});})
+      .finally(() => {preparingOverlay = undefined;});
+  }
+}
 function failure(message: string) {error = message;document.documentElement.dataset.mapState = 'failed';send('error', {message});}
 function camera(value: unknown): CustomMapCamera {
   const c = value as CustomMapCamera;
@@ -62,6 +87,9 @@ function snapshot() {
     pitch === painted.pitch && size.width === painted.size.width && size.height === painted.size.height &&
     size.width === element.clientWidth && size.height === element.clientHeight;
   return {ready, frame, error, camera, pitch, moving, inputReady, painted, state: map?.getState(), rendered,
+    catalogue: {visibleIds: visibleTrailIds, selectedId: selectedRouteId, paths, loader: trailOverlay?.inspect()},
+    requestedMode: modeController?.requested, online: modeController?.online,
+    centerTrailHit: debug && map && size ? map.pickTrail({x: size.width / 2, y: size.height / 2}, 8) : undefined,
     size, viewportSize: {width: element.clientWidth, height: element.clientHeight},
     viewportBounds: {x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height}, routeId: element.dataset.mapDrawnRoute || '', coverage: map?.getCoverage()?.status,
     trustedInput: [...trustedInput],
@@ -120,6 +148,7 @@ async function installLabelFixture() {
   for (let i = 0; i < 32; i++) {const middle = (west + east) / 2;if (inside(middle)) west = middle;else east = middle;}
   const longitude = (west + east) / 2;
   labelFixture = {longitude, latitude};
+  refreshOverlay();
   engine.setMarkers([]);engine.setRoute(undefined);engine.setPitch(0);engine.setMode('detail');engine.setLayers({paths: false, boundaries: false, relief: false});
   engine.setCamera({center: [longitude, latitude], zoom: 10}, false);
   engine.setLabels([
@@ -142,7 +171,17 @@ async function command(type: string, payload: Record<string, unknown>) {
       markerCoordinates = new Map(markers.map(marker => [marker.id, marker.coordinate]));
       engine.setMarkers(markers);engine.setPosition(position);break;
     }
-    case 'route': await routeLoader.update(payload as NativeMapRoute);break;
+    case 'route': {
+      if (!Number.isSafeInteger(payload.version) || Number(payload.version) <= routeCommandVersion) break;
+      routeCommandVersion = Number(payload.version);
+      selectedRouteId = typeof payload.id === 'string' ? payload.id : undefined;
+      refreshOverlay();await routeLoader.update(payload as NativeMapRoute);break;
+    }
+    case 'catalogue': {
+      const ids = payload.ids;
+      if (!Array.isArray(ids) || ids.length > 100000 || ids.some(id => typeof id !== 'string' || !/^[a-z0-9-]{1,128}$/.test(id)) || new Set(ids).size !== ids.length) throw new Error('Invalid map catalogue filter');
+      visibleTrailIds = [...ids];refreshOverlay();break;
+    }
     case 'position': {
       const coordinate = payload.coordinate as [number, number] | null;
       if (coordinate !== null && (!Array.isArray(coordinate) || coordinate.length !== 2 || !coordinate.every(Number.isFinite))) throw new Error('Invalid position');
@@ -153,14 +192,18 @@ async function command(type: string, payload: Record<string, unknown>) {
     case 'region': if (!Array.isArray(payload.shapes) || payload.shapes.some(s => typeof s !== 'string' || s.length > 160)) throw new Error('Invalid region');else engine.setRegion(payload.shapes as string[]);break;
     case 'zoom': {const delta = Number(payload.delta);if (!Number.isFinite(delta) || Math.abs(delta) > 1) throw new Error('Invalid zoom');engine.zoomBy(delta);break;}
     case 'north': engine.north();break;
-    case 'layers': engine.setLayers({relief: payload.relief === true});break;
+    case 'layers': {
+      if (payload.paths !== undefined) paths = payload.paths === true;
+      engine.setLayers({...(payload.relief === undefined ? {} : {relief: payload.relief === true}), paths});refreshOverlay();break;
+    }
+    case 'mode': modeController?.select(payload.mode);break;
+    case 'retry': engine.retry();trailOverlay?.retry();refreshOverlay();break;
     case 'pitch': engine.setPitch(payload.tilted === true ? 40 : 0);break;
     case 'eco': engine.setEco(payload.enabled === true);document.body.dataset.mapEco = String(payload.enabled === true);break;
     case 'active': engine.setActive(payload.active === true);break;
     case 'network': {
       // The native broker independently enforces this policy for every request.
-      // Switching modes invalidates source requests without discarding the view.
-      engine.setMode('overview');engine.setMode('detail');break;
+      modeController?.network(payload.enabled === true);if (payload.enabled === true) trailOverlay?.retry();break;
     }
     case 'snapshot': {
       if (!debug || !Number.isSafeInteger(payload.requestId)) throw new Error('Debug command disabled');
@@ -172,7 +215,7 @@ async function command(type: string, payload: Record<string, unknown>) {
       break;
     }
     case 'labelFixture': if (!debug) throw new Error('Debug command disabled');await installLabelFixture();break;
-    case 'destroy': routeLoader.dispose();engine.destroy();engine = undefined;port?.close();port = undefined;break;
+    case 'destroy': routeLoader.dispose();trailOverlay?.destroy();catalogue.dispose();engine.destroy();engine = undefined;modeController = undefined;port?.close();port = undefined;break;
     default: throw new Error('Unknown map command');
   }
 }
@@ -196,7 +239,7 @@ window.addEventListener('message', event => {
   port.start();
   try {
     engine = new CustomMapEngine(element, {camera: {center: [105, 62], zoom: 0}, maxZoom: 17,
-      onReady: () => {document.documentElement.dataset.mapState = 'ready';send('ready');},
+      onReady: () => {document.documentElement.dataset.mapState = 'ready';send('ready');refreshOverlay();},
       onFrame: camera => {
         frame++;element.dataset.mapDetail = engine && engine.getCamera().zoom >= 10 ? 'close' : 'wide';
         if (debug && engine) painted = {frame, camera: {...camera, center: [...camera.center]}, pitch: engine.getPitch(), size: {...engine.getSize()}};
@@ -204,8 +247,12 @@ window.addEventListener('message', event => {
         if (!sentSourceFrame && sourceTiles > 0) {sentSourceFrame = true;send('frame', {frame, sourceTiles});}
         prepareFixtureFrame();
       },
-      onSettled: value => {if (value.zoom < 10 && engine && engine.getPitch() > 0) engine.setPitch(0);send('camera', {camera: value, pitch: engine?.getPitch() || 0});},
-      onMarker: id => {const coordinate = markerCoordinates.get(id), coverage = engine?.getCoverage();if (coordinate && coverage && inRussiaCoverage(coordinate[0], coordinate[1], coverage.area)) send('marker', {id});},onState: state => send('state', state)});
+      onSettled: value => {if (value.zoom < 10 && engine && engine.getPitch() > 0) engine.setPitch(0);send('camera', {camera: value, pitch: engine?.getPitch() || 0});refreshOverlay();},
+      onMarker: id => {const coordinate = markerCoordinates.get(id), coverage = engine?.getCoverage();if (coordinate && coverage && inRussiaCoverage(coordinate[0], coordinate[1], coverage.area)) send('marker', {id});},
+      onClick: point => {const id = engine?.pickTrail(point, 8);if (id && (id === selectedRouteId || visibleTrailIds.includes(id))) send('trail', {id});},
+      onOverlayError: message => send('rasterError', {message}),
+      onState: state => send('state', {...state, requestedMode: modeController?.requested || 'detail', online: modeController?.online || false})});
+    modeController = new NativeMapModeController(engine);
     document.documentElement.dataset.mapState = 'loading';
   } catch {failure('Карта не открылась. Карточки и источники доступны.');}
 });

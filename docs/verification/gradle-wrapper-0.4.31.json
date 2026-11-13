@@ -1,0 +1,107 @@
+{
+  "status": "verified",
+  "runId": 43386646262,
+  "runAttempt": 1,
+  "jobId": 131756577874,
+  "sourceCommit": "a37c9860e9ed47c034dba72ecce59f48833404df",
+  "sourceParent": "0f8eac8ca041db8fdaf95e38cf1e2b5234ae4d2b",
+  "isolatedBranch": "verify/gradle-wrapper-20261113",
+  "changedRepositoryFiles": [
+    ".github/workflows/gradle-wrapper-verify.yml"
+  ],
+  "sourceWorkflowSha256": "319a9f38b3c046653748cec70739f72432bc54f56d26388fb671183d086fb155",
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43386646262",
+  "artifactId": 14018882690,
+  "artifactBytes": 46379,
+  "artifactSha256": "4833b81b9c8229082f291293e2614fe2098a49c73b003043e4face06e04a5de1",
+  "artifactApiDigestMatched": true,
+  "artifactWhitelistMatched": true,
+  "generatedFileHashesMatched": true,
+  "officialWrapperJarChecksumMatched": true,
+  "officialDistributionChecksumVerifiedInCI": true,
+  "wrapperJarZipAndMainClassVerified": true,
+  "distributionPropertiesVerified": true,
+  "failedCIAttempts": [],
+  "localVerifierAttempts": 2,
+  "localVerifierCorrection": "The first local verifier over-escaped the Java properties URL; its parser was corrected without changing any downloaded bytes or CI source.",
+  "repositoryApplicationBuildExecuted": false,
+  "provenance": {
+    "gradleVersion": "8.14.7",
+    "distributionUrl": "https://services.gradle.org/distributions/gradle-8.14.7-bin.zip",
+    "distributionSha256": "903bfc4bc7622323124054c10f509246212a1902948bdaf26c379cca8735e856",
+    "distributionBytes": 139424091,
+    "wrapperJarSha256": "ad16bca46cb71bb5887c546860d93992aeee35c1fdaf4a242b0a612375d937e0",
+    "checksumReference": "https://gradle.org/release-checksums/",
+    "generator": "official verified Gradle 8.14.7 binary distribution, wrapper task in an empty project",
+    "generationArguments": [
+      "--no-daemon",
+      "--console",
+      "plain",
+      "wrapper",
+      "--gradle-version",
+      "8.14.7",
+      "--distribution-type",
+      "bin",
+      "--gradle-distribution-sha256-sum",
+      "903bfc4bc7622323124054c10f509246212a1902948bdaf26c379cca8735e856",
+      "--network-timeout",
+      "10000",
+      "--validate-url"
+    ],
+    "repositoryCheckedOut": false,
+    "existingApplicationBuildExecuted": false,
+    "javaVersion": "openjdk version \"17.0.21\" 2026-10-20\nOpenJDK Runtime Environment Temurin-17.0.21+9 (build 17.0.21+9)\nOpenJDK 64-Bit Server VM Temurin-17.0.21+9 (build 17.0.21+9, mixed mode, sharing)",
+    "sourceRepository": "orewn/tropnik",
+    "sourceCommit": "a37c9860e9ed47c034dba72ecce59f48833404df",
+    "sourceRef": "refs/heads/verify/gradle-wrapper-20261113",
+    "runId": 43386646262,
+    "runAttempt": 1,
+    "runUrl": "https://github.com/orewn/tropnik/actions/runs/43386646262",
+    "files": {
+      "gradlew": {
+        "bytes": 8733,
+        "sha256": "b187b4c52e749f5760afdd6fadc31b2a98ad35fb249bf0dff03b72650f320409",
+        "mode": "0o755"
+      },
+      "gradlew.bat": {
+        "bytes": 2937,
+        "sha256": "1d297e00bd21de3ace22b4d7f2de1f9dfa858883d66bbf7c1ccbecccec8f4f3b",
+        "mode": "0o600"
+      },
+      "gradle/wrapper/gradle-wrapper.jar": {
+        "bytes": 44309,
+        "sha256": "ad16bca46cb71bb5887c546860d93992aeee35c1fdaf4a242b0a612375d937e0",
+        "mode": "0o600"
+      },
+      "gradle/wrapper/gradle-wrapper.properties": {
+        "bytes": 340,
+        "sha256": "c4747a838d5c923931d1791ae5a56c0654e025f4c1a54e4e277f54cdc60a126f",
+        "mode": "0o600"
+      }
+    }
+  },
+  "ciJobLogSha256": "608964b34d92c00cb910b859cf46878e035cc62326830363fd06fa812003373f",
+  "localWorkflowSha256": "319a9f38b3c046653748cec70739f72432bc54f56d26388fb671183d086fb155",
+  "rootArtifactBytesReverified": true,
+  "applicationBuildStatus": "PR preflight 43388775423 passed 70 JVM, unsigned R8 and 11 device scenarios; final combined main pending",
+  "rootArtifactApiDigestIndependentlyMatched": true,
+  "localProductionConfigurationTests": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/android-build",
+      "-p",
+      "test_production_signing.py"
+    ],
+    "logSha256": "7cb0201692aeff8d2f96bb1f05ab6aa0a5dd7d8314d20509992e5946ba2ac3e7",
+    "actualGradleApplicationBuild": false
+  },
+  "applicationPreflightReceipt": "android-0.4.31-preflight.json"
+}

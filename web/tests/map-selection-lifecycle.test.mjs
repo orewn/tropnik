@@ -16,6 +16,8 @@ import {russiaCamera,russiaPadding} from '../public/maps/russia-viewport.js';
 import {TrailOverlayLoader} from '../lib/map-trail-overlay.ts';
 import {buildTrailOverlay} from '../scripts/build-trail-overlay.mjs';
 import {verifyReviewedCoastalRoute} from '../lib/reviewed-coastal-routes.ts';
+import {loadPublishedRouteGeometry} from '../lib/published-route.ts';
+import {publishedTrail} from '../lib/route-adapter.ts';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),compiled=new Map();
 const turn=()=>new Promise(done=>setImmediate(done));
@@ -89,6 +91,7 @@ function atlasFixture({committedMode='detail',ready=true}={}){
     '@/lib/russia-map':{russiaView:()=>({camera:{center:region.center,zoom:1},padding:{}})},
     '@/lib/map-preload':{loadPublicBytes:(url,priority,signal)=>{const request={...deferred(),url,priority,signal};overlayRequests.push(request);return request.promise;},invalidatePublicMapResource:url=>invalidated.push(url)},
     '@/lib/route-source-integrity':{loadVerifiedRouteGeometry:(url,_sources,{signal})=>{const request={...deferred(),signal};requests.set(url,request);return request.promise;}},
+    '@/lib/published-route':{loadPublishedRouteGeometry},
     '@/lib/map-trail-overlay':{TrailOverlayLoader},'@/lib/trail-overlay.generated.json':{url:'/data/test-overlay.json',sourceHashes:{}},
     '@/lib/reviewed-coastal-routes':{verifyReviewedCoastalRoute},
     '@/lib/map-trail-points':{mapTrailPointEntries:()=>[]},'@/lib/route-geometry':{readRouteGeometry,routeGeometryPositions},
@@ -103,6 +106,19 @@ function atlasFixture({committedMode='detail',ready=true}={}){
   const select=(trail,visibleTrails=[])=>host.render({region,trail,visibleTrails,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
   return{host,requests,maps,notes,chosen,select,overlayRequests,invalidated};
 }
+
+test('a published list overview opens full original vertices and a stale revision cannot retain its line',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());
+  const route={id:'published',regionId:'region',title:'Published',description:'Source route',durationMin:180,difficulty:'easy',revisionId:'revision-1',geometryDetail:'overview',geometry:line(),verifiedAt:null,source:{url:'https://source.example/route',name:'Reviewed',retrievedAt:'2026-11-13T00:00:00Z'}};
+  const overview=publishedTrail(route),full={type:'LineString',coordinates:Array.from({length:1002},(_,i)=>[40.02+i*.00005,43.05+i*.00001])};
+  assert.equal(overview.geometry,undefined);
+  let stale=false,calls=0;
+  t.mock.method(globalThis,'fetch',async(url,init)=>{calls++;assert.equal(url,'/api/backend/routes/published');assert.equal(init.cache,'no-store');return Response.json({data:{...route,geometry:full,geometryDetail:'full',...(stale?{revisionId:'revision-2'}:{})}});});
+  env.select(overview);await env.host.settleUntil(()=>env.maps[0]?.route);
+  assert.deepEqual(env.maps[0].route.coordinates,full.coordinates);assert.equal(env.requests.size,0,'Private API geometry never enters the static public hash loader');
+  stale=true;env.select({...overview});await env.host.settle();await env.host.settle();
+  assert.equal(env.maps[0].route,undefined);assert.match(env.notes.at(-1),/Линия маршрута не загрузилась/);assert.equal(calls,2);
+});
 
 test('the same failed route retries without resetting a manually moved camera; reconnect also restores its geometry',async t=>{
   const env=atlasFixture();t.after(()=>env.host.unmount());const route={id:'retry',title:'Маршрут',geometryUrl:'/retry.geojson'};

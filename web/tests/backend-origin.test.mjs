@@ -12,6 +12,7 @@ const hooks = registerHooks({resolve(specifier, context, nextResolve) {
   if (specifier === '@/lib/backend-forwarding') return nextResolve(new URL('../lib/backend-forwarding.ts', import.meta.url).href, context);
   if (specifier === '@/lib/account-action') return nextResolve(new URL('../lib/account-action.ts', import.meta.url).href, context);
   if (specifier === '@/lib/service-readiness') return nextResolve(new URL('../lib/service-readiness.ts', import.meta.url).href, context);
+  if (specifier === '@/lib/api-transport') return nextResolve(new URL('../lib/api-transport.ts', import.meta.url).href, context);
   return nextResolve(specifier, context);
 }});
 const {GET, POST} = await import('../app/api/backend/[...path]/route.ts');

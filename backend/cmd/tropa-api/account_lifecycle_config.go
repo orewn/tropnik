@@ -22,6 +22,10 @@ func accountLifecycleConfig(getenv func(string) string) (*httpapi.AccountLifecyc
 	if !configured {
 		return nil, nil
 	}
+	mailKey, err := auth.ParseServerKey(getenv("TROPA_ACCOUNT_MAIL_KEY"))
+	if err != nil {
+		return nil, errors.New("TROPA_ACCOUNT_MAIL_KEY must contain exactly 64 hexadecimal characters")
+	}
 	port, err := strconv.Atoi(getenv("TROPA_SMTP_PORT"))
 	if err != nil {
 		return nil, errors.New("TROPA_SMTP_PORT must be a valid port")
@@ -34,5 +38,8 @@ func accountLifecycleConfig(getenv func(string) string) (*httpapi.AccountLifecyc
 	if _, err = auth.AccountActionURL(actionURL, "verify_email", strings.Repeat("A", 43)); err != nil {
 		return nil, err
 	}
-	return &httpapi.AccountLifecycleConfig{Mailer: mailer, ActionURL: actionURL}, nil
+	if _, err = auth.AccountMailMessageID("00000000-0000-4000-8000-000000000000", actionURL); err != nil {
+		return nil, err
+	}
+	return &httpapi.AccountLifecycleConfig{Mailer: mailer, ActionURL: actionURL, MailKey: mailKey}, nil
 }

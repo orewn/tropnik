@@ -16,6 +16,9 @@ REQUIRED_SOURCES = {
     "web/lib/custom-map-tiles.ts", "web/lib/custom-map-tiles.worker.ts",
     "web/public/maps/map-coverage-lod.js", "tools/android-build/custom-map-entry.ts",
     "tools/android-build/custom-map-android.ts", "tools/android-build/prepare-custom-map.mjs",
+    "tools/android-build/native-map-catalogue.ts", "tools/android-build/native-map-route.ts", "tools/android-build/native-map-mode.ts",
+    "web/lib/map-trail-overlay.ts", "web/lib/reviewed-coastal-routes.ts",
+    "web/lib/trail-overlay.generated.json", "android/app/src/main/assets/catalog-manifest.json",
     "web/package.json", "web/pnpm-lock.yaml",
     *{f"tools/android-build/fonts/manrope-{subset}-{weight}-normal.woff2" for subset in ("latin", "cyrillic") for weight in (400, 600)},
 }
@@ -77,7 +80,7 @@ def verify_custom_map(manifest_bytes: bytes, read_asset, *, actual_files=None, s
         data = read_asset(PREFIX + name)
         require(len(data) == record["sizeBytes"] and digest(data) == record["sha256"], f"Packaged map runtime differs: {name}")
         runtime[name] = data
-    require({"map-runtime.js", "map.css", "android-bootstrap.js", "index.html", "offline-manifest.json", "Manrope-OFL.txt"} <= runtime.keys(),
+    require({"map-runtime.js", "map.css", "android-bootstrap.js", "index.html", "offline-manifest.json", "catalogue.json", "Manrope-OFL.txt"} <= runtime.keys(),
             "Shared map bundle is incomplete")
     workers = [name for name in runtime if name.startswith("workers/") and name.endswith(".js")]
     require(any(name.startswith("workers/custom-map-tiles.worker-") for name in workers), "Own vector/DEM worker missing")
@@ -96,7 +99,26 @@ def verify_custom_map(manifest_bytes: bytes, read_asset, *, actual_files=None, s
                 "Unlisted or missing packaged custom-map runtime")
     aliases = manifest.get("resourceAliases")
     require(isinstance(aliases, list) and 500 <= len(aliases) <= 2048, "Native map resource registry missing")
-    urls = set()
+    catalogue = json.loads(read_asset("catalog-manifest.json"))
+    overlay = catalogue.get("trailOverlay", {})
+    require(overlay.get("path") == "maps/catalogue/trail-overlay.json"
+            and overlay.get("sourcePath") == "web/public" + overlay.get("url", ""), "Native map catalogue overview missing")
+    source_records, source_paths = {}, {}
+    for item in catalogue.get("files", []):
+        source = item.get("sourcePath", "")
+        require(re.fullmatch(r"web/public/data/(routes|imported)/[a-z0-9-]+\.geojson", source), "Invalid native trail source alias")
+        url = source.removeprefix("web/public")
+        source_paths.setdefault(url, item["path"])
+        entry = source_records.setdefault(url, {"url": url, "sha256": item["sha256"], "sizeBytes": item["bytes"], "ids": []})
+        require(entry["sha256"] == item["sha256"] and entry["sizeBytes"] == item["bytes"], "Conflicting native trail source")
+        entry["ids"].append(item["routeId"])
+    descriptor = json.loads(runtime["catalogue.json"])
+    require(descriptor == {"schemaVersion": 1,
+            "overlay": {"url": overlay.get("url"), "sha256": overlay.get("sha256"), "sizeBytes": overlay.get("bytes")},
+            "sources": [source_records[url] for url in sorted(source_records)],
+            "referenceRouteIds": catalogue.get("referenceRouteIds")}, "Shared loader catalogue differs from native cards")
+    urls, trail_urls = set(), set()
+    trail_overviews = 0
     vector = terrain = overview = coverage = 0
     for alias in aliases:
         record_ok(alias)
@@ -119,6 +141,13 @@ def verify_custom_map(manifest_bytes: bytes, read_asset, *, actual_files=None, s
         elif url.startswith("/maps/russia-relief/"):
             require(path == url[1:], "National overview alias moved")
             overview += 1
+        elif url == overlay.get("url"):
+            require(path == overlay["path"] and alias["sha256"] == overlay["sha256"] and alias["sizeBytes"] == overlay["bytes"], "Trail overview alias differs")
+            trail_overviews += 1
+        elif url in source_records:
+            require(path == source_paths[url] and alias["sha256"] == source_records[url]["sha256"]
+                    and alias["sizeBytes"] == source_records[url]["sizeBytes"], "Trail source alias differs")
+            trail_urls.add(url)
         else:
             raise ValueError("Unrecognized custom-map resource alias")
         data = read_asset(path)
@@ -126,6 +155,8 @@ def verify_custom_map(manifest_bytes: bytes, read_asset, *, actual_files=None, s
         urls.add(url)
     require(vector == 193 and terrain == 21 and overview == 341 and coverage > 500,
             "Shared renderer cannot access every verified native map source")
+    require(trail_overviews == 1 and trail_urls == set(source_records) and len(trail_urls) == overlay.get("sourceCount"),
+            "Shared renderer cannot access every native catalogue line")
     require(manifest.get("virtualResources") == [{"url": "/offline-map/manifest.json", "assetPath": "custom-map/offline-manifest.json"}],
             "Unknown dynamic map resource")
     offline = json.loads(runtime["offline-manifest.json"])
@@ -139,4 +170,5 @@ def verify_custom_map(manifest_bytes: bytes, read_asset, *, actual_files=None, s
             "mapRendererResourceAliasesVerified": len(aliases), "mapRendererSharedWithWeb": True,
             "mapRendererNativeSdkRequired": False, "mapRendererBridge": manifest["bridge"],
             "mapRendererCyrillicFontBundled": True,
-            "mapRendererOfflineVectorTiles": vector, "mapRendererOfflineDemTiles": terrain}
+            "mapRendererOfflineVectorTiles": vector, "mapRendererOfflineDemTiles": terrain,
+            "mapRendererCatalogueSourcesVerified": len(trail_urls), "mapRendererCatalogueOverviewVerified": True}

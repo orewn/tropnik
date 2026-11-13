@@ -42,6 +42,7 @@ internal const val CUSTOM_MAP_ORIGIN = "https://map.tropnik.invalid"
 private const val CUSTOM_MAP_DOCUMENT = "$CUSTOM_MAP_ORIGIN/custom-map/index.html"
 private const val MAX_MAP_RESOURCE_BYTES = 8 * 1024 * 1024
 private const val MAX_ROUTE_BYTES = 16 * 1024 * 1024
+private val CATALOGUE_TRAIL_ID = Regex("[a-z0-9-]{1,128}")
 
 /** Closed URL policy shared by the resource broker and focused JVM tests.
  * Remote requests never inherit a session, cookies, account or caller headers. */
@@ -66,7 +67,7 @@ private data class CurrentMapRoute(val url: String, val bytes: ByteArray)
 
 /** Each view owns its broker and bounded buffers. Every request is intercepted,
  * including failures; WebView itself is never allowed onto the network. */
-private class CustomMapResources(context: Context, private val networkFailure: () -> Unit) {
+private class CustomMapResources(context: Context, private val networkFailure: () -> Unit, private val localFailure: () -> Unit) {
     private val assets = context.applicationContext.assets
     private val manifest = JSONObject(assets.open("custom-map/manifest.json").bufferedReader().use { it.readText() })
     private val allowed = mutableMapOf<String, MapAsset>()
@@ -145,7 +146,7 @@ private class CustomMapResources(context: Context, private val networkFailure: (
                 val actual = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
                 check(actual == asset.sha256)
                 response(bytes, mime(asset.path))
-            }.getOrElse { denied() }
+            }.getOrElse { localFailure();denied() }
         }
         if (!network.isOnline || !CustomMapResourcePolicy.remoteAllowed(url.toString())) return denied()
         if (!runCatching {networkPermits.tryAcquire(1, TimeUnit.SECONDS)}.getOrDefault(false)) return denied()
@@ -186,10 +187,13 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
     var onReady: (() -> Unit)? = null
     var onCamera: ((JSONObject) -> Unit)? = null
     var onMarker: ((String) -> Unit)? = null
+    var onTrail: ((String) -> Unit)? = null
     var onFailure: ((String, Boolean) -> Unit)? = null
     var onOnlineFailure: (() -> Unit)? = null
     var onPosition: ((Boolean, Long?) -> Unit)? = null
     var onMapState: ((JSONObject) -> Unit)? = null
+    var onOverlayError: ((String) -> Unit)? = null
+    var onRasterError: ((String) -> Unit)? = null
     var ready = false;private set
     var debugSnapshot: JSONObject? = null;private set
     var debugFixtureState: JSONObject? = null;private set
@@ -212,6 +216,8 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
     private var onlineEnabled = false
     private val queued = linkedMapOf<String, JSONObject>()
     private var allowedMarkerIds = emptySet<String>()
+    private var allowedTrailIds = emptySet<String>()
+    private var selectedRouteId: String? = null
     private val brokerReference = AtomicReference<CustomMapResources?>()
     private val assetBroker get() = brokerReference.get()
     private val resourceLoader = Executors.newSingleThreadExecutor { task ->
@@ -273,7 +279,9 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
         // The manifest includes every map tile. Parse its registry off Main
         // before opening the document, so no request races an incomplete broker.
         resourceLoader.execute {
-            runCatching {CustomMapResources(context) { handler.post { if (!disposed) onOnlineFailure?.invoke() } }}
+            runCatching {CustomMapResources(context,
+                networkFailure = { handler.post { if (!disposed) onOnlineFailure?.invoke() } },
+                localFailure = { handler.post { if (!disposed) onFailure?.invoke("Сохранённый фрагмент карты не прочитан. Повторите загрузку.", false) } })}
                 .onSuccess { broker ->
                     brokerReference.set(broker)
                     if (disposed) brokerReference.getAndSet(null)?.close()
@@ -302,7 +310,10 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
             "frame" -> {frameReady = payload.optInt("frame") > 0 && payload.optInt("sourceTiles") > 0;checkReady()}
             "camera" -> onCamera?.invoke(payload)
             "marker" -> payload.optString("id").takeIf {it in allowedMarkerIds}?.let {onMarker?.invoke(it)}
+            "trail" -> payload.optString("id").takeIf {it in allowedTrailIds || it == selectedRouteId}?.let {onTrail?.invoke(it)}
             "state" -> onMapState?.invoke(payload)
+            "overlayError" -> onOverlayError?.invoke(payload.optString("message").take(240))
+            "rasterError" -> onRasterError?.invoke(payload.optString("message").take(240))
             "position" -> onPosition?.invoke(payload.optBoolean("inside"), if (payload.has("measuredAt")) payload.optLong("measuredAt") else null)
             "snapshot" -> if (BuildConfig.DEBUG) {
                 val requestId = payload.optLong("requestId")
@@ -370,10 +381,19 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
     }
 
     fun setRoute(id: String?, geometry: ByteArray?) {
+        selectedRouteId = id
         val version = ++routeVersion
         val url = geometry?.let {"$CUSTOM_MAP_ORIGIN/native-route/$generation-$version.geojson"}
         assetBroker?.setRoute(url, geometry)
         command("route", JSONObject().put("version", version).put("id", id).put("url", url))
+    }
+
+    fun setCatalogue(ids: List<String>) {
+        require(ids.size <= 100000 && ids.all { CATALOGUE_TRAIL_ID.matches(it) })
+        val allowed = ids.toSet()
+        require(allowed.size == ids.size)
+        allowedTrailIds = allowed
+        command("catalogue", JSONObject().put("ids", JSONArray(ids)))
     }
 
     fun setOnline(enabled: Boolean) {onlineEnabled = enabled;assetBroker?.setOnline(enabled);setNetworkAvailable(enabled);command("network", JSONObject().put("enabled", enabled))}
@@ -420,10 +440,10 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
     fun release() {
         if (disposed) return
         command("destroy");disposed = true;ready = false;handler.removeCallbacksAndMessages(null)
-        queued.clear();allowedMarkerIds = emptySet();port?.close();port = null
+        queued.clear();allowedMarkerIds = emptySet();allowedTrailIds = emptySet();selectedRouteId = null;port?.close();port = null
         resourceLoader.shutdownNow();brokerReference.getAndSet(null)?.close()
         stopLoading();onPause();(parent as? ViewGroup)?.removeView(this);removeAllViews();destroy()
-        onReady = null;onCamera = null;onMarker = null;onFailure = null;onOnlineFailure = null;onPosition = null;onMapState = null
+        onReady = null;onCamera = null;onMarker = null;onTrail = null;onFailure = null;onOnlineFailure = null;onPosition = null;onMapState = null;onOverlayError = null;onRasterError = null
     }
 
     companion object {private val serial = AtomicLong()}

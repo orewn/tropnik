@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit
 class ApiContractTest {
     private lateinit var server: MockWebServer
     private lateinit var api: ApiClient
+    private lateinit var client: OkHttpClient
     private val token = "t".repeat(43)
     private val conversation = Conversation(ConversationKind.DEPARTURE, "departure-123", "Fixture only")
 
@@ -25,12 +26,51 @@ class ApiContractTest {
         val serverTls = HandshakeCertificates.Builder().heldCertificate(certificate).build()
         val clientTls = HandshakeCertificates.Builder().addTrustedCertificate(certificate.certificate).build()
         server = MockWebServer().apply { useHttps(serverTls.sslSocketFactory(), false); start() }
-        val client = OkHttpClient.Builder().sslSocketFactory(clientTls.sslSocketFactory(), clientTls.trustManager)
+        client = OkHttpClient.Builder().sslSocketFactory(clientTls.sslSocketFactory(), clientTls.trustManager)
             .followRedirects(false).followSslRedirects(false).retryOnConnectionFailure(false).callTimeout(3, TimeUnit.SECONDS).build()
         api = ApiClient({ server.url("/api/v1").toString() }, { token }, client)
     }
 
     @After fun close() { server.shutdown() }
+
+    @Test fun changedEndpointCannotAttachTheNewServersBearerToAnOldRequest() = runBlocking {
+        val oldOrigin = server.url("/api/v1").toString().trimEnd('/')
+        val selectedOrigin = java.util.concurrent.atomic.AtomicReference(oldOrigin)
+        val newOrigin = "https://other.example.invalid"
+        val changing = ApiClient({ selectedOrigin.getAndSet(newOrigin) }, { requestedOrigin ->
+            token.takeIf { requestedOrigin == selectedOrigin.get() }
+        }, client)
+        val failure = try { changing.me(); null } catch (error: ApiFailure) { error }
+        assertEquals(401, failure?.status)
+        assertNull("No private request may leave with a mismatched origin", server.takeRequest(100, TimeUnit.MILLISECONDS))
+    }
+
+    @Test fun logoutRevokesOnlyTheCapturedOldIdentityAfterALocalServerChange() = runBlocking {
+        val oldOrigin = server.url("/api/v1").toString().trimEnd('/')
+        val account = Account.parse(JSONObject("""{"id":"fixture-user","displayName":"Fixture","email":"fixture@example.invalid","role":"tourist","guideStatus":"none","emailVerified":true}"""))
+        val session = AccountSession(oldOrigin, token, "2099-01-01T00:00:00Z", account)
+        val changed = ApiClient({ "https://new.example.invalid" }, { error("Cleared vault must not supply a bearer") }, client)
+        server.enqueue(MockResponse().setResponseCode(204))
+        changed.logout(session)
+        val request = server.takeRequest(3, TimeUnit.SECONDS)!!
+        assertEquals("/api/v1/auth/logout", request.path)
+        assertEquals("Bearer $token", request.getHeader("Authorization"))
+    }
+
+    @Test fun loginResponseRetainsTheOriginThatActuallyReceivedTheCredentials() = runBlocking {
+        val oldOrigin = server.url("/api/v1").toString().trimEnd('/')
+        val selectedOrigin = java.util.concurrent.atomic.AtomicReference(oldOrigin)
+        server.dispatcher = object : okhttp3.mockwebserver.Dispatcher() {
+            override fun dispatch(request: okhttp3.mockwebserver.RecordedRequest): MockResponse {
+                selectedOrigin.set("https://new.example.invalid")
+                return MockResponse().setBody("""{"data":{"token":"$token","expiresAt":"2099-01-01T00:00:00Z","user":{"id":"fixture-user","displayName":"Fixture","email":"fixture@example.invalid","role":"tourist","guideStatus":"none","emailVerified":true}}}""")
+            }
+        }
+        val changing = ApiClient({ selectedOrigin.get() }, { null }, client)
+        val session = changing.authenticate("fixture@example.invalid", "local-fixture-password")
+        assertEquals(oldOrigin, session.origin)
+        assertNull(server.takeRequest(3, TimeUnit.SECONDS)!!.getHeader("Authorization"))
+    }
 
     @Test fun readyHealthConfirmsApiAndDatabaseWithoutSendingSessionToken() = runBlocking {
         server.enqueue(MockResponse().setHeader("Content-Type", "application/json")

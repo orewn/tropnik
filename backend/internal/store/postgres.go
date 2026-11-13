@@ -12,13 +12,15 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"tropa/backend/internal/auth"
 	"tropa/backend/internal/domain"
 	"tropa/backend/migrations"
 )
 
 type Store struct {
-	Pool      *pgxpool.Pool
-	SafetyKey []byte
+	Pool       *pgxpool.Pool
+	SafetyKey  []byte
+	mailCipher *auth.AccountMailCipher
 }
 type querier interface {
 	QueryRow(context.Context, string, ...any) pgx.Row
@@ -49,7 +51,12 @@ func New(ctx context.Context, uri string) (*Store, error) {
 		p.Close()
 		return nil, e
 	}
-	return &Store{Pool: p, SafetyKey: key}, nil
+	mailCipher, e := loadAccountMailCipher()
+	if e != nil {
+		p.Close()
+		return nil, e
+	}
+	return &Store{Pool: p, SafetyKey: key, mailCipher: mailCipher}, nil
 }
 func (s *Store) Close() { s.Pool.Close() }
 func (s *Store) Ready(ctx context.Context) error {
@@ -224,12 +231,13 @@ func (s *Store) Route(ctx context.Context, id string) (domain.Route, error) {
 }
 
 const eligibleSQL = `u.guide_status='verified' AND NOT u.disabled AND EXISTS(SELECT 1 FROM guide_qualifications q WHERE q.user_id=u.id AND q.revoked_at IS NULL AND q.activity=r.activity AND q.valid_until>=d.ends_at AND q.max_difficulty>=CASE rr.difficulty WHEN 'easy' THEN 1 WHEN 'moderate' THEN 2 WHEN 'hard' THEN 3 ELSE 4 END)`
-const departureSQL = `SELECT d.id::text,d.route_id::text,d.route_revision_id::text,r.title,d.guide_id::text,u.display_name,d.starts_at,d.ends_at,d.time_zone,d.min_people,d.capacity,d.status,d.version,d.created_at,d.created_by::text,
+const departureColumns = `d.id::text,d.route_id::text,d.route_revision_id::text,r.title,d.guide_id::text,u.display_name,d.starts_at,d.ends_at,d.time_zone,d.min_people,d.capacity,d.status,d.version,d.created_at,d.created_by::text,
 (r.status='published' AND r.current_revision_id=d.route_revision_id AND rr.reviewed_at IS NOT NULL AND rr.required_guides=1),COALESCE((` + eligibleSQL + `),false),
 COALESCE(ds.status,rr.mchs_notification_policy),COALESCE(ds.passport_version,0),COALESCE(ds.notification_policy,rr.mchs_notification_policy),ds.submission_id,(ds.confirmed_at IS NOT NULL),
 COALESCE(ds.start_contact_confirmed_at IS NOT NULL AND (d.status IN ('in_progress','completed','aborted') OR (` + currentSafetyStartContactSQL + `)),false),
-(ds.return_reported_at IS NOT NULL),COALESCE(ds.status IN ('closed','cancelled'),false)
-FROM departures d JOIN routes r ON r.id=d.route_id JOIN route_revisions rr ON rr.id=d.route_revision_id LEFT JOIN users u ON u.id=d.guide_id LEFT JOIN departure_safety ds ON ds.departure_id=d.id `
+(ds.return_reported_at IS NOT NULL),COALESCE(ds.status IN ('closed','cancelled'),false)`
+const departureRelations = ` FROM departures d JOIN routes r ON r.id=d.route_id JOIN route_revisions rr ON rr.id=d.route_revision_id LEFT JOIN users u ON u.id=d.guide_id LEFT JOIN departure_safety ds ON ds.departure_id=d.id `
+const departureSQL = `SELECT ` + departureColumns + departureRelations
 
 func readGroup(ctx context.Context, q querier, id string, locked bool) (g domain.Group, e error) {
 	query := departureSQL + "WHERE d.id::text=$1"
@@ -307,36 +315,6 @@ func (s *Store) Departure(ctx context.Context, id, user string) (domain.Departur
 	}
 	return out, nil
 }
-func (s *Store) Departures(ctx context.Context, route, user string) ([]domain.Departure, error) {
-	rows, e := s.Pool.Query(ctx, `SELECT d.id::text FROM departures d JOIN routes r ON r.id=d.route_id WHERE ($1='' OR r.id::text=$1 OR r.slug=$1) AND d.ends_at>now() AND d.status IN ('recruiting','ready','awaiting_guide','in_progress') ORDER BY d.starts_at LIMIT 100`, route)
-	if e != nil {
-		return nil, e
-	}
-	ids := []string{}
-	for rows.Next() {
-		var id string
-		if e = rows.Scan(&id); e != nil {
-			rows.Close()
-			return nil, e
-		}
-		ids = append(ids, id)
-	}
-	e = rows.Err()
-	rows.Close()
-	if e != nil {
-		return nil, e
-	}
-	out := []domain.Departure{}
-	for _, id := range ids {
-		x, e := s.Departure(ctx, id, user)
-		if e != nil {
-			return nil, e
-		}
-		out = append(out, x)
-	}
-	return out, nil
-}
-
 func saveGroup(ctx context.Context, tx pgx.Tx, g domain.Group, actor, action string) error {
 	_, e := tx.Exec(ctx, "UPDATE departures SET guide_id=$2,status=$3,version=$4,completed_at=CASE WHEN $3='completed' THEN COALESCE(completed_at,now()) ELSE completed_at END WHERE id=$1", g.ID, g.GuideID, g.Status, g.Version)
 	if e != nil {
