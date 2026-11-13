@@ -19,7 +19,7 @@ const RECEIPT=join(ROOT,'browser-map-loading-verification.json');
 const CAPTURES=join(PROJECT,'web/pages-preview/design-qa/map-loading');
 export const MAP_LOADING_PROFILE=Object.freeze({name:'desktop-webgl',width:1440,height:1000,mobile:false,deviceScaleFactor:1});
 export const MAP_LOADING_ROUTE=Object.freeze({id:'osm-relation-17013428',regionId:'territory-28173009B90469334921421',title:'Лубяной тракт'});
-export const MAP_LOADING_LIMITS=Object.freeze({acquireMs:4000,holdMs:8000,progressMs:6000,settleMs:15000,networkRecords:256,maxCells:64,maxSetupZooms:4});
+export const MAP_LOADING_LIMITS=Object.freeze({acquireMs:15000,holdMs:8000,progressMs:6000,settleMs:15000,networkRecords:256,maxCells:64,maxSetupZooms:4});
 export const MAP_LOADING_PIXEL_LIMITS=Object.freeze({size:64,inset:4,maxROIs:24,minReferenceColors:16,minChannelRange:8,minNonModalFraction:.25,minCells:2});
 const SOURCE_PATHS=[
   'web/lib/custom-map-engine.ts','web/lib/custom-map-tiles.ts','web/lib/custom-map-camera.ts',

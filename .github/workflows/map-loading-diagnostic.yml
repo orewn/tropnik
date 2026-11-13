@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-          fetch-depth: 2
+          fetch-depth: 3
       - name: Require unchanged production baseline
         run: git diff --exit-code 5fefc0da294400bf36110c9ee8130e68e7425071 HEAD -- web android contracts data
       - name: Set up Node.js
