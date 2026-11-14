@@ -181,7 +181,7 @@ func (m *SMTPMailer) Send(ctx context.Context, message AccountMail) error {
 		encoded = encoded[76:]
 	}
 	body.WriteString(encoded + "\r\n")
-	header := fmt.Sprintf("From: Tropnik <%s>\r\nTo: <%s>\r\nSubject: %s\r\nMessage-ID: %s\r\nDate: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n", m.cfg.From, message.To, mime.BEncoding.Encode("UTF-8", message.Subject), message.MessageID, time.Now().UTC().Format(time.RFC1123Z))
+	header := fmt.Sprintf("From: Tropinych <%s>\r\nTo: <%s>\r\nSubject: %s\r\nMessage-ID: %s\r\nDate: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n", m.cfg.From, message.To, mime.BEncoding.Encode("UTF-8", message.Subject), message.MessageID, time.Now().UTC().Format(time.RFC1123Z))
 	if _, err = writer.Write([]byte(header + body.String())); err != nil {
 		return errors.New("SMTP write failed")
 	}

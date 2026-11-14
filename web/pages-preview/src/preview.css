@@ -5,3 +5,18 @@
 .pages-preview-boot h1{font-size:30px;line-height:36px;font-weight:600;text-wrap:balance}.pages-preview-boot p{max-width:640px;text-wrap:pretty}
 .pages-preview-boot a{text-decoration:underline;text-underline-offset:4px}
 @media(max-width:700px){.pages-preview-banner{display:grid;grid-template-columns:1fr auto;gap:0 12px;text-align:left;padding:4px 16px}.pages-preview-desktop{display:none}.pages-preview-mobile{display:inline}.pages-preview-banner>strong{grid-column:1;grid-row:1}.pages-preview-banner>a{grid-column:2;grid-row:1}.pages-preview-mobile-note{grid-column:1/-1;grid-row:2}}
+
+.pages-preview-load-notice{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:16px;padding:16px;background:var(--surface);color:var(--ink);border:1px solid var(--line);font:var(--body-3)}
+.pages-preview-load-notice p{max-width:680px;text-wrap:pretty}
+.pages-preview-noscript{max-width:980px;margin:0 auto;padding:24px;font:var(--body-3);color:var(--muted)}
+
+.pages-static-header{height:var(--header,72px);display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 32px;background:var(--surface);border-bottom:1px solid var(--line)}
+.pages-static-header .brand img{flex:none;display:block}
+.pages-static-map{display:grid;place-content:center;text-align:center;background:var(--paper);color:var(--forest)}
+.pages-static-map>div{position:relative;z-index:2;padding:24px}
+.pages-static-map p{margin:0 0 24px;font-size:20px;line-height:28px;font-weight:500}
+.pages-static-panel .text-link{display:inline-flex;margin-top:24px}
+.pages-static-panel .sheet-handle{cursor:default;touch-action:pan-y}
+.pages-static-panel .sheet-peek-summary{cursor:pointer;touch-action:manipulation}
+.pages-static-root .seo-article h1{font-size:36px;line-height:40px;font-weight:600;text-wrap:balance;margin-bottom:24px}
+@media(max-width:700px){.pages-static-header{padding:0 16px;gap:8px}.pages-static-header .brand img{width:32px;height:32px}.pages-static-header>a:last-child{font-size:12px;line-height:16px;padding:8px}.pages-static-root .seo-article h1{font-size:30px;line-height:36px}}

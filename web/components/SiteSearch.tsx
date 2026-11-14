@@ -86,7 +86,7 @@ export function SiteSearch({initialState}: {initialState: SearchViewState}) {
   const pageHref = (value: number) => searchStateQuery({...state, page: value}) || '?';
 
   return <main id="main" className={styles.page}>
-    <div className={styles.intro}><div className={styles.introMark} aria-hidden="true"><MagnifyingGlass size={32}/></div><div><h1 className="heading-3">Поиск по Тропнику</h1><p className="body-3">Маршруты, места и полезные страницы. Начните с названия или опишите, куда хочется отправиться.</p></div></div>
+    <div className={styles.intro}><div className={styles.introMark} aria-hidden="true"><MagnifyingGlass size={32}/></div><div><h1 className="heading-3">Поиск по Тропинычу</h1><p className="body-3">Маршруты, места и полезные страницы. Начните с названия или опишите, куда хочется отправиться.</p></div></div>
     <form className={styles.form} onSubmit={submit} role="search" aria-label="Поиск по сайту">
       <label className="sr-only" htmlFor="search-query">Маршрут, место или вопрос</label>
       <div className={styles.field}><MagnifyingGlass size={22} aria-hidden="true"/><input id="search-query" ref={input} data-site-search-input type="search" name="q" maxLength={160} autoComplete="off" enterKeyHint="search" placeholder="Например, Байкал до 15 км" value={query} onChange={event => changeQuery(event.target.value)} aria-controls="site-search-results"/>{query && <button className={styles.clear} type="button" aria-label="Очистить поиск" onClick={() => {changeQuery(''); input.current?.focus();}}><X size={20}/></button>}</div>

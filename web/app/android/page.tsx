@@ -4,15 +4,15 @@ import {Header} from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import {Mountains, ArrowDown, MapTrifold, ShieldCheck} from '@/components/TropnikIcons';
 
-export const metadata: Metadata = {title: 'Тропник для Android', description: 'Карта и сохранённые маршруты на телефоне — даже без интернета.'};
+export const metadata: Metadata = {title: 'Тропиныч для Android', description: 'Карта и сохранённые маршруты на телефоне — даже без интернета.'};
 export default function Android() {
   return <><Header active=""/><main id="main">
-    <section className="page-hero"><span className="eyebrow">Тропник с собой</span><h1>Связь закончилась.<br/>Карта осталась.</h1><p>Сохраните маршруты на телефоне и возвращайтесь к ним без интернета. Подробная карта Бзерпинского карниза уже внутри приложения.</p></section>
+    <section className="page-hero"><span className="eyebrow">Тропиныч с собой</span><h1>Связь закончилась.<br/>Карта осталась.</h1><p>Сохраните маршруты на телефоне и возвращайтесь к ним без интернета. Подробная карта Бзерпинского карниза уже внутри приложения.</p></section>
     <div className="page-content"><div className="app-callout"><div><h2>Подготовьте карту<br/>до выхода.</h2><p>Тропы, подписи и рельеф помогают изучить местность. Граница на карте показывает, какой район доступен без сети.</p>
       <a className="button" href={androidBuild.architecture === 'universal'
         ? `/downloads/tropnik-preview.apk?sha256=${androidBuild.sha256}`
         : `/downloads/tropnik-arm64-preview.apk?sha256=${androidBuild.sha256}`} download><ArrowDown size={18}/>Скачать для Android · {new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 1}).format(androidBuild.bytes / 1024 ** 2)} МБ</a>
-      {androidBuild.compatibleWithPreviousPreview === false && <div className="inline-note" role="note" style={{marginTop: 12}}>Этот файл не подходит для обновления ранее установленного Тропника. Не удаляйте прежнее приложение, если в нём есть нужные данные.</div>}
+      {androidBuild.compatibleWithPreviousPreview === false && <div className="inline-note" role="note" style={{marginTop: 12}}>Этот файл не подходит для обновления ранее установленного Тропиныча. Не удаляйте прежнее приложение, если в нём есть нужные данные.</div>}
       <p className="fineprint" style={{marginTop: 12}}>Версия {androidBuild.version}. {androidBuild.architecture === 'universal'
         ? 'Предварительный выпуск для устройств с процессорами ARM64, ARM 32 бит или x86_64 и Android 8.0 или новее.'
         : 'Предварительный выпуск для телефонов с процессором ARM64 и Android 8.0 или новее.'} После установки откройте карту и убедитесь, что нужный участок доступен без интернета.</p>

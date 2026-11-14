@@ -28,8 +28,9 @@ test('the rendered real Footer keeps its map and section links inside each Pages
   const require = createRequire(new URL('../../../web/package.json', import.meta.url));
   const {createElement} = require('react');
   const {renderToStaticMarkup} = require('react-dom/server');
-  const sources = Object.fromEntries(await Promise.all(['Footer', 'Brand'].map(async name =>
-    [name, await readFile(new URL(`../../../web/components/${name}.tsx`, import.meta.url), 'utf8')])));
+  const sourcePaths = {Footer:'components/Footer.tsx', Brand:'components/Brand.tsx', BrandMark:'components/BrandMark.tsx', brand:'lib/brand.ts'};
+  const sources = Object.fromEntries(await Promise.all(Object.entries(sourcePaths).map(async ([name, path]) =>
+    [name, await readFile(new URL(`../../../web/${path}`, import.meta.url), 'utf8')])));
   for (const base of ['/tropnik/', '/another-project/']) {
     const modules = new Map();
     function load(name) {
@@ -42,6 +43,8 @@ test('the rendered real Footer keeps its map and section links inside each Pages
       const exports = {};
       new Function('require', 'exports', compiled)(specifier => {
         if (specifier === './Brand') return load('Brand');
+        if (specifier === './BrandMark') return load('BrandMark');
+        if (specifier === '@/lib/brand') return load('brand');
         if (specifier === './TropnikIcons') return {DownloadSimple: () => null, ShieldCheck: () => null};
         if (specifier === './Footer.module.css') return {__esModule: true, default: {}};
         return require(specifier);
@@ -114,7 +117,7 @@ test('the rendered Android page selects the advertised file and compatibility fr
     if (delivery === 'github-release') assert.equal(href, publicApkUrl(manifest));
     assert.equal(html.includes('ARM 32 бит или x86_64'), manifest.architecture === 'universal');
     assert.match(html, /Android 8\.0 или новее/);
-    assert.match(html, /Этот файл не подходит для обновления ранее установленного Тропника/);
+    assert.match(html, /Этот файл не подходит для обновления ранее установленного Тропиныча/);
   }
 });
 

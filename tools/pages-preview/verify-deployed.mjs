@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {assertPageSeo, assertSitemap} from './seo-verification.mjs';
 import {createHash} from 'node:crypto';
 import {setTimeout as delay} from 'node:timers/promises';
 import {validateApkDelivery, validateApkManifest, verifyPublicApk} from './apk-artifact.mjs';
@@ -36,7 +37,7 @@ async function request(path, limit = 4 * 1024 * 1024, binary = false) {
   }
   assert.ok(bytes > 0, `${url.pathname} returned an empty body`);
   checks++;
-  return {bytes, sha256: hash.digest('hex'), text: binary ? null : Buffer.concat(chunks).toString('utf8')};
+  return {bytes, robots:response.headers.get('x-robots-tag') || '', sha256: hash.digest('hex'), text: binary ? null : Buffer.concat(chunks).toString('utf8')};
 }
 
 // Pages can briefly serve the preceding CDN revision after a completed deploy.
@@ -82,16 +83,20 @@ for (const [path, hash] of Object.entries(mapLoading.sources)) {
   assert.equal(hash, build.inputs.find(input => input.path === path)?.sha256, 'The public map loading proof belongs to another source input');
 }
 
-const home = (await request('')).text;
-assert.match(home, /Тропник/);
-assert.match(home, /noindex,nofollow/);
+const homeResponse = await request('');
+const home = homeResponse.text;
+assertPageSeo(home, pages.find(page => page.path === '/'), build);
+assert.ok(!/noindex/i.test(homeResponse.robots), 'The live response must not override the public indexing policy');
+assertSitemap((await request('sitemap.xml')).text, pages, build);
 const assets = new Set([...home.matchAll(/(?:src|href)=["'](\/tropnik\/assets\/[^"']+)["']/g)].map(match => match[1]));
 assert.ok(assets.size >= 2, 'The homepage must reference its built script and style assets');
 for (const path of assets) await request(path);
-for (const kind of ['region', 'route', 'android', 'offline', 'sources']) {
+for (const kind of ['routes', 'region', 'route', 'android', 'offline', 'sources']) {
   const page = pages.find(item => item.kind === kind);
   assert.ok(page, `No page of kind ${kind}`);
-  assert.match((await request(page.path.slice(1) + '/')).text, /noindex,nofollow/);
+  const response = await request(page.path.slice(1) + '/');
+  assertPageSeo(response.text, page, build);
+  if (page.seo.indexable) assert.ok(!/noindex/i.test(response.robots));
 }
 await request('offline-viewer.html');
 for (const asset of ['offline-safety.html','offline-safety.js','offline-safety.css']) await request(asset);

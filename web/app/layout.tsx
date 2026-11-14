@@ -9,6 +9,7 @@ import "./event-categories.css";
 import "./map-polish.css";
 import "./interface-refresh.css";
 import "./map-ui-release.css";
+import "./seo-content.css";
 import "./final-polish.css";
 import "./map-sheet.css";
 import "./map-detail.css";
@@ -23,18 +24,26 @@ import '@fontsource/manrope/latin-500.css';
 import '@fontsource/manrope/latin-600.css';
 import '@fontsource/manrope/latin-700.css';
 import {ServiceWorker} from '@/components/ServiceWorker';
-import {getOrigin,isPublicIndexingEnabled} from '@/lib/content';
+import {getOrigin} from '@/lib/content';
+import {BRAND} from '@/lib/brand';
+import {homeSeo} from '@/lib/seo';
+import {getSeoContext} from '@/lib/seo-metadata';
+
+const home = homeSeo(getSeoContext());
 
 export const metadata: Metadata = {
-  title: {default:'Тропник — маршруты и походы с гидом по России',template:'%s · Тропник'},
-  description: 'Изучайте тропы России, проверяйте условия маршрута и готовьтесь к походу с гидом. Карта, справочные маршруты и сохранение данных офлайн.',
+  title: {default: home.title, template: `%s · ${BRAND.name}`},
+  description: home.description,
   metadataBase: new URL(getOrigin()),
-  robots: {index:isPublicIndexingEnabled(),follow:true},
+  // Public catalogue pages opt in through their shared SEO model.
+  robots: {index:false,follow:true},
   manifest:'/manifest.webmanifest',
-  openGraph:{type:'website',locale:'ru_RU',siteName:'Тропник',title:'Тропник — найдите свой следующий маршрут',description:'Маршруты по России. Походы с гидом. Люди, которым по пути.',images:[{url:'/og-cover.png',width:1200,height:630}]},
+  openGraph:{type:'website',locale:'ru_RU',siteName:BRAND.name,title:home.title,description:home.description,images:[{url:home.image,width:1200,height:630,alt:BRAND.name}]},
+  twitter:{card:'summary_large_image',title:home.title,description:home.description,images:[home.image]},
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
+    apple: "/icon-192.png",
   },
 };
 

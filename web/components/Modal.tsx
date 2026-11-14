@@ -2,7 +2,9 @@
 
 import {useEffect, useId, useRef, useSyncExternalStore} from 'react';
 import {createPortal} from 'react-dom';
-import {X, Mountains} from '@/components/TropnikIcons';
+import {X} from '@/components/TropnikIcons';
+import {BRAND} from '@/lib/brand';
+import {BrandMark} from './BrandMark';
 
 const subscribe = () => () => {};
 const clientSnapshot = () => true;
@@ -84,7 +86,7 @@ export function Modal({title, onClose, children, wide = false}: {title: string; 
   if (!mounted) return null;
   return createPortal(<div ref={backdrop} className="modal-backdrop" onClick={event => {if (event.target === event.currentTarget) onClose();}}>
     <div ref={ref} className={`modal ${wide ? 'modal-wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
-      <div className="modal-brandline"><Mountains size={24}/><span>Тропник</span></div>
+      <div className="modal-brandline"><BrandMark size={24}/><span>{BRAND.name}</span></div>
       <div className="modal-heading"><h2 id={titleId}>{title}</h2><button type="button" className="icon-button" aria-label="Закрыть" onClick={onClose}><X size={22}/></button></div>
       {children}
     </div>

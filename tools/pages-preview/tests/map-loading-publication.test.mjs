@@ -13,7 +13,7 @@ const section=(source,startText,endText)=>{
  assert.ok(start>=0&&end>start,'Execute the actual map-loading publication checks');return source.slice(start,end);
 };
 const metadataSource=section(workflow,'          const mapLoading =','          const trailOverlay =').replace(/^ {10}/gm,'');
-const publicSource=section(deployed,'const mapLoading =','\nconst home =');
+const publicSource=section(deployed,'const mapLoading =','\nconst homeResponse =');
 const metadata=compileFunction(metadataSource+'\nreturn mapLoading;', ['assert','createHash','readFileSync','process','build','browser','assertMapLoadingReceipt']);
 const published=compileFunction('return(async()=>{'+publicSource+'\nreturn mapLoading;})();', ['assert','request','expectedCommit','expectedBuild','build','browser','assertMapLoadingReceipt']);
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');

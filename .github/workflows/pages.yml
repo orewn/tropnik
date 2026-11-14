@@ -85,7 +85,7 @@ jobs:
           test "$PAGES_CONFIG_ORIGIN" = 'https://orewn.github.io'
           test "$PAGES_CONFIG_BASE" = '/tropnik'
       - name: Build and verify the static site
-        run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io
+        run: node tools/pages-preview/build.mjs --base /tropnik/ --origin https://orewn.github.io --indexing public
       - name: Check cold offline emergency access before the full browser audit
         timeout-minutes: 3
         env:

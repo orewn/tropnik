@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {assertPageSeo, assertSitemap} from './seo-verification.mjs';
 import {readFile, readdir, access, writeFile} from 'node:fs/promises';
 import {dirname, join, resolve} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -79,7 +80,8 @@ let routingChecks = 0;
 for (const page of pages) {
   const url = page.path === '/' ? base : base + page.path.slice(1);
   for (const pathname of [url, url.endsWith('/') ? url + 'index.html' : url + '/', url.endsWith('/') ? url : url + '/index.html']) {
-    assert.deepEqual(resolvePage(pathname), page, `Production routing mismatch for ${pathname}`);
+    const {path, title, kind, id} = page;
+    assert.deepEqual(resolvePage(pathname), {path, title, kind, ...(id ? {id} : {})}, `Production routing mismatch for ${pathname}`);
     routingChecks++;
   }
 }
@@ -125,7 +127,7 @@ for (const page of pages) {
   const name = page.path === '/' ? 'index.html' : page.path.slice(1) + '/index.html';
   const html = await readFile(join(out, name), 'utf8');
   assert.ok(!/<title>[^<]*(?:· тест|\bpreview\b)/i.test(html), `${name} must use a public-facing page title`);
-  assert.ok(html.includes('noindex,nofollow'), `${name} must be noindex`);
+  assertPageSeo(html, page, report);
   assert.ok(html.includes(`${base}assets/`), `${name} bundle path must have base`);
   for (const match of html.matchAll(/(?:href|src)=["'](\/[^"']*)["']/g)) assert.ok(match[1].startsWith(base), `${name}: root URL ${match[1]}`);
 }
@@ -296,9 +298,11 @@ for (const value of deployedUrls) {
   const present = await exists(join(out, relativePath));
   assert.ok(present, `Missing referenced public asset: ${value}`); publicAssetChecks++;
 }
-for (const path of outputFiles.filter(path => path.endsWith('.html'))) {
-  assert.match(await readFile(path, 'utf8'), /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i, `HTML must be noindex: ${path}`);
+const seoFiles = new Set(pages.map(page => join(out, page.path === '/' ? 'index.html' : page.path.slice(1) + '/index.html')));
+for (const path of outputFiles.filter(path => path.endsWith('.html') && !seoFiles.has(path))) {
+  assert.match(await readFile(path, 'utf8'), /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i, `Utility HTML must remain noindex: ${path}`);
 }
-const verification = {verified:true, pages:pages.length, referenceRoutes:report.referenceRoutes, productionRoutingChecks:routingChecks + 5, mapPolicyChecks, staticApiNetworkCalls:attemptedNetwork, checkedScripts, publicAssetChecks, outputFiles:outputFiles.length, offlineFilesVerified:verified, customMap:{runtime:customMap.runtime,sourceInputsSha256:customMap.sourceInputsSha256,manifestSha256:customMap.manifestSha256,deployedFilesVerified:deployedCustomMapFiles.length,workerCount:customMap.workerCount}, overviewReliefTilesVerified:relief.files.length, terrainGrid:[terrain.width, terrain.height], regionalTerrain:{regions:regions.length,filesVerified:regionalFiles.length,runtimeFetches:regionalFetches}, apkVerified:report.hasApk, coverageExcludedRoutes:coverage.excludedCatalogRouteIds, base};
+const sitemapPages = assertSitemap(await readFile(join(out, 'sitemap.xml'), 'utf8'), pages, report);
+const verification = {verified:true, seo:{verified:true,sitemapPages,indexingEnabled:report.indexing.enabled}, pages:pages.length, referenceRoutes:report.referenceRoutes, productionRoutingChecks:routingChecks + 5, mapPolicyChecks, staticApiNetworkCalls:attemptedNetwork, checkedScripts, publicAssetChecks, outputFiles:outputFiles.length, offlineFilesVerified:verified, customMap:{runtime:customMap.runtime,sourceInputsSha256:customMap.sourceInputsSha256,manifestSha256:customMap.manifestSha256,deployedFilesVerified:deployedCustomMapFiles.length,workerCount:customMap.workerCount}, overviewReliefTilesVerified:relief.files.length, terrainGrid:[terrain.width, terrain.height], regionalTerrain:{regions:regions.length,filesVerified:regionalFiles.length,runtimeFetches:regionalFetches}, apkVerified:report.hasApk, coverageExcludedRoutes:coverage.excludedCatalogRouteIds, base};
 await writeFile(join(out, 'verification.json'), JSON.stringify(verification, null, 2) + '\n');
 console.log(JSON.stringify(verification, null, 2));

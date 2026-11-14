@@ -226,7 +226,7 @@ def make_snapshot(root: Path, output: Path, records: list[dict[str, object]], pr
     stage.mkdir(parents=True)
     inventory = {
         "schemaVersion": 1,
-        "project": "Тропник",
+        "project": "Тропиныч",
         "profile": profile,
         "createdAt": datetime.now(timezone.utc).isoformat(),
         "fileCount": len(records),

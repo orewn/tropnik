@@ -34,8 +34,8 @@
     },
     {
       "path": "tools/android-build/custom-map.html",
-      "sizeBytes": 952,
-      "sha256": "a1bae92f19506b4deecafef29b945ba2f5fca19baa9ff1daa3fca77eba12a78a"
+      "sizeBytes": 954,
+      "sha256": "98a64e2d8bae6ca92efc032ccd594f4d04d5c1ea50a04cbf32f3d2760e32d4a2"
     },
     {
       "path": "tools/android-build/fonts/OFL.txt",
@@ -318,7 +318,7 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "0025075e39c7cf8a2233867d940066aa635770139b9b6e0f02ae29ffaf5e7642",
+  "sourceInputsSha256": "ad7a5a179a2d79c7b203768749915d894f91182c53361bdd62e66d7fe96e5ab0",
   "files": [
     {
       "path": "android-bootstrap.js",
@@ -337,8 +337,8 @@
     },
     {
       "path": "index.html",
-      "sizeBytes": 952,
-      "sha256": "a1bae92f19506b4deecafef29b945ba2f5fca19baa9ff1daa3fca77eba12a78a"
+      "sizeBytes": 954,
+      "sha256": "98a64e2d8bae6ca92efc032ccd594f4d04d5c1ea50a04cbf32f3d2760e32d4a2"
     },
     {
       "path": "Manrope-OFL.txt",

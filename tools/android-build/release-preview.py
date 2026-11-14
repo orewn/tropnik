@@ -191,7 +191,7 @@ def prepare(root: Path, directory: Path, device_directory: Path, output: Path):
     (output / "release-body.md").write_text(body)
     publication = {"schemaVersion": 1, "requestId": request["requestId"], "sourceCommit": build["sourceCommit"], "workflowRunId": build["workflowRunId"],
                    "tag": "v" + build["version"], "version": build["version"],
-                   "name": "Тропник " + build["version"] + " — Android и веб-конструктор",
+                   "name": "Тропиныч " + build["version"] + " — Android и веб-конструктор",
                    "bodySha256": fingerprint(output / "release-body.md")["sha256"],
                    "assets": [{"name": name, **release_asset_fingerprint(output / name, build["version"])} for name in asset_names]}
     (output / "release-upload.json").write_text(json.dumps(publication, ensure_ascii=False, indent=2) + "\n")

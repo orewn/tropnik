@@ -138,7 +138,7 @@ export function ServiceWorker() {
   }
 
   if (!updateReady) return null;
-  return <div className="app-update" role="region" aria-label="Обновление Тропника">
+  return <div className="app-update" role="region" aria-label="Обновление Тропиныча">
     <span role="status" aria-live="polite"><strong>{updateState === 'error' ? 'Не удалось обновить страницу.' : updateState === 'updating' ? 'Подготавливаем свежую версию.' : 'Доступна свежая версия.'}</strong>{' '}{updateState === 'error' ? 'Обновление пока не завершилось. Проверьте подключение и повторите попытку.' : updateState === 'updating' ? 'Страница откроется заново, когда обновление будет готово.' : 'Обновите страницу, когда будете готовы получить последние исправления.'}</span>
     <div><button type="button" className="button primary small" disabled={updateState === 'updating'} onClick={activateUpdate}>{updateState === 'updating' ? 'Обновляем…' : updateState === 'error' ? 'Повторить' : 'Обновить'}</button><button type="button" className="button secondary small" disabled={updateState === 'updating'} onClick={()=>{setUpdateReady(false); setUpdateState('ready');}}>Позже</button></div>
   </div>;

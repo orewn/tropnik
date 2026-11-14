@@ -24,7 +24,7 @@ function harness(size){
  let delivered=0;
  const fetch=async(url,options)=>{
   calls.push({url:url.href,options});
-  return{status:200,body:(async function*(){
+  return{status:200,headers:new Headers(),body:(async function*(){
    let remaining=size;
    while(remaining){const length=Math.min(remaining,chunk.length);remaining-=length;delivered+=length;yield chunk.subarray(0,length);}
   })()};

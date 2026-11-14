@@ -4,7 +4,7 @@ import {Footer} from '@/components/Footer';
 import {SiteSearch} from '@/components/SiteSearch';
 import {readSearchState} from '@/lib/search-state';
 
-export const metadata: Metadata = {title: 'Поиск', description: 'Поиск маршрутов, направлений и полезных страниц Тропника.', robots: {index: false, follow: true}};
+export const metadata: Metadata = {title: 'Поиск', description: 'Поиск маршрутов, направлений и полезных страниц Тропиныча.', robots: {index: false, follow: true}};
 
 export default async function SearchPage({searchParams}: {searchParams?: Promise<Record<string, string | string[] | undefined>>}) {
   const values = await searchParams || {}, params = new URLSearchParams();

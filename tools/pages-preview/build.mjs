@@ -9,6 +9,7 @@ import {normalizeBase, rewriteScript, rewriteJSON, rewriteHTML, rewriteCSS, ts} 
 import {apkFileName, ensureApk, readApkManifest, validateApkDelivery} from './apk-artifact.mjs';
 import {androidPageDownload, pinAndroidPageDownload} from './apk-page.mjs';
 import {catalogueExpectations} from './catalogue-expectations.mjs';
+import {loadSeoModule, renderSeoHead, renderStaticContent, renderSitemap, renderRobots} from './seo.mjs';
 import {verifyCustomMap} from '../../web/scripts/verify-custom-map.mjs';
 import {customMapWebRecords,customMapShellRecords,rewriteCustomMapShellResources,legacyMapRuntime} from './custom-map-assets.mjs';
 
@@ -24,6 +25,9 @@ const args = process.argv.slice(2);
 const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name) + 1] : fallback;
 const base = normalizeBase(option('--base', '/tropnik/'));
 const origin = option('--origin', 'http://localhost:4173');
+const indexing = option('--indexing', 'private');
+if (!['public', 'private'].includes(indexing)) throw new Error('--indexing must be public or private.');
+const publicIndexing = indexing === 'public';
 const parsedOrigin = new URL(origin);
 if (!['https:', 'http:'].includes(parsedOrigin.protocol) || parsedOrigin.origin !== origin || parsedOrigin.username || parsedOrigin.password) throw new Error('--origin must contain only the scheme and host.');
 const out = resolve(option('--out', join(web, 'pages-preview/dist')));
@@ -77,7 +81,7 @@ const infoPages = {
   about: 'О проекте', safety: 'Подготовка к походу', 'safety/registration': 'Регистрация похода в МЧС', sources: 'Источники и лицензии',
   privacy: 'Конфиденциальность', terms: 'Условия', offline: 'Карты с собой',
   trips: 'Походы и группы', community: 'Сообщество', guides: 'Гидам и инструкторам', planner: 'Конструктор похода',
-  account: 'Личный кабинет', 'account/action': 'Действие с аккаунтом', search: 'Поиск', moderation: 'Модерация', android: 'Тропник для Android',
+  account: 'Личный кабинет', 'account/action': 'Действие с аккаунтом', search: 'Поиск', moderation: 'Модерация', android: 'Тропиныч для Android', routes: 'Пешие маршруты России',
 };
 // Inherit the current site's cascade. This preview does not maintain a second visual system.
 const layoutPath = join(web, 'app/layout.tsx');
@@ -112,7 +116,7 @@ for (const name of ['web/package.json', 'web/pnpm-lock.yaml', 'web/pnpm-workspac
   if (await exists(path)) {const bytes = await readFile(path); inputs.push({path: name, bytes: bytes.length, sha256: sha(bytes)});}
 }
 inputs.sort((a, b) => a.path.localeCompare(b.path));
-const buildId = sha(JSON.stringify({base, origin, inputs})).slice(0, 16);
+const buildId = sha(JSON.stringify({base, origin, publicIndexing, inputs})).slice(0, 16);
 
 // Read the actual catalogue, including the pinned geographic exclusions. Resolve JSON
 // imports from the snapshot; fail on an unexpected runtime dependency instead of guessing.
@@ -134,11 +138,24 @@ const {regions, trails} = await import('data:text/javascript;base64,' + Buffer.f
 const pages = [
   {path: '/', title: 'Карта маршрутов России', kind: 'home'},
   ...Object.entries(infoPages).map(([kind, title]) => ({path: '/' + kind, title, kind})),
-  {path: '/preview', title: 'Возможности Тропника', kind: 'preview'},
+  {path: '/preview', title: 'Возможности Тропиныча', kind: 'preview'},
   ...regions.map(region => ({path: '/regions/' + encodeURIComponent(region.id), title: region.name, kind: 'region', id: region.id})),
   ...trails.map(trail => ({path: '/routes/' + encodeURIComponent(trail.id), title: trail.title, kind: 'route', id: trail.id})),
 ];
 if (new Set(pages.map(page => page.path)).size !== pages.length) throw new Error('Duplicate catalogue page path.');
+const seo = await loadSeoModule(source);
+const seoContext = {siteUrl: origin + base, publicIndexing, trailingSlash: true};
+const pageModels = new Map(pages.map(page => {
+  const model = page.kind === 'home' ? seo.homeSeo(seoContext, regions, trails)
+    : page.kind === 'routes' ? seo.catalogueSeo(trails, regions, seoContext)
+    : page.kind === 'route' ? seo.routeSeo(trails.find(trail => trail.id === page.id), regions, seoContext)
+    : page.kind === 'region' ? seo.regionSeo(regions.find(region => region.id === page.id), trails, seoContext)
+    : seo.infoSeo(page.kind, page.title, seoContext);
+  // Keep the browser routing inventory small. Full editorial text and JSON-LD
+  // live in the real HTML, not in a second copy of the entire client catalogue.
+  page.seo = {title: model.title, description: model.description, canonical: model.canonical, indexable: model.indexable};
+  return [page.path, model];
+}));
 const apkManifestPath = join(source, 'public/downloads/android-manifest.json');
 const metadata = await readApkManifest(apkManifestPath);
 assert.deepEqual(metadata, androidMetadata, 'Android manifest changed after the local APK verification.');
@@ -156,7 +173,8 @@ const apk = validateApkDelivery({delivery: 'github-release', sourcePath: android
   testedArchitecture: metadata.testedArchitecture || null,
   deviceExecutionVerified: metadata.deviceExecutionVerified === true,
   physicalDeviceVerified: metadata.physicalDeviceVerified === true}, metadata);
-const config = {id: buildId, base, origin, hasApk: true, pages};
+const runtimePages = pages.map(({path, title, kind, id}) => ({path, title, kind, ...(id ? {id} : {})}));
+const config = {id: buildId, base, origin, publicIndexing, hasApk: true, pages: runtimePages};
 
 // The archived offline pack is copied byte-for-byte. Only its separate application style gets a base path.
 for (const path of await files(join(source, 'public'))) {
@@ -188,12 +206,14 @@ const workerPath=join(publicDir,'sw.js');
 await writeFile(workerPath,rewriteCustomMapShellResources(await readFile(workerPath,'utf8'),customMapShellRecords(customMapFiles,base),customMapShellRecords(deployedCustomMapFiles,base)));
 const manifestPath = join(publicDir, 'manifest.webmanifest');
 const pwa = JSON.parse(await readFile(manifestPath, 'utf8'));
-pwa.name = 'Тропник'; pwa.short_name = 'Тропник';
+pwa.name = 'Тропиныч — пешие маршруты России'; pwa.short_name = 'Тропиныч';
 await writeFile(manifestPath, JSON.stringify(pwa, null, 2) + '\n');
-await writeFile(join(publicDir, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
+await writeFile(join(publicDir, 'robots.txt'), renderRobots({siteUrl: origin + base, base, publicIndexing}));
 await writeFile(join(publicDir, '.nojekyll'), '');
 await writeFile(join(stage, 'entry.tsx'), "import './source/pages-preview/src/main.tsx';\n");
-await writeFile(join(stage, 'index.html'), `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#244d3c"><meta name="robots" content="noindex,nofollow"><meta name="description" content="Карта маршрутов по России. Выбирайте направление и сохраняйте тропы для своего путешествия."><title>Тропник</title><link rel="icon" href="${base}favicon.svg"><link rel="manifest" href="${base}manifest.webmanifest"></head><body><div id="root"><main class="pages-preview-boot"><h1>Тропник</h1><p>Открываем карту маршрутов…</p></main></div><noscript>Чтобы открыть карту, разрешите выполнение сценариев в настройках браузера. <a href="${base}offline-viewer.html">Автономная карта</a> доступна после включения сценариев.</noscript><script type="module" src="/entry.tsx"></script></body></html>`);
+const seoMarker = '<meta name="tropinych-seo" content="pending">';
+const contentMarker = '<main id="tropinych-static-placeholder"></main>';
+await writeFile(join(stage, 'index.html'), `<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#244d3c">${seoMarker}<link rel="icon" href="${base}favicon.svg"><link rel="manifest" href="${base}manifest.webmanifest"></head><body><div id="root">${contentMarker}</div><noscript><p class="pages-preview-noscript">Описание и ссылки доступны без JavaScript. Для интерактивной карты включите JavaScript.</p></noscript><script type="module" src="/entry.tsx"></script></body></html>`);
 
 const boundary = {
   [join(source, 'lib/api')]: join(source, 'pages-preview/src/api.ts'),
@@ -220,7 +240,7 @@ const integration = {
     const path = id.split('?')[0];
     if (!path.startsWith(source + '/')) return null;
     // These adapters already use build.base. Their internal route keys are not public URLs.
-    if (path.startsWith(join(source, 'pages-preview/src') + '/')) return null;
+    if (path.startsWith(join(source, 'pages-preview/src') + '/') || path === join(source, 'lib/seo.ts')) return null;
     if (/\.[cm]?[jt]sx?$/.test(path)) return {code: rewriteScript(code, path, {base}), map: null};
     if (path.endsWith('.json')) return {code: JSON.stringify(rewriteJSON(JSON.parse(code), base)), map: null};
     return null;
@@ -240,7 +260,7 @@ await viteBuild({
   // boundary there and include its real modules in the provenance report.
   worker: {format:'es',plugins:()=>[{...integration,name:'tropnik-pages-worker-boundary'}]},
   resolve: {alias: {'@': source}},
-  define: {'process.env.NEXT_PUBLIC_SITE_URL': JSON.stringify(origin + base.slice(0, -1)), 'process.env.TROPA_PUBLIC_INDEXING': JSON.stringify('false')},
+  define: {'process.env.NEXT_PUBLIC_SITE_URL': JSON.stringify(origin + base.slice(0, -1)), 'process.env.TROPA_PUBLIC_INDEXING': JSON.stringify(String(publicIndexing)), 'process.env.NEXT_PUBLIC_STATIC_EXPORT': JSON.stringify('true')},
   build: {
     outDir: out, emptyOutDir: true, sourcemap: false, manifest: true, chunkSizeWarningLimit: 1200,
     // Keep the actual browser router as an importable production entry, not a second test implementation.
@@ -249,13 +269,18 @@ await viteBuild({
 });
 
 const html = await readFile(join(out, 'index.html'), 'utf8');
-const escape = value => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+assert.ok(html.includes(seoMarker) && html.includes(contentMarker), 'The Vite shell must preserve explicit SEO insertion markers.');
+function renderPage(model) {
+  return html.replace(seoMarker, renderSeoHead(model))
+    .replace(contentMarker, renderStaticContent(model, {regions, trails, base}));
+}
 for (const page of pages) {
   const target = page.path === '/' ? join(out, 'index.html') : join(out, page.path.slice(1), 'index.html');
   await mkdir(dirname(target), {recursive: true});
-  await writeFile(target, html.replace(/<title>[^<]*<\/title>/, `<title>${escape(page.title)} · Тропник</title>`));
+  await writeFile(target, renderPage(pageModels.get(page.path)));
 }
-await writeFile(join(out, '404.html'), html.replace(/<title>[^<]*<\/title>/, '<title>Страница не найдена · Тропник</title>'));
+await writeFile(join(out, '404.html'), renderPage(seo.infoSeo('missing', 'Страница не найдена', {...seoContext, publicIndexing: false})));
+await writeFile(join(out, 'sitemap.xml'), renderSitemap([...pageModels.values()]));
 const packageRoots = new Set(dependencyModules.map(id => {
   const marker = '/node_modules/', index = id.lastIndexOf(marker), parts = id.slice(index + marker.length).split('/');
   return id.slice(0, index + marker.length) + parts.slice(0, parts[0].startsWith('@') ? 2 : 1).join('/');
@@ -274,10 +299,11 @@ for (const root of [...packageRoots].sort()) {
   }
   thirdParty.push({name: metadata.name, version: metadata.version, license: metadata.license || 'See package notice', notices: licenses});
 }
-await writeFile(join(out, 'THIRD_PARTY_NOTICES.txt'), 'Tropnik static preview: browser dependencies\n\n' + thirdParty.map(item => `${item.name} ${item.version}\nLicense: ${JSON.stringify(item.license)}\n${item.notices.join('\n') || 'License notice is retained in the distributed bundle.'}\n`).join('\n'));
+await writeFile(join(out, 'THIRD_PARTY_NOTICES.txt'), 'Tropinych: browser dependencies\n\n' + thirdParty.map(item => `${item.name} ${item.version}\nLicense: ${JSON.stringify(item.license)}\n${item.notices.join('\n') || 'License notice is retained in the distributed bundle.'}\n`).join('\n'));
 const report = {
   schemaVersion: 1, buildId, sourceCommit, base, origin, renderer: 'Tropnik Canvas map and geographic terrain from the input snapshot',
   apiConnected: false, serverCodeIncluded: false, fakeServerResponses: false, pages: pages.length,
+  indexing: {enabled: publicIndexing, eligiblePages: pages.filter(page => page.seo.indexable).length, eligibleRoutes: pages.filter(page => page.kind === 'route' && page.seo.indexable).length, sitemap: origin + base + 'sitemap.xml', robotsRequiresHostRoot: true},
   regions: regions.length, referenceRoutes: trails.length, catalogue: catalogueExpectations(regions, trails), hasApk: config.hasApk, apk, layoutStyles,
   storageNamespace: base.slice(1, -1), immutableOfflinePack: true, inputs, bundledModules, thirdParty, customMap:{...customMap,deployedFiles:deployedCustomMapFiles},
 };

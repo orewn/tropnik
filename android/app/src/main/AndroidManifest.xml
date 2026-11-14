@@ -12,7 +12,7 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_tropa"
         android:roundIcon="@drawable/ic_tropa"
-        android:label="Тропник"
+        android:label="Тропиныч"
         android:supportsRtl="true"
         android:usesCleartextTraffic="false"
         android:networkSecurityConfig="@xml/network_security_config"

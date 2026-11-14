@@ -144,7 +144,7 @@ fun OnlineProfileScreen(model: OnlineViewModel, state: OnlineState, onSources: (
         }
         item {
             CardShell {
-                Text("Тропник", style = MaterialTheme.typography.titleLarge)
+                Text("Тропиныч", style = MaterialTheme.typography.titleLarge)
                 Text("Находите маршруты и людей, с которыми по пути.", style = MaterialTheme.typography.bodyMedium, color = Palette.Muted)
                 TrailTextButton(onClick = onSources, Modifier.heightIn(min = 48.dp).testTag("show_sources")) { Text("Источники и лицензии") }
             }
@@ -158,7 +158,7 @@ fun OnlineProfileScreen(model: OnlineViewModel, state: OnlineState, onSources: (
 private fun ServerDialog(state: OnlineState, model: OnlineViewModel, onDismiss: () -> Unit) {
     var value by remember { mutableStateOf(state.serverUrl) }
     var validation by remember { mutableStateOf<String?>(null) }
-    TrailDialog(onDismissRequest = onDismiss, title = { Text("Подключение к Тропнику") }, text = {
+    TrailDialog(onDismissRequest = onDismiss, title = { Text("Подключение к Тропинычу") }, text = {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Укажите адрес подключения, которому доверяете. Здесь будут храниться аккаунт и сообщения.", style = MaterialTheme.typography.bodyMedium)
             Field(value, { value = it; validation = null }, "Адрес подключения", keyboard = KeyboardType.Uri, tag = "service_url")

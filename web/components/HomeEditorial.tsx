@@ -1,20 +1,23 @@
 import {ArrowRight, DownloadSimple, MapTrifold, ShieldCheck} from '@/components/TropnikIcons';
 import {regions} from '@/lib/content';
+import {BRAND} from '@/lib/brand';
+import {canonicalUrl, homeSeo} from '@/lib/seo';
+import {getSeoContext} from '@/lib/seo-metadata';
 import styles from './HomeEditorial.module.css';
 
 const serviceCards = [
   {
     icon: MapTrifold,
-    label: 'Проверяемая карта',
-    title: 'Понятно, откуда взялись данные',
-    body: 'В карточке маршрута остаются источник, дата проверки, ограничения и честная отметка, если точной линии пути пока нет.',
+    label: 'Карта и описание',
+    title: 'Понимайте, что известно о маршруте',
+    body: 'Смотрите длину, сложность и условия посещения. В карточке указаны источники, даты и подробности о линии пути.',
     href: '/sources',
     action: 'Как устроены источники',
   },
   {
     icon: DownloadSimple,
     label: 'Работа без сети',
-    title: 'Нужное остаётся с вами в походе',
+    title: 'Сохраните нужное перед выходом',
     body: 'Сохраните карточку и подготовленную карту заранее. Приложение явно показывает, какие данные доступны автономно.',
     href: '/offline',
     action: 'Подготовить офлайн-карту',
@@ -22,29 +25,32 @@ const serviceCards = [
   {
     icon: ShieldCheck,
     label: 'Безопасность',
-    title: 'Маршрут, состав и сроки в одном паспорте',
-    body: 'Помощник собирает данные для официального уведомления МЧС и аварийной карточки, не выдавая локальный черновик за регистрацию.',
+    title: 'Соберите маршрут, состав и сроки',
+    body: 'Подготовьте паспорт похода и аварийную карточку. Официальное уведомление МЧС отправляется отдельно на сайте ведомства.',
     href: '/safety/registration',
     action: 'Открыть паспорт похода',
   },
 ] as const;
 
 const steps = [
-  ['01', 'Выберите направление', 'Сравните реальные условия, сложность, доступность и происхождение данных.'],
+  ['01', 'Выберите направление', 'Откройте регион на карте и сравните описания троп, известную длину и сложность.'],
   ['02', 'Проверьте актуальность', 'Перед выходом уточните ограничения территории, погоду, связь и состояние тропы.'],
   ['03', 'Сохраните всё заранее', 'Возьмите офлайн-карту, описание маршрута, контакты и запасной план.'],
   ['04', 'Зафиксируйте план похода', 'Подготовьте состав группы, контрольный срок и сведения для уведомления МЧС.'],
 ] as const;
 
 export function HomeEditorial() {
-  return <div className={styles.shell}>
+  const context = getSeoContext();
+  const seo = homeSeo(context, regions);
+  const directionLinks = seo.links.filter(item => item.path.split('/')[1] === 'regions');
+  return <div className={`${styles.shell} seo-home`}>
     <section className={styles.service} aria-labelledby="service-title">
       <header className={styles.serviceHeader}>
         <div>
-          <span className={styles.kicker}>Тропник как сервис</span>
-          <h2 id="service-title">Не просто найти тропу.<br/>Подготовить поход спокойно.</h2>
+          <span className={styles.kicker}>{BRAND.name}</span>
+          <h2 id="service-title">Выберите тропу.<br/>Подготовьтесь к походу.</h2>
         </div>
-        <p>Карта, проверяемые сведения, автономный доступ и паспорт безопасности собраны в одном последовательном сценарии — без скрытых обещаний и лишнего шума.</p>
+        <p>Пешие маршруты России на одной карте. Изучите описание, проверьте ограничения и сохраните нужные сведения перед выходом.</p>
       </header>
       <div className={styles.serviceGrid}>
         {serviceCards.map(({icon: Icon, label, title, body, href, action}, index) => <article className={styles.serviceCard} key={href}>
@@ -57,11 +63,18 @@ export function HomeEditorial() {
       </div>
     </section>
 
+    <section className="seo-tagline" aria-labelledby="tropinych-tagline">
+      <span className="eyebrow">От короткой прогулки до большого похода</span>
+      <h2 id="tropinych-tagline" className="heading-3">{BRAND.tagline}<br/>Начните с карты России.</h2>
+      <p className="body-3">В каталоге собраны маршруты с описаниями, источниками и известными параметрами. Выберите место, которое хочется увидеть.</p>
+      <a className="button primary" href={canonicalUrl('/routes/', context)}>Выбрать маршрут <ArrowRight size={18}/></a>
+    </section>
+
     <section className={styles.workflow} aria-labelledby="workflow-title">
       <div className={styles.workflowIntro}>
         <span className={styles.kicker}>От идеи до выхода</span>
-        <h2 id="workflow-title">Четыре шага вместо десятка разрозненных сервисов.</h2>
-        <p>Каждый следующий шаг появляется тогда, когда он действительно нужен. Сначала выбор, затем проверка, сохранение и безопасность.</p>
+        <h2 id="workflow-title">Подготовка начинается<br/>с понятного плана.</h2>
+        <p>Выберите маршрут, уточните условия и сохраните карту. Перед выходом договоритесь о составе группы и контрольном сроке.</p>
       </div>
       <ol className={styles.steps}>
         {steps.map(([number, title, body]) => <li key={number}>
@@ -73,16 +86,17 @@ export function HomeEditorial() {
 
     <section className={styles.regions} aria-labelledby="regions-title">
       <header>
-        <div><span className={styles.kicker}>Направления России</span><h2 id="regions-title">Начните с ландшафта, который вам близок.</h2></div>
-        <p>Откройте направление, чтобы увидеть доступные маршруты, особенности территории и подготовленные истории мест.</p>
+        <div><span className={styles.kicker}>Направления России</span><h2 id="regions-title">Куда пойдём<br/>в следующий раз?</h2></div>
+        <p>Горные тропы, лесные прогулки и пути вдоль воды. Выберите направление и откройте описания маршрутов.</p>
       </header>
       <nav className={styles.regionGrid} aria-label="Каталог направлений">
-        {regions.map((region, index) => <a href={`/regions/${region.id}`} key={region.id}>
+        {directionLinks.map((region, index) => <a href={region.url} key={region.url}>
           <span className={styles.regionNumber}>{String(index + 1).padStart(2, '0')}</span>
           <strong>{region.name}</strong>
           <span className={styles.regionArrow}><ArrowRight size={18}/></span>
         </a>)}
       </nav>
+      <div className="section-actions"><a className="button secondary" href={canonicalUrl('/routes/', context)}>Каталог маршрутов России <ArrowRight size={18}/></a></div>
     </section>
   </div>;
 }

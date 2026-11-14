@@ -40,7 +40,7 @@ export function AccountLifecycle({user}: {user: User}) {
   return <section className="account-card">
     <div className="card-heading"><LockKey size={22}/><h3>Почта и безопасность</h3></div>
     <div className="stack">
-      <p className={user.emailVerified ? 'success-inline' : 'muted'}>{user.emailVerified ? <><CheckCircle size={17}/>Почта подтверждена</> : 'Почта пока не подтверждена. Откройте письмо Tropnik и подтвердите адрес.'}</p>
+      <p className={user.emailVerified ? 'success-inline' : 'muted'}>{user.emailVerified ? <><CheckCircle size={17}/>Почта подтверждена</> : 'Почта пока не подтверждена. Откройте письмо Тропиныча и подтвердите адрес.'}</p>
       <div className={styles.actions}>
         {!user.emailVerified && <button className="button secondary small" type="button" disabled={busy} onClick={() => void request('email')}>Запросить письмо</button>}
         <button className="text-link" type="button" disabled={busy} onClick={() => void request('password')}>Изменить пароль</button>
@@ -113,7 +113,7 @@ export function AccountActionScreen() {
         <p className="muted">Придумайте пароль из 12–128 символов. После сохранения потребуется снова войти на всех устройствах.</p>
         <label>Новый пароль<input type="password" autoComplete="new-password" required minLength={12} maxLength={256} disabled={busy} value={password} onChange={event => setPassword(event.target.value)}/></label>
         <label>Повторите пароль<input type="password" autoComplete="new-password" required minLength={12} maxLength={256} disabled={busy} value={confirmation} onChange={event => setConfirmation(event.target.value)}/></label>
-      </> : <p className="muted">Нажмите кнопку, если вы создавали аккаунт Tropnik и хотите подтвердить этот адрес.</p>}
+      </> : <p className="muted">Нажмите кнопку, если вы создавали аккаунт Тропиныча и хотите подтвердить этот адрес.</p>}
       {error && <p className="error-message" role="alert">{error}</p>}
       {message && <p className="success-inline" role="status">{message}</p>}
       <button className="button primary" disabled={busy}>{busy ? 'Ожидаем ответ…' : action?.action === 'reset_password' ? 'Сохранить новый пароль' : action ? 'Подтвердить почту' : 'Запросить ссылку'}</button>

@@ -270,7 +270,7 @@ export function exportHikeGpx(value: HikeDraft, plan: CompositePlan, resolved: R
   }).join('\n');
   const segments = resolved.segments.map(segment => `    <trkseg>\n${segment.map(point => `      <trkpt lat="${decimal(point[1])}" lon="${decimal(point[0])}"/>`).join('\n')}\n    </trkseg>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Тропник" xmlns="${GPX_NAMESPACE}" xmlns:tropnik="${HIKE_NAMESPACE}">
+<gpx version="1.1" creator="Тропиныч" xmlns="${GPX_NAMESPACE}" xmlns:tropnik="${HIKE_NAMESPACE}">
   <metadata>
     <name>${xml(draft.name)}</name>
     <desc>${xml(description)}</desc>

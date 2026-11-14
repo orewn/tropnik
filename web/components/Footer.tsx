@@ -1,5 +1,6 @@
 import {DownloadSimple, ShieldCheck} from './TropnikIcons';
 import {Brand} from './Brand';
+import {BRAND} from '@/lib/brand';
 import styles from './Footer.module.css';
 
 const groups = [
@@ -22,7 +23,7 @@ export function Footer() {
     <div className={styles.inner}>
       <div className={styles.brandColumn}>
         <Brand small/>
-        <p>Маршруты России, подготовка к походу и нужные данные офлайн — в одном спокойном и проверяемом сценарии.</p>
+        <p>Выбирайте маршруты по России, готовьтесь к походу и сохраняйте нужные данные, чтобы открыть их без сети.</p>
         <div className={styles.badges} aria-label="Принципы сервиса">
           <span><ShieldCheck size={16}/>Источники и ограничения видны</span>
           <span><DownloadSimple size={16}/>Ключевые данные доступны без сети</span>
@@ -34,7 +35,7 @@ export function Footer() {
       </section>)}
     </div>
     <div className={styles.bottom}>
-      <span><strong>Тропник</strong> · Сделано для путешествий по России.</span>
+      <span><strong>{BRAND.name}</strong> · Сделано для путешествий по России.</span>
       <span>Перед выходом проверяйте актуальные условия и официальные ограничения территории.</span>
     </div>
   </footer>;

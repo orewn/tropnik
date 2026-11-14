@@ -315,7 +315,7 @@ export function SafetyRegistration() {
           <div>
             <span className={styles.kicker}>Безопасность похода</span>
             <h1>Подготовьте уведомление МЧС без потери деталей</h1>
-            <p className={styles.heroLead}>Тропник собирает маршрут, состав и контрольные сроки в один паспорт. Отправка выполняется только на официальном сайте МЧС России — сервис не выдаёт черновик за регистрацию и не обещает автоматический вызов спасателей.</p>
+            <p className={styles.heroLead}>Тропиныч собирает маршрут, состав и контрольные сроки в один паспорт. Отправка выполняется только на официальном сайте МЧС России — сервис не выдаёт черновик за регистрацию и не обещает автоматический вызов спасателей.</p>
           </div>
           <aside className={styles.heroAside}>
             <strong>Что делает помощник</strong>
@@ -338,7 +338,7 @@ export function SafetyRegistration() {
           </section>
           <section className={`${styles.card} ${styles.privacyNote}`}>
             <strong>Персональные данные</strong>
-            <p>Черновики остаются только в localStorage этого браузера и не отправляются в Tropnik. Хранилище браузера не является защищённым сейфом: на общем устройстве удалите паспорт после переноса.</p>
+            <p>Черновики остаются только в localStorage этого браузера и не отправляются в Тропиныч. Хранилище браузера не является защищённым сейфом: на общем устройстве удалите паспорт после переноса.</p>
           </section>
         </aside>
 
@@ -361,7 +361,7 @@ export function SafetyRegistration() {
           <section className={`${styles.card} ${styles.section}`}>
             <div className={styles.sectionHeader}><div><h2>Маршрут и сроки</h2><p>Укажите фактическую нитку маршрута, а не только название направления.</p></div><span className={styles.sectionNumber}>01</span></div>
             <div className={styles.fieldGrid}>
-              <div className={styles.fieldWide}><label htmlFor="catalog-route">Маршрут из каталога Тропника</label>{catalog ? <select id="catalog-route" value={passport.routeId || ''} disabled={locked} onChange={event => selectRoute(event.target.value)}><option value="">Не выбран — заполню вручную</option>{catalog.routes.map(route => <option key={route.id} value={route.id}>{route.title}</option>)}</select> : <button id="catalog-route" type="button" className={styles.catalogButton} disabled={locked || catalogState === 'loading'} onClick={() => void openCatalog()}><MapPin size={18}/>{catalogState === 'loading' ? 'Загружаем каталог…' : catalogState === 'error' ? 'Повторить загрузку каталога' : 'Выбрать маршрут из каталога'}</button>}<span className={styles.hint}>Каталог загружается только по запросу. Описание остаётся справочным: проверьте ограничения и фактическую нитку перед подачей.</span></div>
+              <div className={styles.fieldWide}><label htmlFor="catalog-route">Маршрут из каталога Тропиныча</label>{catalog ? <select id="catalog-route" value={passport.routeId || ''} disabled={locked} onChange={event => selectRoute(event.target.value)}><option value="">Не выбран — заполню вручную</option>{catalog.routes.map(route => <option key={route.id} value={route.id}>{route.title}</option>)}</select> : <button id="catalog-route" type="button" className={styles.catalogButton} disabled={locked || catalogState === 'loading'} onClick={() => void openCatalog()}><MapPin size={18}/>{catalogState === 'loading' ? 'Загружаем каталог…' : catalogState === 'error' ? 'Повторить загрузку каталога' : 'Выбрать маршрут из каталога'}</button>}<span className={styles.hint}>Каталог загружается только по запросу. Описание остаётся справочным: проверьте ограничения и фактическую нитку перед подачей.</span></div>
               <div className={styles.field}><label htmlFor="route-title">Название маршрута *</label><input id="route-title" value={passport.routeTitle} disabled={locked} onChange={event => update('routeTitle', event.target.value)} placeholder="Например, Бзерпинский карниз"/></div>
               <div className={styles.field}><label htmlFor="region">Регион начала *</label><input id="region" list="safety-regions" value={passport.region} disabled={locked} onChange={event => update('region', event.target.value)} placeholder="Введите регион"/><datalist id="safety-regions">{catalog?.regions.map(region => <option key={region.id} value={region.name}/>)}</datalist></div>
             </div>
@@ -371,7 +371,7 @@ export function SafetyRegistration() {
               <div className={styles.field}><label htmlFor="trip-time-zone">Часовой пояс похода *</label><select id="trip-time-zone" value={passport.timeZone} disabled={locked} onChange={event => update('timeZone', event.target.value)}><option value="">Уточните часовой пояс</option>{['Europe/Kaliningrad','Europe/Moscow','Europe/Samara','Asia/Yekaterinburg','Asia/Omsk','Asia/Krasnoyarsk','Asia/Irkutsk','Asia/Yakutsk','Asia/Vladivostok','Asia/Magadan','Asia/Kamchatka'].map(zone=><option key={zone} value={zone}>{zone}</option>)}</select></div>
               <div className={styles.field}><label htmlFor="return-deadline">Контрольный срок *</label><input id="return-deadline" type="datetime-local" value={passport.returnDeadline} disabled={locked} onChange={event => update('returnDeadline', event.target.value)}/><span className={styles.hint}>Время, после которого контакт вне группы должен начать проверку.</span></div>
             </div>
-            <div className={styles.deadline} style={{marginTop: 16}}><Clock size={19}/><div>До выхода проверьте порядок уведомления на официальной форме МЧС и уточните актуальный состав в территориальном органе. Тропник не рассчитывает юридический крайний срок подачи.</div></div>
+            <div className={styles.deadline} style={{marginTop: 16}}><Clock size={19}/><div>До выхода проверьте порядок уведомления на официальной форме МЧС и уточните актуальный состав в территориальном органе. Тропиныч не рассчитывает юридический крайний срок подачи.</div></div>
             <div className={styles.fieldGrid} style={{marginTop: 16}}>
               <div className={styles.field}><label htmlFor="start-point">Точка старта *</label><input id="start-point" value={passport.startPoint} disabled={locked} onChange={event => update('startPoint', event.target.value)} placeholder="Населённый пункт, кордон, координаты"/></div>
               <div className={styles.field}><label htmlFor="finish-point">Точка завершения *</label><input id="finish-point" value={passport.finishPoint} disabled={locked} onChange={event => update('finishPoint', event.target.value)} placeholder="Финиш и способ выхода к связи"/></div>
@@ -413,7 +413,7 @@ export function SafetyRegistration() {
           </section>
 
           <section className={`${styles.card} ${styles.section}`}>
-            <div className={styles.sectionHeader}><div><h2>Официальное уведомление</h2><p>Тропник готовит данные, но не отправляет их от вашего имени и не получает ведомственный статус автоматически.</p></div><span className={styles.sectionNumber}>04</span></div>
+            <div className={styles.sectionHeader}><div><h2>Официальное уведомление</h2><p>Тропиныч готовит данные, но не отправляет их от вашего имени и не получает ведомственный статус автоматически.</p></div><span className={styles.sectionNumber}>04</span></div>
             <div className={styles.officialBox}>
               <h3>1. Подготовьте переносимый пакет</h3>
               <p>Перед отправкой сверьте маршрут, сроки и состав. Если критичные данные меняются после подачи, статус автоматически станет «Нужно обновить уведомление».</p>
@@ -442,7 +442,7 @@ export function SafetyRegistration() {
           </section>
 
           <section className={`${styles.card} ${styles.saveBar}`}>
-            <div className={styles.saveDescription}><p>{statusDescriptions[passport.status]}</p><p>Все отметки этой формы хранятся на устройстве. Они не являются проверкой регистрации МЧС со стороны Тропника.</p></div>
+            <div className={styles.saveDescription}><p>{statusDescriptions[passport.status]}</p><p>Все отметки этой формы хранятся на устройстве. Они не являются проверкой регистрации МЧС со стороны Тропиныча.</p></div>
             <div className={styles.saveActions}><Link prefetch={false} className={styles.secondaryButton} href="/offline-safety.html">Открыть автономную карточку</Link><button className={styles.secondaryButton} onClick={() => window.print()}>Печать</button><button className={styles.primaryLink} onClick={() => persist()}><NotePencil size={18}/>Сохранить на устройстве</button></div>
           </section>
         </div>

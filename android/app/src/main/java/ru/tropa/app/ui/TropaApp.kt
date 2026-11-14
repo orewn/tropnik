@@ -174,7 +174,7 @@ private fun BrandBar(state: AppState, onBack: () -> Unit) {
             Spacer(Modifier.width(12.dp))
         }
         Column(Modifier.weight(1f)) {
-            Text("ТРОПНИК", style = MaterialTheme.typography.titleLarge, letterSpacing = 3.sp)
+            Text("ТРОПИНЫЧ", style = MaterialTheme.typography.titleLarge, letterSpacing = 3.sp)
             Text("Маршруты и люди", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
         }
         StatusPill(when (state.connection) {

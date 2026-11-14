@@ -1,24 +1,23 @@
 import type {MetadataRoute} from 'next';
-import {getOrigin, isPublicIndexingEnabled, regions} from '@/lib/content';
+import {regions, trails} from '@/lib/content';
 import {getPublishedTrails} from '@/lib/server';
+import {catalogueSeo, homeSeo, infoSeo, regionSeo, routeSeo} from '@/lib/seo';
+import {getSeoContext} from '@/lib/seo-metadata';
 
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  if (!isPublicIndexingEnabled()) return [];
-  const origin = getOrigin();
-  const published = (await getPublishedTrails()).filter(trail => trail.publicationStatus === 'published');
-
-  // A dated seasonal closure or guide requirement does not remove a useful,
-  // published route page from search. Reference and private pages stay excluded.
-  // checkedAt is a source review date, not a reliable page-modification timestamp.
-  return [
-    {url: origin},
-    {url: origin + '/about'},
-    {url: origin + '/safety'},
-    {url: origin + '/sources'},
-    ...regions.filter(region => published.some(trail => trail.regionId === region.id))
-      .map(region => ({url: origin + '/regions/' + region.id})),
-    ...published.map(trail => ({url: origin + '/routes/' + trail.id})),
+  const context = getSeoContext();
+  if (!context.publicIndexing) return [];
+  const published = await getPublishedTrails();
+  const catalogue = [...new Map([...trails, ...published].map(trail => [trail.id, trail])).values()];
+  // Search eligibility describes useful public content, independently of whether
+  // a guided departure is published. A source-review date is not page lastmod.
+  const pages = [
+    homeSeo(context, regions, catalogue), catalogueSeo(catalogue, regions, context),
+    infoSeo('about', 'О проекте', context),
+    ...regions.map(region => regionSeo(region, catalogue, context)),
+    ...catalogue.map(trail => routeSeo(trail, regions, context)),
   ];
+  return [...new Set(pages.filter(page => page.indexable).map(page => page.canonical))].map(url => ({url}));
 }

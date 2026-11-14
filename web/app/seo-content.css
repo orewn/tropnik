@@ -1,0 +1,39 @@
+/* Public catalogue content shares the existing type, colour and spacing system. */
+.seo-breadcrumbs{display:block;margin:0 0 24px;color:var(--muted)}
+.seo-breadcrumbs ol{display:flex;flex-wrap:wrap;gap:8px 12px;list-style:none;padding:0;margin:0}
+.seo-breadcrumbs li{display:inline;min-width:0;font-size:14px;line-height:20px;overflow-wrap:anywhere}
+.seo-breadcrumbs li+li::before{content:"/";margin-right:12px;color:var(--muted)}
+.seo-breadcrumbs a{color:var(--forest);text-underline-offset:4px}
+.seo-breadcrumbs a:hover{text-decoration:underline}
+.seo-article .seo-breadcrumbs{display:block;margin:0 0 24px}
+.seo-article .seo-breadcrumbs a{padding:0;border:0;border-radius:0;background:transparent;font-size:14px;line-height:20px}
+.seo-article h2.heading-4{font-size:30px;line-height:36px;font-weight:600}
+.seo-article h3.heading-6{font-size:20px;line-height:28px;font-weight:600}
+.seo-article>p{font-size:16px;line-height:24px}
+.seo-route-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;list-style:none;margin:24px 0 0;padding:0}
+.seo-route-list>li{display:flex;min-width:0}
+.seo-route-list>li>a{display:flex;flex-direction:column;gap:16px;width:100%;padding:24px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-decoration:none;overflow-wrap:anywhere;transition:transform 500ms cubic-bezier(.22,1,.36,1),background-color 300ms cubic-bezier(.22,1,.36,1)}
+.seo-route-list h2,.seo-route-list strong{display:block;margin:0;font-size:18px;line-height:28px;font-weight:500;text-wrap:balance}
+.seo-route-list p{margin:0;font-size:14px;line-height:20px;color:var(--muted);text-wrap:pretty}
+.seo-route-list a>span:last-child{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:8px;color:var(--forest);font-size:14px;line-height:20px;font-weight:600}
+.seo-route-list a svg{flex:none}
+.seo-route-list a:active{transform:scale(.98)}
+.seo-route-list a:focus-visible,.seo-breadcrumbs a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.seo-article .seo-route-list a:hover{text-decoration:none}
+.seo-related{margin-top:40px}
+.seo-catalogue-main{max-width:1280px;margin:0 auto;padding:48px 32px 80px}
+.seo-catalogue-heading{max-width:680px;margin-bottom:40px}
+.seo-catalogue-heading .eyebrow{display:block;margin-bottom:16px}
+.seo-catalogue-heading h1{margin:0 0 24px;text-wrap:balance}
+.seo-catalogue-heading p{margin:16px 0;color:var(--muted);text-wrap:pretty}
+.seo-catalogue-heading .button{margin-top:8px}
+.seo-catalogue-note{max-width:680px;margin:32px 0 0;color:var(--muted)}
+.seo-tagline{max-width:1280px;margin:0 auto;padding:64px 32px;background:var(--paper)}
+.seo-tagline .eyebrow{display:block;margin-bottom:24px}
+.seo-tagline h2{max-width:680px;margin:0;font-size:36px;line-height:40px;font-weight:600;color:var(--forest)}
+.seo-tagline p{max-width:680px;margin:24px 0;color:var(--muted);font-size:16px;line-height:24px}
+.seo-tagline .button{padding:8px 12px}
+@media(hover:hover) and (pointer:fine){.seo-route-list>li>a:hover{background:var(--paper);transform:translateY(-2px)}}
+@media(max-width:700px){.seo-route-list{grid-template-columns:1fr}.seo-catalogue-main{padding:32px 16px 64px}.seo-route-list>li>a{padding:24px}.seo-tagline{padding:48px 16px}.seo-tagline h2{font-size:30px;line-height:36px}.seo-catalogue-heading h1{font-size:30px;line-height:36px}.seo-breadcrumbs li{font-size:12px;line-height:16px}}
+@media(prefers-reduced-motion:reduce){.seo-route-list>li>a{transition:background-color 300ms cubic-bezier(.22,1,.36,1)}.seo-route-list>li>a:hover,.seo-route-list>li>a:active{transform:none}}
+@media(forced-colors:active){.seo-route-list>li>a{border-color:CanvasText}}

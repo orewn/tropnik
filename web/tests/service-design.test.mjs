@@ -11,7 +11,7 @@ test('home page uses the unified editorial service component',async()=>{
   assert.equal((component.match(/className=\{styles\.serviceCard\}/g)||[]).length,1,'service cards must render from one bounded data model');
   assert.match(component,/const serviceCards = \[/);
   assert.match(component,/const steps = \[/);
-  assert.match(component,/Проверяемая карта/);
+  assert.match(component,/Карта и описание/);
   assert.match(component,/Работа без сети/);
   assert.match(component,/паспорт похода/i);
   assert.match(css,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);

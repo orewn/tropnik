@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {assertPageSeo, assertSitemap} from './seo-verification.mjs';
 import {readFile,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -24,17 +25,18 @@ async function request(path,status,options={}) {
 }
 try {
   const home=await request(base,200);
-  assert.match(await home.text(),/noindex,nofollow/);
+  assertPageSeo(await home.text(), pages.find(page => page.path === '/'), report);
+  assertSitemap(await (await request(base + 'sitemap.xml', 200)).text(), pages, report);
   const slash=await request(base.slice(0,-1)+'?region=altai',301);
   assert.equal(slash.headers.get('location'),base+'?region=altai');
-  for (const kind of ['region','route','android','offline','sources','account']) {
+  for (const kind of ['routes','region','route','android','offline','sources','account']) {
     const page=pages.find(value=>value.kind===kind);
     assert.ok(page,`No page of kind ${kind}`);
     const path=base+page.path.slice(1);
     const redirect=await request(path,301);
     assert.equal(redirect.headers.get('location'),path+'/');
     const direct=await request(path+'/',200);
-    assert.match(await direct.text(),/noindex,nofollow/);
+    assertPageSeo(await direct.text(), page, report);
     await request(path+'/index.html',200);
   }
   for (const path of [base+'not-a-real-page/',base+'routes/osm-relation-14407325/',base+'api/health']) {

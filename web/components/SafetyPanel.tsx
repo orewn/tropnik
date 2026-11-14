@@ -127,7 +127,7 @@ export function SafetyPanel({departure, user, participants, onChanged}: Props) {
 
   return <section className={'prose-card ' + styles.panel} aria-labelledby={'safety-' + departure.id}>
     <div className={styles.heading}><h3 id={'safety-' + departure.id}><ShieldCheck size={20}/>Паспорт безопасности</h3><button className="icon-button" onClick={() => void load()} disabled={loading || !!busy} aria-label="Обновить паспорт безопасности"><ArrowClockwise size={18}/></button></div>
-    <p className={styles.notice}>Подачу завершает руководитель через официальный ресурс. Запись номера ожидает проверки сотрудником Тропника. При происшествии обращайтесь по номеру <a href="tel:112">112</a>.</p>
+    <p className={styles.notice}>Подачу завершает руководитель через официальный ресурс. Запись номера ожидает проверки сотрудником Тропиныча. При происшествии обращайтесь по номеру <a href="tel:112">112</a>.</p>
     {error && <p className="error-message" role="alert">{error}</p>}{notice && <p role="status" aria-live="polite">{notice}</p>}
     {loading && !passport ? <div className={styles.skeleton} role="status">Проверяем сохранённый паспорт…</div> : passport && <>
       <p><strong>{renewStartContact ? 'Подтверждение проверено, предвыходный контакт нужно обновить' : status ? labels[status] : 'Статус недоступен'}</strong><br/>Версия паспорта: {version}. Часовой пояс: {departure.timeZone}.</p>

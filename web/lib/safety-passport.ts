@@ -266,7 +266,7 @@ export function buildSafetyPackage(passport: SafetyPassport): string {
     `аварийный контакт: ${participant.emergencyName || 'не указан'} ${participant.emergencyPhone || ''}`.trim(),
   ].join(' · ')).join('\n');
   return [
-    'ПАСПОРТ БЕЗОПАСНОСТИ ПОХОДА · ТРОПНИК',
+    'ПАСПОРТ БЕЗОПАСНОСТИ ПОХОДА · ТРОПИНЫЧ',
     'Черновик для переноса в официальную форму МЧС России. Сам по себе этот файл не является поданным уведомлением.',
     '',
     line('Маршрут', passport.routeTitle),

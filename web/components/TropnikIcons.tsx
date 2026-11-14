@@ -1,5 +1,5 @@
 import type {CSSProperties,SVGProps} from 'react';
-/** Original Тропник symbol family. 28px grid, open paths, waypoint endpoints.
+/** Original Тропиныч symbol family. 28px grid, open paths, waypoint endpoints.
  * Drawings are project-owned; names retain source compatibility with product components.
  */
 type Props=Omit<SVGProps<SVGSVGElement>,'size'> & {size?:number|string;weight?:'thin'|'light'|'regular'|'bold'|'fill'|'duotone';mirrored?:boolean};
