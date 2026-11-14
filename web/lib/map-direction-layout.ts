@@ -15,12 +15,13 @@ export type MapDirectionGroup<T extends MapDirection = MapDirection> = {
 export const DIRECTION_MARKER_SIZE = 44;
 export const DIRECTION_CLUSTER_WIDTH = 176;
 export const DIRECTION_MARKER_GAP = 12;
-const MAX_LABEL_WIDTH = 168;
+const MAX_LABEL_WIDTH = 240;
 
 /** Approximate the rendered label rather than treating every name as a 44px dot.
  * The measured DOM position is subsequently clamped against the actual viewport. */
 export function directionLabelWidth(label: string) {
-  return Math.min(MAX_LABEL_WIDTH, Math.max(84, Math.ceil([...label].length * 7.1 + 24)));
+  // Reserve the inline trail badge and gap as well as the name and padding.
+  return Math.min(MAX_LABEL_WIDTH, Math.max(128, Math.ceil([...label].length * 7.1 + 96)));
 }
 
 export type MapLabelPlacement = 'top' | 'bottom';
@@ -153,44 +154,6 @@ export function mapLabelAvoidObstacles(label:MapLabelRect,safe:MapLabelSafeRect,
   return{x,y,hidden:true};
 }
 
-/** A count belongs to its geographic flag, so it may use the other side or sit
- * immediately above/below it, but must never drift across the map to find room.
- * The first candidate preserves the established right-hand badge. All other
- * candidates are derived from the same unchanged 44px anchor. */
-export function directionCountShift(count:MapLabelRect,marker:MapLabelRect,safe:MapLabelSafeRect,obstacles:readonly MapLabelRect[],gap=8):MapLabelAvoidance{
-  if(![...Object.values(count),...Object.values(marker),...Object.values(safe)].every(Number.isFinite))return{x:0,y:0,hidden:true};
-  const width=count.right-count.left,height=count.bottom-count.top;
-  if(width<=0||height<=0||marker.right<=marker.left||marker.bottom<=marker.top)return{x:0,y:0,hidden:true};
-  const middle=(marker.left+marker.right)/2-width/2;
-  const usable=obstacles.filter(rect=>Object.values(rect).every(Number.isFinite)&&rect.right>rect.left&&rect.bottom>rect.top);
-  const vertical=(below:boolean)=>{
-    const x=middle-count.left;
-    let y=(below?marker.bottom+4:marker.top-height-4)-count.top;
-    // Nearby controls may extend a little above/below the marker. Move only
-    // along this adjacent side; the distance cap below forbids a detached badge.
-    for(let pass=0;pass<=usable.length;pass++){
-      const rect=translateRect(count,x,y),hit=usable.find(obstacle=>intersects(rect,obstacle,gap));
-      if(!hit)break;
-      y=(below?hit.bottom+gap:hit.top-gap-height)-count.top;
-    }
-    return{x,y};
-  };
-  const candidates=[
-    {x:0,y:0},
-    {x:marker.left+marker.right-count.right-count.left,y:0},
-    vertical(false),vertical(true),
-  ].sort((a,b)=>(a.x*a.x+a.y*a.y)-(b.x*b.x+b.y*b.y));
-  for(const candidate of candidates){
-    const rect=translateRect(count,candidate.x,candidate.y);
-    const distance=Math.hypot((rect.left+rect.right-marker.left-marker.right)/2,(rect.top+rect.bottom-marker.top-marker.bottom)/2);
-    if(distance>DIRECTION_MARKER_SIZE+Math.max(width,height)/2)continue;
-    if(insideSafe(rect,safe)&&!usable.some(obstacle=>intersects(rect,obstacle,gap)))return{...candidate,hidden:false};
-  }
-  // The accessible button name still contains the count. Hide this decorative
-  // duplicate only when every adjacent placement is obscured by real controls.
-  return{x:0,y:0,hidden:true};
-}
-
 /** Prefer the semantic side of a marker, but flip before applying translation. */
 export function mapLabelPlacement(
   preferred: MapLabelPlacement, marker: MapLabelRect, labelHeight: number,
@@ -258,26 +221,18 @@ type MeasuredMapLabel={
   button:HTMLButtonElement;label:HTMLElement;preferred:MapLabelPlacement;placement:MapLabelPlacement;
   rect?:DOMRect;shift?:MapLabelAvoidance;
 };
-type MeasuredDirectionCount={button:HTMLButtonElement;count:HTMLElement;marker?:DOMRect;rect?:DOMRect;shift?:MapLabelAvoidance};
 
 /** Reflow settled markers without one forced layout per label. Prepare all
  * labels, measure all, apply side flips together, then measure only the flipped
  * labels. Collision resolution uses those snapshots, so its final writes never
  * alternate with DOM measurements. Geographic anchors and priority stay intact. */
 export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonElement>,viewport:HTMLElement){
-  const {safe,obstacles}=viewportLabelLayout(viewport),labels:MeasuredMapLabel[]=[],counts:MeasuredDirectionCount[]=[];
+  const {safe,obstacles,compact}=viewportLabelLayout(viewport),labels:MeasuredMapLabel[]=[];
   const ordered=[...buttons.values()].filter(button=>!button.hidden&&button.isConnected).sort((a,b)=>{
     const priority=(button:HTMLButtonElement)=>button.classList.contains('is-selected')?0:button.classList.contains('direction-cluster')?1:2;
     return priority(a)-priority(b)||(a.dataset.regionId??'').localeCompare(b.dataset.regionId??'','en');
   });
   for(const button of ordered){
-    const count=button.querySelector<HTMLElement>('.region-marker-count');
-    if(count){
-      delete button.dataset.mapCountHidden;
-      setInlineProperty(count,'--map-count-shift-x','0px');
-      setInlineProperty(count,'--map-count-shift-y','0px');
-      if(count.textContent)counts.push({button,count});
-    }
     const label=button.querySelector<HTMLElement>('.region-marker-label');
     if(!label)continue;
     labels.push({button,label,preferred:'bottom',placement:'bottom'});
@@ -294,7 +249,7 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
   for(const {button,label,preferred} of labels){
     if(button.dataset.mapLabelPlacement!==preferred)button.dataset.mapLabelPlacement=preferred;
     delete button.dataset.mapLabelHidden;
-    const maximum=Math.max(48,Math.min(preferred==='top'?230:168,available));
+    const maximum=Math.max(48,Math.min(preferred==='top'?230:compact?208:MAX_LABEL_WIDTH,available));
     setInlineProperty(label,'--map-label-max-width',`${Math.floor(maximum)}px`);
     setInlineProperty(label,'--map-label-shift-x','0px');
     setInlineProperty(label,'--map-label-shift-y','0px');
@@ -306,19 +261,8 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
   }
   for(const item of labels)if(item.rect&&item.placement!==item.preferred)item.button.dataset.mapLabelPlacement=item.placement;
   for(const item of labels)if(item.rect&&item.placement!==item.preferred)item.rect=item.label.getBoundingClientRect();
-  for(const item of counts){
-    const marker=item.button.getBoundingClientRect(),rect=item.count.getBoundingClientRect();
-    if(rect.width<2||rect.height<2)continue;
-    item.marker=marker;item.rect=rect;
-  }
-  // Counts have a small finite set of positions next to their own flag. Resolve
-  // them first, then keep the more flexible text labels clear of those badges.
-  for(const item of counts){
-    if(!item.rect||!item.marker)continue;
-    const anchors=counts.filter(other=>other!==item&&other.marker).map(other=>other.marker!);
-    item.shift=directionCountShift(item.rect,item.marker,safe,[...obstacles,...anchors]);
-    if(!item.shift.hidden)obstacles.push(translateRect(item.rect,item.shift.x,item.shift.y));
-  }
+  // Name and count are measured and positioned as one card. The number can
+  // neither drift away from its name nor be hidden independently of it.
   // Reuse one obstacle list; every accepted label becomes an obstacle only for
   // the lower-priority labels that follow it, as in the previous sequential flow.
   for(const item of labels){
@@ -333,12 +277,6 @@ export function constrainDirectionLabels(buttons:ReadonlyMap<string,HTMLButtonEl
     setInlineProperty(label,'--map-label-shift-y',`${shift.y}px`);
     if(shift.hidden)button.dataset.mapLabelHidden='true';
     button.classList.toggle('map-label-shifted',shift.x!==0||shift.y!==0||placement!==preferred);
-  }
-  for(const {button,count,shift} of counts){
-    if(!shift)continue;
-    setInlineProperty(count,'--map-count-shift-x',`${shift.x}px`);
-    setInlineProperty(count,'--map-count-shift-y',`${shift.y}px`);
-    if(shift.hidden)button.dataset.mapCountHidden='true';
   }
 }
 
@@ -374,7 +312,7 @@ export function bindMapLabelReflow(viewport:HTMLElement,schedule:()=>void){
         // writes and every animated marker transform must remain silent.
         if(viewport.dataset.mapCamera)return false;
         if(record.type==='attributes')return record.attributeName==='hidden'&&target.matches('.region-marker');
-        return record.type==='childList'&&(target.matches('.region-marker-count,.region-marker-label')||[...record.addedNodes,...record.removedNodes].some(containsDirection));
+        return record.type==='childList'&&(target.matches('.region-marker-count,.region-marker-name,.region-marker-label')||[...record.addedNodes,...record.removedNodes].some(containsDirection));
       }
       // The fixed-size drawer, rather than each route row, is the obstacle.
       // Search replaces cards and their classes on every keystroke, but none
@@ -429,6 +367,15 @@ export function directionCountLabel(count: number) {
   return `${count} ${noun}`;
 }
 
+/** Every visible count includes its unit; a cluster's size is a direction
+ * count, while a single destination shows trails in the complete catalogue. */
+export function directionTrailCountLabel(count: number) {
+  const mod100 = count % 100, mod10 = count % 10;
+  const noun = mod100 >= 11 && mod100 <= 14 ? 'троп'
+    : mod10 === 1 ? 'тропа' : mod10 >= 2 && mod10 <= 4 ? 'тропы' : 'троп';
+  return `${count} ${noun}`;
+}
+
 export function directionGroupsOverlap(a: Pick<MapDirectionGroup, 'point' | 'width' | 'height'>, b: Pick<MapDirectionGroup, 'point' | 'width' | 'height'>) {
   return Math.abs(a.point.x - b.point.x) < (a.width + b.width) / 2 + DIRECTION_MARKER_GAP
     && Math.abs(a.point.y - b.point.y) < (a.height + b.height) / 2 + DIRECTION_MARKER_GAP;
@@ -469,7 +416,7 @@ export function groupMapDirections<T extends MapDirection>(
       width: members.length > 1 ? DIRECTION_CLUSTER_WIDTH : directionLabelWidth(anchor.name),
       // A 28px pennant and the padded, potentially wrapped label share the
       // control. Reserve their full height before deciding which regions group.
-      height: members.length > 1 || anchor.name.length > 22 ? 88 : 72,
+      height: members.length === 1 && anchor.name.length > 19 ? 104 : 88,
     };
   };
   const groups = unique.filter(item => {
@@ -489,14 +436,14 @@ export function groupMapDirections<T extends MapDirection>(
   return groups.sort((a, b) => a.key.localeCompare(b.key));
 }
 
-export function directionMarkerContent(group: MapDirectionGroup, routeCount: number, overview: boolean) {
+export function directionMarkerContent(group: MapDirectionGroup, routeCount: number) {
   const cluster = group.members.length > 1;
   return {
     cluster,
     label: cluster ? directionCountLabel(group.members.length) : group.anchor.name,
-    count: cluster ? String(group.members.length) : overview ? String(routeCount) : '',
+    count: cluster ? '' : directionTrailCountLabel(routeCount),
     ariaLabel: cluster ? `Приблизить ${directionCountLabel(group.members.length)}: ${group.members.map(item => item.name).join(', ')}`
-      : `Открыть ${group.anchor.name}${overview ? `, маршрутов в каталоге: ${routeCount}` : ''}`,
+      : `Открыть ${group.anchor.name}, ${directionTrailCountLabel(routeCount)} в каталоге`,
   };
 }
 
@@ -517,11 +464,11 @@ export function updateDirectionButtons<T extends MapDirection>(
     }
     if (button.getAttribute('data-map-anchor-region-id') !== group.anchor.id) button.setAttribute('data-map-anchor-region-id',group.anchor.id);
     if (button.getAttribute('data-map-group-key') !== group.key) button.setAttribute('data-map-group-key',group.key);
-    const content = directionMarkerContent(group, counts.get(id) || 0, overview);
+    const content = directionMarkerContent(group, counts.get(id) || 0);
     button.classList.toggle('direction-cluster', content.cluster);
     button.classList.toggle('is-overview', overview);
     button.classList.toggle('is-selected', group.members.some(item => item.id === selectedId));
-    const count = button.querySelector('.region-marker-count'), label = button.querySelector('.region-marker-label');
+    const count = button.querySelector('.region-marker-count'), label = button.querySelector('.region-marker-name');
     if (count && count.textContent !== content.count) count.textContent = content.count;
     if (label && label.textContent !== content.label) label.textContent = content.label;
     if (button.getAttribute('aria-label') !== content.ariaLabel) button.setAttribute('aria-label', content.ariaLabel);

@@ -48,6 +48,7 @@ export function inspectDirectionHitAreas(regionId, doc = document, win = window)
     && (element.dataset.mapGroupKey || '').split('|').includes(regionId));
   if (!button) return {missing: true, reason: 'direction', regionId};
   const anchorRect = box(button), style = win.getComputedStyle(button);
+  const label = button.querySelector('.region-marker-label');
   const sampleHit = point => {
     const withinViewport = inside(point);
     const hit = withinViewport ? doc.elementFromPoint(point.x, point.y) : null;
@@ -64,6 +65,7 @@ export function inspectDirectionHitAreas(regionId, doc = document, win = window)
       && current.display !== 'none' && current.visibility !== 'hidden' && Number(current.opacity) > 0
       && rect.width > 1 && rect.height > 1;
     return {kind, present: true, visible, text: element.textContent || '', rect,
+      containedByLabel: kind === 'count' ? !!label?.contains(element) : true,
       pointerEvents: current.pointerEvents,
       samples: visible ? directionHitGrid(rect, anchorRect, kind === 'count' ? 4 : 8).map(sampleHit) : []};
   });

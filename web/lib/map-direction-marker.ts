@@ -38,17 +38,21 @@ export function createDirectionMarker(
   svg.appendChild(flag);
   svg.appendChild(ridge);
 
-  // Counts are deliberately separate from the SVG: regrouping must never
-  // replace the geographic emblem when it updates textContent.
+  emblem.appendChild(svg);
+
+  // The name and its unit-bearing count share one measured, clickable card.
+  // Regrouping updates these leaves without replacing the geographic emblem
+  // or separating a number from the destination it describes.
+  const label = ownerDocument.createElement('span');
+  label.className = 'region-marker-label';
+  const name = ownerDocument.createElement('span');
+  name.className = 'region-marker-name';
+  name.textContent = direction.name;
   const count = ownerDocument.createElement('span');
   count.className = 'region-marker-count';
   count.setAttribute('aria-hidden', 'true');
-  emblem.appendChild(svg);
-  emblem.appendChild(count);
-
-  const label = ownerDocument.createElement('span');
-  label.className = 'region-marker-label';
-  label.textContent = direction.name;
+  label.appendChild(name);
+  label.appendChild(count);
   button.appendChild(emblem);
   button.appendChild(label);
   return button;

@@ -19,6 +19,7 @@ import {buildTrailOverlay} from '../scripts/build-trail-overlay.mjs';
 import {verifyReviewedCoastalRoute} from '../lib/reviewed-coastal-routes.ts';
 import {loadPublishedRouteGeometry} from '../lib/published-route.ts';
 import {publishedTrail} from '../lib/route-adapter.ts';
+import {mapDirectionCounts} from '../lib/map-catalog.ts';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),compiled=new Map();
 const turn=()=>new Promise(done=>setImmediate(done));
@@ -42,6 +43,7 @@ function componentHost(file,name,dependencies={}){
   const effect=(queue,callback,deps)=>{const index=cursor++,previous=hooks[index],changed=!previous||deps===undefined||deps.some((value,i)=>!Object.is(value,previous.deps?.[i]));
     if(changed){hooks[index]={deps,cleanup:previous?.cleanup};queue.push(()=>{hooks[index].cleanup?.();hooks[index].cleanup=callback();});}};
   const react={memo:value=>value,
+    useMemo:(factory,deps)=>{const index=cursor++,previous=hooks[index];if(!previous||deps.some((value,i)=>!Object.is(value,previous.deps?.[i])))hooks[index]={value:factory(),deps};return hooks[index].value;},
     useCallback:(callback,deps)=>{const index=cursor++,previous=hooks[index];if(!previous||deps.some((value,i)=>!Object.is(value,previous.deps?.[i])))hooks[index]={value:callback,deps};return hooks[index].value;},
     useRef:initial=>{const index=cursor++;return hooks[index]??= {current:initial};},
     useState:initial=>{const index=cursor++;if(!hooks[index])hooks[index]={value:typeof initial==='function'?initial():initial};return[hooks[index].value,value=>{if(disposed)return;const next=typeof value==='function'?value(hooks[index].value):value;if(!Object.is(next,hooks[index].value)){hooks[index].value=next;dirty=true;}}];},
@@ -69,7 +71,7 @@ function componentHost(file,name,dependencies={}){
   return host;
 }
 
-function atlasFixture({committedMode='detail',ready=true}={}){
+function atlasFixture({committedMode='detail',ready=true,directions=[]}={}){
   const requests=new Map(),maps=[],notes=[],chosen=[],overlayRequests=[],invalidated=[],frameControllers=[];
   class AtlasEngine{
     constructor(_element,options){this.options=options;this.route=undefined;this.routeId=undefined;this.fits=[];this.cameras=[];this.camera=options.camera;this.visibleBounds=grid.bounds;this.active=true;this.activations=[];this.modes=[];this.pitchChanges=[];this.layers={paths:true,boundaries:true,relief:true};this.layerChanges=[];this.routeChanges=[];this.state={ready,mode:'detail',committedMode,error:ready?'':'Границы карты не загрузились.',loading:false,reliefReady:ready,imageryLoading:false};maps.push(this);queueMicrotask(()=>ready?options.onReady():options.onState(this.getState()));}
@@ -83,13 +85,13 @@ function atlasFixture({committedMode='detail',ready=true}={}){
     zoomBy(delta){this.options.onBeforeZoom?.();(this.zoomCalls??=[]).push({delta,fits:this.fits.length});this.options.onGesture?.();}
     retry(){this.retries=(this.retries||0)+1;this.state.loading=true;this.options.onState(this.getState());}
     setPosition(value){this.position=value;}
-    setFloor(){}setPadding(){}setRegion(){}setActive(value){this.active=value;this.activations.push(value);}setMarkers(){}setPitch(value){this.pitchChanges.push(value);}setObstacles(){}setCamera(camera){this.camera=camera;this.cameras.push(camera);}destroy(){this.destroyed=true;}
+    setFloor(){}setPadding(){}setRegion(){}setActive(value){this.active=value;this.activations.push(value);}setMarkers(value){this.markers=value;}setPitch(value){this.pitchChanges.push(value);}setObstacles(){}setCamera(camera){this.camera=camera;this.cameras.push(camera);}destroy(){this.destroyed=true;}
     fit(bounds){this.fits.push(bounds);}getVisibleBounds(){return this.visibleBounds;}getBounds(){return this.visibleBounds;}getCamera(){return this.camera;}getSize(){return{width:800,height:600};}
   }
   const host=componentHost('components/CustomAtlas.tsx','CustomAtlas',{
     './MapIcon':{MapIcon:'icon'},'./MapAttribution':{MapAttribution:'credit'},'./MapRouteContext':{MapRouteContext:'context'},
     '@/lib/custom-map-engine':{CustomMapEngine:AtlasEngine},'@/lib/custom-map-camera':{hitGeometry:()=>true,mercatorProject:()=>({x:.6,y:.4}),mercatorUnproject:()=>region.center},
-    '@/lib/content':{regions:[],routeCountLabel:()=>''},'@/lib/map-catalog':{mapDirectionCounts:()=>new globalThis.Map()},'@/lib/territories':{territoryForMapPoint:()=>undefined},
+    '@/lib/content':{regions:directions,routeCountLabel:()=>''},'@/lib/map-catalog':{mapDirectionCounts},'@/lib/territories':{territoryForMapPoint:()=>undefined},
     '@/lib/russia-map':{russiaView:()=>({camera:{center:region.center,zoom:1},padding:{}})},
     '@/lib/map-preload':{loadPublicBytes:(url,priority,signal)=>{const request={...deferred(),url,priority,signal};overlayRequests.push(request);return request.promise;},invalidatePublicMapResource:url=>invalidated.push(url)},
     '@/lib/route-source-integrity':{loadVerifiedRouteGeometry:(url,_sources,{signal})=>{const request={...deferred(),signal};requests.set(url,request);return request.promise;}},
@@ -108,6 +110,26 @@ function atlasFixture({committedMode='detail',ready=true}={}){
   const select=(trail,visibleTrails=[])=>host.render({region,trail,visibleTrails,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
   return{host,requests,maps,notes,chosen,select,overlayRequests,invalidated,frameControllers};
 }
+
+test('direction totals retain the full catalogue through regional selection, empty filters, zoom and catalogue refresh',async t=>{
+  const altai={...region,id:'altai',name:'Алтай'},baikal={...region,id:'baikal',name:'Байкал'},empty={...region,id:'empty',name:'Без троп'};
+  const env=atlasFixture({directions:[altai,baikal,empty]});t.after(()=>env.host.unmount());
+  const mountain={id:'mountain',regionId:'altai',title:'Горная тропа'},shore={id:'shore',regionId:'baikal',title:'Береговая тропа'},shared={id:'shared',regionId:'altai',regionIds:['altai','baikal','baikal'],title:'Общий маршрут'};
+  const catalog=[mountain,shore,shared];
+  const render=(visibleTrails,selectedRegion,catalogTrails=catalog)=>env.host.render({region:selectedRegion,visibleTrails,catalogTrails,onRegion(){}});
+  const totals=()=>Object.fromEntries(env.maps[0].markers.filter(marker=>marker.kind==='direction').map(marker=>[marker.id,marker.count]));
+  render(catalog);await env.host.settle();assert.deepEqual(totals(),{altai:2,baikal:2,empty:0});
+  render([mountain,shared],altai);await env.host.settle();
+  assert.deepEqual(totals(),{altai:2,baikal:2,empty:0},'selecting Altai must not claim that Baikal is empty');
+  assert.equal(env.maps[0].markers.find(marker=>marker.id==='altai').active,true);
+  render([],altai);await env.host.settle();
+  assert.deepEqual(totals(),{altai:2,baikal:2,empty:0},'an empty filter changes visible routes, not catalogue availability');
+  env.maps[0].camera={center:altai.center,zoom:14};env.maps[0].options.onSettled(env.maps[0].camera);env.host.render();
+  assert.deepEqual(totals(),{altai:2,baikal:2,empty:0},'zoom cannot change a region catalogue total');
+  render([shore],baikal,[...catalog,{id:'published',regionId:'baikal',title:'Новый опубликованный маршрут',publicationStatus:'published'}]);await env.host.settle();
+  assert.deepEqual(totals(),{altai:2,baikal:3,empty:0},'published catalogue changes update totals for the existing markers');
+  assert.equal(env.maps[0].markers.find(marker=>marker.id==='baikal').active,true);
+});
 
 test('the real atlas controls prepare their selected frame before zoom and preserve later manual ownership',async t=>{
  const env=atlasFixture();t.after(()=>env.host.unmount());let finishes=0;

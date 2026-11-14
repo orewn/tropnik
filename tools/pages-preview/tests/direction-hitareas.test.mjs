@@ -17,15 +17,17 @@ test('inner-corner/edge grids choose actual painted areas outside the44px anchor
  assert.equal(directionExternalPoint(grid,'label'),null,'a hidden label is not a clickable target');
 });
 
-function dom({engine='tropnik-canvas',labelHidden=false,countPassThrough=false,hiddenFootprint=false}={}){
+function dom({engine='tropnik-canvas',labelHidden=false,labelPassThrough=false,countDetached=false,hiddenFootprint=false}={}){
  const original=directionGridFixture('altai',engine),canvas={tagName:'CANVAS',closest:()=>null};
  const styles=new Map(),visible={display:'block',visibility:'visible',opacity:'1',pointerEvents:'auto'};
  const button={tagName:'BUTTON',hidden:false,dataset:{regionId:'altai',mapGroupKey:'altai'},classList:{contains:()=>false},getBoundingClientRect:()=>original.anchorRect,getAttribute:()=>original.ariaLabel};
  const surfaces=original.surfaces.map(surface=>{
   const node={tagName:'SPAN',textContent:surface.text,getBoundingClientRect:()=>surface.rect,closest:selector=>selector==='.region-marker'?button:null};
-  styles.set(node,{...visible,visibility:surface.kind==='label'&&labelHidden?'hidden':'visible',pointerEvents:surface.kind==='count'&&countPassThrough?'none':'auto'});
+  styles.set(node,{...visible,visibility:labelHidden?'hidden':'visible',pointerEvents:surface.kind==='count'||labelPassThrough?'none':'auto'});
   return{kind:surface.kind,node,rect:surface.rect};
  });
+ const label=surfaces.find(surface=>surface.kind==='label'),count=surfaces.find(surface=>surface.kind==='count');
+ label.node.contains=node=>node===label.node||!countDetached&&node===count.node;
  button.querySelector=selector=>surfaces.find(surface=>selector===`.region-marker-${surface.kind}`)?.node;
  button.closest=selector=>selector==='.region-marker'?button:null;styles.set(button,visible);
  const hidden={tagName:'BUTTON',hidden:true,dataset:{regionId:'inactive'},getBoundingClientRect:()=>hiddenFootprint?hitRect(200,200,44,44):hitRect(0,0,0,0),closest:()=>null};
@@ -50,11 +52,12 @@ test('the serialized read-only browser inspector measures external surfaces and 
  const hidden=dom({labelHidden:true}),hiddenGrid=browserRead(hidden.doc,hidden.win);
  assert.equal(hiddenGrid.surfaces[0].visible,false);assert.deepEqual(hiddenGrid.surfaces[0].samples,[]);
  assert.equal(assertDirectionHitGrid(hiddenGrid,'hidden-label','tropnik-canvas'),hiddenGrid,'hidden labels under overlays must not be reported as hit failures');
- assert.equal(hidden.probes(),8);
+ assert.equal(hiddenGrid.surfaces[1].visible,false,'the count shares the hidden card state');
+ assert.equal(hidden.probes(),0);
 });
 
-test('real DOM-grid failures are detected for passing-through counters and inactive controls',()=>{
- for(const options of [{countPassThrough:true},{hiddenFootprint:true}]){
+test('real DOM-grid failures detect a passing-through card, detached count, and inactive controls',()=>{
+ for(const options of [{labelPassThrough:true},{countDetached:true},{hiddenFootprint:true}]){
   const fake=dom(options),grid=inspectDirectionHitAreas('altai',fake.doc,fake.win);
   assert.throws(()=>assertDirectionHitGrid(grid,'broken','tropnik-canvas'));
  }
@@ -67,10 +70,10 @@ test('both pointer profiles require native external ordinary-label and count act
  for(const [engine,mobile] of [['tropnik-canvas',true],['tropnik-canvas',false]]){
   const receipt=directionHitAreasFixture(engine,mobile);
   assert.equal(assertDirectionHitAreas(receipt,'fixture',engine,mobile),receipt);
-  const count=receipt.actions[1];count.grid.cluster=true;count.grid.groupKey='baikal|other';count.point.groupKey=count.grid.groupKey;
-  count.events.forEach(event=>{event.button.groupKey=count.grid.groupKey;});count.after={region:'',route:'',zoom:3};
-  assert.equal(assertDirectionHitAreas(receipt,'cluster',engine,mobile),receipt,'native count input may instead expand its actual cluster');
-  count.after.zoom=2.2;assert.throws(()=>assertDirectionHitAreas(receipt,'cluster',engine,mobile),/did not expand/);
+  const cluster=structuredClone(receipt.actions[1]);cluster.kind='label';cluster.grid=directionGridFixture('baikal',engine,true);cluster.point=directionExternalPoint(cluster.grid,'label');
+  cluster.events.forEach(event=>{event.button.groupKey=cluster.grid.groupKey;event.x=cluster.point.x;event.y=cluster.point.y;});cluster.after={region:'',route:'',zoom:3};receipt.actions.unshift(cluster);
+  assert.equal(assertDirectionHitAreas(receipt,'cluster',engine,mobile),receipt,'native cluster label input expands destinations before the ordinary region count is selected');
+  cluster.after.zoom=2.2;assert.throws(()=>assertDirectionHitAreas(receipt,'cluster',engine,mobile),/did not expand/);
  }
 });
 
@@ -83,6 +86,7 @@ test('pass flags cannot hide an incomplete grid, wrong target, synthetic input o
   receipt=>receipt.actions[0].grid.surfaces[0].samples[0].withinViewport=false,
   receipt=>receipt.actions[0].grid.surfaces[0].samples[0].x+=10,
   receipt=>receipt.actions[0].grid.surfaces[0].pointerEvents='none',
+  receipt=>receipt.actions[0].grid.surfaces[1].containedByLabel=false,
   receipt=>receipt.actions[0].grid.hiddenControls[0].display='block',
   receipt=>{receipt.actions[0].grid.hiddenControls[0].rect=hitRect(200,200,44,44);},
   receipt=>receipt.actions.forEach(action=>{action.grid.hiddenControls=[];}),
@@ -97,5 +101,5 @@ test('pass flags cannot hide an incomplete grid, wrong target, synthetic input o
  ];
  for(const change of changes){const receipt=directionHitAreasFixture();change(receipt);assert.throws(()=>assertDirectionHitAreas(receipt,'invalid','tropnik-canvas',true));}
  const hidden=directionHitAreasFixture();hidden.actions[1].grid.surfaces[0].visible=false;hidden.actions[1].grid.surfaces[0].samples=[];
- assert.equal(assertDirectionHitAreas(hidden,'hidden-label','tropnik-canvas',true),hidden,'an independently clicked count need not expose a collision-hidden label');
+ assert.throws(()=>assertDirectionHitAreas(hidden,'hidden-label','tropnik-canvas',true),/share visibility/,'a trail count must never remain detached from its hidden region name');
 });

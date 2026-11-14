@@ -326,12 +326,18 @@ export function assertDirectionHitGrid(grid, context, engine) {
   });
  };
  assert.deepEqual(grid.surfaces?.map(surface=>surface.kind),['label','count']);
+ const label=grid.surfaces.find(surface=>surface.kind==='label'),count=grid.surfaces.find(surface=>surface.kind==='count');
+ assert.equal(count.containedByLabel,true,`${context}: count is detached from its region name`);
+ assert.equal(count.visible,!grid.cluster&&label.visible,`${context}: name and count must share visibility`);
+ if(grid.cluster)assert.equal(count.text,'',`${context}: a direction cluster must not carry a trail count`);
  for(const surface of grid.surfaces){
   assert.equal(surface.present,true,`${context}: direction ${surface.kind} is absent`);
   assert.equal(typeof surface.visible,'boolean');
   if(!surface.visible){assert.deepEqual(surface.samples,[]);continue;}
   rect(surface.rect,surface.kind);assert.ok(surface.rect.width>1&&surface.rect.height>1);
-  assert.ok(surface.text?.trim());assert.equal(surface.pointerEvents,'auto',`${context}: visible ${surface.kind} passes clicks through`);
+  assert.ok(surface.text?.trim());
+  assert.equal(surface.pointerEvents,surface.kind==='count'?'none':'auto',`${context}: the shared card must own input on its name and count`);
+  if(surface.kind==='count')assert.ok(surface.rect.left>=label.rect.left&&surface.rect.right<=label.rect.right&&surface.rect.top>=label.rect.top&&surface.rect.bottom<=label.rect.bottom,`${context}: the painted count escapes its region card`);
   sampleGrid(surface.samples,directionHitGrid(surface.rect,grid.anchorRect,surface.kind==='count'?4:8),sample=>{
    assert.equal(sample.owned,true,`${context}: ${surface.kind}/${sample.name} is intercepted by ${sample.hitTag||'nothing'}`);
    assert.equal(sample.hitRegionId,grid.anchorId,`${context}: ${surface.kind}/${sample.name} hits another region`);
@@ -384,11 +390,11 @@ export function assertDirectionHitAreas(receipt,name,engine,mobile){
  for(const [index,action] of receipt.actions.entries()){
   const grid=assertDirectionAction(action,`${name}/directions/${index}`,engine,input);
   if(!grid.cluster&&action.kind==='label')ordinaryLabel=true;
-  if(action.kind==='count')count=true;
+  if(!grid.cluster&&action.kind==='count')count=true;
   hiddenControls+=grid.hiddenControls.length;
  }
  assert.equal(ordinaryLabel,true,`${name}: no ordinary label was selected through its external edge`);
- assert.equal(count,true,`${name}: no external count/cluster input was verified`);
+ assert.equal(count,true,`${name}: no ordinary region trail count was selected through its painted area`);
  assert.ok(hiddenControls>0,`${name}: no inactive directions were inspected`);
  return receipt;
 }
@@ -504,6 +510,10 @@ export function assertLayerMenuAudit(receipt,name){
  return receipt;
 }
 
+const russianCount=(count,one,few,many)=>`${count} ${count%100>=11&&count%100<=14?many:count%10===1?one:count%10>=2&&count%10<=4?few:many}`;
+const trailCountText=count=>russianCount(count,'тропа','тропы','троп');
+const directionCountText=count=>russianCount(count,'направление','направления','направлений');
+
 export function assertOverviewCounts(frame,context,expectedCatalogue){
  assert.equal(frame?.region,'');assert.ok(Number.isInteger(frame.total)&&frame.total>0);assert.equal(frame.mapTotal,frame.total,`${context}: country map and catalogue totals differ`);
  assert.ok(Array.isArray(frame.catalog)&&frame.catalog.length>0,`${context}: catalogue directions are missing`);
@@ -533,12 +543,13 @@ export function assertOverviewCounts(frame,context,expectedCatalogue){
   assert.equal(marker.cluster,members.length>1);
   assert.ok(typeof marker.name==='string'&&marker.name.length>0&&typeof marker.ariaLabel==='string'&&marker.ariaLabel.length>0);
   if(marker.cluster){
-   // A group badge counts directions, not routes. Hidden member controls keep
-   // old labels/counts, so only the current visible group is evidence here.
-   assert.equal(marker.count,members.length,`${context}: cluster badge differs from its direction membership`);
+   assert.equal(marker.name,directionCountText(members.length),`${context}: cluster label differs from its direction membership`);
+   assert.equal(marker.count,null,`${context}: a direction cluster must not masquerade as a trail count`);
+   assert.equal(marker.countText,'',`${context}: the cluster has a detached or duplicate count`);
   }else{
    assert.equal(marker.name,catalog.get(marker.id).name,`${context}: flag name differs from its catalogue direction`);
    assert.equal(marker.count,catalog.get(marker.id).count,`${context}: a hidden filter changed a flag count`);
+   assert.equal(marker.countText,trailCountText(marker.count),`${context}: the region count must state its trail unit`);
   }
   positive ||= members.some(id=>catalog.get(id).count>0);
  }
@@ -550,12 +561,13 @@ function assertSavedDirectionReentry(actions,context,engine,input,count){
  assert.ok(Array.isArray(actions)&&actions.length>=1&&actions.length<=7,`${context}: bounded native direction reentry is missing`);
  for(const [index,action] of actions.entries()){
   const grid=assertDirectionAction(action,`${context}/${index}`,engine,input);
-  assert.equal(action.kind,'count');assert.equal(grid.regionId,'altai');assert.equal(action.before.region,'');
+  assert.equal(grid.regionId,'altai');assert.equal(action.before.region,'');
   const last=index===actions.length-1;
+  assert.equal(action.kind,last?'count':'label',`${context}: expand the cluster label before selecting the region trail count`);
   assert.equal(grid.cluster,!last,`${context}: reentry must finish with an ordinary Altai flag`);
-  const members=grid.groupKey.split('|'),surface=grid.surfaces.find(item=>item.kind==='count');
+  const members=grid.groupKey.split('|'),surface=grid.surfaces.find(item=>item.kind===action.kind);
   assert.equal(new Set(members).size,members.length);assert.ok(members.includes('altai'));
-  assert.equal(surface.text.trim(),String(last?count:members.length),`${context}: displayed count does not match the native reentry target`);
+  assert.equal(surface.text.trim(),last?trailCountText(count):directionCountText(members.length),`${context}: displayed count does not match the native reentry target`);
   if(last){assert.equal(grid.anchorId,'altai');assert.equal(grid.groupKey,'altai');assert.equal(action.after.region,'altai');}
   if(index)assert.ok(Math.abs(action.before.zoom-actions[index-1].after.zoom)<.01,`${context}: reentry camera measurements are disconnected`);
  }

@@ -1,6 +1,6 @@
 'use client';
 import type * as GeoJSON from 'geojson';
-import {memo,useCallback,useEffect,useLayoutEffect,useRef,useState} from 'react';
+import {memo,useCallback,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {MapIcon} from './MapIcon';
 import {MapAttribution,MapFooter} from './MapAttribution';
 import {MapRouteContext} from './MapRouteContext';
@@ -30,7 +30,8 @@ import {reliefContourIntervals} from '@/lib/custom-map-relief';
 const INITIAL:CustomMapState={ready:false,loading:false,mode:'detail',committedMode:'overview',imageryLoading:false,reliefReady:false,localDetail:false,error:'',residentTiles:0,pendingTiles:0};
 
 export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
-  const {region,trail,visibleTrails=EMPTY_MAP_TRAILS,planning=false,planPoints}=props;
+  const {region,trail,visibleTrails=EMPTY_MAP_TRAILS,catalogTrails=visibleTrails,planning=false,planPoints}=props;
+  const directionCounts=useMemo(()=>mapDirectionCounts(catalogTrails),[catalogTrails]);
   const container=useRef<HTMLDivElement>(null),engine=useRef<CustomMapEngine|null>(null),latest=useRef(props);
   const scaleValue=useRef<HTMLSpanElement>(null),scaleLine=useRef<HTMLSpanElement>(null);
   const frame=useRef<MapFrameRefit|null>(null),navigation=useRef(0),manual=useRef(false),fullView=useRef(!region),fitCurrent=useRef<(animate?:boolean)=>void>(()=>{});
@@ -161,12 +162,12 @@ export const CustomAtlas=memo(function CustomAtlas(props:AtlasProps){
   useEffect(()=>{refreshOverlay.current();},[visibleTrails,planning,paths,trail?.id,state.ready]);
   useEffect(()=>{
     const map=engine.current,coverage=map?.getCoverage();if(!map||!coverage||!state.ready)return;
-    const counts=mapDirectionCounts(visibleTrails),markers:CustomMapMarker[]=planning?[]:regions.filter(item=>inRussiaCoverage(...item.center,coverage.area)).map(item=>({id:item.id,coordinate:item.center,label:item.name,kind:'direction',count:counts.get(item.id)||0,active:item.id===region?.id}));
+    const markers:CustomMapMarker[]=planning?[]:regions.filter(item=>inRussiaCoverage(...item.center,coverage.area)).map(item=>({id:item.id,coordinate:item.center,label:item.name,kind:'direction',count:directionCounts.get(item.id)||0,active:item.id===region?.id}));
     if(region&&!planning)markers.push(...mapTrailPointEntries(visibleTrails,(lng,lat)=>inRussiaCoverage(lng,lat,coverage.area),region,trail?.id).map(item=>({id:item.id,coordinate:item.center,label:item.title,kind:'trail' as const,active:item.selected})));
     if(planning&&planPoints)markers.push(...planPoints.map(point=>({id:point.id,coordinate:point.point,label:point.label,kind:'plan' as const,active:point.kind==='choice'})));
     if(position.current)markers.push({id:'current-position',coordinate:position.current,label:'Моё местоположение',kind:'position'});
     map.setMarkers(markers);
-  },[visibleTrails,region,trail?.id,planPoints,planning,state.ready]);
+  },[visibleTrails,directionCounts,region,trail?.id,planPoints,planning,state.ready]);
   const changeMode=(mode:Extract<CustomMapMode,'detail'|'satellite'>)=>{
     const map=engine.current;if(!map)return;
     setDismissedError('');setStatus('');map.setPitch(0);

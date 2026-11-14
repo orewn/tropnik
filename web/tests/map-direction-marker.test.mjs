@@ -61,7 +61,10 @@ test('a direction is one named native button with a decorative non-focusable emb
   assert.equal(button.type, 'button', 'map selection must never submit an enclosing form');
   assert.equal(button.dataset.regionId, 'altai');
   assert.equal(button.getAttribute('aria-label'), 'Открыть Алтай');
-  assert.equal(button.querySelector('.region-marker-label').textContent, 'Алтай');
+  const label = button.querySelector('.region-marker-label');
+  const name = button.querySelector('.region-marker-name');
+  assert.equal(name.textContent, 'Алтай');
+  assert.equal(name.parentElement, label, 'the region name belongs to the shared label card');
   const emblem = button.querySelector('.region-marker-emblem');
   const count = button.querySelector('.region-marker-count');
   const svg = emblem.querySelector('svg');
@@ -71,34 +74,56 @@ test('a direction is one named native button with a decorative non-focusable emb
   assert.equal(svg.getAttribute('focusable'), 'false');
   assert.equal(svg.namespaceURI, 'http://www.w3.org/2000/svg');
   assert.ok(svg.querySelector('path'), 'the region retains its distinct drawn emblem');
-  assert.equal(count.parentElement, emblem);
+  assert.equal(count.parentElement, label, 'the trail count stays beside the name inside one card');
+  assert.equal(emblem.querySelector('.region-marker-count'), null, 'the flag must not carry a detached ambiguous number');
   assert.notEqual(count, svg);
   assert.equal(button.querySelector('.region-marker-dot'), null, 'the old trail-like dot must not return');
 });
 
-test('overview counts, group expansion, and detail selection preserve the original region artwork', () => {
+test('group expansion and detail zoom preserve the region name, trail count, and original artwork', () => {
   const doc = documentFixture();
   const directions = [{id: 'a', name: 'Алтай', center: [86, 51]}, {id: 'b', name: 'Саяны', center: [94, 52]}];
   const buttons = new Map(directions.map(direction => [direction.id, createDirectionMarker(direction, doc)]));
   const artwork = new Map([...buttons].map(([id, button]) => [id, button.querySelector('svg')]));
   const paths = new Map([...artwork].map(([id, svg]) => [id, [...svg.children]]));
+  const cards = new Map([...buttons].map(([id, button]) => [id, {
+    label: button.querySelector('.region-marker-label'),
+    name: button.querySelector('.region-marker-name'),
+    count: button.querySelector('.region-marker-count'),
+  }]));
   const counts = new Map([['a', 17], ['b', 8]]);
   const expanded = groupMapDirections(directions, ([lng, lat]) => ({x: lng * 200, y: lat * 200}));
   updateDirectionButtons(buttons, expanded, counts, true);
-  assert.equal(buttons.get('a').querySelector('.region-marker-count').textContent, '17');
-  assert.equal(buttons.get('a').getAttribute('aria-label'), 'Открыть Алтай, маршрутов в каталоге: 17');
+  assert.equal(buttons.get('a').querySelector('.region-marker-count').textContent, '17 троп');
+  assert.equal(buttons.get('a').getAttribute('aria-label'), 'Открыть Алтай, 17 троп в каталоге');
   const grouped = groupMapDirections(directions, () => ({x: 0, y: 0}));
   updateDirectionButtons(buttons, grouped, counts, true);
   const anchor = buttons.get(grouped[0].anchor.id);
-  assert.equal(anchor.querySelector('.region-marker-count').textContent, '2');
-  assert.equal(anchor.querySelector('.region-marker-label').textContent, '2 направления');
+  assert.equal(anchor.querySelector('.region-marker-count').textContent, '', 'a grouped destination count is not a trail count');
+  assert.equal(anchor.querySelector('.region-marker-name').textContent, '2 направления');
   assert.match(anchor.getAttribute('aria-label'), /^Приблизить 2 направления:/);
   updateDirectionButtons(buttons, expanded, counts, false, 'a');
-  assert.equal(buttons.get('a').getAttribute('aria-label'), 'Открыть Алтай');
+  assert.equal(buttons.get('a').getAttribute('aria-label'), 'Открыть Алтай, 17 троп в каталоге');
   for (const [id, button] of buttons) {
     assert.equal(button.hidden, false);
-    assert.equal(button.querySelector('.region-marker-count').textContent, '');
+    assert.equal(button.querySelector('.region-marker-name').textContent, directions.find(item => item.id === id).name);
+    assert.equal(button.querySelector('.region-marker-count').textContent, `${counts.get(id)} троп`, 'detail zoom retains the readable catalogue count');
+    for (const [part, node] of Object.entries(cards.get(id))) {
+      assert.equal(button.querySelector(`.region-marker-${part}`), node, 'regrouping updates children instead of destroying the label card');
+    }
     assert.equal(button.querySelector('svg'), artwork.get(id), 'count changes must not replace the emblem');
     assert.deepEqual(button.querySelector('svg').children, paths.get(id), 'drawn paths survive grouping and expansion');
+  }
+});
+
+test('a real empty destination shows zero trails at both overview and detail zoom', () => {
+  const doc = documentFixture(), direction = {id: 'empty', name: 'Пустое направление', center: [90, 50]};
+  const button = createDirectionMarker(direction, doc), buttons = new Map([[direction.id, button]]);
+  const groups = groupMapDirections([direction], () => ({x: 200, y: 200}));
+  for (const overview of [true, false]) {
+    updateDirectionButtons(buttons, groups, new Map([[direction.id, 0]]), overview);
+    assert.equal(button.querySelector('.region-marker-name').textContent, direction.name);
+    assert.equal(button.querySelector('.region-marker-count').textContent, '0 троп');
+    assert.match(button.getAttribute('aria-label'), /0/);
   }
 });

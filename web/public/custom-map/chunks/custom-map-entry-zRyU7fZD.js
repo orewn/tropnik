@@ -102,7 +102,7 @@ function S(e, t, n, r = {
 }, i = {}) {
 	return a(r), x(h(r, p(e, t)), r, t, v(n, i), e.bearingDegrees ?? 0);
 }
-function ee(e) {
+function C(e) {
 	let t = typeof e == "number" ? {
 		top: e,
 		right: e,
@@ -117,7 +117,7 @@ function ee(e) {
 	for (let [e, t] of Object.entries(n)) if (i(t, e) < 0) throw RangeError("Map insets cannot be negative");
 	return n;
 }
-function te(t, n) {
+function ee(t, n) {
 	let [a, o, s, c] = t;
 	for (let e of t) i(e, "bounds");
 	if (o > c) throw RangeError("South must not exceed north");
@@ -132,24 +132,24 @@ function te(t, n) {
 		c
 	];
 }
-function C(e, n, r = {}) {
+function w(e, n, r = {}) {
 	o(n);
-	let i = ee(r.padding), a = n.width - i.left - i.right, s = n.height - i.top - i.bottom;
+	let i = C(r.padding), a = n.width - i.left - i.right, s = n.height - i.top - i.bottom;
 	if (a <= 0 || s <= 0) throw RangeError("Insets leave no map viewport");
-	let [l, u, f, p] = te(e, r.referenceLongitude), m = d([l, u]), h = d([f, p]), g = {
+	let [l, u, f, p] = ee(e, r.referenceLongitude), m = d([l, u]), h = d([f, p]), g = {
 		x: (m.x + h.x) / 2,
 		y: (m.y + h.y) / 2
-	}, _ = c(r.bearingDegrees), y = _ * t, b = Math.abs(Math.cos(y)) * (h.x - m.x) + Math.abs(Math.sin(y)) * (m.y - h.y), S = Math.abs(Math.sin(y)) * (h.x - m.x) + Math.abs(Math.cos(y)) * (m.y - h.y), C = Math.min(b > 0 ? a / b : Infinity, S > 0 ? s / S : Infinity), w = r.maxZoom ?? 18, T = v(Number.isFinite(C) ? Math.log2(C / 256) : w, {
+	}, _ = c(r.bearingDegrees), y = _ * t, b = Math.abs(Math.cos(y)) * (h.x - m.x) + Math.abs(Math.sin(y)) * (m.y - h.y), S = Math.abs(Math.sin(y)) * (h.x - m.x) + Math.abs(Math.cos(y)) * (m.y - h.y), w = Math.min(b > 0 ? a / b : Infinity, S > 0 ? s / S : Infinity), T = r.maxZoom ?? 18, E = v(Number.isFinite(w) ? Math.log2(w / 256) : T, {
 		...r,
-		maxZoom: w
+		maxZoom: T
 	});
 	return x(g, {
 		x: i.left + a / 2,
 		y: i.top + s / 2
-	}, n, T, _);
+	}, n, E, _);
 }
-function w(e, t, n) {
-	let r = p(e, t), i = ee(n), a = i.left, o = t.width - i.right, s = i.top, c = t.height - i.bottom;
+function T(e, t, n) {
+	let r = p(e, t), i = C(n), a = i.left, o = t.width - i.right, s = i.top, c = t.height - i.bottom;
 	if (o <= a || c <= s) throw RangeError("Insets leave no map viewport");
 	let l = [
 		{
@@ -176,16 +176,16 @@ function w(e, t, n) {
 		Math.max(...l.map((e) => e[1]))
 	];
 }
-var T = (e) => ({
+var E = (e) => ({
 	x: (e[0].x + e[1].x) / 2,
 	y: (e[0].y + e[1].y) / 2
-}), ne = (e) => Math.hypot(e[1].x - e[0].x, e[1].y - e[0].y);
-function re(e, n, r, i, o = {}, s = !1) {
+}), te = (e) => Math.hypot(e[1].x - e[0].x, e[1].y - e[0].y);
+function ne(e, n, r, i, o = {}, s = !1) {
 	[...r, ...i].forEach(a);
-	let l = h(T(r), p(e, n)), u = ne(r), d = ne(i), f = u >= 1 && d >= 1 ? d / u : 1, m = v(e.zoom + Math.log2(f), o), g = s && u >= 1 && d >= 1 ? c((Math.atan2(i[1].y - i[0].y, i[1].x - i[0].x) - Math.atan2(r[1].y - r[0].y, r[1].x - r[0].x)) / t) : 0;
-	return x(l, T(i), n, m, (e.bearingDegrees ?? 0) - g);
+	let l = h(E(r), p(e, n)), u = te(r), d = te(i), f = u >= 1 && d >= 1 ? d / u : 1, m = v(e.zoom + Math.log2(f), o), g = s && u >= 1 && d >= 1 ? c((Math.atan2(i[1].y - i[0].y, i[1].x - i[0].x) - Math.atan2(r[1].y - r[0].y, r[1].x - r[0].x)) / t) : 0;
+	return x(l, E(i), n, m, (e.bearingDegrees ?? 0) - g);
 }
-var ie = class {
+var re = class {
 	constructor(e = {}) {
 		this.contacts = /* @__PURE__ */ new Map(), this.options = { ...e };
 	}
@@ -209,7 +209,7 @@ var ie = class {
 					x: t.x - e.x,
 					y: t.y - e.y
 				});
-			} else this.current = re(n, r, [i[0].point, i[1].point], [this.contacts.get(i[0].id), this.contacts.get(i[1].id)], this.options, this.options.rotate);
+			} else this.current = ne(n, r, [i[0].point, i[1].point], [this.contacts.get(i[0].id), this.contacts.get(i[1].id)], this.options, this.options.rotate);
 			return {
 				...this.current,
 				center: [...this.current.center]
@@ -242,17 +242,17 @@ var ie = class {
 		});
 	}
 };
-function ae(e, t = 0, n = 800, r = 16) {
+function ie(e, t = 0, n = 800, r = 16) {
 	if (i(e, "wheel delta"), t === 0) return e;
 	let a = t === 1 ? r : t === 2 ? n : NaN;
 	if (!Number.isFinite(a) || a <= 0) throw RangeError("Invalid wheel mode or dimensions");
 	return e * a;
 }
-function oe(e, t = 0, n = 800, r = 480) {
+function ae(e, t = 0, n = 800, r = 480) {
 	if (!(i(r, "pixels per zoom") > 0)) throw RangeError("Wheel zoom sensitivity must be positive");
-	return -ae(e, t, n) / r;
+	return -ie(e, t, n) / r;
 }
-function se(e, t, n, r = {}) {
+function oe(e, t, n, r = {}) {
 	let a = i(r.panPixels ?? 80, "keyboard pan"), o = i(r.zoomStep ?? 1, "keyboard zoom");
 	if (a < 0 || o < 0) throw RangeError("Keyboard steps cannot be negative");
 	let s = {
@@ -287,7 +287,7 @@ function se(e, t, n, r = {}) {
 		"PageDown"
 	].includes(n)) return S(e, t, e.zoom - o, r.anchor, r);
 }
-function ce(e, t, n) {
+function se(e, t, n) {
 	let i = n.x - t.x, a = n.y - t.y, o = i * i + a * a, s = o ? r(((e.x - t.x) * i + (e.y - t.y) * a) / o, 0, 1) : 0, c = {
 		x: t.x + i * s,
 		y: t.y + a * s
@@ -314,14 +314,14 @@ Object.freeze({
 	geolocationTimeoutMs: 15e3,
 	geolocationMaximumAgeMs: 1e4
 });
-var le = Object.freeze({
+var ce = Object.freeze({
 	concurrency: 3,
 	maxBytes: 24 * 1024 * 1024,
 	maxResourceBytes: 8 * 1024 * 1024,
 	maxQueued: 72,
 	timeoutMs: 15e3
-}), ue = /^https:\/\/(?:tiles\.openfreemap\.org\/(?:[^/?#]+\/)+\d+\/\d+\/\d+\.pbf|tiles\.mapterhorn\.com\/\d+\/\d+\/\d+\.webp|tiles\.maps\.eox\.at\/wmts\/1\.0\.0\/(?:s2cloudless_3857|bluemarble_3857)\/default\/g\/\d+\/\d+\/\d+\.jpg)$/;
-function de(e) {
+}), le = /^https:\/\/(?:tiles\.openfreemap\.org\/(?:[^/?#]+\/)+\d+\/\d+\/\d+\.pbf|tiles\.mapterhorn\.com\/\d+\/\d+\/\d+\.webp|tiles\.maps\.eox\.at\/wmts\/1\.0\.0\/(?:s2cloudless_3857|bluemarble_3857)\/default\/g\/\d+\/\d+\/\d+\.jpg)$/;
+function ue(e) {
 	return new Promise((t, n) => {
 		e.throwIfAborted();
 		let r = () => {
@@ -332,14 +332,14 @@ function de(e) {
 		e.addEventListener("abort", r, { once: !0 }), e.aborted && r();
 	});
 }
-var fe = class extends Error {
+var de = class extends Error {
 	constructor(e) {
 		super(`Preview resource unavailable (${e})`), this.name = "MapResourceHTTPError", this.status = e;
 	}
-}, pe = class {
+}, fe = class {
 	constructor(e = {}) {
 		this.entries = /* @__PURE__ */ new Map(), this.queue = [], this.active = 0, this.bytes = 0, this.reloads = /* @__PURE__ */ new Set(), this.options = {
-			...le,
+			...ce,
 			fetcher: (...e) => fetch(...e),
 			...e
 		};
@@ -448,7 +448,7 @@ var fe = class extends Error {
 						credentials: e.startsWith("/") ? "same-origin" : "omit",
 						signal: t.signal
 					}));
-					if (!i.ok) throw new fe(i.status);
+					if (!i.ok) throw new de(i.status);
 					if (Number(i.headers.get("content-length") || 0) > this.options.maxResourceBytes) throw Error("Preview resource exceeds the byte budget");
 					if (a = i.body?.getReader(), !a) return /* @__PURE__ */ new ArrayBuffer(0);
 					let o = [], c = 0;
@@ -462,11 +462,11 @@ var fe = class extends Error {
 					for (let e of o) l.set(e, u), u += e.length;
 					return l.buffer;
 				} catch (n) {
-					if (i || t.signal.aborted || !o || !ue.test(e)) throw t.abort(), n;
+					if (i || t.signal.aborted || !o || !le.test(e)) throw t.abort(), n;
 				} finally {
 					await a?.cancel().catch(() => {}), a?.releaseLock();
 				}
-				await de(t.signal);
+				await ue(t.signal);
 			}
 		} finally {
 			clearTimeout(r), t.abort();
@@ -483,7 +483,7 @@ var fe = class extends Error {
 };
 //#endregion
 //#region web/lib/map-transport.ts
-function me(e, t = "https://map-preview.local") {
+function pe(e, t = "https://map-preview.local") {
 	try {
 		if (e.startsWith("//")) return null;
 		let n = new URL(t), r = new URL(e, n);
@@ -500,50 +500,50 @@ function me(e, t = "https://map-preview.local") {
 }
 //#endregion
 //#region web/lib/route-geometry.ts
-var E = (e) => !!e && typeof e == "object" && !Array.isArray(e), he = (e) => Array.isArray(e) && e.length >= 2 && e.every((e) => typeof e == "number" && Number.isFinite(e));
-function D(e, t) {
-	return t === 0 ? he(e) : Array.isArray(e) && e.every((e) => D(e, t - 1));
+var D = (e) => !!e && typeof e == "object" && !Array.isArray(e), me = (e) => Array.isArray(e) && e.length >= 2 && e.every((e) => typeof e == "number" && Number.isFinite(e));
+function O(e, t) {
+	return t === 0 ? me(e) : Array.isArray(e) && e.every((e) => O(e, t - 1));
 }
-function O(e, t = 0) {
-	if (!E(e) || t > 16) return !1;
+function k(e, t = 0) {
+	if (!D(e) || t > 16) return !1;
 	switch (e.type) {
-		case "Point": return D(e.coordinates, 0);
+		case "Point": return O(e.coordinates, 0);
 		case "MultiPoint":
-		case "LineString": return D(e.coordinates, 1);
+		case "LineString": return O(e.coordinates, 1);
 		case "MultiLineString":
-		case "Polygon": return D(e.coordinates, 2);
-		case "MultiPolygon": return D(e.coordinates, 3);
-		case "GeometryCollection": return Array.isArray(e.geometries) && e.geometries.every((e) => O(e, t + 1));
+		case "Polygon": return O(e.coordinates, 2);
+		case "MultiPolygon": return O(e.coordinates, 3);
+		case "GeometryCollection": return Array.isArray(e.geometries) && e.geometries.every((e) => k(e, t + 1));
 		default: return !1;
 	}
 }
-function ge(e) {
-	return E(e) && e.type === "Feature" && (e.geometry === null || O(e.geometry)) && (e.properties === void 0 || e.properties === null || E(e.properties));
+function he(e) {
+	return D(e) && e.type === "Feature" && (e.geometry === null || k(e.geometry)) && (e.properties === void 0 || e.properties === null || D(e.properties));
 }
-function _e(e) {
-	let t = E(e) && E(e.data) && "geometry" in e.data ? e.data.geometry : e;
-	if (!E(t) || !(t.type === "FeatureCollection" ? Array.isArray(t.features) && t.features.every(ge) : t.type === "Feature" ? ge(t) : O(t))) throw Error("Invalid route geometry");
+function ge(e) {
+	let t = D(e) && D(e.data) && "geometry" in e.data ? e.data.geometry : e;
+	if (!D(t) || !(t.type === "FeatureCollection" ? Array.isArray(t.features) && t.features.every(he) : t.type === "Feature" ? he(t) : k(t))) throw Error("Invalid route geometry");
 	return t;
 }
 //#endregion
 //#region web/public/maps/russia-viewport.js
-var ve = [[19.6389282, 41.1858711], [191.0026658, 81.858721]], ye = "#e7ebe2", k = (e, t, n) => Math.max(t, Math.min(n, e));
-function A(e) {
+var _e = [[19.6389282, 41.1858711], [191.0026658, 81.858721]], ve = "#e7ebe2", A = (e, t, n) => Math.max(t, Math.min(n, e));
+function j(e) {
 	return Number.isFinite(e) ? e + 360 * Math.round((105 - e) / 360) : NaN;
 }
-function be(e, t, n, r) {
-	let [[i, a], [o, s]] = ve, c = k(1 - (n - r.zoom) / 2, 0, 1), l = a + Math.min(0, r.center[1] - a) * c, u = s + Math.max(0, r.center[1] - s) * c;
+function ye(e, t, n, r) {
+	let [[i, a], [o, s]] = _e, c = A(1 - (n - r.zoom) / 2, 0, 1), l = a + Math.min(0, r.center[1] - a) * c, u = s + Math.max(0, r.center[1] - s) * c;
 	return {
-		center: [k(A(e), Math.min(i, r.center[0]), Math.max(o, r.center[0])), k(t, l, u)],
-		zoom: k(n, Math.min(r.zoom, 18), 18)
+		center: [A(j(e), Math.min(i, r.center[0]), Math.max(o, r.center[0])), A(t, l, u)],
+		zoom: A(n, Math.min(r.zoom, 18), 18)
 	};
 }
-function xe(e, t, n, r) {
+function be(e, t, n, r) {
 	let i = (e - n[0]) * (r[1] - n[1]) - (t - n[1]) * (r[0] - n[0]);
 	return Math.abs(i) < 1e-10 && e >= Math.min(n[0], r[0]) - 1e-10 && e <= Math.max(n[0], r[0]) + 1e-10 && t >= Math.min(n[1], r[1]) - 1e-10 && t <= Math.max(n[1], r[1]) + 1e-10;
 }
-var j = 1e-10, Se = /* @__PURE__ */ new WeakMap(), Ce = (e, t, n) => e >= n[0] - j && e <= n[2] + j && t >= n[1] - j && t <= n[3] + j;
-function we(e) {
+var M = 1e-10, xe = /* @__PURE__ */ new WeakMap(), Se = (e, t, n) => e >= n[0] - M && e <= n[2] + M && t >= n[1] - M && t <= n[3] + M;
+function Ce(e) {
 	if (!e.length) return null;
 	let t = [
 		Infinity,
@@ -552,9 +552,9 @@ function we(e) {
 		-Infinity
 	];
 	for (let [n, r] of e) t[0] = Math.min(t[0], n), t[1] = Math.min(t[1], r), t[2] = Math.max(t[2], n), t[3] = Math.max(t[3], r);
-	let n = Math.max(1, Math.min(512, Math.ceil(Math.sqrt(e.length) * 2))), r = t[3] > t[1] ? n / (t[3] - t[1]) : 0, i = (e) => k(Math.floor((e - t[1]) * r), 0, n - 1), a = Array.from({ length: n }, () => []);
+	let n = Math.max(1, Math.min(512, Math.ceil(Math.sqrt(e.length) * 2))), r = t[3] > t[1] ? n / (t[3] - t[1]) : 0, i = (e) => A(Math.floor((e - t[1]) * r), 0, n - 1), a = Array.from({ length: n }, () => []);
 	for (let t = 0, n = e.length - 1; t < e.length; n = t++) {
-		let r = i(Math.min(e[t][1], e[n][1]) - j), o = i(Math.max(e[t][1], e[n][1]) + j);
+		let r = i(Math.min(e[t][1], e[n][1]) - M), o = i(Math.max(e[t][1], e[n][1]) + M);
 		for (let e = r; e <= o; e++) a[e].push(t);
 	}
 	return {
@@ -564,23 +564,23 @@ function we(e) {
 		bucket: i
 	};
 }
-function Te(e, t, n) {
-	if (!n || !Ce(e, t, n.bounds)) return !1;
+function we(e, t, n) {
+	if (!n || !Se(e, t, n.bounds)) return !1;
 	let r = !1;
 	for (let i of n.buckets[n.bucket(t)]) {
 		let a = n.points[i], o = n.points[i === 0 ? n.points.length - 1 : i - 1];
-		if (t < Math.min(a[1], o[1]) - j || t > Math.max(a[1], o[1]) + j || e > Math.max(a[0], o[0]) + j) continue;
+		if (t < Math.min(a[1], o[1]) - M || t > Math.max(a[1], o[1]) + M || e > Math.max(a[0], o[0]) + M) continue;
 		let s = a[1] > t != o[1] > t;
-		if (e < Math.min(a[0], o[0]) - j) {
+		if (e < Math.min(a[0], o[0]) - M) {
 			s && (r = !r);
 			continue;
 		}
-		if (xe(e, t, a, o)) return !0;
+		if (be(e, t, a, o)) return !0;
 		s && e < (o[0] - a[0]) * (t - a[1]) / (o[1] - a[1]) + a[0] && (r = !r);
 	}
 	return r;
 }
-function Ee(e) {
+function Te(e) {
 	let t = [], n = (e) => {
 		if (e) {
 			if (e.type === "FeatureCollection") {
@@ -596,10 +596,10 @@ function Ee(e) {
 				return;
 			}
 			for (let n of e.type === "Polygon" ? [e.coordinates] : e.type === "MultiPolygon" ? e.coordinates : []) {
-				let e = we(n[0] || []);
+				let e = Ce(n[0] || []);
 				e && t.push({
 					outer: e,
-					holes: n.slice(1).map(we).filter(Boolean)
+					holes: n.slice(1).map(Ce).filter(Boolean)
 				});
 			}
 		}
@@ -608,9 +608,9 @@ function Ee(e) {
 		polygons: t,
 		buckets: []
 	};
-	let r = Math.min(...t.map((e) => e.outer.bounds[1])), i = Math.max(...t.map((e) => e.outer.bounds[3])), a = i > r ? 256 / (i - r) : 0, o = (e) => k(Math.floor((e - r) * a), 0, 255), s = Array.from({ length: 256 }, () => []);
+	let r = Math.min(...t.map((e) => e.outer.bounds[1])), i = Math.max(...t.map((e) => e.outer.bounds[3])), a = i > r ? 256 / (i - r) : 0, o = (e) => A(Math.floor((e - r) * a), 0, 255), s = Array.from({ length: 256 }, () => []);
 	for (let e of t) {
-		let t = o(e.outer.bounds[1] - j), n = o(e.outer.bounds[3] + j);
+		let t = o(e.outer.bounds[1] - M), n = o(e.outer.bounds[3] + M);
 		for (let r = t; r <= n; r++) s[r].push(e);
 	}
 	return {
@@ -620,13 +620,13 @@ function Ee(e) {
 		buckets: s
 	};
 }
-function M(e, t, n) {
-	let r = A(e);
+function N(e, t, n) {
+	let r = j(e);
 	if (!Number.isFinite(r) || !Number.isFinite(t) || !n || typeof n != "object") return !1;
-	let i = Se.get(n);
-	return i || (i = Ee(n), Se.set(n, i)), !i.buckets.length || t < i.south - j || t > i.north + j ? !1 : i.buckets[i.bucket(t)].some((e) => Te(r, t, e.outer) && !e.holes.some((e) => Te(r, t, e)));
+	let i = xe.get(n);
+	return i || (i = Te(n), xe.set(n, i)), !i.buckets.length || t < i.south - M || t > i.north + M ? !1 : i.buckets[i.bucket(t)].some((e) => we(r, t, e.outer) && !e.holes.some((e) => we(r, t, e)));
 }
-var N = Object.freeze({
+var P = Object.freeze({
 	manifestBytes: 512 * 1024,
 	baseBytes: 8 * 1024 * 1024,
 	cellBytes: 3 * 1024 * 1024,
@@ -634,44 +634,44 @@ var N = Object.freeze({
 	cacheBytes: 24 * 1024 * 1024,
 	concurrent: 3,
 	cells: 192
-}), De = /* @__PURE__ */ new Set([
+}), Ee = /* @__PURE__ */ new Set([
 	"area",
 	"mask",
 	"territory",
 	"territory-boundary"
-]), Oe = {
+]), De = {
 	Point: 0,
 	MultiPoint: 1,
 	LineString: 1,
 	MultiLineString: 2,
 	Polygon: 2,
 	MultiPolygon: 3
-}, P = (e) => ({
+}, F = (e) => ({
 	type: "FeatureCollection",
 	features: e
-}), F = (e) => /* @__PURE__ */ Error(`coverage-${e}`);
-function ke(e) {
-	if (e?.type !== "TropnikCoverage" || e.encoding !== "indexed-delta-1e7-v1" || !Array.isArray(e.positions) || e.positions.length % 2 || !Array.isArray(e.features)) throw F("encoding");
+}), I = (e) => /* @__PURE__ */ Error(`coverage-${e}`);
+function Oe(e) {
+	if (e?.type !== "TropnikCoverage" || e.encoding !== "indexed-delta-1e7-v1" || !Array.isArray(e.positions) || e.positions.length % 2 || !Array.isArray(e.features)) throw I("encoding");
 	let t = [], n = 0, r = 0;
 	for (let i = 0; i < e.positions.length; i += 2) {
 		let a = e.positions[i], o = e.positions[i + 1];
-		if (!Number.isSafeInteger(a) || !Number.isSafeInteger(o) || (n += a, r += o, !Number.isSafeInteger(n) || !Number.isSafeInteger(r) || n < 0 || n > 36e8 || Math.abs(r) > 850511288)) throw F("coordinate");
+		if (!Number.isSafeInteger(a) || !Number.isSafeInteger(o) || (n += a, r += o, !Number.isSafeInteger(n) || !Number.isSafeInteger(r) || n < 0 || n > 36e8 || Math.abs(r) > 850511288)) throw I("coordinate");
 		t.push([n / 1e7, r / 1e7]);
 	}
 	let i = (e, n) => {
 		if (n === 0) {
-			if (!Number.isSafeInteger(e) || e < 0 || e >= t.length) throw F("index");
+			if (!Number.isSafeInteger(e) || e < 0 || e >= t.length) throw I("index");
 			return t[e];
 		}
-		if (!Array.isArray(e) || !e.length) throw F("nesting");
+		if (!Array.isArray(e) || !e.length) throw I("nesting");
 		return e.map((e) => i(e, n - 1));
 	}, a = e.features.map((e) => {
-		if (e?.type !== "Feature" || !De.has(e.properties?.role) || typeof e.properties.cell != "string" || !(e.geometry?.type in Oe)) throw F("feature");
+		if (e?.type !== "Feature" || !Ee.has(e.properties?.role) || typeof e.properties.cell != "string" || !(e.geometry?.type in De)) throw I("feature");
 		return {
 			...e,
 			geometry: {
 				type: e.geometry.type,
-				coordinates: i(e.geometry.coordinates, Oe[e.geometry.type])
+				coordinates: i(e.geometry.coordinates, De[e.geometry.type])
 			}
 		};
 	});
@@ -682,11 +682,11 @@ function ke(e) {
 		features: a
 	};
 }
-function Ae(e) {
+function ke(e) {
 	return e <= 4 ? "overview" : e <= 8 ? "regional" : e <= 12 ? "local" : "source";
 }
-function je(e, t, n) {
-	let r = Ae(n);
+function Ae(e, t, n) {
+	let r = ke(n);
 	if (r === "overview") return [];
 	let [i, a, o, s] = t;
 	if (![
@@ -695,8 +695,8 @@ function je(e, t, n) {
 		o,
 		s,
 		n
-	].every(Number.isFinite) || a > s || (o < i && (o += 360 * Math.ceil((i - o) / 360)), !Number.isFinite(o - i))) throw F("viewport");
-	let c = Math.min(360, o - i), l = A(i + c / 2);
+	].every(Number.isFinite) || a > s || (o < i && (o += 360 * Math.ceil((i - o) / 360)), !Number.isFinite(o - i))) throw I("viewport");
+	let c = Math.min(360, o - i), l = j(i + c / 2);
 	i = l - c * .65, o = l + c * .65;
 	let u = s - a;
 	return a = Math.max(-85.0511288, a - u * .15), s = Math.min(85.0511288, s + u * .15), e.cells.filter((e) => e.levels[r] && [
@@ -705,37 +705,37 @@ function je(e, t, n) {
 		360
 	].some((t) => e.bounds[2] + t >= i && e.bounds[0] + t <= o && e.bounds[3] >= a && e.bounds[1] <= s));
 }
-function Me(e) {
-	if (e?.schemaVersion !== 1 || e.encoding !== "indexed-delta-1e7-v1" || !/^[a-f0-9]{16}$/.test(e.version) || !Array.isArray(e.cells) || e.cells.length > 1024) throw F("manifest");
+function je(e) {
+	if (e?.schemaVersion !== 1 || e.encoding !== "indexed-delta-1e7-v1" || !/^[a-f0-9]{16}$/.test(e.version) || !Array.isArray(e.cells) || e.cells.length > 1024) throw I("manifest");
 	let t = (e, t) => {
-		if (!e || typeof e.url != "string" || !/^\/(?:[\w-]+\/)*data\/map-coverage\//.test(e.url) || e.url.includes("..") || !e.url.endsWith(".coverage") || !Number.isSafeInteger(e.bytes) || e.bytes < 1 || e.bytes > t || !/^[a-f0-9]{64}$/.test(e.sha256)) throw F("descriptor");
+		if (!e || typeof e.url != "string" || !/^\/(?:[\w-]+\/)*data\/map-coverage\//.test(e.url) || e.url.includes("..") || !e.url.endsWith(".coverage") || !Number.isSafeInteger(e.bytes) || e.bytes < 1 || e.bytes > t || !/^[a-f0-9]{64}$/.test(e.sha256)) throw I("descriptor");
 	};
-	t(e.base, N.baseBytes);
+	t(e.base, P.baseBytes);
 	let n = /* @__PURE__ */ new Set();
 	for (let r of e.cells) {
-		if (typeof r.id != "string" || n.has(r.id) || !Array.isArray(r.bounds) || r.bounds.length !== 4 || !r.bounds.every(Number.isFinite) || r.bounds[0] < 0 || r.bounds[2] > 360 || r.bounds[0] >= r.bounds[2] || r.bounds[1] >= r.bounds[3] || !r.levels) throw F("cell");
+		if (typeof r.id != "string" || n.has(r.id) || !Array.isArray(r.bounds) || r.bounds.length !== 4 || !r.bounds.every(Number.isFinite) || r.bounds[0] < 0 || r.bounds[2] > 360 || r.bounds[0] >= r.bounds[2] || r.bounds[1] >= r.bounds[3] || !r.levels) throw I("cell");
 		n.add(r.id);
 		for (let [e, n] of Object.entries(r.levels)) {
 			if (![
 				"regional",
 				"local",
 				"source"
-			].includes(e)) throw F("level");
-			t(n, N.cellBytes);
+			].includes(e)) throw I("level");
+			t(n, P.cellBytes);
 		}
 	}
 	return e;
 }
-async function Ne(e, t, n, r) {
+async function Me(e, t, n, r) {
 	let i = await e(t, {
 		signal: r,
 		credentials: "same-origin"
 	});
-	if (!i.ok) throw F("http");
-	if (Number(i.headers?.get?.("content-length")) > n) throw await i.body?.cancel(), F("size");
+	if (!i.ok) throw I("http");
+	if (Number(i.headers?.get?.("content-length")) > n) throw await i.body?.cancel(), I("size");
 	if (!i.body?.getReader) {
 		let e = new Uint8Array(await i.arrayBuffer());
-		if (e.byteLength > n) throw F("size");
+		if (e.byteLength > n) throw I("size");
 		return e;
 	}
 	let a = i.body.getReader(), o = [], s = 0;
@@ -743,7 +743,7 @@ async function Ne(e, t, n, r) {
 		for (;;) {
 			let { value: e, done: t } = await a.read();
 			if (t) break;
-			if (s += e.byteLength, s > n) throw await a.cancel(), F("size");
+			if (s += e.byteLength, s > n) throw await a.cancel(), I("size");
 			o.push(e);
 		}
 	} finally {
@@ -753,18 +753,18 @@ async function Ne(e, t, n, r) {
 	for (let e of o) c.set(e, l), l += e.byteLength;
 	return c;
 }
-async function Pe(e, t, n, r, i, a) {
-	let o = await Ne(e, t.url, t.bytes, a);
+async function Ne(e, t, n, r, i, a) {
+	let o = await Me(e, t.url, t.bytes, a);
 	if (a?.aborted) throw new DOMException("Aborted", "AbortError");
-	if (o.byteLength !== t.bytes) throw F("size");
-	if ([...new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", o))].map((e) => e.toString(16).padStart(2, "0")).join("") !== t.sha256) throw F("integrity");
+	if (o.byteLength !== t.bytes) throw I("size");
+	if ([...new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", o))].map((e) => e.toString(16).padStart(2, "0")).join("") !== t.sha256) throw I("integrity");
 	let s = JSON.parse(new TextDecoder().decode(o));
-	if (s.coverageVersion !== n || s.lod !== r || i && s.cell !== i) throw F("identity");
-	let c = ke(s);
-	if (i && c.features.some((e) => e.properties.cell !== i)) throw F("identity");
+	if (s.coverageVersion !== n || s.lod !== r || i && s.cell !== i) throw I("identity");
+	let c = Oe(s);
+	if (i && c.features.some((e) => e.properties.cell !== i)) throw I("identity");
 	return c;
 }
-function Fe(e, t) {
+function Pe(e, t) {
 	if (!(t.get(e.properties.cell)?.bounds[0] >= 180)) return e;
 	let n = (e) => typeof e[0] == "number" ? [e[0] - 360, e[1]] : e.map(n);
 	return {
@@ -775,21 +775,21 @@ function Fe(e, t) {
 		}
 	};
 }
-function Ie(e, t, n = {}) {
-	Me(e);
+function Fe(e, t, n = {}) {
+	je(e);
 	let r = n.fetch ?? globalThis.fetch.bind(globalThis), i = new Map(e.cells.map((e) => [e.id, e])), a = new Map(e.cells.map((e) => [e.id, []]));
 	for (let e of t.features) {
 		let t = a.get(e.properties.cell);
-		if (!t) throw F("identity");
+		if (!t) throw I("identity");
 		t.push(e);
 	}
 	let o = /* @__PURE__ */ new Set(), s = /* @__PURE__ */ new Map(), c = 0, l = 0, u, d = !1, f = "overview:", p = "overview:", m = {
 		manifest: e,
 		version: e.version,
-		area: P([]),
-		mask: P([]),
-		territories: P([]),
-		boundaries: P([]),
+		area: F([]),
+		mask: F([]),
+		territories: F([]),
+		boundaries: F([]),
 		cellFeatures: /* @__PURE__ */ new Map(),
 		status: {
 			version: e.version,
@@ -816,12 +816,12 @@ function Ie(e, t, n = {}) {
 			let i = e.get(n)?.features ?? r;
 			m.cellFeatures.set(n, i), t.push(...i);
 		}
-		m.area = P(t.filter((e) => e.properties.role === "area")), m.mask = P(((e) => n.canonicalMask ? e.map((e) => Fe(e, i)) : e)(t.filter((e) => e.properties.role === "mask"))), m.territories = P(t.filter((e) => e.properties.role === "territory")), m.boundaries = P(t.filter((e) => e.properties.role === "territory-boundary"));
+		m.area = F(t.filter((e) => e.properties.role === "area")), m.mask = F(((e) => n.canonicalMask ? e.map((e) => Pe(e, i)) : e)(t.filter((e) => e.properties.role === "mask"))), m.territories = F(t.filter((e) => e.properties.role === "territory")), m.boundaries = F(t.filter((e) => e.properties.role === "territory-boundary"));
 	};
 	g(/* @__PURE__ */ new Map());
 	async function _(t, n) {
 		if (d) return;
-		let i = Ae(n), a = je(e, t, n), o = a.map((e) => e.id).sort(), _ = `${i}:${o.join(",")}`;
+		let i = ke(n), a = Ae(e, t, n), o = a.map((e) => e.id).sort(), _ = `${i}:${o.join(",")}`;
 		if (_ === f && (m.status.ready || m.status.pending > 0)) return;
 		f = _;
 		let v = ++l;
@@ -836,20 +836,20 @@ function Ie(e, t, n = {}) {
 			ready: !1
 		}, h();
 		try {
-			if (a.length > N.cells || a.reduce((e, t) => e + t.levels[i].bytes, 0) > N.viewBytes) throw F("budget");
+			if (a.length > P.cells || a.reduce((e, t) => e + t.levels[i].bytes, 0) > P.viewBytes) throw I("budget");
 			let t = /* @__PURE__ */ new Map(), n = 0;
-			if (await Promise.all(Array.from({ length: Math.min(N.concurrent, a.length) }, async () => {
+			if (await Promise.all(Array.from({ length: Math.min(P.concurrent, a.length) }, async () => {
 				for (; n < a.length && b();) {
 					let o = a[n++], l = o.levels[i], u = `${i}:${o.id}`, d = s.get(u)?.bundle;
 					if (d) {
 						let e = s.get(u);
 						s.delete(u), s.set(u, e);
 					} else {
-						if (d = await Pe(r, l, e.version, i, o.id, y), !b()) return;
+						if (d = await Ne(r, l, e.version, i, o.id, y), !b()) return;
 						for (s.set(u, {
 							bundle: d,
 							bytes: l.bytes
-						}), c += l.bytes; c > N.cacheBytes && s.size;) {
+						}), c += l.bytes; c > P.cacheBytes && s.size;) {
 							let e = s.keys().next().value;
 							c -= s.get(e).bytes, s.delete(e);
 						}
@@ -882,77 +882,77 @@ function Ie(e, t, n = {}) {
 	}
 	return m;
 }
-var I = /* @__PURE__ */ new Map();
-async function Le(e = {}) {
-	let t = e.manifestURL ?? "/data/map-coverage/manifest.json", n = e.fetch ?? globalThis.fetch.bind(globalThis), r = !e.fetch && I.get(t);
+var L = /* @__PURE__ */ new Map();
+async function Ie(e = {}) {
+	let t = e.manifestURL ?? "/data/map-coverage/manifest.json", n = e.fetch ?? globalThis.fetch.bind(globalThis), r = !e.fetch && L.get(t);
 	r || (r = (async () => {
-		let e = await Ne(n, t, N.manifestBytes), r = Me(JSON.parse(new TextDecoder().decode(e)));
+		let e = await Me(n, t, P.manifestBytes), r = je(JSON.parse(new TextDecoder().decode(e)));
 		return {
 			manifest: r,
-			base: await Pe(n, r.base, r.version, "overview")
+			base: await Ne(n, r.base, r.version, "overview")
 		};
-	})(), e.fetch || (I.set(t, r), r.catch(() => I.delete(t))));
+	})(), e.fetch || (L.set(t, r), r.catch(() => L.delete(t))));
 	let { manifest: i, base: a } = await r;
-	return Ie(i, a, e);
+	return Fe(i, a, e);
 }
 //#endregion
 //#region web/lib/map-preload.ts
-var Re = "20261106-3", ze = new pe(), Be = () => typeof location > "u" ? "https://map-preview.local" : location.origin;
-`${Re}`;
-function Ve(e) {
-	return me(e, Be());
+var Le = "20261106-3", Re = new fe(), ze = () => typeof location > "u" ? "https://map-preview.local" : location.origin;
+`${Le}`;
+function Be(e) {
+	return pe(e, ze());
 }
-function He(e, t = 0) {
-	let n = Ve(e);
-	return n ? ze.json(n, t) : Promise.reject(/* @__PURE__ */ Error("Unknown public map resource"));
+function Ve(e, t = 0) {
+	let n = Be(e);
+	return n ? Re.json(n, t) : Promise.reject(/* @__PURE__ */ Error("Unknown public map resource"));
 }
-function Ue(e, t = 1, n) {
-	let r = Ve(e);
-	return r ? ze.get(r, t, n) : Promise.reject(/* @__PURE__ */ Error("Unknown public map resource"));
+function He(e, t = 1, n) {
+	let r = Be(e);
+	return r ? Re.get(r, t, n) : Promise.reject(/* @__PURE__ */ Error("Unknown public map resource"));
 }
 //#endregion
 //#region web/lib/map-satellite.ts
-var We = "tropnik-satellite", Ge = "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg", Ke = "tropnik-satellite-overview", qe = "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/{z}/{y}/{x}.jpg", Je = [
+var Ue = "tropnik-satellite", We = "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg", Ge = "tropnik-satellite-overview", Ke = "https://tiles.maps.eox.at/wmts/1.0.0/bluemarble_3857/default/g/{z}/{y}/{x}.jpg", qe = [
 	176,
 	61,
 	183,
 	72.5
-], Ye = {
+], Je = {
 	"eox-s2": {
-		source: We,
-		tiles: Ge,
+		source: Ue,
+		tiles: We,
 		maxzoom: 14,
 		attribution: "EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017), CC BY 4.0"
 	},
 	"eox-bluemarble": {
-		source: Ke,
-		tiles: qe,
+		source: Ge,
+		tiles: Ke,
 		maxzoom: 8,
 		attribution: "NASA Earth Observatory · Blue Marble · EOX::Maps"
 	}
 };
-function Xe({ west: e, south: t, east: n, north: r }) {
+function Ye({ west: e, south: t, east: n, north: r }) {
 	if (![
 		e,
 		t,
 		n,
 		r
 	].every(Number.isFinite)) return "eox-s2";
-	let [i, a, o, s] = Je;
+	let [i, a, o, s] = qe;
 	return r < a || t > s ? "eox-s2" : (n < e && (n += 360 * Math.ceil((e - n) / 360)), n - e >= 360 || i + Math.ceil((e - o) / 360) * 360 <= n ? "eox-bluemarble" : "eox-s2");
 }
 //#endregion
 //#region web/lib/custom-map-tiles.ts
-var Ze = 96, Qe = 288, $e = 160, et = 3, tt = 6, L = 8 * 1024 * 1024, nt = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
-function rt(e) {
+var Xe = 96, Ze = 288, Qe = 160, $e = 3, et = 6, R = 8 * 1024 * 1024, tt = (e, t) => (e % 2 ** t + 2 ** t) % 2 ** t;
+function nt(e) {
 	let t = e.paintZoom === void 0 ? e.z : e.paintZoom;
 	if (!Number.isInteger(e.z) || e.z < 0 || !Number.isInteger(t) || t < e.z || t > 18) throw Error("Invalid map paint zoom");
 	return t;
 }
-function R(e) {
-	return `${e.kind}:${e.z}/${e.x}/${e.y}:${e.paths === !1 ? 0 : 1}:${+!!e.transparent}:${rt(e)}:${e.boundaries === !1 ? 0 : 1}`;
+function z(e) {
+	return `${e.kind}:${e.z}/${e.x}/${e.y}:${e.paths === !1 ? 0 : 1}:${+!!e.transparent}:${nt(e)}:${e.boundaries === !1 ? 0 : 1}`;
 }
-function it(e, t, n, r = Math.min(e, 12)) {
+function rt(e, t, n, r = Math.min(e, 12)) {
 	let i = 2 ** (e - r), a = t - Math.floor(t / i) * i, o = n - Math.floor(n / i) * i, s = [0], c = [0];
 	a === 0 && s.push(-1), a === i - 1 && s.push(1), o === 0 && c.push(-1), o === i - 1 && c.push(1);
 	let l = [];
@@ -962,7 +962,7 @@ function it(e, t, n, r = Math.min(e, 12)) {
 	});
 	return l;
 }
-var at = class {
+var it = class {
 	constructor(e = !1) {
 		this.softwareRaster = e, this.cache = /* @__PURE__ */ new Map(), this.jobs = /* @__PURE__ */ new Map(), this.pinned = /* @__PURE__ */ new Set(), this.fetching = 0, this.reading = /* @__PURE__ */ new Set(), this.failedSources = /* @__PURE__ */ new Map(), this.lastHaloWork = 0, this.serial = 0, this.disposed = !1, this.enabled = !0, this.errors = [];
 	}
@@ -999,14 +999,14 @@ var at = class {
 		if (this.disposed) return Promise.reject(/* @__PURE__ */ Error("Map resources released"));
 		let t;
 		try {
-			t = R(e);
+			t = z(e);
 		} catch (e) {
 			return Promise.reject(e instanceof Error ? e : /* @__PURE__ */ Error("Invalid map tile request"));
 		}
 		let n = this.cache.get(t), r = this.jobs.get(t);
 		if (n) return this.cache.delete(t), this.cache.set(t, n), Promise.resolve(n);
 		if (r) return r.promise;
-		if (this.jobs.size >= $e) return Promise.reject(/* @__PURE__ */ Error("Map tile queue is full"));
+		if (this.jobs.size >= Qe) return Promise.reject(/* @__PURE__ */ Error("Map tile queue is full"));
 		let i, a, o = new Promise((e, t) => {
 			i = e, a = t;
 		}), s = {
@@ -1024,17 +1024,17 @@ var at = class {
 		}), this.pump(), o;
 	}
 	files() {
-		return this.localFiles ??= He("/offline-map/manifest.json").then((e) => new Set(e.files.map((e) => e.path))).catch(() => (this.localFiles = void 0, /* @__PURE__ */ new Set()));
+		return this.localFiles ??= Ve("/offline-map/manifest.json").then((e) => new Set(e.files.map((e) => e.path))).catch(() => (this.localFiles = void 0, /* @__PURE__ */ new Set()));
 	}
 	async source(e) {
-		let { kind: t } = e.request, n = Math.min(e.request.z, t === "vector" ? 14 : t === "relief" ? 12 : e.request.z), r = 2 ** (e.request.z - n), i = Math.floor(e.request.x / r), a = Math.floor(e.request.y / r), o = nt(i, n);
+		let { kind: t } = e.request, n = Math.min(e.request.z, t === "vector" ? 14 : t === "relief" ? 12 : e.request.z), r = 2 ** (e.request.z - n), i = Math.floor(e.request.x / r), a = Math.floor(e.request.y / r), o = tt(i, n);
 		if (e.sourceZ = n, t === "overview") return {
 			url: `/maps/russia-relief/${n}/${o}/${a}.png`,
 			local: !0,
 			mime: "image/png"
 		};
 		if (t === "eox-s2" || t === "eox-bluemarble") return {
-			url: Ye[t].tiles.replace("{z}", String(n)).replace("{x}", String(o)).replace("{y}", String(a)),
+			url: Je[t].tiles.replace("{z}", String(n)).replace("{x}", String(o)).replace("{y}", String(a)),
 			local: !1,
 			mime: "image/jpeg"
 		};
@@ -1050,7 +1050,7 @@ var at = class {
 			local: !1,
 			mime: "image/webp"
 		} : {
-			url: (await (this.template ??= He("https://tiles.openfreemap.org/planet/latest").then((e) => {
+			url: (await (this.template ??= Ve("https://tiles.openfreemap.org/planet/latest").then((e) => {
 				let t = e.tiles?.[0];
 				if (!t?.startsWith("https://tiles.openfreemap.org/")) throw Error("Unrecognized vector source");
 				return t;
@@ -1069,9 +1069,9 @@ var at = class {
 		if (r.has(t)) throw r.get(t);
 		this.reading.add(t);
 		try {
-			return await Ue(t, n, e.controller.signal);
+			return await He(t, n, e.controller.signal);
 		} catch (n) {
-			throw r === this.failedSources && this.current(e) && !e.controller.signal.aborted && (r.size >= $e && r.delete(r.keys().next().value), r.set(t, n)), n;
+			throw r === this.failedSources && this.current(e) && !e.controller.signal.aborted && (r.size >= Qe && r.delete(r.keys().next().value), r.set(t, n)), n;
 		} finally {
 			this.reading.delete(t);
 		}
@@ -1086,7 +1086,7 @@ var at = class {
 		e.local = t.local, e.mime = t.mime, e.sourceKey = t.url;
 		let n = await this.readSource(e, t.url, 0);
 		if (this.current(e)) {
-			if (n.byteLength > L) throw Error("Map source exceeds tile budget");
+			if (n.byteLength > R) throw Error("Map source exceeds tile budget");
 			if (!n.byteLength && e.request.kind !== "vector") throw Error("Empty raster map source");
 			if (e.bytes = n.slice(0), e.request.kind === "relief") {
 				let { z: r, x: i, y: a } = e.request, o = e.sourceZ, s = 2 ** (r - o), c = Math.floor(i / s), l = Math.floor(a / s), u = e.local ? await this.files() : void 0;
@@ -1095,7 +1095,7 @@ var at = class {
 					tiles: [],
 					missing: []
 				}, e.haloPlan = {
-					offsets: it(r, i, a, o),
+					offsets: rt(r, i, a, o),
 					index: 0,
 					sourceZ: o,
 					parentX: c,
@@ -1108,7 +1108,7 @@ var at = class {
 		}
 	}
 	haloDependency(e, t) {
-		let n = e.haloPlan, r = nt(n.parentX + t.dx, n.sourceZ), i = n.parentY + t.dy;
+		let n = e.haloPlan, r = tt(n.parentX + t.dx, n.sourceZ), i = n.parentY + t.dy;
 		if (i < 0 || i >= 2 ** n.sourceZ) return { reason: "coverage" };
 		let a = `terrain/tiles/${n.sourceZ}/${r}/${i}.png`, o = !!e.local && !!n.files?.has(a);
 		if (!o && !navigator.onLine) return { reason: "unavailable" };
@@ -1140,7 +1140,7 @@ var at = class {
 				}), t.index++;
 				continue;
 			}
-			if (t.bytes >= L) {
+			if (t.bytes >= R) {
 				n.missing.push({
 					...r,
 					reason: "budget"
@@ -1158,7 +1158,7 @@ var at = class {
 					...r,
 					reason: "invalid"
 				});
-				else if (t.bytes + i.byteLength > L) n.missing.push({
+				else if (t.bytes + i.byteLength > R) n.missing.push({
 					...r,
 					reason: "budget"
 				});
@@ -1186,7 +1186,7 @@ var at = class {
 			t?.bitmap.close();
 			return;
 		}
-		if (this.jobs.delete(e.key), t && !this.disposed && this.cache.size < Qe) this.cache.set(e.key, t), e.resolve(t), this.evict();
+		if (this.jobs.delete(e.key), t && !this.disposed && this.cache.size < Ze) this.cache.set(e.key, t), e.resolve(t), this.evict();
 		else {
 			t?.bitmap.close();
 			let r = n || /* @__PURE__ */ Error("Map tile unavailable");
@@ -1198,7 +1198,7 @@ var at = class {
 		this.pump();
 	}
 	evict(e = !1) {
-		for (let [t, n] of this.cache) this.pinned.has(t) || this.cache.size <= Ze && !(e && n.reliefCoverage?.missing.some((e) => e.reason !== "coverage")) || (this.cache.delete(t), n.bitmap.close());
+		for (let [t, n] of this.cache) this.pinned.has(t) || this.cache.size <= Xe && !(e && n.reliefCoverage?.missing.some((e) => e.reason !== "coverage")) || (this.cache.delete(t), n.bitmap.close());
 	}
 	decode(e) {
 		try {
@@ -1237,7 +1237,7 @@ var at = class {
 				z: e.request.z,
 				x: e.request.x,
 				y: e.request.y,
-				paintZoom: rt(e.request),
+				paintZoom: nt(e.request),
 				sourceZ: e.sourceZ,
 				sourceKey: e.sourceKey,
 				paths: e.request.paths !== !1,
@@ -1273,7 +1273,7 @@ var at = class {
 		for (let { work: n } of this.jobs.values()) {
 			if (n.stage !== "halo") continue;
 			let r = n.haloPlan, i = r.offsets[r.index], a = i ? this.haloDependency(n, i) : void 0;
-			a && "item" in a && !r.copies.has(a.item.sourceKey) && r.bytes < L && this.reading.has(a.item.sourceKey) || ((!e || n.id < e.id) && (e = n), n.id > this.lastHaloWork && (!t || n.id < t.id) && (t = n));
+			a && "item" in a && !r.copies.has(a.item.sourceKey) && r.bytes < R && this.reading.has(a.item.sourceKey) || ((!e || n.id < e.id) && (e = n), n.id > this.lastHaloWork && (!t || n.id < t.id) && (t = n));
 		}
 		return t ?? e;
 	}
@@ -1283,8 +1283,8 @@ var at = class {
 				let e = this.next("ready", this.lastDecodeKind);
 				e && (this.lastDecodeKind = e.request.kind, this.decode(e));
 			}
-			for (; this.fetching < et;) {
-				let e = ([...this.jobs.values()].filter(({ work: e }) => e.stage === "fetching" || e.stage === "halo" || e.stage === "ready").length < tt ? this.next("queued", this.lastFetchKind) : void 0) ?? this.nextHalo();
+			for (; this.fetching < $e;) {
+				let e = ([...this.jobs.values()].filter(({ work: e }) => e.stage === "fetching" || e.stage === "halo" || e.stage === "ready").length < et ? this.next("queued", this.lastFetchKind) : void 0) ?? this.nextHalo();
 				if (!e) break;
 				let t = e.stage === "halo";
 				t && (this.lastHaloWork = e.id), this.lastFetchKind = e.request.kind, e.stage = "fetching", this.fetching++, (t ? this.fetchHalo(e) : this.fetchPrimary(e)).catch((t) => this.finish(e, void 0, t instanceof Error ? t : /* @__PURE__ */ Error("Tile download failed"))).finally(() => {
@@ -1305,17 +1305,17 @@ var at = class {
 };
 //#endregion
 //#region web/lib/russia-map.ts
-async function ot(e = !1) {
-	return Le({ canonicalMask: e });
+async function at(e = !1) {
+	return Ie({ canonicalMask: e });
 }
 //#endregion
 //#region web/lib/map-framing.ts
-function z(e, t, n, r, i) {
-	let a = be(e, t, n, r);
+function B(e, t, n, r, i) {
+	let a = ye(e, t, n, r);
 	if (!i || ![...i.center, i.zoom].every(Number.isFinite)) return a;
 	let o = Math.max(0, Math.min(1, 1 - (n - i.zoom) / 2));
 	if (!o) return a;
-	let s = be(...i.center, n, r), c = i.center.map((e, t) => s.center[t] + (e - s.center[t]) * o), l = [A(e), t];
+	let s = ye(...i.center, n, r), c = i.center.map((e, t) => s.center[t] + (e - s.center[t]) * o), l = [j(e), t];
 	return {
 		...a,
 		center: a.center.map((e, t) => Math.max(Math.min(e, c[t]), Math.min(Math.max(e, c[t]), l[t])))
@@ -1327,32 +1327,32 @@ Object.freeze({
 	accent: "#A56736",
 	closeZoom: 10
 });
-function B(e) {
+function V(e) {
 	return 3 + Math.max(0, Math.min(1, ((Number.isFinite(e) ? e : 10) - 8) / 6)) * 2;
 }
-var V = Object.freeze({
+var H = Object.freeze({
 	badgeSize: 32,
 	labelWidth: 64,
 	labelHeight: 24,
 	labelGap: 4,
 	clearance: 8
 });
-function st(e, t) {
+function ot(e, t) {
 	if (!e || !Number.isFinite(e.x) || !Number.isFinite(e.y)) return "hidden";
 	if (!t) return "full";
 	if (!Number.isFinite(t.x) || !Number.isFinite(t.y)) return "hidden";
-	let n = Math.abs(e.x - t.x), r = Math.abs(e.y - t.y), i = V.badgeSize + V.clearance;
+	let n = Math.abs(e.x - t.x), r = Math.abs(e.y - t.y), i = H.badgeSize + H.clearance;
 	if (n < i && r < i) return "hidden";
-	let a = V.badgeSize + V.labelGap + V.labelHeight;
-	return n < V.labelWidth + V.clearance && r < a + V.clearance ? "compact" : "full";
+	let a = H.badgeSize + H.labelGap + H.labelHeight;
+	return n < H.labelWidth + H.clearance && r < a + H.clearance ? "compact" : "full";
 }
-function ct(e) {
+function st(e) {
 	let t = e[0], n = e[1];
 	if (!t) return;
-	let r = st(t.project(), n?.project());
+	let r = ot(t.project(), n?.project());
 	t.element.dataset.routeEdgeDensity !== r && (t.element.dataset.routeEdgeDensity = r), n && n.element.dataset.routeEdgeDensity !== r && (n.element.dataset.routeEdgeDensity = r);
 }
-function lt(e) {
+function ct(e) {
 	let t, n = 0, r = (e) => {
 		e.length < 2 || (n++, n === 1 && (t = e));
 	}, i = (e) => {
@@ -1384,9 +1384,9 @@ function lt(e) {
 		label: "Край Б исходной линии"
 	}];
 }
-function ut(e) {
+function lt(e) {
 	let t = document.createElement("div");
-	t.className = `route-edge-marker route-edge-marker--${e.kind}`, t.dataset.routeEdgeDensity = "hidden", t.style.setProperty("--route-edge-badge-size", `${V.badgeSize}px`), t.style.setProperty("--route-edge-label-width", `${V.labelWidth}px`), t.style.setProperty("--route-edge-label-height", `${V.labelHeight}px`), t.style.setProperty("--route-edge-label-gap", `${V.labelGap}px`), t.setAttribute("role", "img"), t.setAttribute("aria-label", e.label);
+	t.className = `route-edge-marker route-edge-marker--${e.kind}`, t.dataset.routeEdgeDensity = "hidden", t.style.setProperty("--route-edge-badge-size", `${H.badgeSize}px`), t.style.setProperty("--route-edge-label-width", `${H.labelWidth}px`), t.style.setProperty("--route-edge-label-height", `${H.labelHeight}px`), t.style.setProperty("--route-edge-label-gap", `${H.labelGap}px`), t.setAttribute("role", "img"), t.setAttribute("aria-label", e.label);
 	let n = document.createElement("span");
 	n.className = "route-edge-badge", n.textContent = e.kind === "last" ? "Б" : "А", n.setAttribute("aria-hidden", "true");
 	let r = document.createElement("span");
@@ -1394,7 +1394,7 @@ function ut(e) {
 }
 //#endregion
 //#region web/lib/map-interaction.ts
-function dt(e, t) {
+function ut(e, t) {
 	!e || ![
 		t.longitude,
 		t.latitude,
@@ -1403,7 +1403,7 @@ function dt(e, t) {
 }
 //#endregion
 //#region web/lib/map-direction-marker.ts
-function ft(e, t = document) {
+function dt(e, t = document) {
 	let n = t.createElement("button");
 	n.type = "button", n.className = `region-marker region-marker-${e.id}`, n.dataset.regionId = e.id, n.setAttribute("aria-label", `Открыть ${e.name}`);
 	let r = t.createElement("span");
@@ -1413,20 +1413,22 @@ function ft(e, t = document) {
 	let o = t.createElementNS(i, "path");
 	o.setAttribute("class", "region-marker-flag"), o.setAttribute("d", "M2 1h20v26l-10-5-10 5Z"), o.setAttribute("stroke-width", "1.5"), o.setAttribute("stroke-linejoin", "round");
 	let s = t.createElementNS(i, "path");
-	s.setAttribute("class", "region-marker-ridge"), s.setAttribute("d", "m5 17 5-8 3 5 2-3 4 6M8 12l2 1 2-1"), s.setAttribute("fill", "none"), s.setAttribute("stroke-width", "1.5"), s.setAttribute("stroke-linecap", "round"), s.setAttribute("stroke-linejoin", "round"), a.appendChild(o), a.appendChild(s);
+	s.setAttribute("class", "region-marker-ridge"), s.setAttribute("d", "m5 17 5-8 3 5 2-3 4 6M8 12l2 1 2-1"), s.setAttribute("fill", "none"), s.setAttribute("stroke-width", "1.5"), s.setAttribute("stroke-linecap", "round"), s.setAttribute("stroke-linejoin", "round"), a.appendChild(o), a.appendChild(s), r.appendChild(a);
 	let c = t.createElement("span");
-	c.className = "region-marker-count", c.setAttribute("aria-hidden", "true"), r.appendChild(a), r.appendChild(c);
+	c.className = "region-marker-label";
 	let l = t.createElement("span");
-	return l.className = "region-marker-label", l.textContent = e.name, n.appendChild(r), n.appendChild(l), n;
+	l.className = "region-marker-name", l.textContent = e.name;
+	let u = t.createElement("span");
+	return u.className = "region-marker-count", u.setAttribute("aria-hidden", "true"), c.appendChild(l), c.appendChild(u), n.appendChild(r), n.appendChild(c), n;
 }
-var pt = 168;
-function mt(e) {
-	return Math.min(pt, Math.max(84, Math.ceil([...e].length * 7.1 + 24)));
+var ft = 240;
+function pt(e) {
+	return Math.min(ft, Math.max(128, Math.ceil([...e].length * 7.1 + 96)));
 }
-function H(e, t, n) {
+function U(e, t, n) {
 	e.style.getPropertyValue(t) !== n && e.style.setProperty(t, n);
 }
-var ht = {
+var mt = {
 	wide: {
 		edge: 18,
 		top: 18,
@@ -1439,7 +1441,7 @@ var ht = {
 		right: 12,
 		bottom: 12
 	}
-}, gt = [
+}, ht = [
 	".map-context",
 	".map-style-switch",
 	".map-controls",
@@ -1454,8 +1456,8 @@ var ht = {
 	".fact-closed",
 	".explore-panel"
 ];
-function _t(e, t, n) {
-	let r = t ? ht.compact : ht.wide, i = e.left + r.edge, a = e.right - r.right, o = e.top + r.top, s = Math.min(e.bottom - r.bottom, n ?? Infinity);
+function gt(e, t, n) {
+	let r = t ? mt.compact : mt.wide, i = e.left + r.edge, a = e.right - r.right, o = e.top + r.top, s = Math.min(e.bottom - r.bottom, n ?? Infinity);
 	return a - i < 160 && (a = e.right - r.edge), s - o < 96 && (o = e.top + r.edge, s = Math.min(e.bottom - r.edge, n ?? Infinity)), a = Math.max(i + 1, a), s = Math.max(o + 1, s), {
 		left: i,
 		right: a,
@@ -1463,7 +1465,7 @@ function _t(e, t, n) {
 		bottom: s
 	};
 }
-function vt(e, t) {
+function _t(e, t) {
 	if (![...Object.values(e), ...Object.values(t)].every(Number.isFinite) || e.right < e.left || e.bottom < e.top) return {
 		x: 0,
 		y: 0
@@ -1474,16 +1476,16 @@ function vt(e, t) {
 		y: s
 	};
 }
-var U = (e, t, n) => ({
+var W = (e, t, n) => ({
 	left: e.left + t,
 	right: e.right + t,
 	top: e.top + n,
 	bottom: e.bottom + n
-}), yt = (e, t) => e.left >= t.left - .5 && e.right <= t.right + .5 && e.top >= t.top - .5 && e.bottom <= t.bottom + .5, W = (e, t, n = 0) => e.left < t.right + n && e.right > t.left - n && e.top < t.bottom + n && e.bottom > t.top - n;
+}), vt = (e, t) => e.left >= t.left - .5 && e.right <= t.right + .5 && e.top >= t.top - .5 && e.bottom <= t.bottom + .5, yt = (e, t, n = 0) => e.left < t.right + n && e.right > t.left - n && e.top < t.bottom + n && e.bottom > t.top - n;
 function bt(e, t, n, r = 8) {
-	let i = vt(e, t), a = i.x, o = i.y, s = U(e, a, o), c = n.filter((e) => [...Object.values(e)].every(Number.isFinite) && e.right > e.left && e.bottom > e.top);
+	let i = _t(e, t), a = i.x, o = i.y, s = W(e, a, o), c = n.filter((e) => [...Object.values(e)].every(Number.isFinite) && e.right > e.left && e.bottom > e.top);
 	for (let e = 0; e < Math.min(16, c.length + 4); e++) {
-		let e = c.find((e) => W(s, e, r));
+		let e = c.find((e) => yt(s, e, r));
 		if (!e) return {
 			x: a,
 			y: o,
@@ -1508,8 +1510,8 @@ function bt(e, t, n, r = 8) {
 			}
 		].map((e) => ({
 			...e,
-			rect: U(s, e.dx, e.dy)
-		})).filter((e) => yt(e.rect, t)).sort((e, t) => Math.abs(e.dx) + Math.abs(e.dy) - (Math.abs(t.dx) + Math.abs(t.dy)))[0];
+			rect: W(s, e.dx, e.dy)
+		})).filter((e) => vt(e.rect, t)).sort((e, t) => Math.abs(e.dx) + Math.abs(e.dy) - (Math.abs(t.dx) + Math.abs(t.dy)))[0];
 		if (!n) return {
 			x: a,
 			y: o,
@@ -1524,76 +1526,24 @@ function bt(e, t, n, r = 8) {
 	};
 }
 function xt(e, t, n, r, i = 8) {
-	if (![
-		...Object.values(e),
-		...Object.values(t),
-		...Object.values(n)
-	].every(Number.isFinite)) return {
-		x: 0,
-		y: 0,
-		hidden: !0
-	};
-	let a = e.right - e.left, o = e.bottom - e.top;
-	if (a <= 0 || o <= 0 || t.right <= t.left || t.bottom <= t.top) return {
-		x: 0,
-		y: 0,
-		hidden: !0
-	};
-	let s = (t.left + t.right) / 2 - a / 2, c = r.filter((e) => Object.values(e).every(Number.isFinite) && e.right > e.left && e.bottom > e.top), l = (n) => {
-		let r = s - e.left, a = (n ? t.bottom + 4 : t.top - o - 4) - e.top;
-		for (let t = 0; t <= c.length; t++) {
-			let t = U(e, r, a), s = c.find((e) => W(t, e, i));
-			if (!s) break;
-			a = (n ? s.bottom + i : s.top - i - o) - e.top;
-		}
-		return {
-			x: r,
-			y: a
-		};
-	}, u = [
-		{
-			x: 0,
-			y: 0
-		},
-		{
-			x: t.left + t.right - e.right - e.left,
-			y: 0
-		},
-		l(!1),
-		l(!0)
-	].sort((e, t) => e.x * e.x + e.y * e.y - (t.x * t.x + t.y * t.y));
-	for (let r of u) {
-		let s = U(e, r.x, r.y);
-		if (!(Math.hypot((s.left + s.right - t.left - t.right) / 2, (s.top + s.bottom - t.top - t.bottom) / 2) > 44 + Math.max(a, o) / 2) && yt(s, n) && !c.some((e) => W(s, e, i))) return {
-			...r,
-			hidden: !1
-		};
-	}
-	return {
-		x: 0,
-		y: 0,
-		hidden: !0
-	};
-}
-function St(e, t, n, r, i = 8) {
 	let a = t.top - r.top - i, o = r.bottom - t.bottom - i;
 	return e === "top" ? a >= n || a >= o ? "top" : "bottom" : o >= n || o >= a ? "bottom" : "top";
 }
-function Ct(e, t) {
+function St(e, t) {
 	let n = getComputedStyle(e);
 	if (n.display === "none" || n.visibility === "hidden" || Number(n.opacity) === 0) return;
 	let r = e.getBoundingClientRect();
-	if (!(r.width < 2 || r.height < 2 || !W(r, t))) return {
+	if (!(r.width < 2 || r.height < 2 || !yt(r, t))) return {
 		left: r.left,
 		right: r.right,
 		top: r.top,
 		bottom: r.bottom
 	};
 }
-function wt(e, t) {
-	return [...(e.closest(".explore-layout") ?? e.parentElement ?? e).querySelectorAll(gt.join(","))].filter((t) => t !== e && !t.contains(e)).map((e) => Ct(e, t)).filter((e) => !!e);
+function Ct(e, t) {
+	return [...(e.closest(".explore-layout") ?? e.parentElement ?? e).querySelectorAll(ht.join(","))].filter((t) => t !== e && !t.contains(e)).map((e) => St(e, t)).filter((e) => !!e);
 }
-function Tt(e) {
+function wt(e) {
 	if (typeof window > "u" || !window.visualViewport) return e;
 	let t = window.visualViewport, n = {
 		left: Math.max(e.left, t.offsetLeft),
@@ -1603,34 +1553,29 @@ function Tt(e) {
 	};
 	return n.right - n.left >= 80 && n.bottom - n.top >= 80 ? n : e;
 }
-function Et(e) {
-	let t = Tt(e.getBoundingClientRect()), n = (e.closest(".explore-layout") ?? e.parentElement ?? e).querySelector(".explore-panel"), r;
+function Tt(e) {
+	let t = wt(e.getBoundingClientRect()), n = (e.closest(".explore-layout") ?? e.parentElement ?? e).querySelector(".explore-panel"), r;
 	if (n) {
 		let e = n.getBoundingClientRect();
 		e.left < t.right && e.right > t.left && e.top > t.top && e.top < t.bottom && (r = Math.max(t.top + 72, e.top - 12));
 	}
 	let i = Math.min(e.clientWidth, t.right - t.left) <= 700;
 	return {
-		safe: _t(t, i, r),
-		obstacles: wt(e, t),
+		safe: gt(t, i, r),
+		obstacles: Ct(e, t),
 		compact: i
 	};
 }
-function Dt(e, t) {
-	let { safe: n, obstacles: r } = Et(t), i = [], a = [], o = [...e.values()].filter((e) => !e.hidden && e.isConnected).sort((e, t) => {
+function Et(e, t) {
+	let { safe: n, obstacles: r, compact: i } = Tt(t), a = [], o = [...e.values()].filter((e) => !e.hidden && e.isConnected).sort((e, t) => {
 		let n = (e) => e.classList.contains("is-selected") ? 0 : e.classList.contains("direction-cluster") ? 1 : 2;
 		return n(e) - n(t) || (e.dataset.regionId ?? "").localeCompare(t.dataset.regionId ?? "", "en");
 	});
 	for (let e of o) {
-		let t = e.querySelector(".region-marker-count");
-		t && (delete e.dataset.mapCountHidden, H(t, "--map-count-shift-x", "0px"), H(t, "--map-count-shift-y", "0px"), t.textContent && a.push({
+		let t = e.querySelector(".region-marker-label");
+		t && a.push({
 			button: e,
-			count: t
-		}));
-		let n = e.querySelector(".region-marker-label");
-		n && i.push({
-			button: e,
-			label: n,
+			label: t,
 			preferred: "bottom",
 			placement: "bottom"
 		});
@@ -1640,10 +1585,10 @@ function Dt(e, t) {
 		let t = e.querySelector(".trail-marker-label");
 		if (t) {
 			if (!(e.classList.contains("is-selected") || e.matches(":hover,:focus-visible,:focus-within"))) {
-				delete e.dataset.mapLabelHidden, H(t, "--map-label-shift-x", "0px"), H(t, "--map-label-shift-y", "0px");
+				delete e.dataset.mapLabelHidden, U(t, "--map-label-shift-x", "0px"), U(t, "--map-label-shift-y", "0px");
 				continue;
 			}
-			i.push({
+			a.push({
 				button: e,
 				label: t,
 				preferred: "top",
@@ -1652,37 +1597,31 @@ function Dt(e, t) {
 		}
 	}
 	let s = Math.max(48, n.right - n.left - 12);
-	for (let { button: e, label: t, preferred: n } of i) e.dataset.mapLabelPlacement !== n && (e.dataset.mapLabelPlacement = n), delete e.dataset.mapLabelHidden, H(t, "--map-label-max-width", `${Math.floor(Math.max(48, Math.min(n === "top" ? 230 : 168, s)))}px`), H(t, "--map-label-shift-x", "0px"), H(t, "--map-label-shift-y", "0px");
-	for (let e of i) {
+	for (let { button: e, label: t, preferred: n } of a) e.dataset.mapLabelPlacement !== n && (e.dataset.mapLabelPlacement = n), delete e.dataset.mapLabelHidden, U(t, "--map-label-max-width", `${Math.floor(Math.max(48, Math.min(n === "top" ? 230 : i ? 208 : ft, s)))}px`), U(t, "--map-label-shift-x", "0px"), U(t, "--map-label-shift-y", "0px");
+	for (let e of a) {
 		let t = e.button.getBoundingClientRect(), r = e.label.getBoundingClientRect();
-		r.width < 2 || r.height < 2 || (e.rect = r, e.placement = St(e.preferred, t, r.height, n));
+		r.width < 2 || r.height < 2 || (e.rect = r, e.placement = xt(e.preferred, t, r.height, n));
 	}
-	for (let e of i) e.rect && e.placement !== e.preferred && (e.button.dataset.mapLabelPlacement = e.placement);
-	for (let e of i) e.rect && e.placement !== e.preferred && (e.rect = e.label.getBoundingClientRect());
+	for (let e of a) e.rect && e.placement !== e.preferred && (e.button.dataset.mapLabelPlacement = e.placement);
+	for (let e of a) e.rect && e.placement !== e.preferred && (e.rect = e.label.getBoundingClientRect());
 	for (let e of a) {
-		let t = e.button.getBoundingClientRect(), n = e.count.getBoundingClientRect();
-		n.width < 2 || n.height < 2 || (e.marker = t, e.rect = n);
-	}
-	for (let e of a) {
-		if (!e.rect || !e.marker) continue;
-		let t = a.filter((t) => t !== e && t.marker).map((e) => e.marker);
-		e.shift = xt(e.rect, e.marker, n, [...r, ...t]), e.shift.hidden || r.push(U(e.rect, e.shift.x, e.shift.y));
-	}
-	for (let e of i) {
 		if (!e.rect) continue;
 		let t = bt(e.rect, n, r);
 		e.shift = {
 			x: Math.round(t.x),
 			y: Math.round(t.y),
 			hidden: t.hidden
-		}, t.hidden || r.push(U(e.rect, e.shift.x, e.shift.y));
+		}, t.hidden || r.push(W(e.rect, e.shift.x, e.shift.y));
 	}
-	for (let { button: e, label: t, preferred: n, placement: r, shift: a } of i) a && (H(t, "--map-label-shift-x", `${a.x}px`), H(t, "--map-label-shift-y", `${a.y}px`), a.hidden && (e.dataset.mapLabelHidden = "true"), e.classList.toggle("map-label-shifted", a.x !== 0 || a.y !== 0 || r !== n));
-	for (let { button: e, count: t, shift: n } of a) n && (H(t, "--map-count-shift-x", `${n.x}px`), H(t, "--map-count-shift-y", `${n.y}px`), n.hidden && (e.dataset.mapCountHidden = "true"));
+	for (let { button: e, label: t, preferred: n, placement: r, shift: i } of a) i && (U(t, "--map-label-shift-x", `${i.x}px`), U(t, "--map-label-shift-y", `${i.y}px`), i.hidden && (e.dataset.mapLabelHidden = "true"), e.classList.toggle("map-label-shifted", i.x !== 0 || i.y !== 0 || r !== n));
+}
+function Dt(e) {
+	let t = e % 100, n = e % 10;
+	return `${e} ${t >= 11 && t <= 14 ? "направлений" : n === 1 ? "направление" : n >= 2 && n <= 4 ? "направления" : "направлений"}`;
 }
 function Ot(e) {
 	let t = e % 100, n = e % 10;
-	return `${e} ${t >= 11 && t <= 14 ? "направлений" : n === 1 ? "направление" : n >= 2 && n <= 4 ? "направления" : "направлений"}`;
+	return `${e} ${t >= 11 && t <= 14 ? "троп" : n === 1 ? "тропа" : n >= 2 && n <= 4 ? "тропы" : "троп"}`;
 }
 function kt(e, t) {
 	return Math.abs(e.point.x - t.point.x) < (e.width + t.width) / 2 + 12 && Math.abs(e.point.y - t.point.y) < (e.height + t.height) / 2 + 12;
@@ -1711,8 +1650,8 @@ function jt(e, t, n = /* @__PURE__ */ new Set()) {
 				Math.max(...i),
 				Math.max(...a)
 			],
-			width: e.length > 1 ? 176 : mt(t.name),
-			height: e.length > 1 || t.name.length > 22 ? 88 : 72
+			width: e.length > 1 ? 176 : pt(t.name),
+			height: e.length === 1 && t.name.length > 19 ? 104 : 88
 		};
 	}, o = i.filter((e) => {
 		let t = r.get(e.id);
@@ -1724,13 +1663,13 @@ function jt(e, t, n = /* @__PURE__ */ new Set()) {
 	}
 	return o.sort((e, t) => e.key.localeCompare(t.key));
 }
-function Mt(e, t, n) {
-	let r = e.members.length > 1;
+function Mt(e, t) {
+	let n = e.members.length > 1;
 	return {
-		cluster: r,
-		label: r ? Ot(e.members.length) : e.anchor.name,
-		count: r ? String(e.members.length) : n ? String(t) : "",
-		ariaLabel: r ? `Приблизить ${Ot(e.members.length)}: ${e.members.map((e) => e.name).join(", ")}` : `Открыть ${e.anchor.name}${n ? `, маршрутов в каталоге: ${t}` : ""}`
+		cluster: n,
+		label: n ? Dt(e.members.length) : e.anchor.name,
+		count: n ? "" : Ot(t),
+		ariaLabel: n ? `Приблизить ${Dt(e.members.length)}: ${e.members.map((e) => e.name).join(", ")}` : `Открыть ${e.anchor.name}, ${Ot(t)} в каталоге`
 	};
 }
 function Nt(e, t, n, r, i) {
@@ -1742,9 +1681,9 @@ function Nt(e, t, n, r, i) {
 			continue;
 		}
 		o.getAttribute("data-map-anchor-region-id") !== e.anchor.id && o.setAttribute("data-map-anchor-region-id", e.anchor.id), o.getAttribute("data-map-group-key") !== e.key && o.setAttribute("data-map-group-key", e.key);
-		let s = Mt(e, n.get(t) || 0, r);
+		let s = Mt(e, n.get(t) || 0);
 		o.classList.toggle("direction-cluster", s.cluster), o.classList.toggle("is-overview", r), o.classList.toggle("is-selected", e.members.some((e) => e.id === i));
-		let c = o.querySelector(".region-marker-count"), l = o.querySelector(".region-marker-label");
+		let c = o.querySelector(".region-marker-count"), l = o.querySelector(".region-marker-name");
 		c && c.textContent !== s.count && (c.textContent = s.count), l && l.textContent !== s.label && (l.textContent = s.label), o.getAttribute("aria-label") !== s.ariaLabel && o.setAttribute("aria-label", s.ariaLabel), o.removeAttribute("title");
 	}
 	if (o && !a.has(o)) {
@@ -1974,7 +1913,7 @@ async function nn(e, t) {
 		e && (e.type === "FeatureCollection" ? e.features.forEach(a) : e.type === "Feature" ? a(e.geometry) : e.type === "GeometryCollection" ? e.geometries.forEach(a) : e.type === "LineString" ? r.push(e.coordinates.map((e) => [...e])) : e.type === "MultiLineString" ? e.coordinates.forEach((e) => r.push(e.map((e) => [...e]))) : i = !1);
 	};
 	try {
-		a(_e(t));
+		a(ge(t));
 	} catch {
 		return;
 	}
@@ -2109,7 +2048,7 @@ function hn(e, t) {
 			for (let a of c) {
 				let c = a[0] + 360 * Math.round((d - a[0]) / 360), l = a[1];
 				if (d = c, u && Math.min(u.longitude, c) <= r[2] && Math.max(u.longitude, c) >= r[0] && Math.min(u.latitude, l) <= r[3] && Math.max(u.latitude, l) >= r[1]) {
-					let r = ce(n, t.project(u.longitude, u.latitude), t.project(c, l));
+					let r = se(n, t.project(u.longitude, u.latitude), t.project(c, l));
 					if (r.distance <= i && (!o || r.distance < o.distance)) {
 						let n = t.unproject(r.point);
 						(e || t.insideCoverage(n[0], n[1])) && (o = {
@@ -2264,7 +2203,7 @@ var bn = class {
 					let n = [...new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", r))].map((e) => e.toString(16).padStart(2, "0")).join("");
 					if (this.disposed || t.signal.aborted || this.jobs.get(e.key) !== t) return;
 					if (n !== e.sha256) throw Error("Detailed trail source integrity mismatch");
-					if (a = _e(JSON.parse(new TextDecoder().decode(r))), i = q(a), !i.length) throw Error("Empty detailed trail geometry");
+					if (a = ge(JSON.parse(new TextDecoder().decode(r))), i = q(a), !i.length) throw Error("Empty detailed trail geometry");
 				} catch (e) {
 					throw this.options.invalidate?.(n), e;
 				}
@@ -2717,7 +2656,7 @@ function Q(e) {
 	};
 }
 function $(e, t, n, r, i = !0, a = !1, o = !0) {
-	let s = Math.max(0, Math.floor(n)), c = w(e, t), l = d([c[0], c[1]]), u = d([c[2], c[3]]), f = d(e.center), p = (e.bearingDegrees ?? 0) * Math.PI / 180, m = Math.cos(p), h = Math.sin(p), g = 256 * 2 ** e.zoom, _ = t.width / 2, v = t.height / 2, y = [], b = (e, t, n) => {
+	let s = Math.max(0, Math.floor(n)), c = T(e, t), l = d([c[0], c[1]]), u = d([c[2], c[3]]), f = d(e.center), p = (e.bearingDegrees ?? 0) * Math.PI / 180, m = Math.cos(p), h = Math.sin(p), g = 256 * 2 ** e.zoom, _ = t.width / 2, v = t.height / 2, y = [], b = (e, t, n) => {
 		let r = ((e + .5) / n - f.x) * g, i = ((t + .5) / n - f.y) * g, a = g / (2 * n), o = a * (Math.abs(m) + Math.abs(h));
 		return Math.abs(r * m + i * h) <= _ + o && Math.abs(-r * h + i * m) <= v + o && Math.abs(r) <= a + _ * Math.abs(m) + v * Math.abs(h) && Math.abs(i) <= a + _ * Math.abs(h) + v * Math.abs(m);
 	};
@@ -2749,7 +2688,7 @@ var Pn = class {
 			sources: 0,
 			parts: 0,
 			details: 0
-		}, this.trailRasterPartCache = /* @__PURE__ */ new WeakMap(), this.trailRasterPartSerial = 0, this.trailOverlayPaintedEntries = [], this.trailOverlayViewportReady = !0, this.trailRasterError = "", this.groundSnapshotUnavailable = !1, this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.drawRevision = 0, this.labelRevision = 0, this.frame = 0, this.paintRequested = !1, this.labelsRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new ie({
+		}, this.trailRasterPartCache = /* @__PURE__ */ new WeakMap(), this.trailRasterPartSerial = 0, this.trailOverlayPaintedEntries = [], this.trailOverlayViewportReady = !0, this.trailRasterError = "", this.groundSnapshotUnavailable = !1, this.markers = /* @__PURE__ */ new Map(), this.markerGroups = /* @__PURE__ */ new Map(), this.routeEdges = [], this.selectedShapes = [], this.mode = "detail", this.paths = !0, this.boundaryVisible = !0, this.reliefVisible = !0, this.generation = 0, this.currentKeys = "", this.disposed = !1, this.active = !0, this.eco = !1, this.additionalLabels = [], this.labelDiagnostics = [], this.labelDiagnosticTotal = 0, this.drawRevision = 0, this.labelRevision = 0, this.frame = 0, this.paintRequested = !1, this.labelsRequested = !1, this.animation = 0, this.zoomTarget = null, this.pointer = new re({
 			minZoom: -2,
 			maxZoom: 18,
 			rotate: !0
@@ -2764,7 +2703,7 @@ var Pn = class {
 			error: "",
 			residentTiles: 0,
 			pendingTiles: 0
-		}, this.element = e, this.options = t, this.camera = { ...t.camera }, this.floor = { ...t.camera }, this.rasterPolicy = qt(e.ownerDocument ?? document), this.tiles = new at(this.rasterPolicy.softwareRaster), this.canvas = document.createElement("canvas"), this.canvas.className = "tropnik-map-canvas", this.canvas.tabIndex = 0, this.canvas.setAttribute("aria-label", "Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб."), this.canvas.setAttribute("role", "img"), e.appendChild(this.canvas), this.labelCanvas = document.createElement("canvas"), this.labelCanvas.className = "tropnik-map-labels", this.labelCanvas.hidden = !0, this.labelCanvas.setAttribute("aria-hidden", "true"), e.appendChild(this.labelCanvas), this.markerLayer = document.createElement("div"), this.markerLayer.className = "tropnik-marker-layer", e.appendChild(this.markerLayer);
+		}, this.element = e, this.options = t, this.camera = { ...t.camera }, this.floor = { ...t.camera }, this.rasterPolicy = qt(e.ownerDocument ?? document), this.tiles = new it(this.rasterPolicy.softwareRaster), this.canvas = document.createElement("canvas"), this.canvas.className = "tropnik-map-canvas", this.canvas.tabIndex = 0, this.canvas.setAttribute("aria-label", "Карта России: перетаскивание и стрелки перемещают карту, колёсико и плюс или минус меняют масштаб."), this.canvas.setAttribute("role", "img"), e.appendChild(this.canvas), this.labelCanvas = document.createElement("canvas"), this.labelCanvas.className = "tropnik-map-labels", this.labelCanvas.hidden = !0, this.labelCanvas.setAttribute("aria-hidden", "true"), e.appendChild(this.labelCanvas), this.markerLayer = document.createElement("div"), this.markerLayer.className = "tropnik-marker-layer", e.appendChild(this.markerLayer);
 		let n = this.canvas.getContext("2d", {
 			alpha: !1,
 			willReadFrequently: this.rasterPolicy.softwareRaster
@@ -2779,7 +2718,7 @@ var Pn = class {
 		this.labelContext = r, this.resize = new ResizeObserver(() => this.resizeCanvas()), this.resize.observe(e), this.resizeCanvas(), this.bindInput(), this.loadCoverage();
 	}
 	loadCoverage() {
-		this.disposed || this.coverage || this.coverageTask || (this.updateState({ loading: !0 }), this.coverageTask = ot().then((e) => {
+		this.disposed || this.coverage || this.coverageTask || (this.updateState({ loading: !0 }), this.coverageTask = at().then((e) => {
 			if (this.disposed) {
 				e.dispose();
 				return;
@@ -2818,11 +2757,11 @@ var Pn = class {
 		return { ...this.size };
 	}
 	getBounds() {
-		return w(this.camera, this.virtualSize());
+		return T(this.camera, this.virtualSize());
 	}
 	getVisibleBounds(e = this.padding) {
 		let t = Math.cos(this.pitch * Math.PI / 180);
-		return w(this.camera, this.virtualSize(), {
+		return T(this.camera, this.virtualSize(), {
 			...e,
 			top: (e.top ?? 0) / t,
 			bottom: (e.bottom ?? 0) / t
@@ -2999,7 +2938,7 @@ var Pn = class {
 	moveCamera(e, t, n) {
 		if (this.disposed) return;
 		this.pointer.cancel(), this.stopAnimation();
-		let r = z(e.center[0], e.center[1], e.zoom, {
+		let r = B(e.center[0], e.center[1], e.zoom, {
 			...this.floor,
 			center: [...this.floor.center]
 		}, this.framed ? {
@@ -3023,7 +2962,7 @@ var Pn = class {
 				let e = S(a, this.size, r, n, {
 					minZoom: this.floor.zoom,
 					maxZoom: this.options.maxZoom ?? 18
-				}), t = z(e.center[0], e.center[1], e.zoom, {
+				}), t = B(e.center[0], e.center[1], e.zoom, {
 					...this.floor,
 					center: [...this.floor.center]
 				}, this.framed ? {
@@ -3048,7 +2987,7 @@ var Pn = class {
 		this.animation = requestAnimationFrame(l);
 	}
 	fit(e, t = {}, n = 14, r = !0) {
-		this.padding = t, this.framed = C(e, this.size, {
+		this.padding = t, this.framed = w(e, this.size, {
 			padding: t,
 			maxZoom: n,
 			minZoom: this.floor.zoom,
@@ -3114,8 +3053,8 @@ var Pn = class {
 				lines: [e.coordinates]
 			})),
 			coastal: this.reviewedCoastalRoute ? n : void 0
-		} : void 0, this.routeEdges.forEach((e) => e.element.remove()), this.routeEdges = [], e) for (let t of lt(e)) {
-			let e = ut(t);
+		} : void 0, this.routeEdges.forEach((e) => e.element.remove()), this.routeEdges = [], e) for (let t of ct(e)) {
+			let e = lt(t);
 			this.markerLayer.appendChild(e), this.routeEdges.push({
 				element: e,
 				project: () => this.project(t.coordinate)
@@ -3155,8 +3094,8 @@ var Pn = class {
 				};
 			},
 			unproject: (e) => this.unproject(e),
-			insideCoverage: (e, t) => M(e, t, o),
-			pointerInsideCoverage: M(a[0], a[1], o)
+			insideCoverage: (e, t) => N(e, t, o),
+			pointerInsideCoverage: N(a[0], a[1], o)
 		}, c = this.routeHit && hn([this.routeHit], s);
 		return c ? c.id : this.paths ? hn(this.trailOverlayPaintedEntries, {
 			...s,
@@ -3180,7 +3119,7 @@ var Pn = class {
 		}
 		let e = this.getBounds(), t = this.camera.zoom <= K[0] ? 0 : this.camera.zoom <= K[1] ? 1 : 2, n = this.trailOverlayWindow;
 		if (n && this.trailOverlayLevel === t && e[0] >= n[0] && e[1] >= n[1] && e[2] <= n[2] && e[3] <= n[3]) return;
-		let r = this.virtualSize(), i = w(this.camera, {
+		let r = this.virtualSize(), i = T(this.camera, {
 			width: r.width + 512,
 			height: r.height + 512
 		}), a = new Path2D(), o = [], s = 0, c = 0, l = 0, u = 0, f = 0;
@@ -3274,7 +3213,7 @@ var Pn = class {
 		for (let t of e) {
 			let e = this.markers.get(t.id);
 			if (e && e.marker.kind !== t.kind && (e.button.remove(), this.markers.delete(t.id), e = void 0), !e) {
-				let n = t.kind === "direction" ? ft({
+				let n = t.kind === "direction" ? dt({
 					id: t.id,
 					name: t.label
 				}) : document.createElement("button");
@@ -3291,7 +3230,7 @@ var Pn = class {
 					let a = this.markerGroups.get(t.id);
 					if (a && a.members.length > 1) {
 						this.options.onGesture?.();
-						let e = C(a.bounds, this.size, {
+						let e = w(a.bounds, this.size, {
 							padding: this.padding,
 							maxZoom: 11,
 							referenceLongitude: 105
@@ -3395,7 +3334,7 @@ var Pn = class {
 			let n = t(e), r = this.pointer.move(e.pointerId, this.flatPoint(n));
 			if (!r) return;
 			this.pointerStart && Math.hypot(n.x - this.pointerStart.x, n.y - this.pointerStart.y) > 5 && (this.pointerMoved = !0);
-			let i = z(r.center[0], r.center[1], r.zoom, {
+			let i = B(r.center[0], r.center[1], r.zoom, {
 				...this.floor,
 				center: [...this.floor.center]
 			}, this.framed ? {
@@ -3418,10 +3357,10 @@ var Pn = class {
 		})), this.listen(this.element, "wheel", ((e) => {
 			if (!this.state.ready || !this.active) return;
 			e.preventDefault(), this.options.onGesture?.(), this.stopAnimation();
-			let n = S(this.camera, this.size, this.camera.zoom + oe(e.deltaY, e.deltaMode, this.size.height), this.flatPoint(t(e)), {
+			let n = S(this.camera, this.size, this.camera.zoom + ae(e.deltaY, e.deltaMode, this.size.height), this.flatPoint(t(e)), {
 				minZoom: this.floor.zoom,
 				maxZoom: this.options.maxZoom ?? 18
-			}), r = z(n.center[0], n.center[1], n.zoom, {
+			}), r = B(n.center[0], n.center[1], n.zoom, {
 				...this.floor,
 				center: [...this.floor.center]
 			}, this.framed ? {
@@ -3464,7 +3403,7 @@ var Pn = class {
 				].includes(e.key) ? 1 : -1);
 				return;
 			}
-			let t = se(this.camera, this.size, e.key, {
+			let t = oe(this.camera, this.size, e.key, {
 				minZoom: this.floor.zoom,
 				maxZoom: this.options.maxZoom ?? 18
 			});
@@ -3513,7 +3452,7 @@ var Pn = class {
 	}
 	settled() {
 		if (this.disposed || !this.active) return;
-		this.setMoving(!1), dt(this.element, {
+		this.setMoving(!1), ut(this.element, {
 			longitude: this.camera.center[0],
 			latitude: this.camera.center[1],
 			zoom: this.camera.zoom,
@@ -3524,12 +3463,12 @@ var Pn = class {
 		}), this.element.dataset.mapBearing = String(this.camera.bearingDegrees ?? 0), this.options.onSettled?.(this.getCamera());
 		let e = this.getBounds();
 		requestAnimationFrame(() => {
-			this.disposed || (Dt(new Map([...this.markers].filter(([, e]) => e.marker.kind === "direction").map(([e, t]) => [e, t.button])), this.element), ct(this.routeEdges));
+			this.disposed || (Et(new Map([...this.markers].filter(([, e]) => e.marker.kind === "direction").map(([e, t]) => [e, t.button])), this.element), st(this.routeEdges));
 		}), this.coverage?.updateView([...e], this.camera.zoom).catch(() => void 0), this.refreshTiles(), this.schedule();
 	}
 	refreshTiles() {
 		if (this.disposed || !this.active || !this.coverage) return;
-		let e = this.virtualSize(), t = Math.max(0, Math.floor(this.camera.zoom)), n = $(this.camera, e, Math.min(4, t), "overview"), r = Math.min(18, Math.ceil(this.camera.zoom)), i = this.mode !== "overview" && t >= 5 ? $(this.camera, e, r, "vector", this.paths, this.mode === "satellite", this.boundaryVisible) : [], a = this.mode === "detail" && this.reliefVisible && t >= 5 ? $(this.camera, e, r, "relief") : [], o = this.getBounds(), s = Xe({
+		let e = this.virtualSize(), t = Math.max(0, Math.floor(this.camera.zoom)), n = $(this.camera, e, Math.min(4, t), "overview"), r = Math.min(18, Math.ceil(this.camera.zoom)), i = this.mode !== "overview" && t >= 5 ? $(this.camera, e, r, "vector", this.paths, this.mode === "satellite", this.boundaryVisible) : [], a = this.mode === "detail" && this.reliefVisible && t >= 5 ? $(this.camera, e, r, "relief") : [], o = this.getBounds(), s = Ye({
 			west: o[0],
 			south: o[1],
 			east: o[2],
@@ -3539,7 +3478,7 @@ var Pn = class {
 			...i,
 			...a,
 			...c
-		], u = l.map(R).join("|");
+		], u = l.map(z).join("|");
 		if (u === this.currentKeys) return;
 		this.currentKeys = u;
 		let d = ++this.generation;
@@ -3551,7 +3490,7 @@ var Pn = class {
 			this.imagery,
 			this.imageryOverlay
 		].flatMap((e) => e?.tiles.map((e) => e.key) || []);
-		this.tiles.pin([...l.map(R), ...f()]), this.updateState({
+		this.tiles.pin([...l.map(z), ...f()]), this.updateState({
 			loading: l.length > 0,
 			imageryLoading: c.length > 0,
 			imageryTarget: c.length ? s : void 0
@@ -3603,7 +3542,7 @@ var Pn = class {
 					...navigator.onLine ? { error: "" } : {}
 				}), this.schedule();
 			}
-		}), ee = Promise.all([
+		}), C = Promise.all([
 			x(i, "vector"),
 			x(a, "relief"),
 			x(c, s)
@@ -3639,8 +3578,8 @@ var Pn = class {
 			});
 			this.schedule();
 		});
-		Promise.all([S, ee]).finally(() => {
-			p() && (this.tiles.pin([...l.map(R), ...f()]), this.updateState({ loading: !1 }), b !== this.coverageRevision && [
+		Promise.all([S, C]).finally(() => {
+			p() && (this.tiles.pin([...l.map(z), ...f()]), this.updateState({ loading: !1 }), b !== this.coverageRevision && [
 				this.detail,
 				this.relief,
 				this.imagery,
@@ -3876,20 +3815,20 @@ var Pn = class {
 		this.groundSnapshot = void 0, e && (e.surface.width = 0, e.surface.height = 0);
 	}
 	drawGround(e, t, n, r = this.context, i) {
-		r.setTransform(1, 0, 0, 1, 0, 0), n || (r.fillStyle = ye, r.fillRect(0, 0, this.canvas.width, this.canvas.height));
+		r.setTransform(1, 0, 0, 1, 0, 0), n || (r.fillStyle = ve, r.fillRect(0, 0, this.canvas.width, this.canvas.height));
 		let a = this.worldTransform(r);
 		return n || (this.area && (r.fillStyle = "#dce5cf", r.fill(this.area, "evenodd")), this.drawTiles(this.overview, .95, r, i)), t && this.drawTiles(this.imagery, 1, r, i), this.mode !== "overview" && this.camera.zoom >= 4.7 && (!t || e?.tiles[0]?.transparent) && this.drawTiles(e, 1, r, i), !t && (this.mode === "detail" || this.state.committedMode === "detail") && this.reliefVisible && this.camera.zoom >= 4.7 && this.drawTiles(this.relief, .82, r, i), !t && this.mode === "detail" && this.camera.zoom >= 4.7 && this.loadingGround && (this.drawTiles(this.loadingGround.detail, 1, r, i), this.reliefVisible && this.drawTiles(this.loadingGround.relief, .82, r, i)), this.boundaryVisible && this.boundaries && (r.strokeStyle = t ? "rgba(245,248,232,.45)" : "rgba(95,123,87,.45)", r.lineWidth = .65 / a, r.stroke(this.boundaries)), this.selectedArea && (r.fillStyle = "rgba(92,128,70,.10)", r.fill(this.selectedArea, "evenodd")), this.selectedBoundary && (r.strokeStyle = t ? "#e7eacc" : "#688360", r.lineWidth = 1.3 / a, r.stroke(this.selectedBoundary)), a;
 	}
 	draw() {
 		if (this.disposed || !this.active) return;
 		let e = this.context, t = this.displayDetail(), n = this.detailCoversViewport(t), r = this.displayingSatellite(), i = this.groundSignature(t, r, n), a;
-		if (this.restoreGround(i) || this.updateLoadingGround(i, t, r, n) ? a = this.worldTransform() : (a = this.drawGround(t, r, n), this.retainGround(i)), this.paths && this.drawTrailOverlay(a, r), this.route && !this.reviewedCoastalRoute && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (B(this.camera.zoom) + 3) / a, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = B(this.camera.zoom) / a, e.stroke(this.route.path)), this.mask && (e.fillStyle = ye, e.fill(this.mask, "evenodd")), this.paths && this.reviewedCoastalOverlayBatch) {
+		if (this.restoreGround(i) || this.updateLoadingGround(i, t, r, n) ? a = this.worldTransform() : (a = this.drawGround(t, r, n), this.retainGround(i)), this.paths && this.drawTrailOverlay(a, r), this.route && !this.reviewedCoastalRoute && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (V(this.camera.zoom) + 3) / a, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = V(this.camera.zoom) / a, e.stroke(this.route.path)), this.mask && (e.fillStyle = ve, e.fill(this.mask, "evenodd")), this.paths && this.reviewedCoastalOverlayBatch) {
 			let t = this.camera.zoom < 8 ? 1.4 : 2;
 			e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = r ? "rgba(30,48,37,.9)" : "rgba(255,254,245,.9)", e.lineWidth = (t + 2) / a, e.stroke(this.reviewedCoastalOverlayBatch), e.strokeStyle = r ? "#f2d49b" : "#618253", e.lineWidth = t / a, e.stroke(this.reviewedCoastalOverlayBatch);
 		}
 		if (this.reviewedCoastalRoute || this.paths && this.reviewedCoastalOverlayBatch && this.route && this.area) {
 			let t = this.reviewedCoastalRoute ?? this.route;
-			e.save(), this.reviewedCoastalRoute || e.clip(this.area, "evenodd"), e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (B(this.camera.zoom) + 3) / a, e.stroke(t.path), e.strokeStyle = "#244d3c", e.lineWidth = B(this.camera.zoom) / a, e.stroke(t.path), e.restore();
+			e.save(), this.reviewedCoastalRoute || e.clip(this.area, "evenodd"), e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (V(this.camera.zoom) + 3) / a, e.stroke(t.path), e.strokeStyle = "#244d3c", e.lineWidth = V(this.camera.zoom) / a, e.stroke(t.path), e.restore();
 		}
 		this.drawMarkers(), this.drawLabels(), this.element.dataset.mapPainted = "true", this.element.dataset.mapCanvas = "custom", this.element.dataset.mapDrawnRoute = this.routeId || "", this.drawRevision++, !this.pointer.activePointers && !this.animation && this.publishInspection(), this.options.onFrame?.(this.getCamera());
 	}
@@ -3972,7 +3911,7 @@ var Pn = class {
 				f.reason = "duplicate";
 				continue;
 			}
-			if (!(s.insideCoverage ??= M(c[0], c[1], this.coverage.area))) {
+			if (!(s.insideCoverage ??= N(c[0], c[1], this.coverage.area))) {
 				f.reason = "outside-coverage";
 				continue;
 			}
@@ -4011,11 +3950,11 @@ var Pn = class {
 }, Fn = Object.freeze({
 	version: 1,
 	CustomMapEngine: Pn,
-	inRussiaCoverage: M
+	inRussiaCoverage: N
 });
 typeof window < "u" && Object.defineProperty(window, "TropnikMapAPI", {
 	value: Fn,
 	configurable: !1
 });
 //#endregion
-export { M as a, nn as i, Pn as n, _e as o, bn as r, Fn as t };
+export { N as a, nn as i, Pn as n, ge as o, bn as r, Fn as t };

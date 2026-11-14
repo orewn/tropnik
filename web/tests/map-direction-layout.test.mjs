@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {dirname, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,directionAnchorCorrection,directionCountShift,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,mapLabelObstacleRects,updateDirectionButtons,bindMapLabelReflow} from '../lib/map-direction-layout.ts';
+import {groupMapDirections,directionGroupsOverlap,directionMarkerContent,directionCountLabel,directionLabelWidth,directionAnchorCorrection,mapLabelPlacement,mapLabelSafeRect,mapLabelShift,mapLabelAvoidObstacles,mapLabelObstacleRects,updateDirectionButtons,bindMapLabelReflow} from '../lib/map-direction-layout.ts';
 import {russiaCamera,russiaPadding,russiaLongitude} from '../public/maps/russia-viewport.js';
 
 // Use the actual fifteen directions, not a separately maintained coordinate
@@ -62,10 +62,24 @@ test('a cluster names directions instead of summing shared route counts',()=>{
   const [group]=groupMapDirections(south,()=>({x:0,y:0}));
   const content=directionMarkerContent(group,999,true);
   assert.equal(content.label,'5 направлений');
-  assert.equal(content.count,'5');
+  assert.equal(content.count,'','group size is already named and must not masquerade as a trail count');
   assert.ok(!content.ariaLabel.includes('999'));
   for(const item of south)assert.ok(content.ariaLabel.includes(item.name));
   assert.deepEqual([1,2,5,11,21,22].map(directionCountLabel),['1 направление','2 направления','5 направлений','11 направлений','21 направление','22 направления']);
+});
+
+test('single destinations retain truthful pluralised trail counts at both zoom levels',()=>{
+  const [group]=groupMapDirections([regions.find(item=>item.id==='altai')],()=>({x:200,y:200}));
+  const examples=[[0,'0 троп'],[1,'1 тропа'],[2,'2 тропы'],[5,'5 троп'],[11,'11 троп'],[14,'14 троп'],[21,'21 тропа'],[22,'22 тропы'],[25,'25 троп'],[111,'111 троп'],[121,'121 тропа']];
+  for(const [count,expected]of examples){
+    const overview=directionMarkerContent(group,count,true),detail=directionMarkerContent(group,count,false);
+    assert.equal(overview.label,'Алтай');
+    assert.equal(overview.count,expected);
+    assert.equal(detail.label,overview.label,'large zoom keeps the destination name');
+    assert.equal(detail.count,overview.count,'large zoom keeps the count beside that name');
+    assert.equal(detail.ariaLabel,overview.ariaLabel,'the accessible count does not disappear with zoom');
+    assert.ok(detail.ariaLabel.includes(String(count)),'the readable count is also accessible');
+  }
 });
 
 test('regrouping transfers keyboard focus and restores a separate selected direction',()=>{
@@ -92,10 +106,10 @@ test('regrouping transfers keyboard focus and restores a separate selected direc
   updateDirectionButtons(buttons,expanded,new Map([['a',7],['b',3]]),true,'b');
   assert.ok([...buttons.values()].every(button=>!button.hidden));
   assert.equal(buttons.get('b').label.textContent,'Б');
-  assert.equal(buttons.get('b').count.textContent,'3');
+  assert.equal(buttons.get('b').count.textContent,'3 тропы');
   assert.ok(buttons.get('b').classes.has('is-selected'));
   assert.ok(!buttons.get('a').classes.has('direction-cluster'));
-  assert.equal(buttons.get('b').attributes.get('aria-label'),'Открыть Б, маршрутов в каталоге: 3');
+  assert.equal(buttons.get('b').attributes.get('aria-label'),'Открыть Б, 3 тропы в каталоге');
 });
 
 test('safe-area rules keep labels inside all four map edges',()=>{
@@ -107,8 +121,8 @@ test('safe-area rules keep labels inside all four map edges',()=>{
   assert.deepEqual(mapLabelShift({left:900,right:1040,top:710,bottom:770},wide),{x:-58,y:0});
   assert.equal(mapLabelPlacement('bottom',{left:100,right:132,top:700,bottom:732},40,wide),'bottom');
   assert.equal(mapLabelPlacement('top',{left:100,right:132,top:75,bottom:107},40,wide),'top');
-  assert.ok(directionLabelWidth('Петропавловск-Камчатский')<=168);
-  assert.ok(directionLabelWidth('Алтай')>=84);
+  assert.ok(directionLabelWidth('Петропавловск-Камчатский')<=240);
+  assert.ok(directionLabelWidth('Алтай')>=128);
 });
 
 test('labels avoid floating cards and controls without moving their map anchor',()=>{
@@ -179,44 +193,27 @@ test('DOM anchor correction is idempotent across repeated camera frames',()=>{
   assert.deepEqual(directionAnchorCorrection(moved,{x:130,y:250},viewport,first),first);
 });
 
-test('the Baikal count clears the narrow-phone controls without moving its flag',()=>{
-  // The actual failed CI horizontal geometry: the badge extends beyond the
-  // 44px anchor and is partly covered by the adjacent fixed map toolbar.
+test('a joint region card clears narrow-phone controls as one readable unit',()=>{
   const marker={left:310,right:354,top:160,bottom:204};
-  const count={left:340,right:364.890625,top:168,bottom:188};
+  const label={left:240,right:432,top:204,bottom:260};
+  const count={left:352,right:416,top:212,bottom:236};
   const toolbar={left:350,right:394,top:100,bottom:360};
-  const safe={left:12,right:400,top:12,bottom:500};
-  const anchor={...marker};
-  const shift=directionCountShift(count,marker,safe,[toolbar]);
+  const safe={left:12,right:400,top:12,bottom:500},anchor={...marker};
+  const shift=mapLabelAvoidObstacles(label,safe,[toolbar]);
   assert.equal(shift.hidden,false);
-  const actual={left:count.left+shift.x,right:count.right+shift.x,top:count.top+shift.y,bottom:count.bottom+shift.y};
-  assert.ok(actual.right<=toolbar.left-8,'every painted part clears the toolbar');
-  assert.ok(actual.left<marker.left,'the external badge remains an independently reachable part of the same button');
-  assert.ok(Math.abs(shift.x)<=44&&Math.abs(shift.y)<=44,'the badge stays beside its own flag');
-  assert.deepEqual(marker,anchor,'a UI collision never changes the geographic anchor');
-  assert.deepEqual(directionCountShift(count,marker,safe,[toolbar]),shift,'repeated settled layout does not accumulate an offset');
-  assert.deepEqual(directionCountShift(count,marker,safe,[]),{x:0,y:0,hidden:false},'removing the obstacle restores the normal side');
+  const moved=rect=>({left:rect.left+shift.x,right:rect.right+shift.x,top:rect.top+shift.y,bottom:rect.bottom+shift.y});
+  const card=moved(label),badge=moved(count);
+  assert.ok(card.right<=toolbar.left-8||card.left>=toolbar.right+8||card.bottom<=toolbar.top-8||card.top>=toolbar.bottom+8,'the whole name/count card clears the toolbar');
+  assert.ok(badge.left>=card.left&&badge.right<=card.right&&badge.top>=card.top&&badge.bottom<=card.bottom,'the count travels inside its region card');
+  assert.ok(card.left>=safe.left&&card.right<=safe.right&&card.top>=safe.top&&card.bottom<=safe.bottom);
+  assert.deepEqual(marker,anchor,'moving a card never changes its geographic anchor');
+  assert.deepEqual(mapLabelAvoidObstacles(label,safe,[toolbar]),shift,'repeated settled layout does not accumulate an offset');
 });
 
-test('count placement uses another adjacent side at viewport edges and avoids other controls',()=>{
-  const safe={left:12,right:378,top:12,bottom:500};
-  const marker={left:334,right:378,top:160,bottom:204};
-  const count={left:364,right:388,top:168,bottom:188};
-  const leftButton={left:296,right:340,top:152,bottom:212};
-  const shift=directionCountShift(count,marker,safe,[leftButton]);
-  assert.equal(shift.hidden,false);
-  const actual={left:count.left+shift.x,right:count.right+shift.x,top:count.top+shift.y,bottom:count.bottom+shift.y};
-  assert.ok(actual.left>=safe.left&&actual.right<=safe.right&&actual.top>=safe.top&&actual.bottom<=safe.bottom);
-  assert.ok(actual.bottom<=marker.top||actual.top>=marker.bottom,'occupied horizontal sides use a position directly above or below the same flag');
-  const label={left:300,right:390,top:204,bottom:240};
-  const placement=mapLabelAvoidObstacles(label,safe,[leftButton,actual]);
-  assert.equal(placement.hidden,false,'the flexible label can still find room after reserving the badge');
-});
-
-test('a completely covered count hides its decorative copy instead of drifting onto another region',()=>{
-  const safe={left:12,right:378,top:12,bottom:500};
-  const marker={left:100,right:144,top:160,bottom:204},count={left:130,right:154,top:168,bottom:188};
-  assert.deepEqual(directionCountShift(count,marker,safe,[{left:60,right:190,top:100,bottom:260}]),{x:0,y:0,hidden:true});
+test('a fully covered region card hides together instead of leaving an unrelated number',()=>{
+  const safe={left:12,right:252,top:12,bottom:108};
+  const label={left:12,right:252,top:32,bottom:88};
+  assert.equal(mapLabelAvoidObstacles(label,safe,[{...safe}]).hidden,true);
 });
 
 test('catalogue count changes reflow once while marker transforms and layout writes stay silent',async t=>{
@@ -234,7 +231,7 @@ test('catalogue count changes reflow once while marker transforms and layout wri
     addEventListener(){}
     removeEventListener(){}
   }
-  const root=new Element('explore-layout'),viewport=new Element('atlas-canvas',root),layer=new Element('tropnik-marker-layer',viewport),button=new Element('region-marker',layer),count=new Element('region-marker-count',button);
+  const root=new Element('explore-layout'),viewport=new Element('atlas-canvas',root),layer=new Element('tropnik-marker-layer',viewport),button=new Element('region-marker',layer),label=new Element('region-marker-label',button),name=new Element('region-marker-name',label),count=new Element('region-marker-count',label);
   Object.assign(globalThis,{
     Element,document:{fonts:{ready:Promise.resolve(),addEventListener(){},removeEventListener(){}}},window:{addEventListener(){},removeEventListener(){}},
     ResizeObserver:class{constructor(callback){resizeCallback=callback;}observe(element){observed.add(element);}unobserve(element){observed.delete(element);}disconnect(){observed.clear();}},
@@ -248,18 +245,20 @@ test('catalogue count changes reflow once while marker transforms and layout wri
   const content={target:count,type:'childList',addedNodes:[],removedNodes:[]};
   mutationCallback([content]);mutationCallback([content]);flush();
   assert.equal(scheduled,1,'a batch of text updates requires one settled pass');
+  mutationCallback([{target:name,type:'childList',addedNodes:[],removedNodes:[]}]);flush();
+  assert.equal(scheduled,2,'regrouping the nested destination name reflows the complete card even without a count');
   mutationCallback([{target:count,type:'attributes',attributeName:'style'}]);
   mutationCallback([{target:button,type:'attributes',attributeName:'class'}]);
-  flush();assert.equal(scheduled,1,'our offset/visibility styling never loops');
-  viewport.dataset.mapCamera='moving';mutationCallback([content]);flush();assert.equal(scheduled,1,'camera animation owns the final settled layout');
+  flush();assert.equal(scheduled,2,'our offset/visibility styling never loops');
+  viewport.dataset.mapCamera='moving';mutationCallback([content]);flush();assert.equal(scheduled,2,'camera animation owns the final settled layout');
   delete viewport.dataset.mapCamera;
-  mutationCallback([{target:button,type:'attributes',attributeName:'hidden'}]);flush();assert.equal(scheduled,2,'a newly exposed group reflows even if its text did not change');
+  mutationCallback([{target:button,type:'attributes',attributeName:'hidden'}]);flush();assert.equal(scheduled,3,'a newly exposed group reflows even if its text did not change');
   const control=new Element('layer-control',root),popup=new Element('layer-menu',control),story=new Element('fact-card',root);
   mutationCallback([{target:root,type:'childList',addedNodes:[control,story],removedNodes:[]}]);flush();
   assert.ok(observed.has(popup)&&observed.has(story),'absolute popups and sibling story cards are observed independently');
-  assert.equal(scheduled,3);resizeCallback();resizeCallback();flush();assert.equal(scheduled,4,'a popup resize coalesces to one layout boundary');
+  assert.equal(scheduled,4);resizeCallback();resizeCallback();flush();assert.equal(scheduled,5,'a popup resize coalesces to one layout boundary');
   control.children=[];root.children=root.children.filter(child=>child!==story);
   mutationCallback([{target:root,type:'childList',addedNodes:[],removedNodes:[popup,story]}]);flush();
-  assert.equal(observed.has(popup),false);assert.equal(observed.has(story),false);assert.equal(scheduled,5,'closing overlays releases their observed geometry');
-  dispose();mutationCallback([content]);flush();assert.equal(scheduled,5,'disposed maps schedule no work');
+  assert.equal(observed.has(popup),false);assert.equal(observed.has(story),false);assert.equal(scheduled,6,'closing overlays releases their observed geometry');
+  dispose();mutationCallback([content]);flush();assert.equal(scheduled,6,'disposed maps schedule no work');
 });

@@ -2,13 +2,13 @@ import {directionHitGrid,directionExternalPoint} from '../browser-direction-hita
 
 export const hitRect=(left,top,width,height)=>({left,top,right:left+width,bottom:top+height,width,height});
 
-export function directionGridFixture(regionId='altai',engine='tropnik-canvas'){
+export function directionGridFixture(regionId='altai',engine='tropnik-canvas',cluster=false){
  const anchorRect=hitRect(100,100,44,44),available={left:0,top:0,right:500,bottom:500};
- const surfaces=[['label',hitRect(70,140,104,38),'Название'],['count',hitRect(130,108,24,20),'3']].map(([kind,rect,text])=>({
-  kind,present:true,visible:true,text,rect,pointerEvents:'auto',
-  samples:directionHitGrid(rect,anchorRect,kind==='count'?4:8).map(point=>({...point,withinViewport:true,owned:true,hitRegionId:regionId,hitHidden:false,hitTag:'SPAN'})),
+ const surfaces=[['label',hitRect(70,140,192,40),cluster?'2 направления':'Название3 тропы'],['count',cluster?hitRect(0,0,0,0):hitRect(182,148,64,24),cluster?'':'3 тропы']].map(([kind,rect,text])=>({
+  kind,present:true,visible:kind==='label'||!cluster,text,rect,pointerEvents:kind==='count'?'none':'auto',containedByLabel:true,
+  samples:kind==='count'&&cluster?[]:directionHitGrid(rect,anchorRect,kind==='count'?4:8).map(point=>({...point,withinViewport:true,owned:true,hitRegionId:regionId,hitHidden:false,hitTag:'SPAN'})),
  }));
- return{schemaVersion:1,engine,regionId,anchorId:regionId,groupKey:regionId,cluster:false,ariaLabel:'Открыть направление',anchorRect,available,surfaces,
+ return{schemaVersion:1,engine,regionId,anchorId:regionId,groupKey:cluster?'altai|baikal':regionId,cluster,ariaLabel:cluster?'Приблизить 2 направления: Алтай, Байкал':'Открыть направление, 3 тропы в каталоге',anchorRect,available,surfaces,
   hiddenControls:[{regionId:'inactive',hidden:true,display:'none',rect:hitRect(0,0,0,0),wrapper:null}]};
 }
 

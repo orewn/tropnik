@@ -68,19 +68,19 @@ export function requestMapLayoutFixture(){
 
 export function overviewCountsFixture(clustered=false){
  const catalog=[{id:'altai',name:'Алтай',count:11},{id:'baikal',name:'Байкал',count:10}];
- const markers=clustered?[{id:'altai',name:'2 направления',count:2,groupKey:'altai|baikal',cluster:true,ariaLabel:'Приблизить 2 направления: Алтай, Байкал'}]:catalog.map(item=>({...item,groupKey:item.id,cluster:false,ariaLabel:`Открыть ${item.name}, маршрутов в каталоге: ${item.count}`}));
+ const markers=clustered?[{id:'altai',name:'2 направления',count:null,countText:'',groupKey:'altai|baikal',cluster:true,ariaLabel:'Приблизить 2 направления: Алтай, Байкал'}]:catalog.map(item=>({...item,countText:`${item.count} троп`,groupKey:item.id,cluster:false,ariaLabel:`Открыть ${item.name}, ${item.count} троп в каталоге`}));
  return{region:'',catalog,markers,total:21,mapTotal:21};
 }
 
 export function savedReentryFixture(mobile=true,clustered=false,engine='tropnik-canvas'){
  const input=mobile?'touch':'mouse';
  return(clustered?[true,false]:[false]).map((cluster,index)=>{
-  const grid=directionGridFixture('altai',engine);grid.cluster=cluster;grid.groupKey=cluster?'altai|baikal':'altai';
-  grid.ariaLabel=cluster?'Приблизить 2 направления: Алтай, Байкал':'Открыть Алтай, маршрутов в каталоге: 11';
-  grid.surfaces.find(item=>item.kind==='label').text=cluster?'2 направления':'Алтай';grid.surfaces.find(item=>item.kind==='count').text=cluster?'2':'11';
-  const point=directionExternalPoint(grid,'count'),click=nativeClickFixture(input,'canvas',point);
+  const grid=directionGridFixture('altai',engine,cluster),kind=cluster?'label':'count';
+  grid.ariaLabel=cluster?'Приблизить 2 направления: Алтай, Байкал':'Открыть Алтай, 11 троп в каталоге';
+  grid.surfaces.find(item=>item.kind==='label').text=cluster?'2 направления':'Алтай11 троп';grid.surfaces.find(item=>item.kind==='count').text=cluster?'':'11 троп';
+  const point=directionExternalPoint(grid,kind),click=nativeClickFixture(input,'canvas',point);
   for(const event of click.events)event.button={regionId:'altai',groupKey:grid.groupKey};
-  return{kind:'count',input,grid,point,events:click.events,before:{region:'',route:'',zoom:2+index},after:{region:cluster?'':'altai',route:'',zoom:cluster?3:7}};
+  return{kind,input,grid,point,events:click.events,before:{region:'',route:'',zoom:2+index},after:{region:cluster?'':'altai',route:'',zoom:cluster?3:7}};
  });
 }
 

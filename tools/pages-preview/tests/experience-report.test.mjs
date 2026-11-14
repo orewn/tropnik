@@ -65,8 +65,9 @@ test('fully clustered country receipts retain count evidence through native ordi
   receipt.filterReset.overviewBefore=overviewCountsFixture(true);receipt.filterReset.overviewAfter=overviewCountsFixture(true);
   receipt.filterReset.reentryActions=savedReentryFixture(mobile,true);
   assert.equal(checkExplore(mobile)(receipt),receipt);
-  assert.equal(receipt.filterReset.overviewAfter.markers[0].count,2,'A cluster counts directions, not its 21 routes');
-  assert.equal(receipt.filterReset.reentryActions.at(-1).grid.surfaces.find(item=>item.kind==='count').text,'11');
+  assert.equal(receipt.filterReset.overviewAfter.markers[0].name,'2 направления');
+  assert.equal(receipt.filterReset.overviewAfter.markers[0].count,null,'A cluster states its direction count in its label');
+  assert.equal(receipt.filterReset.reentryActions.at(-1).grid.surfaces.find(item=>item.kind==='count').text,'11 троп');
  }
 });
 
@@ -79,6 +80,8 @@ test('overview requires nonempty visible groups with unique known members and ac
   ['missing catalogue ID',value=>delete value.catalog[0].id],
   ['duplicate catalogue ID',value=>value.catalog[1].id='altai'],
   ['group badge mistaken for route sum',value=>value.markers[0].count=21],
+  ['group label names wrong membership',value=>value.markers[0].name='3 направления'],
+  ['ambiguous duplicate group badge',value=>value.markers[0].countText='2'],
   ['unknown group member',value=>value.markers[0].groupKey='altai|unknown'],
   ['duplicated group member',value=>value.markers[0].groupKey='altai|altai'],
   ['nonmember anchor',value=>value.markers[0].id='another'],
@@ -90,6 +93,7 @@ test('overview requires nonempty visible groups with unique known members and ac
  rejectsEach(overviewCountsFixture,validate,[
   ['ordinary count secretly filtered',value=>value.markers[0].count=0],
   ['ordinary name mapped to wrong ID',value=>value.markers[0].name='Байкал'],
+  ['ordinary count without a unit',value=>value.markers[0].countText='11'],
  ]);
 });
 

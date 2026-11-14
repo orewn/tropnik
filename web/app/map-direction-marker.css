@@ -75,29 +75,25 @@
 .explore-layout .region-marker:is(:hover, :focus-visible, .is-selected) .region-marker-ridge {stroke: var(--surface)}
 .explore-layout .region-marker:active .region-marker-emblem {opacity: .82}
 .explore-layout .region-marker-count {
-  position: absolute;
-  left: calc(100% - 4px);
-  top: 0;
-  display: none;
+  display: grid;
   place-items: center;
   box-sizing: border-box;
-  min-width: 24px;
-  height: 20px;
-  padding: 0 4px;
-  border: 1px solid var(--forest);
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: 4px 8px;
+  border: 0;
   border-radius: 4px;
-  background: var(--surface);
+  background: var(--paper, #f3f2e7);
   color: var(--forest);
   font: var(--caption-3);
   font-variant-numeric: tabular-nums;
-  transform: translate(var(--map-count-shift-x, 0px), var(--map-count-shift-y, 0px));
-  pointer-events: auto;
+  white-space: nowrap;
+  pointer-events: none;
 }
-.explore-layout .region-marker:is(.is-overview, .direction-cluster) .region-marker-count:not(:empty) {display: grid}
+.explore-layout .region-marker-count:empty {display: none}
 .explore-layout .region-marker:is(:hover, :focus-visible, .is-selected) .region-marker-count {
-  border-color: var(--surface);
-  background: var(--forest);
-  color: var(--surface);
+  background: var(--surface);
+  color: var(--forest);
 }
 /* The visible label is part of its button even when collision layout moves it
  * beyond the 44px anchor. No transparent parent pane intercepts those clicks. */
@@ -106,11 +102,14 @@
   left: 50%;
   top: calc(50% + 18px);
   bottom: auto;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   box-sizing: border-box;
   width: max-content;
   min-width: 0;
-  max-width: var(--map-label-max-width, 168px);
+  max-width: var(--map-label-max-width, 240px) !important;
   padding: 8px 12px;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
@@ -119,7 +118,7 @@
   box-shadow: var(--shadow-control);
   font: var(--button-sm);
   letter-spacing: 0;
-  text-align: center;
+  text-align: left;
   white-space: normal;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -129,6 +128,11 @@
   visibility: visible;
   pointer-events: auto;
   transition: opacity 300ms cubic-bezier(.22, 1, .36, 1) !important;
+}
+.explore-layout .region-marker-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  pointer-events: none;
 }
 .explore-layout .region-marker[data-map-label-placement='top'] .region-marker-label {
   top: auto;
@@ -140,18 +144,16 @@
   background: var(--forest);
   color: var(--surface);
 }
-.explore-layout .region-marker.direction-cluster .region-marker-label {min-width: 132px}
+.explore-layout .region-marker.direction-cluster .region-marker-label {min-width: 132px; text-align: center}
 .explore-layout .region-marker[data-map-label-hidden='true'] .region-marker-label,
-.explore-layout .region-marker[data-map-count-hidden='true'] .region-marker-count,
-.explore-layout .atlas-canvas[data-map-camera] .region-marker-label,
-.explore-layout .atlas-canvas[data-map-camera] .region-marker-count {
+.explore-layout .atlas-canvas[data-map-camera] .region-marker-label {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none;
   transition: none !important;
 }
 @media (max-width: 700px) {
-  .explore-layout .region-marker .region-marker-label {font: var(--caption-3)}
+  .explore-layout .region-marker .region-marker-label {max-width: var(--map-label-max-width, 208px) !important; font: var(--caption-3)}
   .explore-layout .region-marker.direction-cluster .region-marker-label {min-width: 108px}
 }
 @media (prefers-reduced-motion: reduce) {

@@ -554,7 +554,7 @@ async function overviewCounts(cdp){
   return evaluate(cdp,`(()=>{
     const number=text=>Number((text||'').match(/[0-9][0-9\\s\\u00a0]*/)?.[0].replace(/\\D/g,'')||0);
     const catalog=[...document.querySelectorAll('.region-option')].map(element=>({id:[...element.querySelector('.region-thumbnail').classList].find(name=>name.startsWith('region-thumbnail-'))?.slice('region-thumbnail-'.length),name:element.querySelector('strong')?.textContent?.trim(),count:number(element.querySelector('small')?.textContent)}));
-    const markers=[...document.querySelectorAll('.region-marker:not([hidden])')].map(element=>({id:element.dataset.regionId,name:element.querySelector('.region-marker-label')?.textContent?.trim(),count:number(element.querySelector('.region-marker-count')?.textContent),groupKey:element.dataset.mapGroupKey,cluster:element.classList.contains('direction-cluster'),ariaLabel:element.getAttribute('aria-label')}));
+    const markers=[...document.querySelectorAll('.region-marker:not([hidden])')].map(element=>{const countText=element.querySelector('.region-marker-count')?.textContent?.trim()||'';return{id:element.dataset.regionId,name:element.querySelector('.region-marker-name')?.textContent?.trim(),count:countText?number(countText):null,countText,groupKey:element.dataset.mapGroupKey,cluster:element.classList.contains('direction-cluster'),ariaLabel:element.getAttribute('aria-label')};});
     return{region:new URLSearchParams(location.search).get('region')||'',catalog,markers,total:number(document.querySelector('.sheet-peek-copy>span')?.textContent),mapTotal:number(document.querySelector('.map-context>span:last-child')?.textContent)};
   })()`);
 }
@@ -623,7 +623,9 @@ async function selectMapDirection(cdp,profile,id,title,{kind,actions}){
     let previous=null,stable=0;
     const {grid,point}=await waitValue(`${profile.name}: external ${kind} of ${id} did not become stable and reachable`,async()=>{
       const grid=await evaluate(cdp,`(()=>{const directionHitGrid=${directionHitGrid.toString()};return (${inspectDirectionHitAreas.toString()})(${JSON.stringify(id)});})()`);
-      return{grid,point:directionExternalPoint(grid,kind)};
+      // A cluster is named by its destination count. Expand its label first;
+      // the requested trail-count target is inspected once the region is alone.
+      return{grid,point:directionExternalPoint(grid,grid.cluster?'label':kind)};
     },current=>{
       const point=current.point,stopped=point&&previous&&point.anchorId===previous.anchorId&&point.groupKey===previous.groupKey&&point.name===previous.name&&Math.abs(point.x-previous.x)<.25&&Math.abs(point.y-previous.y)<.25;
       stable=stopped?stable+1:0;previous=point;return stable>=2;
@@ -634,7 +636,7 @@ async function selectMapDirection(cdp,profile,id,title,{kind,actions}){
     await waitValue(`${profile.name}: external ${kind} did not select or expand ${id}`,async()=>({selection:await selectionState(cdp),map:await mapState(cdp)}),state=>state.selection.region===id||!!state.map&&state.map.camera.zoom>before.camera.zoom+.2);
     const after=await settledMap(cdp,profile.engine),selection=await selectionState(cdp);
     const events=await evaluate(cdp,'window.__tropnikInputEvents');
-    actions.push({kind,input:profile.mobile?'touch':'mouse',grid,point,events,
+    actions.push({kind:point.kind,input:profile.mobile?'touch':'mouse',grid,point,events,
       before:{region:selectedBefore.region,route:selectedBefore.route,zoom:before.camera.zoom},
       after:{region:selection.region,route:selection.route,zoom:after.camera.zoom}});
     progress.push({group:grid.groupKey,beforeZoom:before.camera.zoom,afterZoom:after.camera.zoom,selected:selection.region});

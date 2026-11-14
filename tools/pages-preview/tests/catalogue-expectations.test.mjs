@@ -29,11 +29,12 @@ test('the native exploration gate accepts the exact expanded source catalogue wi
   for(const frame of [filter.overviewBefore,filter.overviewAfter]){
     frame.total=frame.mapTotal=22;
     frame.catalog.find(item=>item.id==='altai').count=12;
-    const marker=frame.markers.find(item=>item.id==='altai');marker.count=12;marker.ariaLabel=marker.ariaLabel.replace('11','12');
+    const marker=frame.markers.find(item=>item.id==='altai');marker.count=12;marker.countText='12 троп';marker.ariaLabel=marker.ariaLabel.replace('11','12');
   }
   for(const action of filter.reentryActions){
     action.grid.ariaLabel=action.grid.ariaLabel.replace('11','12');
-    action.grid.surfaces.find(item=>item.kind==='count').text='12';
+    action.grid.surfaces.find(item=>item.kind==='label').text='Алтай12 троп';
+    action.grid.surfaces.find(item=>item.kind==='count').text='12 троп';
   }
   assertExploreExperience(receipt,'android-portrait','tropnik-canvas',true,expected);
   assert.throws(()=>assertExploreExperience(receipt,'android-portrait','tropnik-canvas',true,catalogueFixture),/source catalogue/);

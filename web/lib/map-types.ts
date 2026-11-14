@@ -18,6 +18,9 @@ export type AtlasProps = {
   region?: MapRegion;
   trail?: Trail;
   visibleTrails?: readonly Trail[];
+  /** Complete reference and published catalogue for stable direction totals.
+   * Visible trails remain the filtered selection used for lines and points. */
+  catalogTrails?: readonly Trail[];
   onTrail?: (trail: Trail) => void;
   onRegion: (region: MapRegion) => void;
   onMapNote?: (text: string) => void;
