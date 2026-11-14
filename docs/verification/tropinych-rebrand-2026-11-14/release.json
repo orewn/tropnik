@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-14 02:09:32 UTC",
+  "sourceCommit": "2bd887a9f74487721468cf2e5e5e65fca3927d52",
+  "buildId": "c1e608835e4d4ce5",
+  "publicUrl": "https://orewn.github.io/tropnik/",
+  "published": true,
+  "ci": [
+    {
+      "id": 43541859007,
+      "name": "Public GitHub Pages",
+      "status": "completed",
+      "conclusion": "success",
+      "sourceCommit": "2bd887a9f74487721468cf2e5e5e65fca3927d52",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43541859007"
+    },
+    {
+      "id": 43541859044,
+      "name": "Backend and native PostGIS",
+      "status": "completed",
+      "conclusion": "success",
+      "sourceCommit": "2bd887a9f74487721468cf2e5e5e65fca3927d52",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43541859044"
+    },
+    {
+      "id": 43541859118,
+      "name": "Android preview",
+      "status": "completed",
+      "conclusion": "success",
+      "sourceCommit": "2bd887a9f74487721468cf2e5e5e65fca3927d52",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43541859118"
+    }
+  ],
+  "localValidation": {
+    "webTests": 982,
+    "pagesTests": 399,
+    "failed": 0,
+    "staticPages": 719,
+    "referenceRoutes": 685,
+    "indexablePages": 130,
+    "indexableRoutes": 112,
+    "httpChecks": 77,
+    "lint": "passed",
+    "types": "passed"
+  },
+  "liveSeo": "live-seo.json",
+  "browserObservations": "browser-observations.json",
+  "screenshots": [
+    {
+      "file": "home.jpg",
+      "width": 1348,
+      "height": 926,
+      "bytes": 109348,
+      "sha256": "3c2b31f1b674e058d67496f39c0a284f602b614b62da771483813dc7bdbf17b6"
+    },
+    {
+      "file": "catalogue.jpg",
+      "width": 1348,
+      "height": 926,
+      "bytes": 97125,
+      "sha256": "39be68bb90e7658d5c48f250499b8c942722ef7f14ed948e08685a3caa5c1afa"
+    },
+    {
+      "file": "route.jpg",
+      "width": 1348,
+      "height": 926,
+      "bytes": 145532,
+      "sha256": "cb0e535684f27bf1ef2c0728dceee0423e377db83f22320f416b6fcbd301c75c"
+    }
+  ],
+  "coverage": {
+    "desktop": "Public site visually inspected after updating the old live service worker; home, catalogue and route verified.",
+    "mobile": "Verified by the mandatory GitHub Pages browser release gates.",
+    "searchEngineIndexing": "Not measured or submitted to webmaster accounts.",
+    "androidRelease": "Source branding built and device-tested; no new public APK release requested."
+  }
+}

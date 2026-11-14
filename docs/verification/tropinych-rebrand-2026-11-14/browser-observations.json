@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-11-14T02:07:52.821Z",
+  "home": {
+    "url": "https://orewn.github.io/tropnik/",
+    "newBrandVisible": true,
+    "mapVisible": true,
+    "oldVersionUpdatePromptUsed": true
+  },
+  "catalogue": {
+    "h1": [
+      "Пешие маршруты России"
+    ],
+    "horizontalOverflow": false,
+    "routeLinks": 112,
+    "title": "Пешие маршруты России: каталог троп — Тропиныч",
+    "url": "https://orewn.github.io/tropnik/routes/",
+    "viewport": {
+      "height": 936,
+      "width": 1363
+    }
+  },
+  "route": {
+    "canonical": "https://orewn.github.io/tropnik/routes/sikhote-alin-arsenyev/",
+    "h1": [
+      "Тропа Арсеньева"
+    ],
+    "horizontalOverflow": false,
+    "robots": "index,follow,max-image-preview:large",
+    "title": "Тропа Арсеньева: карта и описание — Тропиныч",
+    "url": "https://orewn.github.io/tropnik/routes/sikhote-alin-arsenyev/"
+  }
+}

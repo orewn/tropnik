@@ -1,0 +1,63 @@
+{
+  "verified": true,
+  "buildId": "c1e608835e4d4ce5",
+  "sourceCommit": "2bd887a9f74487721468cf2e5e5e65fca3927d52",
+  "sitemapUrls": 130,
+  "indexing": {
+    "enabled": true,
+    "eligiblePages": 130,
+    "eligibleRoutes": 112,
+    "sitemap": "https://orewn.github.io/tropnik/sitemap.xml",
+    "robotsRequiresHostRoot": true
+  },
+  "pages": [
+    {
+      "url": "https://orewn.github.io/tropnik/",
+      "status": 200,
+      "title": "Тропиныч — пешие маршруты и походы по России",
+      "canonical": "https://orewn.github.io/tropnik/",
+      "robots": "index,follow,max-image-preview:large",
+      "h1": "Пешие маршруты и походы по России"
+    },
+    {
+      "url": "https://orewn.github.io/tropnik/routes/",
+      "status": 200,
+      "title": "Пешие маршруты России: каталог троп — Тропиныч",
+      "canonical": "https://orewn.github.io/tropnik/routes/",
+      "robots": "index,follow,max-image-preview:large",
+      "h1": "Пешие маршруты России"
+    },
+    {
+      "url": "https://orewn.github.io/tropnik/routes/kavkaz-16a/",
+      "status": 200,
+      "title": "Тисо-самшитовая роща — Малое кольцо: карта и описание — Тропиныч",
+      "canonical": "https://orewn.github.io/tropnik/routes/kavkaz-16a/",
+      "robots": "index,follow,max-image-preview:large",
+      "h1": "Тисо-самшитовая роща — Малое кольцо"
+    },
+    {
+      "url": "https://orewn.github.io/tropnik/routes/bbt-bolshie-koty-goloustnoe/",
+      "status": 200,
+      "title": "Большие Коты — Большое Голоустное: карта и описание — Тропиныч",
+      "canonical": "https://orewn.github.io/tropnik/routes/bbt-bolshie-koty-goloustnoe/",
+      "robots": "index,follow,max-image-preview:large",
+      "h1": "Большие Коты — Большое Голоустное"
+    },
+    {
+      "url": "https://orewn.github.io/tropnik/routes/sikhote-alin-arsenyev/",
+      "status": 200,
+      "title": "Тропа Арсеньева: карта и описание — Тропиныч",
+      "canonical": "https://orewn.github.io/tropnik/routes/sikhote-alin-arsenyev/",
+      "robots": "index,follow,max-image-preview:large",
+      "h1": "Тропа Арсеньева"
+    },
+    {
+      "url": "https://orewn.github.io/tropnik/about/",
+      "status": 200,
+      "title": "О проекте — Тропиныч",
+      "canonical": "https://orewn.github.io/tropnik/about/",
+      "robots": "index,follow,max-image-preview:large",
+      "h1": "О Тропиныче"
+    }
+  ]
+}
