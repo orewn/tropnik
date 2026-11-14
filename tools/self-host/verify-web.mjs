@@ -82,9 +82,11 @@ async function verifyHTTP(origin) {
   const body = JSON.parse(status.text);
   assert.equal(body.configured, false); assert.equal(body.connected, false); assert.equal(body.mode, 'preview');
   report.http.apiStatus = body;
-  const account = await get(origin, '/api/backend/me', 503);
-  assert.equal(JSON.parse(account.text).error?.code, 'service_not_configured');
-  report.http.accountStatus = {status: 503, code: 'service_not_configured'};
+  for (const [name, path] of [['accountStatus', '/api/backend/me'], ['routesStatus', '/api/backend/routes/?limit=100']]) {
+    const unavailable = await get(origin, path, 503); assert.match(unavailable.type, /^application\/json/);
+    assert.equal(JSON.parse(unavailable.text).error?.code, 'service_not_configured');
+    report.http[name] = {method: 'GET', path, status: 503, code: 'service_not_configured'};
+  }
   const assets = [tags(home, 'script').find(tag => tag.src?.startsWith('/_next/static/'))?.src,
     tags(home, 'link').find(tag => tag.rel === 'stylesheet' && tag.href?.startsWith('/_next/static/'))?.href, '/favicon.svg'];
   report.http.assets = [];
@@ -136,6 +138,14 @@ async function click(cdp, selector) {
 const settled = map => map?.state.ready && !map.state.loading && !map.state.error && map.coverage?.ready &&
   map.catalogueOverlay.currentViewportReady && !map.catalogueOverlay.pending && !map.catalogueOverlay.error;
 
+function disconnectedRead(request, response, origin) {
+  if (request?.method !== 'GET' || response.status !== 503 || request.url !== response.url) return false;
+  const url = new URL(response.url), path = url.pathname.replace(/\/$/, '');
+  if (url.origin !== origin) return false;
+  // Next's trailing-slash redirect preserves these two exact read operations.
+  return path === '/api/backend/me' && url.search === '' || path === '/api/backend/routes' && url.search === '?limit=100';
+}
+
 async function verifyBrowser(origin) {
   // CI browser gate; --http-only supports local verification.
   assert.equal(process.env.GITHUB_ACTIONS, 'true', 'Run --http-only locally; Chromium is restricted to GitHub Actions');
@@ -143,7 +153,7 @@ async function verifyBrowser(origin) {
   assert.ok(binary, 'Chromium is unavailable');
   const debugPort = await port(), profile = await mkdtemp(join(tmpdir(), 'tropinych-self-host-'));
   const browser = launchBrowser(binary, browserEnvironmentArgs({debugPort, userDataDir: profile}));
-  const result = report.browser, workers = new Map(), tasks = new Set(), requests = new Map(); let cdp;
+  const result = report.browser, workers = new Map(), tasks = new Set(), requests = new Map(), apiBodies = new Map(); let cdp;
   const record = (list, value) => { if (list.length < 256) list.push(value); else result.failureOverflow = true; };
   try {
     const version = await browser.waitUntilReady(`http://127.0.0.1:${debugPort}/json/version`);
@@ -152,16 +162,31 @@ async function verifyBrowser(origin) {
     cdp = new CDP(target.webSocketDebuggerUrl); await cdp.open();
     cdp.observe('Runtime.exceptionThrown', (event, sessionId) => record(result.pageErrors, {sessionId, details: event.exceptionDetails}));
     cdp.observe('Runtime.consoleAPICalled', (event, sessionId) => { if (event.type === 'error') record(result.consoleErrors, {sessionId, text: event.args.map(arg => arg.value ?? arg.description).join(' ').slice(0, 4096)}); });
-    cdp.observe('Network.requestWillBeSent', (event, sessionId) => requests.set(`${sessionId || ''}:${event.requestId}`, event.request.url));
-    cdp.observe('Network.responseReceived', ({response}) => {
+    cdp.observe('Network.requestWillBeSent', (event, sessionId) => requests.set(`${sessionId || ''}:${event.requestId}`, {url: event.request.url, method: event.request.method}));
+    cdp.observe('Network.responseReceived', ({response, requestId}, sessionId) => {
       if (!response.url.startsWith(origin + '/') || response.status < 400) return;
-      const item = {url: response.url, status: response.status};
-      if (new URL(response.url).pathname.replace(/\/$/, '') === '/api/backend/me' && response.status === 503) record(result.expectedDisconnectedAPI, item);
+      const key = `${sessionId || ''}:${requestId}`, request = requests.get(key);
+      const item = {url: response.url, method: request?.method, status: response.status};
+      if (disconnectedRead(request, response, origin)) apiBodies.set(key, item);
       else record(result.localAssetErrors, item);
     });
+    cdp.observe('Network.loadingFinished', ({requestId}, sessionId) => {
+      const key = `${sessionId || ''}:${requestId}`, item = apiBodies.get(key); if (!item) return;
+      // Read the actual browser response only after its body finished arriving.
+      const task = (async () => {
+        const reply = await cdp.call('Network.getResponseBody', {requestId}, sessionId);
+        const body = Buffer.from(reply.body, reply.base64Encoded ? 'base64' : 'utf8');
+        assert.ok(body.length <= 4096, 'Oversized disconnected API response');
+        const code = JSON.parse(body.toString('utf8')).error?.code;
+        assert.equal(code, 'service_not_configured');
+        record(result.expectedDisconnectedAPI, {...item, code, bodyVerified: true});
+      })().catch(error => record(result.localAssetErrors, {...item, error: error.message})).finally(() => apiBodies.delete(key));
+      tasks.add(task); void task.finally(() => tasks.delete(task));
+    });
     cdp.observe('Network.loadingFailed', (event, sessionId) => {
-      const url = requests.get(`${sessionId || ''}:${event.requestId}`) || '';
-      if (url.startsWith(origin + '/') && !event.canceled) record(result.localAssetErrors, {url, error: event.errorText});
+      const key = `${sessionId || ''}:${event.requestId}`, url = requests.get(key)?.url || '';
+      const missingAPIBody = apiBodies.delete(key);
+      if (url.startsWith(origin + '/') && (!event.canceled || missingAPIBody)) record(result.localAssetErrors, {url, error: event.errorText});
     });
     cdp.observe('Target.attachedToTarget', ({targetInfo, sessionId}) => {
       if (targetInfo.type !== 'worker') return;
@@ -205,6 +230,7 @@ async function verifyBrowser(origin) {
       const asset = await get(origin, worker.url); assert.match(asset.type, /javascript/); assert.ok(asset.bytes > 0);
       worker.http = {status: asset.status, bytes: asset.bytes, type: asset.type};
     }
+    await waitFor('Disconnected API response bodies', () => apiBodies.size, count => count === 0, 10000);
     assert.deepEqual(result.pageErrors, []); assert.deepEqual(result.consoleErrors, []); assert.deepEqual(result.localAssetErrors, []);
     assert.ok(!result.failureOverflow, 'Too many browser failures');
     assert.deepEqual(result.frames.pathsOn.resources.errors, []);
