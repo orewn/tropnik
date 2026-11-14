@@ -61,18 +61,18 @@ async function productionBundle(){
  assert.match(source,/const detail=this\.displayDetail\(\),covered=this\.detailCoversViewport\(detail\);/);
  assert.match(source,/if\(!covered\)\{ctx\.fillStyle=MAP_OUTSIDE_COLOR;ctx\.fillRect\(0,0,this\.canvas\.width,this\.canvas\.height\);\}/);
  const result=await build({absWorkingDir:web,bundle:true,write:false,format:'iife',platform:'browser',target:'chrome107',minify:false,metafile:true,logLevel:'silent',
+  // This IIFE invokes production paint methods without constructing engine workers.
+  define:{'import.meta.url':'location.href'},
   tsconfigRaw:{compilerOptions:{baseUrl:'.',paths:{'@/*':['./*']}}},
   stdin:{contents:`import {CustomMapEngine,geometryPath} from './lib/custom-map-engine.ts';import {mercatorProject,mercatorUnproject} from './lib/custom-map-camera.ts';import {MAP_OUTSIDE_COLOR} from './public/maps/russia-viewport.js';import {mapCanvasPolicy} from './lib/map-canvas-policy.ts';window.runUnderlayGate=options=>(${runProductionPixels.toString()})({CustomMapEngine,geometryPath,mercatorUnproject,MAP_OUTSIDE_COLOR,mapCanvasPolicy},options);window.runStreamingGroundGate=options=>(${runStreamingPixels.toString()})({CustomMapEngine,geometryPath,mercatorProject,mercatorUnproject,mapCanvasPolicy},options);`,resolveDir:web,sourcefile:'underlay-fixture-entry.js'},
-  plugins:[{name:'production-source-and-unused-worker-urls',setup(plugin){
+  plugins:[{name:'production-source',setup(plugin){
    plugin.onLoad({filter:/[/\\]custom-map-engine\.ts$/},async args=>{assert.equal(args.path,enginePath);return{contents:source,loader:'ts',resolveDir:join(web,'lib')};});
-   plugin.onResolve({filter:/\?worker&url$/},args=>({path:args.path,namespace:'unconstructed-worker'}));
-   plugin.onLoad({filter:/.*/,namespace:'unconstructed-worker'},()=>({contents:'export default "data:application/javascript,";',loader:'js'}));
   }}],
  });
  assert.equal(result.outputFiles.length,1);
  const sources={};
  for(const name of Object.keys(result.metafile.inputs).sort()){
-  if(name==='underlay-fixture-entry.js'||name.startsWith('unconstructed-worker:'))continue;
+  if(name==='underlay-fixture-entry.js')continue;
   const path=resolve(web,name);assert.ok(path.startsWith(web+'/'));
   sources['web/'+name]=createHash('sha256').update(await readFile(path)).digest('hex');
  }

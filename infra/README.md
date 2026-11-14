@@ -4,6 +4,9 @@ This directory runs the Go API and its PostgreSQL/PostGIS database. It does not
 publish a website or contact real users. The web preview uses its own preview
 runtime; ordinary self-hosting uses the Next application from `../web`.
 
+For the `Тропиныч.рф` production domain, use the
+[domain preset and deployment checks](production/tropinych/README.md).
+
 ## Host layout
 
 Use an x86-64 Linux host with Docker Compose for the supplied PostGIS image.

@@ -1,0 +1,75 @@
+name: Self-host web regression
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'tools/self-host/**'
+      - 'tools/pages-preview/browser-*.mjs'
+      - 'tools/pages-preview/map-projection.mjs'
+      - 'infra/production/tropinych/**'
+      - '.github/workflows/self-host-web.yml'
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'tools/self-host/**'
+      - 'tools/pages-preview/browser-*.mjs'
+      - 'tools/pages-preview/map-projection.mjs'
+      - 'infra/production/tropinych/**'
+      - '.github/workflows/self-host-web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: self-host-web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  standalone:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_SITE_URL: https://xn--h1akbedl4b5a.xn--p1ai
+      PUBLIC_ORIGIN: https://xn--h1akbedl4b5a.xn--p1ai
+      TROPA_PUBLIC_INDEXING: 'true'
+      TROPA_STANDALONE: 'true'
+      # Deliberately disconnected: this gate does not replace API/DB verification.
+      TROPA_API_URL: ''
+    steps:
+      - name: Check out the exact source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install the pinned package manager and frozen dependencies
+        run: |
+          npm install --global pnpm@11.25.0 --ignore-scripts --no-audit --no-fund
+          test "$(pnpm --version)" = '11.25.0'
+          pnpm --dir web install --frozen-lockfile
+      - name: Build the ordinary Next standalone artifact
+        timeout-minutes: 12
+        run: |
+          mkdir -p "$RUNNER_TEMP/tropinych-self-host"
+          set -o pipefail
+          pnpm --dir web run build:next 2>&1 | tee "$RUNNER_TEMP/tropinych-self-host/build.log"
+      - name: Verify standalone HTTP, map hydration and real workers
+        timeout-minutes: 5
+        # The verifier copies public and .next/static, owns its actual Next
+        # listener and Chromium process, and cleans up both after verification.
+        run: node tools/self-host/verify-web.mjs --artifacts "$RUNNER_TEMP/tropinych-self-host"
+      - name: Preserve verification and failure evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tropinych-self-host-web-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tropinych-self-host
+          if-no-files-found: ignore
+          retention-days: 7

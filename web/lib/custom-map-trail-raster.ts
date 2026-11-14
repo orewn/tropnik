@@ -1,4 +1,3 @@
-import trailRasterWorkerURL from './custom-map-trail-raster.worker.ts?worker&url';
 
 /** A part keeps one immutable identity for its interleaved projected world X/Y.
  * The caller retains its array; only a private copy is transferred to a worker. */
@@ -145,7 +144,7 @@ export class CustomMapTrailRaster {
   }
   private ensureWorker(){
     if(this.worker)return this.worker;
-    const worker=this.options.createWorker?.()??new Worker(new URL(trailRasterWorkerURL,location.href),{type:'module',name:'tropnik-trail-overlay'});
+    const worker=this.options.createWorker?.()??new Worker(new URL('./custom-map-trail-raster.worker.ts',import.meta.url),{type:'module',name:'tropnik-trail-overlay'});
     this.worker=worker;
     worker.onmessage=(event:MessageEvent<WorkerReply>)=>this.receive(worker,event.data);
     worker.onerror=event=>{if(this.worker===worker)this.failWorker('Worker failed: '+(event.message||'Unknown worker error'));};

@@ -7,7 +7,6 @@ import {MAP_CONFIG} from './map-config';
 import trailOverlayMetadata from './trail-overlay.generated.json';
 import {versionedRouteSource} from './route-source-integrity';
 import {loadMapCoverage} from '@/public/maps/map-coverage-lod.js';
-import terrainPreparationWorkerURL from './terrain-preparation.worker.ts?worker&url';
 
 export const TERRAIN_BOUNDS = [40.29, 43.64, 40.49, 43.82] as const;
 const TERRAIN_VERSION = '20261106-3';
@@ -23,7 +22,7 @@ function preparation() {
       return rendererModule;
     },
     loadGrid: () => loadPublicJSON<TerrainGrid>(terrainKey),
-    createWorker: () => typeof Worker === 'undefined' ? undefined : new Worker(new URL(terrainPreparationWorkerURL, location.href), {type: 'module', name: 'tropnik-terrain'}),
+    createWorker: () => typeof Worker === 'undefined' ? undefined : new Worker(new URL('./terrain-preparation.worker.ts', import.meta.url), {type: 'module', name: 'tropnik-terrain'}),
     onFailure: () => pool.invalidate(terrainKey),
   });
 }

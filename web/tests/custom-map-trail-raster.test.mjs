@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
 
-const compile=file=>ts.transpileModule(readFileSync(new URL(file,import.meta.url),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+const compile=file=>ts.transpileModule(readFileSync(new URL(file,import.meta.url),'utf8').replaceAll('import.meta.url',JSON.stringify(new URL(file,'https://preview.test/tests/').href)),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
 const managerSource=compile('../lib/custom-map-trail-raster.ts');
 const workerSource=compile('../lib/custom-map-trail-raster.worker.ts');
 const plain=value=>JSON.parse(JSON.stringify(value));
@@ -29,7 +29,7 @@ function fixture(options={}){
   const workers=[],events=[];
   const testModule={exports:{}};
   const context=vm.createContext({URL,Float64Array,queueMicrotask,setTimeout,clearTimeout,Error});
-  const require=id=>{assert.equal(id,'./custom-map-trail-raster.worker.ts?worker&url');return{default:'/raster-worker.js'};};
+  const require=id=>{assert.fail(`Unexpected raster dependency ${id}`);};
   vm.runInContext(`(function(require,module,exports){${managerSource}\n})`,context)(require,testModule,testModule.exports);
   const raster=new testModule.exports.CustomMapTrailRaster({onChange:()=>events.push(raster.getState()),createWorker:()=>{const worker=new ControlledWorker();workers.push(worker);return worker;},...options});
   return{raster,workers,events,limits:testModule.exports.TRAIL_RASTER_LIMITS};

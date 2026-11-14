@@ -158,12 +158,13 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   if(!compiled.has(compiledKey)){
    let source=readFileSync(filename,'utf8');
    if(engineModule&&baselineLabels){const start=source.indexOf('  private drawLabels(){\n'),end=source.indexOf('  destroy(){\n',start);assert.ok(start>0&&end>start);source=source.slice(0,start)+originalLabels+source.slice(end);}
+   // Preserve module-relative worker URLs in the CommonJS browser-surface fixture.
+   source=source.replaceAll('import.meta.url',JSON.stringify(new URL(filename.slice(root.length+1),'https://preview.test/').href));
    compiled.set(compiledKey,ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true},fileName:filename}).outputText);
   }
   const require=specifier=>{
    if(specifier==='./russia-map')return{loadRussiaGeometry:()=>{const attempt=++coverageAttempts;return coverageLoader?coverageLoader(attempt,coverage):attempt<=coverageFailures?Promise.reject(new Error('Coverage fetch failed')):coveragePromise;}};
    if(specifier==='./map-preload')return{loadPublicBytes(){assert.fail('No real download in an engine unit test');},loadPublicJSON(){assert.fail('No real download in an engine unit test');}};
-   if(specifier.endsWith('?worker&url'))return{__esModule:true,default:'/workers/fixture.js'};
    let path=resolve(dirname(filename),specifier);if(!existsSync(path))path+='.ts';assert.ok(path.startsWith(root+'/'),'Only real local map modules may load');
    const result=load(path);if(specifier==='./custom-map-tiles'){tileKey=result.customTileKey;return{...result,CustomMapTiles:Tiles};}
    if(engineModule){

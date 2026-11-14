@@ -63,9 +63,10 @@ async function productionBundle(){
  const workerNames=Object.keys(after.metafile.inputs).map(path=>'web/'+path).filter(path=>path!=='web/lib/custom-map-tiles.worker.ts').sort();
  assert.deepEqual(workerNames,Object.keys(TILE_OPACITY_WORKER_DEPENDENCIES).sort());
  for(const path of workerNames)assert.equal(digest(await readFile(join(root,path))),TILE_OPACITY_WORKER_DEPENDENCIES[path],'The baseline painter/decode dependency changed: '+path);
- const main=await build({...options,stdin:{contents:`import {CustomMapEngine} from './lib/custom-map-engine.ts';import {mercatorUnproject} from './lib/custom-map-camera.ts';window.runTileOpacityGate=options=>(${runProductionPixels.toString()})({CustomMapEngine,mercatorUnproject},options);`,resolveDir:web,sourcefile:'tile-opacity-fixture-entry.js'},plugins:[{name:'unconstructed-engine-worker-urls',setup(plugin){plugin.onResolve({filter:/\?worker&url$/},args=>({path:args.path,namespace:'unconstructed-worker'}));plugin.onLoad({filter:/.*/,namespace:'unconstructed-worker'},()=>({contents:'export default "data:application/javascript,";',loader:'js'}));}}]});
+ // Real pixel workers are bundled above; engine constructors are not run by this IIFE fixture.
+ const main=await build({...options,define:{'import.meta.url':'location.href'},stdin:{contents:`import {CustomMapEngine} from './lib/custom-map-engine.ts';import {mercatorUnproject} from './lib/custom-map-camera.ts';window.runTileOpacityGate=options=>(${runProductionPixels.toString()})({CustomMapEngine,mercatorUnproject},options);`,resolveDir:web,sourcefile:'tile-opacity-fixture-entry.js'}});
  for(const result of [before,after,main])assert.equal(result.outputFiles.length,1);
- const paths=new Set([...Object.keys(main.metafile.inputs),...Object.keys(after.metafile.inputs)].filter(path=>path!=='tile-opacity-fixture-entry.js'&&!path.startsWith('unconstructed-worker:')).map(path=>'web/'+path));
+ const paths=new Set([...Object.keys(main.metafile.inputs),...Object.keys(after.metafile.inputs)].filter(path=>path!=='tile-opacity-fixture-entry.js').map(path=>'web/'+path));
  for(const path of [TILE_OPACITY_FIXTURE,TILE_OPACITY_HELPER,'tools/pages-preview/browser-startup.mjs','tools/pages-preview/browser-environment.mjs','tools/pages-preview/browser-native-surface.mjs'])paths.add(path);
  const assets=[];
  for(const asset of TILE_OPACITY_ASSETS){const bytes=await readFile(join(root,asset.path));assert.equal(digest(bytes),asset.sha256);assets.push({...asset,bytes:bytes.length,content:bytes});paths.add(asset.path);}

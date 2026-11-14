@@ -30,16 +30,15 @@ async function productionBundle(){
  const options={absWorkingDir:web,bundle:true,write:false,format:'iife',platform:'browser',target:'chrome107',minify:false,metafile:true,logLevel:'silent',tsconfigRaw:{compilerOptions:{baseUrl:'.',paths:{'@/*':['./*']}}}};
  const worker=await build({...options,entryPoints:['lib/custom-map-trail-raster.worker.ts']});
  const main=await build({...options,
+  // This classic-script fixture injects its separately bundled real Worker.
+  // Supply an ESM URL only for the unconstructed default factories in the IIFE.
+  define:{'import.meta.url':'location.href'},
   stdin:{contents:`import {CustomMapTrailRaster} from './lib/custom-map-trail-raster.ts';import {geometryPath} from './lib/custom-map-engine.ts';import {mercatorProject,fitBounds} from './lib/custom-map-camera.ts';import {decodeOverlayLine} from './lib/map-trail-overlay.ts';import {mapCanvasPolicy} from './lib/map-canvas-policy.ts';window.runTrailRasterGate=options=>(${runProductionPixels.toString()})({CustomMapTrailRaster,geometryPath,mercatorProject,fitBounds,decodeOverlayLine,mapCanvasPolicy},options);`,resolveDir:web,sourcefile:'trail-raster-fixture-entry.js'},
-  plugins:[{name:'real-trail-worker-url',setup(plugin){
-   plugin.onResolve({filter:/\?worker&url$/},args=>({path:args.path,namespace:'worker-url'}));
-   plugin.onLoad({filter:/.*/,namespace:'worker-url'},args=>({contents:`export default ${JSON.stringify(args.path.includes('custom-map-trail-raster.worker')?'/raster-worker.js':'data:application/javascript,')};`,loader:'js'}));
-  }}],
  });
  assert.equal(main.outputFiles.length,1);assert.equal(worker.outputFiles.length,1);
  const sources={};
  for(const name of new Set([...Object.keys(main.metafile.inputs),...Object.keys(worker.metafile.inputs)])){
-  if(name==='trail-raster-fixture-entry.js'||name.startsWith('worker-url:'))continue;
+  if(name==='trail-raster-fixture-entry.js')continue;
   const path=resolve(web,name);assert.ok(path.startsWith(web+'/'));sources['web/'+name]=digest(await readFile(path));
  }
  for(const name of ['custom-map-trail-raster.ts','custom-map-trail-raster.worker.ts','custom-map-engine.ts','map-trail-overlay.ts'])assert.ok(sources['web/lib/'+name]);

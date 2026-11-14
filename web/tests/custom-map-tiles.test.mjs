@@ -8,7 +8,8 @@ import {MAP_RESOURCE_LIMITS} from '../lib/map-config.ts';
 const turn=()=>new Promise(resolve=>setImmediate(resolve));
 const preparedPayloads=state=>(state.stages.ready||0)+(state.stages.halo||0)+state.fetching;
 const source=readFileSync(new URL('../lib/custom-map-tiles.ts',import.meta.url),'utf8');
-const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+// The CommonJS VM has no import.meta; keep a module URL distinct from the document.
+const compiled=ts.transpileModule(source.replaceAll('import.meta.url',JSON.stringify('https://preview.test/lib/custom-map-tiles.ts')),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
 const poolSource=readFileSync(new URL('../lib/map-resource-pool.ts',import.meta.url),'utf8');
 const poolCompiled=ts.transpileModule(poolSource,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
 function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManifest}={}){
@@ -38,7 +39,6 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
         return{tiles:['https://tiles.openfreemap.org/snapshot/{z}/{x}/{y}.pbf']};
       }};
       if(name==='./map-satellite')return {SATELLITE_PROVIDERS:{'eox-s2':{tiles:'https://tiles.maps.eox.at/s2/{z}/{x}/{y}.jpg'},'eox-bluemarble':{tiles:'https://tiles.maps.eox.at/bm/{z}/{x}/{y}.jpg'}}};
-      if(name.endsWith('?worker&url'))return {__esModule:true,default:'/custom-map/workers/tiles.js'};
       throw new Error(`Unmocked runtime dependency ${name}`);
     }});
   const store=new testModule.exports.CustomMapTiles(softwareRaster);
@@ -125,7 +125,7 @@ test('a paused map fetches nothing and resumes one actual decoder with an HTTP a
   assert.equal(env.downloads.length,0);assert.equal(env.workers.length,0);
   env.store.setActive(true);await turn();assert.equal(env.downloads.length,1);
   env.resolveDownloads();await turn();assert.equal(env.workers.length,1);
-  assert.equal(env.workers[0].url,'https://preview.test/custom-map/workers/tiles.js');
+  assert.equal(env.workers[0].url,'https://preview.test/lib/custom-map-tiles.worker.ts');
   env.workers[0].complete();const tile=await promise;assert.equal(tile.bitmap.width,512);assert.equal(env.store.snapshot().pending,0);
 });
 

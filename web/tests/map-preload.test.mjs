@@ -11,7 +11,7 @@ import {MAP_CONFIG} from '../lib/map-config.ts';
 import {loadVerifiedRouteGeometry,versionedRouteSource} from '../lib/route-source-integrity.ts';
 import * as renderer from '../public/terrain/terrain-renderer.js';
 
-const preloadSource=ts.transpileModule(readFileSync(new URL('../lib/map-preload.ts',import.meta.url),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+const preloadSource=ts.transpileModule(readFileSync(new URL('../lib/map-preload.ts',import.meta.url),'utf8').replaceAll('import.meta.url',JSON.stringify('https://map-preview.local/lib/map-preload.ts')),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
 const sourceFixture=geometry=>{const body=JSON.stringify(geometry),sha256=createHash('sha256').update(body).digest('hex'),url='/data/preview.geojson',sourceHashes={'preview.geojson':sha256};return{body,url,sourceHashes,versioned:versionedRouteSource(url,sourceHashes).url};};
 function preloadModule(dependencies,environment={}){
   const context=vm.createContext({URL,window:{},location:{origin:'https://map-preview.local',href:'https://map-preview.local/'},navigator:{onLine:true},...environment});
@@ -37,7 +37,6 @@ test('route previews warm actual 2D geometry and relief tiles without preparing 
     './terrain-preparation':{TerrainPreparation:PreviewPreparation},'./map-config':{MAP_CONFIG},
     './trail-overlay.generated.json':{sourceHashes:source.sourceHashes},'./route-source-integrity':{versionedRouteSource},
     '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>{coverageReads++;return{dispose(){coverageDisposals++;}};}},
-    './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js',
   };
   const api=preloadModule(dependencies,{Worker:class{constructor(){workers++;}}}),trail={id:'caucasus',revisionId:'1',geometryUrl:'/data/preview.geojson',bbox:[40.29,43.64,40.49,43.82]};
   assert.equal(api.hasTerrainPreview(trail),true,'The regression exercises the former implicit 3D coverage branch');
@@ -66,7 +65,6 @@ test('prefetch and selected-route verification share one versioned HTTP read in 
       './terrain-preparation':{TerrainPreparation},'./map-config':{MAP_CONFIG},
       './trail-overlay.generated.json':{sourceHashes:source.sourceHashes},'./route-source-integrity':{versionedRouteSource},
       '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>({dispose(){}})},
-      './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js',
     });
     const trail={id:'shared',revisionId:'1',geometryUrl:source.url},controller=new AbortController();
     const select=()=>loadVerifiedRouteGeometry(trail.geometryUrl,source.sourceHashes,{load:api.loadPublicBytes,invalidate:api.invalidatePublicMapResource,signal:controller.signal});
@@ -90,7 +88,6 @@ test('offline preview failures stay partial, skip remote tiles and can retry the
     './terrain-preparation':{TerrainPreparation},'./map-config':{MAP_CONFIG},
     './trail-overlay.generated.json':{sourceHashes:source.sourceHashes},'./route-source-integrity':{versionedRouteSource},
     '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>({dispose(){}})},
-    './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js',
   },{navigator:{onLine:false}});
   const trail={id:'offline',geometryUrl:source.url,bbox:[40.29,43.64,40.49,43.82]};
   assert.deepEqual({...await api.preloadTrail(trail)},{state:'partial',completed:0,total:1});assert.deepEqual(reads,[source.versioned]);
@@ -107,7 +104,7 @@ test('explicit legacy terrain requests lazily share one coordinator and preserve
     './terrain-preparation':{TerrainPreparation:LegacyPreparation},'./map-config':{MAP_CONFIG},
     './trail-overlay.generated.json':{sourceHashes:{}},'./route-source-integrity':{versionedRouteSource},
     '@/public/maps/map-coverage-lod.js':{loadMapCoverage:async()=>({dispose(){}})},
-    './terrain-preparation.worker.ts?worker&url':'/assets/terrain-preparation.test.js','@/public/terrain/terrain-renderer.js':renderer,
+    '@/public/terrain/terrain-renderer.js':renderer,
   });
   const idle={state:'idle',method:null,attempts:0,workerStarts:0,fallbackReason:null};
   assert.deepEqual({...api.terrainPreparationInfo()},idle);assert.equal(coordinators,0);assert.equal(reads,0);

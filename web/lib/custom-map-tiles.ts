@@ -1,7 +1,6 @@
 import {loadPublicBytes,loadPublicJSON} from './map-preload';
 import {SATELLITE_PROVIDERS,type SatelliteSourceId} from './map-satellite';
 import type {MapTileLabel,ReliefCoverage,ReliefHaloOffset,ReliefHaloPayload,ReliefHaloSource} from './custom-map-painter';
-import tileWorkerURL from './custom-map-tiles.worker.ts?worker&url';
 
 export type CustomTileKind='vector'|'relief'|'overview'|SatelliteSourceId;
 export type CustomMapTile={key:string;kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;bitmap:ImageBitmap;labels:MapTileLabel[];contours:number;local:boolean;paths?:boolean;transparent?:boolean;boundaries?:boolean;reliefCoverage?:ReliefCoverage};
@@ -190,7 +189,7 @@ export class CustomMapTiles {
   private decode(work:Work){
     try{
       if(!this.worker){
-        const worker=new Worker(new URL(tileWorkerURL,location.href),{type:'module',name:'tropnik-cartography'});this.worker=worker;
+        const worker=new Worker(new URL('./custom-map-tiles.worker.ts',import.meta.url),{type:'module',name:'tropnik-cartography'});this.worker=worker;
         worker.onmessage=(event:MessageEvent<{id:number;bitmap?:ImageBitmap;labels?:MapTileLabel[];contours?:number;reliefCoverage?:ReliefCoverage;error?:string}>)=>{
           const item=this.active;if(!item||event.data.id!==item.id||this.disposed){event.data.bitmap?.close();return;}
           clearTimeout(this.timer);this.active=undefined;

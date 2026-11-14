@@ -1,0 +1,26 @@
+# Host HTTPS Caddy, outside Docker Compose. Canonical domain: Тропиныч.рф.
+# Both DNS names must point to the VPS before automatic TLS can complete.
+# If proxy proof is enabled, supply TROPA_PROXY_TOKEN to this host service and
+# configure the same token plus the observed peer CIDRs in infra/.env.
+xn--h1akbedl4b5a.xn--p1ai {
+	handle /api/v1/* {
+		reverse_proxy 127.0.0.1:8080 {
+			header_up X-Real-IP {remote_host}
+			header_up X-Tropa-Proxy-Token "{$TROPA_PROXY_TOKEN}"
+		}
+	}
+	handle {
+		reverse_proxy 127.0.0.1:3000 {
+			header_up X-Real-IP {remote_host}
+			header_up X-Tropa-Proxy-Token "{$TROPA_PROXY_TOKEN}"
+		}
+	}
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+}
+
+www.xn--h1akbedl4b5a.xn--p1ai {
+	redir https://xn--h1akbedl4b5a.xn--p1ai{uri} 308
+}
