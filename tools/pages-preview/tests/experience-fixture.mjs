@@ -25,6 +25,17 @@ export function nativeScrollFixture(input='touch',selector='.explore-panel-conte
  return{input,selector,direction,start,end,distance,before:state(top),after:state(after),commands:types.map(type=>({type,method:input==='touch'?'Input.dispatchTouchEvent':'Input.dispatchMouseEvent',status:'fulfilled'})),events};
 }
 
+export function mapWheelFixture(){
+ const baseline={scrollY:0,rect:rect(384,72,1056,928)},minimumZoom=2.5;
+ const selection={region:'territory-28173009B65133456612022',route:'',title:'Красноярский край'};
+ const bursts=[[-1,3.4,4.4],[1,4.4,3.4],[1,3.4,2.5],[1,2.5,2.5]].map(([direction,before,after])=>({
+  direction,dispatchMode:'ordered-native',producerDurationMs:1,eventSpanMs:30,point:{x:900,y:642,markerId:'krasnoyarsk',kind:'label'},before:{camera:{zoom:before}},after:{camera:{zoom:after}},layout:clone(baseline),
+  commands:Array.from({length:4},(_,index)=>({index,sentOffsetMs:index*.1,ackOffsetMs:40+index,method:'Input.dispatchMouseEvent',type:'mouseWheel',status:'fulfilled',deltaY:direction*120})),
+  events:Array.from({length:4},(_,index)=>({...clone(baseline),time:100+index*10,trusted:true,cancelable:true,defaultPrevented:true,inMap:true,markerId:index?null:'krasnoyarsk',target:index?'CANVAS[tropnik-map-canvas]':'SPAN[region-marker-label]',deltaY:direction*120,deltaMode:0})),
+ }));
+ return{schemaVersion:1,passed:true,regionId:selection.region,input:'mouse-wheel',minimumZoom,initial:{camera:{zoom:3.4}},selection:clone(selection),selectionAfter:clone(selection),baseline,bursts,samples:[clone(baseline)],sidebar:nativeScrollFixture('mouse'),finalLayout:clone(baseline)};
+}
+
 export function layerMenusFixture(){
  const controls=[['INPUT','Тропы и грунтовые дороги'],['INPUT','Рельеф и линии высот'],['INPUT','Границы территорий'],['A','Подробная офлайн-карта'],['A','Источники карты']];
  const states=['closed','open'].map(sheet=>{

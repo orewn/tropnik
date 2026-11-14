@@ -587,7 +587,9 @@ export class CustomMapEngine {
       const wasActive=this.pointer.activePointers;this.pointer.end(event.pointerId);
       if(wasActive&&!this.pointer.activePointers){this.pointerRect=undefined;this.pointerStart=undefined;this.canvas.classList.remove('is-moving');this.settled();}
     }) as EventListener);
-    this.listen(this.canvas,'wheel',((event:WheelEvent)=>{
+    // Geographic markers are Canvas siblings. Their bubbling wheel input owns
+    // the same zoom, including at its limits, instead of scrolling the page.
+    this.listen(this.element,'wheel',((event:WheelEvent)=>{
       if(!this.state.ready||!this.active)return;event.preventDefault();this.options.onGesture?.();this.stopAnimation();
       const next=zoomAt(this.camera,this.size,this.camera.zoom+wheelZoomDelta(event.deltaY,event.deltaMode,this.size.height),this.flatPoint(local(event)),{minZoom:this.floor.zoom,maxZoom:this.options.maxZoom??18});
       const constrained=constrainFramedCamera(next.center[0],next.center[1],next.zoom,{...this.floor,center:[...this.floor.center]},this.framed?{...this.framed,center:[...this.framed.center]}:null);

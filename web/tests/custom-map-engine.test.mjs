@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {createMapCoverage,decodeCoverage} from '../public/maps/map-coverage-lod.js';
+import {russiaCamera,russiaPadding} from '../public/maps/russia-viewport.js';
 import {mercatorUnproject} from '../lib/custom-map-camera.ts';
 import {MapFrameRefit,prepareMapFrameControl} from '../lib/map-framing.ts';
 import {existsSync,readFileSync} from 'node:fs';
@@ -30,16 +31,16 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
  class Target{
   listeners=new Map();
-  addEventListener(type,listener,options){const capture=typeof options==='boolean'?options:!!options?.capture,listeners=this.listeners.get(type)||[];if(!listeners.some(item=>item.listener===listener&&item.capture===capture))listeners.push({listener,capture});this.listeners.set(type,listeners);}
+  addEventListener(type,listener,options){const capture=typeof options==='boolean'?options:!!options?.capture,listeners=this.listeners.get(type)||[];if(!listeners.some(item=>item.listener===listener&&item.capture===capture))listeners.push({listener,capture,passive:typeof options==='object'&&!!options?.passive});this.listeners.set(type,listeners);}
   removeEventListener(type,listener,options){const capture=typeof options==='boolean'?options:!!options?.capture;this.listeners.set(type,(this.listeners.get(type)||[]).filter(item=>item.listener!==listener||item.capture!==capture));}
   // Replay an explicitly supplied browser event through real DOM phases. This
   // does not invent click targets or synthesize clicks from pointerup; the
   // Canvas -> marker boundary below comes from the failed native CI trace.
   dispatch(type,properties={}){
-   let stopped=false,immediate=false;
-   const event={type,button:0,bubbles:!['focus','blur'].includes(type),target:this,defaultPrevented:false,...properties,preventDefault(){this.defaultPrevented=true;},stopPropagation(){stopped=true;},stopImmediatePropagation(){stopped=true;immediate=true;}};
+   let stopped=false,immediate=false,passive=false;
+   const event={type,button:0,bubbles:!['focus','blur'].includes(type),cancelable:true,target:this,defaultPrevented:false,...properties,preventDefault(){if(this.cancelable&&!passive)this.defaultPrevented=true;},stopPropagation(){stopped=true;},stopImmediatePropagation(){stopped=true;immediate=true;}};
    const parents=[];for(let parent=this.parentElement??this.parentTarget;parent;parent=parent.parentElement??parent.parentTarget)parents.push(parent);
-   const invoke=(target,capture,phase)=>{event.currentTarget=target;event.eventPhase=phase;for(const item of [...(target.listeners.get(type)||[])]){if(item.capture===capture)item.listener.call(target,event);if(immediate)break;}};
+   const invoke=(target,capture,phase)=>{event.currentTarget=target;event.eventPhase=phase;for(const item of [...(target.listeners.get(type)||[])]){if(item.capture===capture){passive=item.passive;item.listener.call(target,event);passive=false;}if(immediate)break;}};
    for(const parent of [...parents].reverse()){invoke(parent,true,1);if(stopped)break;}
    if(!stopped){invoke(this,true,2);if(!immediate)invoke(this,false,2);}
    if(event.bubbles&&!stopped)for(const parent of parents){invoke(parent,false,3);if(stopped)break;}
@@ -1084,6 +1085,70 @@ test('public inspection publishes fresh scene insets without refitting and toler
  map.setPadding({left:24,right:80,top:40,bottom:64});published=JSON.parse(env.host.dataset.mapInspection);
  assert.equal(published.viewport.height,200);assert.ok(published.visibleBounds?.every(Number.isFinite));assert.deepEqual(published.visibleBounds,plain(map.getVisibleBounds()));
  assert.deepEqual(plain(map.getCamera()),camera,'Publishing geometry must not change the manually selected view');
+});
+
+test('wheel bursts keep their geographic anchor and consume input across Canvas, direction and point descendants',async t=>{
+ const territory=JSON.parse(readFileSync(resolve(root,'lib/territories.generated.json'),'utf8')).territories.find(item=>item.id==='territory-28173009B65133456612022');
+ assert.equal(territory.name,'Красноярский край');
+ for(const [bearingDegrees,pitch] of [[0,0],[37,40]]){
+  const width=1150,height=640,padding=russiaPadding(width,height),floor=russiaCamera(width,height,padding,256);
+  const env=fixture({width,height,view:{center:territory.center,zoom:8,bearingDegrees}});t.after(()=>env.engine.destroy());await env.ready();
+  const map=env.engine;map.setFloor(floor);map.setPadding(padding);map.setPitch(pitch);env.flush();
+  const rect={left:384,top:72,width,height},anchor={x:543,y:300},coordinate=map.unproject(anchor);
+  map.canvas.getBoundingClientRect=()=>rect;
+  map.setMarkers([{id:'wheel-direction',label:territory.name,coordinate,kind:'direction',count:47},{id:'wheel-trail',label:'Тропа',coordinate,kind:'trail'}]);env.flush();
+  const direction=env.host.querySelector('.region-marker-wheel-direction'),point=env.host.querySelector('.tropnik-point-marker');
+  const targets=[map.canvas,direction.querySelector('.region-marker-label'),direction.querySelector('.region-marker-count'),direction.querySelector('svg'),point,map.canvas];
+  const observations=[];
+  for(const capture of [true,false])env.document.addEventListener('wheel',event=>observations.push({target:event.target,phase:event.eventPhase,prevented:event.defaultPrevented}),capture);
+  // The renderer's real sibling marker DOM changes the event target. Replay
+  // those targets through capture/bubble phases without inventing browser hit tests.
+  for(const [index,target] of targets.entries()){
+   assert.ok(target);const before=map.getCamera().zoom,gestures=env.gestures;
+   const [deltaY,deltaMode]=[[120,0],[7.5,1],[120/height,2]][index%3];
+   const event=target.dispatch('wheel',{clientX:rect.left+anchor.x,clientY:rect.top+anchor.y,deltaY,deltaMode});env.tick(16);
+   assert.equal(event.defaultPrevented,true,`Wheel target ${index} must not leak native page scrolling`);
+   assert.ok(Math.abs(map.getCamera().zoom-(before-.25))<1e-10,'Each input applies once, including Canvas bubbling through its map surface');
+   assert.equal(env.gestures,gestures+1,'A wheel input owns one camera gesture');
+   const actual=map.project(coordinate);assert.ok(Math.hypot(actual.x-anchor.x,actual.y-anchor.y)<1e-7,`Target ${index} moved the geographic anchor`);
+   assert.deepEqual(observations.slice(-2),[{target,phase:1,prevented:false},{target,phase:3,prevented:true}],'Document observers retain the original target and both native event phases');
+  }
+  assert.equal(observations.length,targets.length*2);
+ }
+});
+
+test('wheel bursts at the country floor still consume marker input without moving the camera or accumulating zoom debt',async t=>{
+ const width=1150,height=640,padding=russiaPadding(width,height),floor=russiaCamera(width,height,padding,256);
+ const env=fixture({width,height,view:{...floor,zoom:floor.zoom+.1}});t.after(()=>env.engine.destroy());await env.ready();
+ const map=env.engine;map.setFloor(floor);map.setPadding(padding);
+ const anchor={x:width/2,y:height/2},coordinate=map.unproject(anchor);
+ map.setMarkers([{id:'wheel-floor',label:'Красноярский край',coordinate,kind:'direction',count:47},{id:'wheel-trail',label:'Тропа',coordinate,kind:'trail'}]);env.flush();
+ const direction=env.host.querySelector('.region-marker-wheel-floor'),point=env.host.querySelector('.tropnik-point-marker');
+ const targets=[map.canvas,direction.querySelector('.region-marker-label'),direction.querySelector('.region-marker-count'),point,map.canvas];
+ let clamped;
+ for(const target of [...targets,...targets]){
+  const event=target.dispatch('wheel',{clientX:anchor.x,clientY:anchor.y,deltaY:120,deltaMode:0});env.tick(16);
+  assert.equal(event.defaultPrevented,true,'Reaching minimum zoom does not transfer the same gesture to document scrolling');
+  assert.equal(map.getCamera().zoom,floor.zoom);clamped??=plain(map.getCamera());assert.deepEqual(plain(map.getCamera()),clamped);
+  const actual=map.project(coordinate);assert.ok(Math.hypot(actual.x-anchor.x,actual.y-anchor.y)<1e-7);
+ }
+ const reverse=point.dispatch('wheel',{clientX:anchor.x,clientY:anchor.y,deltaY:-120,deltaMode:0});env.flush();
+ assert.equal(reverse.defaultPrevented,true);assert.equal(map.getCamera().zoom,floor.zoom+.25,'A reversal responds immediately after repeated clamped inputs');
+});
+
+test('wheel input leaves unready, inactive, disposed and sibling page surfaces uncancelled',async t=>{
+ const env=fixture({delayedCoverage:true});t.after(()=>env.engine.destroy());const map=env.engine;
+ map.setMarkers([{id:'wheel-lifecycle',label:'Направление',coordinate:[...camera.center],kind:'direction'}]);
+ const label=env.host.querySelector('.region-marker-label'),input={clientX:400,clientY:300,deltaY:120,deltaMode:0};
+ const untouched=target=>{const before=plain(map.getCamera()),gestures=env.gestures,event=target.dispatch('wheel',input);assert.equal(event.defaultPrevented,false);assert.deepEqual(plain(map.getCamera()),before);assert.equal(env.gestures,gestures);};
+ untouched(map.canvas);untouched(label);await env.ready();
+ // The catalogue and overlaid UI are siblings, outside the geographic surface.
+ const catalogue=env.document.createElement('aside'),control=env.document.createElement('button');env.document.body.appendChild(catalogue);env.document.body.appendChild(control);
+ const pageEvents=[];env.document.addEventListener('wheel',event=>pageEvents.push({target:event.target,prevented:event.defaultPrevented}));
+ untouched(catalogue);untouched(control);assert.deepEqual(pageEvents,[{target:catalogue,prevented:false},{target:control,prevented:false}]);
+ map.setActive(false);untouched(map.canvas);untouched(label);map.setActive(true);
+ const active=label.dispatch('wheel',input);assert.equal(active.defaultPrevented,true);assert.equal(map.getCamera().zoom,camera.zoom-.25);
+ map.destroy();untouched(map.canvas);untouched(label);untouched(env.host);
 });
 
 test('button and keyboard zoom retain the visible ground anchor behind asymmetric UI, bearing and pitch',async t=>{

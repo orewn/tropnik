@@ -13,6 +13,7 @@ import {assertProductMapMode,assertProductMapModeTransition} from './browser-map
 import {assertBrowserEnvironment} from './browser-environment.mjs';
 import {assertNativeSurfaceCoverage} from './browser-native-surface.mjs';
 import {assertTerrainMaskReport} from './terrain-mask-report.mjs';
+import {assertMapWheelAudit} from './browser-map-wheel.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -674,7 +675,7 @@ export function assertBrowserReport(browser,expectedCommit,expectedCatalogue){
  assert.equal(browser.sourceCommit,expectedCommit);
  assertCatalogueExpectations(expectedCatalogue);
  assert.deepEqual(browser.catalogue,expectedCatalogue,'The browser report belongs to another catalogue snapshot');
- assert.equal(browser.mapInteractionSchemaVersion,5,'The browser report predates the Relief/Satellite continuity gates');
+ assert.equal(browser.mapInteractionSchemaVersion,6,'The browser report predates native map wheel ownership coverage');
  assert.ok(Array.isArray(browser.profiles));
  for(const name of MOBILE_PROFILES){
   const profile=browser.profiles.find(item=>item.name===name);
@@ -704,7 +705,7 @@ export function assertBrowserReport(browser,expectedCommit,expectedCatalogue){
   assertDirectionHitAreas(result.directionHitAreas,name,engine,mobile);
   assertExploreExperience(result.experience,name,engine,mobile,expectedCatalogue);
   assert.equal(result.experience.requestOwnership.route.id,result.route?.id,`${name}: request ownership used another selected route`);
-  if(!mobile){assert.equal(result.styleCameraRoundtrip?.before.engine,engine);assertStyleCameraRoundtrip(result.styleCameraRoundtrip,name);assert.equal(result.styleCameraRoundtrip.routeId,result.route?.id);}
+  if(!mobile){assert.equal(result.styleCameraRoundtrip?.before.engine,engine);assertStyleCameraRoundtrip(result.styleCameraRoundtrip,name);assert.equal(result.styleCameraRoundtrip.routeId,result.route?.id);assertMapWheelAudit(result.wheelOwnership);}
   assert.equal(result.firstDirection?.at(-1)?.selected,'altai');
   assert.equal(result.secondDirection?.at(-1)?.selected,'baikal');
   assert.ok(result.route?.id&&result.route.offsetPx>=12&&result.route.offsetPx<=22,`${name}: route hit target was not tested away from the small visual dot`);

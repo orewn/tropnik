@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {CLOSE_TRAIL_FIXTURE,assertBrowserReport as verifyBrowserReport,assertRouteEdgeFrame,assertReliefPalette} from '../browser-report.mjs';
 import {projectMapPoint,unprojectMapPoint} from '../map-projection.mjs';
 import {directionHitAreasFixture} from './direction-hitareas-fixture.mjs';
-import {catalogueFixture,layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture} from './experience-fixture.mjs';
+import {catalogueFixture,layerMenusFixture,exploreExperienceFixture,styleCameraRoundtripFixture,mapWheelFixture} from './experience-fixture.mjs';
 import {coastFixture} from './coast-fixture.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
 import {smoothnessFixture} from './smoothness-fixture.mjs';
@@ -58,13 +58,13 @@ function zoomDesign(profile,engine,mobile){
   screenshots:[...['detail','relief'].flatMap(mode=>[2,5,8,11,14,18].map(zoom=>({file:`${profile}-${mode}-z${zoom}.png`,mode,zoom,bytes:10000,sha256:'a'.repeat(64)}))),...edges.frames.map(frame=>({file:frame.screenshot,mode:'source-ends',zoom:frame.zoom,bytes:10000,sha256:'b'.repeat(64)}))]};
 }
 function evidence(){
- return{verified:true,environment:browserEnvironmentFixture(commit),terrainMask:terrainMaskReportFixture(commit),catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:5,
+ return{verified:true,environment:browserEnvironmentFixture(commit),terrainMask:terrainMaskReportFixture(commit),catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:6,
   offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,originTransport:{method:'origin-socket-destroy',active:false,startedAt:'2026-11-10T00:00:00Z',restoredAt:'2026-11-10T00:00:01Z',blockedRequests:1,requests:[{path:'/tropnik/_offline-transport-probe',method:'GET'}],probe:{passed:true,errorCode:'ECONNRESET',path:'/tropnik/_offline-transport-probe'}},screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
   profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'tropnik-canvas',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'tropnik-canvas',coarse:false,mapInteractionTested:true}],
   zoomDesigns:[zoomDesign('android-portrait','tropnik-canvas',true),zoomDesign('desktop-webgl','tropnik-canvas',false)],
   siteSmoothness:[smoothnessFixture('android-portrait','tropnik-canvas'),smoothnessFixture('desktop-webgl','tropnik-canvas')],
-  mapInteractions:[['android-portrait','tropnik-canvas',true],['desktop-webgl','tropnik-canvas',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),experience:exploreExperienceFixture(mobile,'route',engine),...(mobile?{}:{styleCameraRoundtrip:styleCameraRoundtripFixture('route',{engine})}),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100,layoutShift:0}))};
+  mapInteractions:[['android-portrait','tropnik-canvas',true],['desktop-webgl','tropnik-canvas',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),experience:exploreExperienceFixture(mobile,'route',engine),...(mobile?{}:{styleCameraRoundtrip:styleCameraRoundtripFixture('route',{engine}),wheelOwnership:mapWheelFixture()}),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100,layoutShift:0}))};
 }
 test('both upload and public verification require real mobile and desktop map interaction evidence',()=>{
  const report=evidence();assert.equal(assertBrowserReport(report,commit),report);
@@ -102,6 +102,17 @@ test('both upload and public verification require real mobile and desktop map in
   value=>delete value.mapInteractions[0].experience,
   value=>delete value.mapInteractions[1].experience,
   value=>delete value.mapInteractions[1].styleCameraRoundtrip,
+  value=>value.mapInteractionSchemaVersion=5,
+  value=>delete value.mapInteractions[1].wheelOwnership,
+  value=>value.mapInteractions[1].wheelOwnership.bursts[1].events[0].defaultPrevented=false,
+  value=>value.mapInteractions[1].wheelOwnership.bursts[1].events[0].scrollY=468,
+  value=>value.mapInteractions[1].wheelOwnership.bursts.pop(),
+  value=>value.mapInteractions[1].wheelOwnership.bursts.forEach(burst=>{burst.point.kind='marker';}),
+  value=>value.mapInteractions[1].wheelOwnership.bursts[0].commands[1].index=0,
+  value=>value.mapInteractions[1].wheelOwnership.bursts[0].commands[1].sentOffsetMs=-1,
+  value=>value.mapInteractions[1].wheelOwnership.bursts[0].commands[1].ackOffsetMs=-1,
+  value=>value.mapInteractions[1].wheelOwnership.bursts[0].eventSpanMs=30000,
+  value=>value.mapInteractions[1].wheelOwnership.sidebar.after.scrollTop=0,
   value=>value.mapInteractions[0].experience=exploreExperienceFixture(true,'another-route'),
   value=>value.mapInteractions[1].styleCameraRoundtrip=styleCameraRoundtripFixture('another-route'),
   value=>delete value.mapInteractions[0].directionHitAreas,

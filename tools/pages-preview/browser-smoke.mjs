@@ -23,6 +23,7 @@ import {observePublicMapNetwork} from './browser-network.mjs';
 import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-satellite-audit.mjs';
 import {installSmoothnessRecorder,runSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
 import {inspectCustomMapDOM} from './browser-custom-map.mjs';
+import {runMapWheelAudit} from './browser-map-wheel.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
@@ -840,8 +841,17 @@ async function mapInteraction(cdp,profile,performanceIssues){
   currentExploreExperience.step='validation';assertExploreExperience({...experience,passed:true},profile.name,profile.engine,profile.mobile,catalogue);experience.passed=true;
   const perf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
   performanceIssues.push(...performanceBudgetIssues({layoutShift:perf.cls,longestTaskMs:perf.longest},profile,'map-interactions'));
+  let wheelOwnership=null;
+  if(!profile.mobile){
+    currentExploreExperience.step='wheel-ownership';await phase('wheel-ownership');
+    wheelOwnership=await runMapWheelAudit(cdp,profile,{loadProfile,evaluate,waitValue,settledMap,clearMapStories,expectSelection,scrollContainer,url:`http://127.0.0.1:${httpPort}/tropnik/`},country.camera.zoom);
+    const wheelPerf=await evaluate(cdp,'({cls:window.__tropnikPerf?.cls||0,longest:window.__tropnikPerf?.longest||0})');
+    performanceIssues.push(...performanceBudgetIssues({layoutShift:wheelPerf.cls,longestTaskMs:wheelPerf.longest},profile,'map-wheel-ownership'));
+    wheelOwnership.performance={layoutShift:wheelPerf.cls,longestTaskMs:wheelPerf.longest};
+    perf.cls=Math.max(perf.cls,wheelPerf.cls);perf.longest=Math.max(perf.longest,wheelPerf.longest);
+  }
   currentExploreExperience=null;
-  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,requestOwnershipTrace:requestOwnership.trace,siblingSelectionTrace:siblingSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
+  return{profile:profile.name,engine:profile.engine,mobile:profile.mobile,passed:true,firstDirection,firstSelectionTrace:firstSelection.trace,requestOwnershipTrace:requestOwnership.trace,siblingSelectionTrace:siblingSelection.trace,directionHitAreas,catalogScroll,route:{id:trail.id,title:trail.title,offsetPx:trail.offset},line,returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,countryCameras:{initial:country.camera,returned:returned.camera},secondDirection,polygon,gestures,experience,styleCameraRoundtrip,wheelOwnership,longestTaskMs:perf.longest,layoutShift:perf.cls,durationMs:Date.now()-started};
 }
 
 async function siteSmoothnessAudit(cdp,profile,cpuSlowdownRate=1){
@@ -1012,7 +1022,7 @@ try{
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
-  const report={verified:true,environment,terrainMask,catalogue,mapInteractionSchemaVersion:5,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,siteSmoothness,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,environment,terrainMask,catalogue,mapInteractionSchemaVersion:6,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,siteSmoothness,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
   }
@@ -1024,6 +1034,7 @@ try{
   if(error.smoothnessAudit)failure.smoothnessAudit=error.smoothnessAudit;
   if(siteSmoothness.length)failure.completedSiteSmoothness=siteSmoothness;
   if(error.nativeScroll)failure.nativeScroll=error.nativeScroll;
+  if(error.mapWheelOwnership)failure.mapWheelOwnership=error.mapWheelOwnership;
   if(satelliteAudits.length)failure.completedSatelliteAudits=satelliteAudits;
   if(error.pointerTarget)failure.pointerTarget=error.pointerTarget;
   if(currentExploreExperience)failure.exploreExperience=currentExploreExperience;

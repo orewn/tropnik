@@ -3408,7 +3408,7 @@ var Fn = class {
 		this.listen(this.canvas, "pointerup", n), this.listen(this.canvas, "pointercancel", n), this.listen(this.canvas, "lostpointercapture", ((e) => {
 			let t = this.pointer.activePointers;
 			this.pointer.end(e.pointerId), t && !this.pointer.activePointers && (this.pointerRect = void 0, this.pointerStart = void 0, this.canvas.classList.remove("is-moving"), this.settled());
-		})), this.listen(this.canvas, "wheel", ((e) => {
+		})), this.listen(this.element, "wheel", ((e) => {
 			if (!this.state.ready || !this.active) return;
 			e.preventDefault(), this.options.onGesture?.(), this.stopAnimation();
 			let n = S(this.camera, this.size, this.camera.zoom + ae(e.deltaY, e.deltaMode, this.size.height), this.flatPoint(t(e)), {
