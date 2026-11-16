@@ -6,8 +6,11 @@ import {assertBrowserEnvironment,assertMatchingBrowserEnvironments} from './brow
 import {assertNativeSurfaceCoverage} from './browser-native-surface.mjs';
 
 export const TILE_OPACITY_BASELINE=Object.freeze({sourceCommit:'3cb219fdd8380fcf2580bfe37aa7d1f47523ba08',workerSHA256:'25047eadb538c0e08b2e5521349419504961bee8bbb207fde6633f414f2d7217'});
-export const TILE_OPACITY_CANDIDATE_SHA256='1817903d49d61ff46bdc7c7bd4b84f724a9af3093d1439e5bf19a1c84ec789e1';
-export const TILE_OPACITY_WORKER_DEPENDENCIES=Object.freeze({
+export const TILE_OPACITY_CANDIDATE_SHA256='f530680286e305aeb9d79bd34c7d40669a0056f059dc64905da5c54af8d06513';
+export const TILE_OPACITY_BASELINE_ROOT='tools/pages-preview/tests/fixtures/tile-opacity-3cb219f';
+// Complete original bytes, including the painter and every runtime import.
+// The reference must never resolve a dependency from the candidate checkout.
+export const TILE_OPACITY_BASELINE_DEPENDENCIES=Object.freeze({
  'web/lib/custom-map-vector.ts':'87e145aa0d4c8a6b5007c0e1b53faba1b57a6c0d41b7782d7091575c1f5ebe48',
  'web/lib/custom-map-relief.ts':'14ee495df7b02fe2f689c51e585e4e0fd64ec165a9beb1a85522716861e5f71a',
  'web/public/maps/map-city-labels.js':'62d4b661ef3edf6ffe22b079dde39da0c1602f5f33f28f265bf44c388e3cfd53',
@@ -15,6 +18,16 @@ export const TILE_OPACITY_WORKER_DEPENDENCIES=Object.freeze({
  'web/lib/custom-map-labels.ts':'b0e38679b23272f18119501b2503211801d5e1719cc2804713496f041f4342fd',
  'web/lib/custom-map-painter.ts':'7665c1fb54ba8d62dbd75342e72eac046f3fc1ca6e2427a5c9a0d4812971e0f1',
 });
+export const TILE_OPACITY_WORKER_DEPENDENCIES=Object.freeze({
+ 'web/lib/custom-map-vector.ts':'87e145aa0d4c8a6b5007c0e1b53faba1b57a6c0d41b7782d7091575c1f5ebe48',
+ 'web/lib/custom-map-relief.ts':'14ee495df7b02fe2f689c51e585e4e0fd64ec165a9beb1a85522716861e5f71a',
+ 'web/public/maps/map-city-labels.js':'62d4b661ef3edf6ffe22b079dde39da0c1602f5f33f28f265bf44c388e3cfd53',
+ 'web/lib/custom-map-symbols.ts':'062eb4cdaf29d6f4946713a790c3d90feca49d0bf9cfcd2d7477465d3a289601',
+ 'web/lib/custom-map-labels.ts':'b0e38679b23272f18119501b2503211801d5e1719cc2804713496f041f4342fd',
+ 'web/lib/custom-map-painter.ts':'c286fa58f0e77eebf477c4d2af219f51e4ee7696daf034b4bc57693529cfaa44',
+});
+export const TILE_OPACITY_BASELINE_FILES=Object.freeze(Object.fromEntries(Object.entries({'web/lib/custom-map-tiles.worker.ts':TILE_OPACITY_BASELINE.workerSHA256,...TILE_OPACITY_BASELINE_DEPENDENCIES}).map(([path,sha256])=>[`${TILE_OPACITY_BASELINE_ROOT}/${path}`,sha256])));
+export const TILE_OPACITY_WORKER_FILES=Object.freeze({'web/lib/custom-map-tiles.worker.ts':TILE_OPACITY_CANDIDATE_SHA256,...TILE_OPACITY_WORKER_DEPENDENCIES});
 export const TILE_OPACITY_ASSETS=Object.freeze([
  {id:'z7',path:'web/public/offline-map/localtiles/7/78/46.pbf',sha256:'377653b949af33792b377c16f3f77e7dd92711a082fa625ac437d4ee71f32091'},
  {id:'z12',path:'web/public/offline-map/localtiles/12/2506/1494.pbf',sha256:'ef12aeb5e7091f725d8ccdfc7ecf158d48a1a2eb6570d3a7f29d0f32e7556a2b'},
@@ -41,6 +54,19 @@ const record=value=>{assert.ok(value&&typeof value.path==='string'&&!value.path.
 export const tileOpacityCaseKey=item=>`${item.name}/dpr${item.dpr}/${item.softwareRaster?'software':'default'}`;
 export const tileOpacityPNGName=(item,phase)=>tileOpacityCaseKey(item).replaceAll('/','-')+'-'+phase+'.png';
 
+/** Check actual bundler inputs, including missing and unexpected transitive
+ * imports. Both sides have complete, separate reviewed source closures. */
+export function assertTileOpacityWorkerInputs(inputs,side){
+ assert.ok(side==='baseline'||side==='candidate');
+ assert.deepEqual([...inputs].sort(),Object.keys(side==='baseline'?TILE_OPACITY_BASELINE_FILES:TILE_OPACITY_WORKER_FILES).sort(),`${side} worker source closure changed`);
+}
+export function assertTileOpacitySources(records){
+ assert.ok(Array.isArray(records)&&records.length>=12&&records.length<=96);
+ const sources=new Map(records.map(value=>{record(value);return[value.path,value];}));assert.equal(sources.size,records.length);
+ for(const [path,sha256]of Object.entries({...TILE_OPACITY_BASELINE_FILES,...TILE_OPACITY_WORKER_FILES}))assert.equal(sources.get(path)?.sha256,sha256,'Reviewed worker source changed or missing: '+path);
+ return sources;
+}
+
 /** Dependency-free assertion shared by CI and public proof verification. It
  * never launches a browser or trusts a summary instead of the 144 raw rows. */
 export function assertTileOpacityReceipt(report,{sourceCommit,buildId,environment}={}){
@@ -48,10 +74,11 @@ export function assertTileOpacityReceipt(report,{sourceCommit,buildId,environmen
  assert.equal(report.verified,true);assert.equal(report.phase,'complete');assert.equal(report.sourceCommit,sourceCommit);
  assert.equal(report.buildId,buildId);assert.match(buildId??'',/^[a-f0-9]{16}$/);
  assert.deepEqual(report.baseline,TILE_OPACITY_BASELINE);assert.equal(report.workerSHA256,TILE_OPACITY_CANDIDATE_SHA256);
+ assert.deepEqual(report.baselineWorkerDependencies,TILE_OPACITY_BASELINE_DEPENDENCIES);
  assert.deepEqual(report.workerDependencies,TILE_OPACITY_WORKER_DEPENDENCIES);assert.deepEqual(report.matrix,TILE_OPACITY_MATRIX);
+ assertTileOpacityWorkerInputs(report.workerInputs.baseline,'baseline');assertTileOpacityWorkerInputs(report.workerInputs.candidate,'candidate');
  assert.equal(report.fixture.path,TILE_OPACITY_FIXTURE);record(report.fixture);record(report.helper);assert.equal(report.helper.path,TILE_OPACITY_HELPER);
- assert.ok(Array.isArray(report.sources)&&report.sources.length>=12&&report.sources.length<=96);
- const sources=new Map(report.sources.map(value=>{record(value);return[value.path,value];}));assert.equal(sources.size,report.sources.length);
+ const sources=assertTileOpacitySources(report.sources);
  assert.deepEqual(sources.get(TILE_OPACITY_FIXTURE),report.fixture);assert.deepEqual(sources.get(TILE_OPACITY_HELPER),report.helper);
  assert.equal(sources.get('web/lib/custom-map-tiles.worker.ts')?.sha256,report.workerSHA256);
  assert.ok(sources.has('web/lib/custom-map-engine.ts')&&sources.has('web/lib/custom-map-camera.ts'));
@@ -120,6 +147,7 @@ export function assertTileOpacityReceipt(report,{sourceCommit,buildId,environmen
 /** Source files and PNG bytes remain independently inspectable artifacts. */
 export function assertTileOpacityFiles(report,{root='.',build}={}){
  assert.ok(build&&build.sourceCommit===report.sourceCommit&&build.buildId===report.buildId);
+ assertTileOpacitySources(report.sources);
  for(const source of report.sources){const bytes=readFileSync(join(root,source.path));assert.equal(bytes.length,source.bytes);assert.equal(hash(bytes),source.sha256);assert.deepEqual(build.inputs.find(input=>input.path===source.path),source);}
  const native=readFileSync(join(root,report.runtime.native.path));assert.equal(native.length,report.runtime.native.bytes);assert.equal(hash(native),report.runtime.native.sha256);
  const manifest=JSON.parse(readFileSync(join(root,report.runtime.web.path),'utf8'));assert.equal(manifest.sourceInputsSha256,report.runtime.sourceInputsSha256);

@@ -7,31 +7,17 @@ import {createRequire} from 'node:module';
 import {createServer as createHTTPServer} from 'node:http';
 import {createServer as createNetServer} from 'node:net';
 import {tmpdir} from 'node:os';
-import {join,resolve} from 'node:path';
+import {dirname,extname,join,relative,resolve} from 'node:path';
 import {launchBrowser,BROWSER_STARTUP_LIMITS,browserErrorDetails} from '../browser-startup.mjs';
 import {browserEnvironmentArgs,collectBrowserEnvironment} from '../browser-environment.mjs';
 import {collectNativeBrowserSurface,assertNativeSurfaceCoverage} from '../browser-native-surface.mjs';
-import {TILE_OPACITY_BASELINE,TILE_OPACITY_CANDIDATE_SHA256,TILE_OPACITY_WORKER_DEPENDENCIES,TILE_OPACITY_ASSETS,TILE_OPACITY_CASES,TILE_OPACITY_MATRIX,TILE_OPACITY_FIXTURE,TILE_OPACITY_HELPER,assertTileOpacityReceipt,assertTileOpacityFiles,tileOpacityCaseKey,tileOpacityPNGName} from '../browser-map-tile-opacity-receipt.mjs';
+import {TILE_OPACITY_BASELINE,TILE_OPACITY_CANDIDATE_SHA256,TILE_OPACITY_BASELINE_ROOT,TILE_OPACITY_BASELINE_DEPENDENCIES,TILE_OPACITY_BASELINE_FILES,TILE_OPACITY_WORKER_DEPENDENCIES,TILE_OPACITY_WORKER_FILES,TILE_OPACITY_ASSETS,TILE_OPACITY_CASES,TILE_OPACITY_MATRIX,TILE_OPACITY_FIXTURE,TILE_OPACITY_HELPER,assertTileOpacityWorkerInputs,assertTileOpacityReceipt,assertTileOpacityFiles,tileOpacityCaseKey,tileOpacityPNGName} from '../browser-map-tile-opacity-receipt.mjs';
 
 const root=resolve(import.meta.dirname,'../../..'),web=join(root,'web'),require=createRequire(join(web,'package.json'));
 const {build}=createRequire(require.resolve('vite'))('esbuild');
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-const workerPath=join(web,'lib/custom-map-tiles.worker.ts');
 const binary=['google-chrome','google-chrome-stable','chromium','chromium-browser'].find(name=>spawnSync('which',[name],{stdio:'ignore'}).status===0);
-const comment=`    // Ordinary vector tiles begin with a full opaque paper fill, including
-    // cropped children and empty MVTs. Declare that same opacity to Canvas so
-    // repeated map blits do not carry an unnecessary transparent source.
-    // Satellite overlays, measured relief and decoded imagery keep alpha.
-`;
-
-function baselineWorker(candidate){
- assert.equal(digest(candidate),TILE_OPACITY_CANDIDATE_SHA256,'The candidate must be the reviewed alpha-only worker');
- assert.equal(candidate.split(comment).length,2);assert.equal(candidate.split("alpha:job.kind!=='vector'||!!job.transparent").length,2);
- const baseline=candidate.replace(comment,'').replace("alpha:job.kind!=='vector'||!!job.transparent",'alpha:true');
- assert.equal(digest(baseline),TILE_OPACITY_BASELINE.workerSHA256,'The reference must be the complete exact 3cb worker bytes');
- return baseline;
-}
 
 /** Both workers execute their actual production handler. These two observers
  * forward the original native calls unchanged. An additional message records
@@ -54,24 +40,34 @@ function observeNativeWorker(){
  };
 }
 
-async function productionBundle(){
- const candidate=await readFile(workerPath,'utf8'),baseline=baselineWorker(candidate);
+async function productionBundle(readSource=readFile){
  const options={absWorkingDir:web,bundle:true,write:false,format:'iife',platform:'browser',target:'chrome107',minify:false,metafile:true,logLevel:'silent',tsconfigRaw:{compilerOptions:{baseUrl:'.',paths:{'@/*':['./*']}}}};
- const worker=async source=>build({...options,entryPoints:['lib/custom-map-tiles.worker.ts'],banner:{js:`(${observeNativeWorker.toString()})();`},plugins:[{name:'exact-worker-source',setup(plugin){plugin.onLoad({filter:/[/\\]custom-map-tiles\.worker\.ts$/},args=>{assert.equal(args.path,workerPath);return{contents:source,loader:'ts',resolveDir:join(web,'lib')};});}}]});
- const [before,after]=await Promise.all([worker(baseline),worker(candidate)]);
- assert.deepEqual(Object.keys(before.metafile.inputs),Object.keys(after.metafile.inputs));
- const workerNames=Object.keys(after.metafile.inputs).map(path=>'web/'+path).filter(path=>path!=='web/lib/custom-map-tiles.worker.ts').sort();
- assert.deepEqual(workerNames,Object.keys(TILE_OPACITY_WORKER_DEPENDENCIES).sort());
- for(const path of workerNames)assert.equal(digest(await readFile(join(root,path))),TILE_OPACITY_WORKER_DEPENDENCIES[path],'The baseline painter/decode dependency changed: '+path);
+ const inputPaths=result=>Object.keys(result.metafile.inputs).filter(path=>path!=='tile-opacity-fixture-entry.js').map(path=>relative(root,resolve(web,path)).split('\\').join('/')).sort();
+ const worker=async side=>{
+  const expected=side==='baseline'?TILE_OPACITY_BASELINE_FILES:TILE_OPACITY_WORKER_FILES;
+  const entry=side==='baseline'?`${TILE_OPACITY_BASELINE_ROOT}/web/lib/custom-map-tiles.worker.ts`:'web/lib/custom-map-tiles.worker.ts';
+  const result=await build({...options,entryPoints:[join(root,entry)],banner:{js:`(${observeNativeWorker.toString()})();`},plugins:[{name:'complete-reviewed-worker-sources',setup(plugin){
+   plugin.onLoad({filter:/.*/},async args=>{
+    const path=relative(root,args.path).split('\\').join('/');assert.ok(Object.hasOwn(expected,path),'Unreviewed '+side+' worker dependency: '+path);
+    const bytes=await readSource(args.path);assert.equal(digest(bytes),expected[path],'Reviewed '+side+' worker source changed: '+path);
+    return{contents:bytes.toString('utf8'),loader:extname(args.path)==='.ts'?'ts':'js',resolveDir:dirname(args.path)};
+   });
+  }}]});
+  assertTileOpacityWorkerInputs(inputPaths(result),side);return result;
+ };
+ // The old worker resolves only beneath its frozen snapshot. Current painter
+ // or decoder edits can never be silently shared by the reference side.
+ const [before,after]=await Promise.all([worker('baseline'),worker('candidate')]);
  // Real pixel workers are bundled above; engine constructors are not run by this IIFE fixture.
  const main=await build({...options,define:{'import.meta.url':'location.href'},stdin:{contents:`import {CustomMapEngine} from './lib/custom-map-engine.ts';import {mercatorUnproject} from './lib/custom-map-camera.ts';window.runTileOpacityGate=options=>(${runProductionPixels.toString()})({CustomMapEngine,mercatorUnproject},options);`,resolveDir:web,sourcefile:'tile-opacity-fixture-entry.js'}});
  for(const result of [before,after,main])assert.equal(result.outputFiles.length,1);
- const paths=new Set([...Object.keys(main.metafile.inputs),...Object.keys(after.metafile.inputs)].filter(path=>path!=='tile-opacity-fixture-entry.js').map(path=>'web/'+path));
+ const workerInputs={baseline:inputPaths(before),candidate:inputPaths(after)};
+ const paths=new Set([...inputPaths(main),...workerInputs.baseline,...workerInputs.candidate]);
  for(const path of [TILE_OPACITY_FIXTURE,TILE_OPACITY_HELPER,'tools/pages-preview/browser-startup.mjs','tools/pages-preview/browser-environment.mjs','tools/pages-preview/browser-native-surface.mjs'])paths.add(path);
  const assets=[];
  for(const asset of TILE_OPACITY_ASSETS){const bytes=await readFile(join(root,asset.path));assert.equal(digest(bytes),asset.sha256);assets.push({...asset,bytes:bytes.length,content:bytes});paths.add(asset.path);}
  const sources=[];for(const path of [...paths].sort()){const bytes=await readFile(join(root,path));sources.push({path,bytes:bytes.length,sha256:digest(bytes)});}
- return{main:main.outputFiles[0].text,baseline:before.outputFiles[0].text,candidate:after.outputFiles[0].text,sources,assets};
+ return{main:main.outputFiles[0].text,baseline:before.outputFiles[0].text,candidate:after.outputFiles[0].text,workerInputs,sources,assets};
 }
 
 // This function runs in Chromium. Output images come from real production
@@ -150,15 +146,18 @@ async function runProductionPixels({CustomMapEngine,mercatorUnproject},options){
  }
 }
 
-test('tile opacity fixture bundles the exact old worker and unchanged real production dependencies',async()=>{
+test('tile opacity fixture bundles the complete exact old worker separately from current production sources',async()=>{
  const bundle=await productionBundle();assert.ok(bundle.main.length>10000);assert.ok(bundle.baseline.length>10000);assert.notEqual(bundle.baseline,bundle.candidate);
  assert.equal(bundle.assets.length,4);assert.ok(bundle.sources.some(source=>source.path==='web/lib/custom-map-engine.ts'));
+ assert.deepEqual(bundle.workerInputs.baseline,Object.keys(TILE_OPACITY_BASELINE_FILES).sort());assert.deepEqual(bundle.workerInputs.candidate,Object.keys(TILE_OPACITY_WORKER_FILES).sort());
+ for(const [path,sha256]of Object.entries(TILE_OPACITY_BASELINE_FILES))assert.equal(bundle.sources.find(source=>source.path===path)?.sha256,sha256);
 });
 
-test('tile opacity baseline rejects unrelated production edits instead of silently sharing a changed painter',async()=>{
- const candidate=await readFile(workerPath,'utf8');assert.equal(digest(baselineWorker(candidate)),TILE_OPACITY_BASELINE.workerSHA256);
- assert.throws(()=>baselineWorker(candidate.replace('MAX_PARENTS=4','MAX_PARENTS=5')),/reviewed alpha-only worker/);
- assert.throws(()=>baselineWorker(candidate.replace("alpha:job.kind!=='vector'||!!job.transparent",'alpha:false')),/reviewed alpha-only worker/);
+test('tile opacity bundles reject edited sources on both sides instead of sharing a changed painter',async()=>{
+ for(const path of [...Object.keys(TILE_OPACITY_BASELINE_FILES),...Object.keys(TILE_OPACITY_WORKER_FILES)]){
+  const changed=join(root,path);
+  await assert.rejects(productionBundle(async filename=>{const bytes=await readFile(filename);return filename===changed?Buffer.concat([bytes,Buffer.from('\n// unreviewed edit\n')]):bytes;}),/Reviewed (baseline|candidate) worker source changed/);
+ }
 });
 
 test('real worker opaque tiles preserve every native RGBA pixel and fractional world composition',{
@@ -172,7 +171,7 @@ test('real worker opaque tiles preserve every native RGBA pixel and fractional w
  const runtimeWeb=await fileRecord('web/public/custom-map/manifest.json'),runtimeNative=await fileRecord('android/app/src/main/assets/custom-map/manifest.json');
  const manifest=JSON.parse(await readFile(join(root,runtimeWeb.path),'utf8'));bundle.sources.push(runtimeWeb);bundle.sources.sort((a,b)=>a.path.localeCompare(b.path));
  const report={schemaVersion:1,evidence:'production-native-worker-tile-opacity-pixel-parity',verified:false,phase:'browser-startup',sourceCommit:process.env.GITHUB_SHA||null,buildId:buildInfo.buildId,
-  baseline:TILE_OPACITY_BASELINE,workerSHA256:TILE_OPACITY_CANDIDATE_SHA256,workerDependencies:TILE_OPACITY_WORKER_DEPENDENCIES,
+  baseline:TILE_OPACITY_BASELINE,baselineWorkerDependencies:TILE_OPACITY_BASELINE_DEPENDENCIES,workerSHA256:TILE_OPACITY_CANDIDATE_SHA256,workerDependencies:TILE_OPACITY_WORKER_DEPENDENCIES,workerInputs:bundle.workerInputs,
   fixture:bundle.sources.find(source=>source.path===TILE_OPACITY_FIXTURE),helper:bundle.sources.find(source=>source.path===TILE_OPACITY_HELPER),sources:bundle.sources,
   runtime:{web:runtimeWeb,native:runtimeNative,sourceInputsSha256:manifest.sourceInputsSha256},assets:bundle.assets.map(({content,...asset})=>asset),matrix:TILE_OPACITY_MATRIX,cases:[],totals:{cases:0,comparisons:0,pngs:0,workers:0}};
  assert.equal(buildInfo.sourceCommit,report.sourceCommit,'The browser gate must run on the exact built source');
