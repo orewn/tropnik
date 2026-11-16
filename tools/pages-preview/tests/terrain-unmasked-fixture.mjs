@@ -24,9 +24,9 @@ function inspectUnmasked(terrain,route){
 
 // These wrappers observe real calls and always delegate unchanged. They do not
 // fake fence readiness, draw pixels, or force the renderer onto a test path.
-function observePresentation(canvas,deferred){
+export function observePresentation(canvas,deferred){
  const state={fencesCreated:0,fencesDeleted:0,maxPending:0,waitCalls:0,waitFlags:[],waitTimeouts:[],readyFences:0,defaultSceneDraws:0,defaultPresentationDraws:0,pendingDefaultDraws:0,pendingDefaultClears:0,unreadyPresentationDraws:0,offscreenSceneDraws:0,resolves:0,badResolves:0,pendingResizes:0,onRenderWithoutPresentation:0,completedCallbacks:0,queuedAtCompletion:0,nullFences:0,groundDraws:0,boundaryDraws:0,allocations:[]};
- const renderbuffers=new WeakMap(),fences=new Map(),shaderSources=[],shaderText=new WeakMap(),programShaders=new WeakMap(),programKinds=new WeakMap();let sequence=0,lastReady=0,lastPresented=0,drawFramebuffer=null,readFramebuffer=null,program=null,boundRenderbuffer=null,observedContext,reportedPresentations=0;
+ const renderbuffers=new WeakMap(),framebuffers=new WeakMap(),fences=new Map(),shaderSources=[],shaderText=new WeakMap(),programShaders=new WeakMap(),programKinds=new WeakMap();let sequence=0,lastReady=0,lastPresented=0,drawFramebuffer=null,readFramebuffer=null,program=null,boundRenderbuffer=null,observedContext,reportedPresentations=0;
  for(const property of ['width','height']){
   const descriptor=Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,property);
   Object.defineProperty(canvas,property,{configurable:true,get:()=>descriptor.get.call(canvas),set:value=>{if(fences.size)state.pendingResizes++;descriptor.set.call(canvas,value);}});
@@ -35,6 +35,16 @@ function observePresentation(canvas,deferred){
  canvas.getContext=function(kind,attributes){
   const gl=getContext(kind,attributes);if(kind!=='webgl2'||!gl||observedContext===gl)return gl;observedContext=gl;
   const wrap=(name,observe)=>{const original=gl[name].bind(gl);gl[name]=(...args)=>observe(original,...args);};
+  const framebufferRecord=(target,create=false)=>{
+   const framebuffer=target===gl.READ_FRAMEBUFFER?readFramebuffer:target===gl.FRAMEBUFFER||target===gl.DRAW_FRAMEBUFFER?drawFramebuffer:null;
+   if(!framebuffer)return null;let record=framebuffers.get(framebuffer);
+   if(!record&&create){record={attachments:new Map(),checked:null};framebuffers.set(framebuffer,record);}return record;
+  };
+  const completeFramebuffer=target=>{
+   const record=framebufferRecord(target);if(!record?.checked?.size)return null;
+   for(const[attachment,buffer]of record.attachments){const allocation=renderbuffers.get(buffer);if(!allocation||record.checked.get(attachment)!==allocation)return null;}
+   return record;
+  };
   wrap('shaderSource',(original,shader,source)=>{
    shaderText.set(shader,source);
    if(source.includes('uniform sampler2D uCartography;')&&source.includes('vec3 perturbNormal('))shaderSources.push({kind:'terrain-fragment',source});
@@ -48,6 +58,7 @@ function observePresentation(canvas,deferred){
   wrap('linkProgram',(original,value)=>{const sources=(programShaders.get(value)||[]).map(shader=>shaderText.get(shader)||'');programKinds.set(value,sources.some(source=>source.includes('uniform highp sampler2D uCompleted;'))?'presentation':sources.some(source=>source.includes('float distanceToBase=length(max(abs(vPoint)-uExtent*.5'))?'ground':sources.some(source=>source.includes('float elevation=clamp((vPosition.z-uFloor)/.17'))?'boundary':'scene');return original(value);});
   wrap('useProgram',(original,value)=>{program=value;return original(value);});
   wrap('bindFramebuffer',(original,target,value)=>{if(target===gl.FRAMEBUFFER||target===gl.DRAW_FRAMEBUFFER)drawFramebuffer=value;if(target===gl.FRAMEBUFFER||target===gl.READ_FRAMEBUFFER)readFramebuffer=value;return original(target,value);});
+  wrap('deleteFramebuffer',(original,value)=>{const result=original(value);framebuffers.delete(value);if(drawFramebuffer===value)drawFramebuffer=null;if(readFramebuffer===value)readFramebuffer=null;return result;});
   wrap('fenceSync',(original,...args)=>{const sync=original(...args);state.fencesCreated++;if(sync){fences.set(sync,{sequence:++sequence,ready:false});state.maxPending=Math.max(state.maxPending,fences.size);}else state.nullFences++;return sync;});
   wrap('clientWaitSync',(original,sync,flags,timeout)=>{
    state.waitCalls++;if(!state.waitFlags.includes(flags))state.waitFlags.push(flags);if(!state.waitTimeouts.includes(timeout))state.waitTimeouts.push(timeout);
@@ -68,8 +79,32 @@ function observePresentation(canvas,deferred){
   });
   for(const name of ['clear','clearBufferfv','clearBufferiv','clearBufferuiv','clearBufferfi'])wrap(name,(original,...args)=>{if(drawFramebuffer===null&&fences.size)state.pendingDefaultClears++;return original(...args);});
   wrap('blitFramebuffer',(original,...args)=>{state.resolves++;if(!drawFramebuffer||!readFramebuffer||args[0]!==args[4]||args[1]!==args[5]||args[2]!==args[6]||args[3]!==args[7]||args[8]!==gl.COLOR_BUFFER_BIT||args[9]!==gl.NEAREST)state.badResolves++;return original(...args);});
-  // Observe only the production queries; never inject renderbuffer queries or
-  // binding changes into allocation on an older WebView.
+  // Observe only production calls. A complete draw framebuffer reports the
+  // common sample count of its attached images; attachment queries report their
+  // actual precision. Never infer either from requested storage parameters.
+  // Snapshot allocation identities so later storage cannot reuse old evidence.
+  wrap('framebufferRenderbuffer',(original,target,attachment,kind,buffer)=>{
+   const result=original(target,attachment,kind,buffer),record=framebufferRecord(target,true);
+   if(record){record.checked=null;for(const point of attachment===gl.DEPTH_STENCIL_ATTACHMENT?[gl.DEPTH_ATTACHMENT,gl.STENCIL_ATTACHMENT]:[attachment])if(buffer)record.attachments.set(point,buffer);else record.attachments.delete(point);}return result;
+  });
+  wrap('framebufferTexture2D',(original,...args)=>{const result=original(...args),record=framebufferRecord(args[0]);if(record){record.checked=null;record.attachments.delete(args[1]);}return result;});
+  wrap('checkFramebufferStatus',(original,target)=>{
+   const value=original(target),record=framebufferRecord(target);
+   if(record)record.checked=value===gl.FRAMEBUFFER_COMPLETE?new Map([...record.attachments].map(([attachment,buffer])=>[attachment,renderbuffers.get(buffer)])):null;
+   return value;
+  });
+  wrap('getParameter',(original,parameter)=>{
+   const value=original(parameter),record=parameter===gl.SAMPLES&&completeFramebuffer(gl.DRAW_FRAMEBUFFER);
+   if(record)for(const buffer of new Set(record.attachments.values()))renderbuffers.get(buffer).samples=value;
+   return value;
+  });
+  wrap('getFramebufferAttachmentParameter',(original,target,attachment,parameter)=>{
+   const value=original(target,attachment,parameter),record=completeFramebuffer(target),buffer=record?.attachments.get(attachment),allocation=buffer&&renderbuffers.get(buffer);
+   if(allocation)for(const[name,key]of [['redBits',gl.FRAMEBUFFER_ATTACHMENT_RED_SIZE],['greenBits',gl.FRAMEBUFFER_ATTACHMENT_GREEN_SIZE],['blueBits',gl.FRAMEBUFFER_ATTACHMENT_BLUE_SIZE],['alphaBits',gl.FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE],['depthBits',gl.FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE],['stencilBits',gl.FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE]])if(parameter===key)allocation.precision[name]=value;
+   return value;
+  });
+  // Retain observation of the previous query API without adding driver reads
+  // or binding changes to either side of the immutable pixel comparison.
   wrap('bindRenderbuffer',(original,target,value)=>{boundRenderbuffer=value;return original(target,value);});
   for(const name of ['renderbufferStorageMultisample','renderbufferStorage'])wrap(name,(original,...args)=>{
    const result=original(...args),multi=name==='renderbufferStorageMultisample';

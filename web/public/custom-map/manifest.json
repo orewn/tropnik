@@ -309,8 +309,8 @@
     },
     {
       "path": "web/public/terrain/terrain-renderer.js",
-      "sizeBytes": 103757,
-      "sha256": "9aeb714ca4f889587d92506ef7c937c23b09e6fe2c5cf397bfa4121a84de2c86"
+      "sizeBytes": 103850,
+      "sha256": "63d759259b0cebdb40530cf00d454c0d10f34e1626ef58709d1a7e4f4564882a"
     },
     {
       "path": "web/tsconfig.json",
@@ -318,7 +318,7 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "7b5f337cc10d4bafb38e8d28b2941aa33157baded38b52b5dd66c2715e2a1add",
+  "sourceInputsSha256": "a42e8753de5e93999b8d98e038666225ad5ab5ea41f604ef8b4d18f18144e421",
   "files": [
     {
       "path": "android-bootstrap.js",

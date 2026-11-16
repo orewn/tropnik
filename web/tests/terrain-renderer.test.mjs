@@ -100,19 +100,32 @@ function environment(t,{gpuFailure=false,gl=null,cloneFails=false,width=80,heigh
 }
 
 function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready',loseRenderbufferBinding=false}={}){
-  const counts={framebuffers:0,renderbuffers:0,buffers:0,deletedBuffers:0,contextReleasedBuffers:0,vertexArrays:0,deletedVertexArrays:0,contextReleasedVertexArrays:0,bufferUploads:[],shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[],draws:[],resolves:[],polls:[],maxPendingSyncs:0,deletedSyncs:0,renderbufferQueries:[],missingRenderbufferBindings:0},enums=new Map(),generations=new WeakMap(),liveTextures=new Set(),liveSyncs=new Set(),liveBuffers=new Set(),liveVertexArrays=new Set();let next=1,gl,generation=0,error=0,drawFramebuffer=null,readFramebuffer=null,renderbuffer=null,nativeRenderbuffer=null,program=null;
-  const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);if(type==='Buffer')liveBuffers.add(object);if(type==='VertexArray'){liveVertexArrays.add(object);counts.vertexArrays++;}if(type==='Sync'){liveSyncs.add(object);counts.maxPendingSyncs=Math.max(counts.maxPendingSyncs,liveSyncs.size);}return object;};
+  const counts={framebuffers:0,renderbuffers:0,buffers:0,deletedBuffers:0,contextReleasedBuffers:0,vertexArrays:0,deletedVertexArrays:0,contextReleasedVertexArrays:0,bufferUploads:[],shadowBudgets:[],textures:0,deletedTextures:0,contextReleasedTextures:0,invalidObjectCalls:0,uploads:[],anisotropyQueries:0,anisotropyValues:[],shaderSources:[],stencilState:[],draws:[],resolves:[],polls:[],maxPendingSyncs:0,deletedSyncs:0,renderbufferQueries:[],framebufferSampleQueries:[],framebufferAttachmentQueries:[],missingRenderbufferBindings:0,deletedFramebuffers:0,deletedRenderbuffers:0},enums=new Map(),generations=new WeakMap(),liveTextures=new Set(),liveSyncs=new Set(),liveBuffers=new Set(),liveVertexArrays=new Set(),liveFramebuffers=new Set(),liveRenderbuffers=new Set();let queryBindingFault=false,next=1,gl,generation=0,error=0,drawFramebuffer=null,readFramebuffer=null,renderbuffer=null,nativeRenderbuffer=null,program=null;
+  const create=type=>{const object={};generations.set(object,generation);if(type==='Texture')liveTextures.add(object);if(type==='Buffer')liveBuffers.add(object);if(type==='Framebuffer')liveFramebuffers.add(object);if(type==='Renderbuffer')liveRenderbuffers.add(object);if(type==='VertexArray'){liveVertexArrays.add(object);counts.vertexArrays++;}if(type==='Sync'){liveSyncs.add(object);counts.maxPendingSyncs=Math.max(counts.maxPendingSyncs,liveSyncs.size);}return object;};
   const remove=(type,object)=>{
     if(generations.get(object)!==generation){counts.invalidObjectCalls++;error=gl.INVALID_OPERATION;return;}
-    generations.delete(object);if(type==='Buffer'){liveBuffers.delete(object);counts.deletedBuffers++;}if(type==='VertexArray'){liveVertexArrays.delete(object);counts.deletedVertexArrays++;}if(type==='Texture'){counts.deletedTextures++;liveTextures.delete(object);}if(type==='Sync'){liveSyncs.delete(object);counts.deletedSyncs++;}
+    generations.delete(object);if(type==='Framebuffer'){liveFramebuffers.delete(object);counts.deletedFramebuffers++;}if(type==='Renderbuffer'){liveRenderbuffers.delete(object);counts.deletedRenderbuffers++;}if(type==='Buffer'){liveBuffers.delete(object);counts.deletedBuffers++;}if(type==='VertexArray'){liveVertexArrays.delete(object);counts.deletedVertexArrays++;}if(type==='Texture'){counts.deletedTextures++;liveTextures.delete(object);}if(type==='Sync'){liveSyncs.delete(object);counts.deletedSyncs++;}
   };
   const extension={MAX_TEXTURE_MAX_ANISOTROPY_EXT:0x84ff,TEXTURE_MAX_ANISOTROPY_EXT:0x84fe};
   const methods={NO_ERROR:0,getParameter:key=>{
       if(key===extension.MAX_TEXTURE_MAX_ANISOTROPY_EXT)return anisotropy;
-      if(key===gl.SAMPLES)return samples;if(key===gl.DEPTH_BITS)return 24;if(key===gl.STENCIL_BITS)return 8;
+      if(key===gl.SAMPLES){if(!drawFramebuffer)return samples;const value=[...drawFramebuffer.attachments.values()][0].samples;counts.framebufferSampleQueries.push({framebuffer:drawFramebuffer,value});return value;}if(key===gl.DEPTH_BITS)return 24;if(key===gl.STENCIL_BITS)return 8;
       if([gl.RED_BITS,gl.GREEN_BITS,gl.BLUE_BITS].includes(key))return 8;if(key===gl.ALPHA_BITS)return 0;return 16384;
     },getError:()=>{const result=error;error=0;return result;},getExtension:name=>{if(name!=='EXT_texture_filter_anisotropic')return null;counts.anisotropyQueries++;return anisotropy?extension:null;},getShaderParameter:()=>true,getProgramParameter:()=>true,
-    getFramebufferAttachmentParameter:()=>deferred?gl.LINEAR:gl.SRGB,
+    getFramebufferAttachmentParameter:(target,attachment,parameter)=>{
+      const framebuffer=target===gl.READ_FRAMEBUFFER?readFramebuffer:drawFramebuffer;
+      if(!framebuffer)return deferred?gl.LINEAR:gl.SRGB;
+      const buffer=framebuffer.attachments?.get(attachment);if(!buffer){error=gl.INVALID_OPERATION;return null;}
+      let value=0;
+      if([gl.FRAMEBUFFER_ATTACHMENT_RED_SIZE,gl.FRAMEBUFFER_ATTACHMENT_GREEN_SIZE,gl.FRAMEBUFFER_ATTACHMENT_BLUE_SIZE].includes(parameter))value=buffer.format===gl.RGB8?8:0;
+      else if(parameter===gl.FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE)value=buffer.format===gl.RGB8?0:24;
+      else if(parameter===gl.FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE)value=buffer.format===gl.DEPTH24_STENCIL8?8:0;
+      counts.framebufferAttachmentQueries.push({framebuffer,attachment,parameter,value,format:buffer.format,width:buffer.width,height:buffer.height});return value;
+    },
+    framebufferRenderbuffer:(target,attachment,_renderbufferTarget,buffer)=>{
+      const framebuffer=target===gl.READ_FRAMEBUFFER?readFramebuffer:drawFramebuffer;framebuffer.attachments??=new Map();
+      for(const point of attachment===gl.DEPTH_STENCIL_ATTACHMENT?[gl.DEPTH_ATTACHMENT,gl.STENCIL_ATTACHMENT]:[attachment])framebuffer.attachments.set(point,buffer);
+    },
     getInternalformatParameter:()=>new Int32Array([samples]),
     bindFramebuffer:(target,object)=>{if(target===gl.FRAMEBUFFER||target===gl.DRAW_FRAMEBUFFER)drawFramebuffer=object;if(target===gl.FRAMEBUFFER||target===gl.READ_FRAMEBUFFER)readFramebuffer=object;},
     // Model a command cache separately from the native driver binding. A same-object
@@ -121,6 +134,7 @@ function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready',l
     renderbufferStorageMultisample:(_target,count,format,width,height)=>{Object.assign(nativeRenderbuffer,{samples:count,format,width,height});if(loseRenderbufferBinding)nativeRenderbuffer=null;},
     renderbufferStorage:(_target,format,width,height)=>{Object.assign(nativeRenderbuffer,{samples:0,format,width,height});if(loseRenderbufferBinding)nativeRenderbuffer=null;},
     getRenderbufferParameter:(_target,parameter)=>{
+      if(queryBindingFault)nativeRenderbuffer=null;
       if(!nativeRenderbuffer){counts.missingRenderbufferBindings++;error=gl.INVALID_OPERATION;return null;}
       const buffer=nativeRenderbuffer;let value=0;
       if(parameter===gl.RENDERBUFFER_SAMPLES)value=buffer.samples;
@@ -140,7 +154,10 @@ function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready',l
     texParameterf:(_target,key,value)=>{if(key===extension.TEXTURE_MAX_ANISOTROPY_EXT)counts.anisotropyValues.push(value);},
     shaderSource:(_shader,source)=>counts.shaderSources.push(source),
     stencilMask:value=>counts.stencilState.push(['mask',value]),stencilFunc:(...values)=>counts.stencilState.push(['function',...values]),stencilOp:(...values)=>counts.stencilState.push(['operation',...values]),
-    checkFramebufferStatus:()=>gl.FRAMEBUFFER_COMPLETE,getUniformLocation:(_program,name)=>name,
+    checkFramebufferStatus:target=>{
+      const framebuffer=target===gl.READ_FRAMEBUFFER?readFramebuffer:drawFramebuffer,buffers=[...(framebuffer?.attachments?.values()||[])];
+      return buffers.some(buffer=>buffer.samples!==buffers[0].samples)?gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:gl.FRAMEBUFFER_COMPLETE;
+    },getUniformLocation:(_program,name)=>name,
     uniform1i:(name,value)=>{if(name==='uSteps')counts.shadowBudgets.push(value);},
     createFramebuffer:()=>{counts.framebuffers++;return create('Framebuffer');},createRenderbuffer:()=>{counts.renderbuffers++;return create('Renderbuffer');},createBuffer:()=>{counts.buffers++;return create('Buffer');},
     createTexture:()=>{counts.textures++;return create('Texture');},deleteTexture:object=>remove('Texture',object),
@@ -152,7 +169,7 @@ function recordingGL({anisotropy=0,deferred=true,samples=4,frameStatus='ready',l
     if(String(key).startsWith('create'))return()=>create(String(key).slice(6));
     if(String(key).startsWith('delete'))return object=>remove(String(key).slice(6),object);return()=>{};
   }});
-  return{gl,counts,setFrameStatus(value){frameStatus=value;},pendingSyncs:()=>liveSyncs.size,liveTextures:()=>liveTextures.size,liveBuffers:()=>liveBuffers.size,liveVertexArrays:()=>liveVertexArrays.size,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;counts.contextReleasedBuffers+=liveBuffers.size;counts.contextReleasedVertexArrays+=liveVertexArrays.size;liveTextures.clear();liveBuffers.clear();liveVertexArrays.clear();liveSyncs.clear();drawFramebuffer=null;readFramebuffer=null;renderbuffer=null;nativeRenderbuffer=null;program=null;}};
+  return{gl,counts,setQueryBindingFault(value){queryBindingFault=value;},injectError(value){error=value;},liveFramebuffers:()=>liveFramebuffers.size,liveRenderbuffers:()=>liveRenderbuffers.size,setFrameStatus(value){frameStatus=value;},pendingSyncs:()=>liveSyncs.size,liveTextures:()=>liveTextures.size,liveBuffers:()=>liveBuffers.size,liveVertexArrays:()=>liveVertexArrays.size,loseContext(){generation++;counts.contextReleasedTextures+=liveTextures.size;counts.contextReleasedBuffers+=liveBuffers.size;counts.contextReleasedVertexArrays+=liveVertexArrays.size;liveTextures.clear();liveBuffers.clear();liveVertexArrays.clear();liveFramebuffers.clear();liveRenderbuffers.clear();liveSyncs.clear();drawFramebuffer=null;readFramebuffer=null;renderbuffer=null;nativeRenderbuffer=null;program=null;}};
 }
 
 test('LOD hysteresis avoids toggling near a zoom threshold while retaining hard limits',()=>{
@@ -220,33 +237,83 @@ test('deferred terrain preserves MSAA and keeps the default canvas untouched unt
   assert.equal(record.pendingSyncs(),0);assert.equal(record.counts.maxPendingSyncs,1);assert.equal(env.frames.size,0);renderer.destroy();
 });
 
-test('allocation restores native renderbuffer binding for every checked parameter, including resize and depth-only targets',t=>{
-  for(const masked of[false,true]){
-    const record=recordingGL({loseRenderbufferBinding:true}),env=environment(t,{gl:record.gl}),source=grid(3,3),frames=[];
-    let width=80,height=60;env.canvas.getBoundingClientRect=()=>({width,height,left:0,top:0,right:width,bottom:height});
+test('complete framebuffer validation retains exact samples and attachment precision across resize',t=>{
+  for(const masked of[false,true])for(const samples of[0,4]){
+    const record=recordingGL({samples,loseRenderbufferBinding:true}),env=environment(t,{gl:record.gl}),source=grid(3,3),frames=[];
     const renderer=new TerrainRenderer(env.canvas,source,{...(masked?{displayMask:displayMask(source,[255,0,0,255])}:{}),onRender:info=>frames.push(info)});
-    env.flush();assert.ok(renderer.gpu,'a stale native binding must not force the Canvas fallback');
+    env.flush();assert.ok(renderer.gpu,'a stale native renderbuffer binding must not force the Canvas fallback');
     assert.equal(frames.length,1);assert.equal(frames[0].renderer,'webgl2');assert.equal(frames[0].graphicsFallback,null);
-    assert.equal(record.counts.missingRenderbufferBindings,0);assert.equal(record.counts.renderbufferQueries.length,8);
-    assert.deepEqual(record.counts.renderbufferQueries.filter(query=>query.parameter===record.gl.RENDERBUFFER_SAMPLES).map(query=>query.value),[4,4]);
-    assert.equal(record.counts.renderbufferQueries.find(query=>query.parameter===record.gl.RENDERBUFFER_DEPTH_SIZE).value,24);
-    assert.equal(record.counts.renderbufferQueries.find(query=>query.parameter===record.gl.RENDERBUFFER_STENCIL_SIZE).value,masked?8:0);
-    width=110;height=75;renderer.request();env.flush();
+    assert.equal(record.counts.renderbufferQueries.length,0);assert.equal(record.counts.missingRenderbufferBindings,0);
+    assert.deepEqual(record.counts.framebufferSampleQueries.map(query=>query.value),[samples]);
+    assert.equal(record.counts.framebufferAttachmentQueries.length,6);
+    assert.deepEqual(record.counts.framebufferAttachmentQueries.map(query=>query.value),[8,8,8,0,24,masked?8:0]);
+    assert.equal(record.counts.framebufferAttachmentQueries[4].attachment,record.gl.DEPTH_ATTACHMENT);
+    assert.equal(record.counts.framebufferAttachmentQueries[5].attachment,masked?record.gl.STENCIL_ATTACHMENT:record.gl.DEPTH_ATTACHMENT);
+    env.resize(110,75);renderer.request();env.flush();
     assert.equal(frames.length,2);assert.equal(frames[1].renderer,'webgl2');assert.equal(frames[1].graphicsFallback,null);
-    assert.equal(record.counts.renderbufferQueries.length,16);assert.equal(record.counts.missingRenderbufferBindings,0);
-    assert.ok(record.counts.renderbufferQueries.slice(8).every(query=>query.width===110&&query.height===75));
+    assert.equal(record.counts.framebufferAttachmentQueries.length,12);assert.equal(record.counts.missingRenderbufferBindings,0);
+    assert.ok(record.counts.framebufferAttachmentQueries.slice(6).every(query=>query.width===110&&query.height===75));
+    assert.deepEqual(record.counts.framebufferSampleQueries.map(query=>query.value),[samples,samples]);
     assert.equal(record.counts.resolves.length,2);assert.equal(record.pendingSyncs(),0);renderer.destroy();
+    assert.equal(record.liveFramebuffers(),0);assert.equal(record.liveRenderbuffers(),0);assert.equal(record.counts.invalidObjectCalls,0);
   }
 });
 
-test('restoring the binding never admits a changed sample count or color/depth precision',t=>{
-  for(const [parameter,value,reason]of[['RENDERBUFFER_SAMPLES',2,/sample count changed/],['RENDERBUFFER_RED_SIZE',7,/precision changed/],['RENDERBUFFER_DEPTH_SIZE',16,/precision changed/]]){
-    const record=recordingGL({loseRenderbufferBinding:true}),read=record.gl.getRenderbufferParameter,frames=[];
-    record.gl.getRenderbufferParameter=(target,key)=>{const actual=read(target,key);return key===record.gl[parameter]?value:actual;};
-    const env=environment(t,{gl:record.gl}),renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:info=>frames.push(info)});
-    env.flush();assert.equal(frames.length,0,'an invalid target cannot be presented as ready WebGL');assert.equal(record.counts.resolves.length,0);assert.equal(record.pendingSyncs(),0);
-    env.flush();assert.equal(frames.length,1);assert.equal(frames[0].renderer,'canvas2d');assert.equal(frames[0].graphicsFallback.stage,'render');assert.match(frames[0].graphicsFallback.reason,reason);
+test('rotation keeps WebGL quality when a renderbuffer query would lose its native binding after the rebind',t=>{
+  const oldDpr=globalThis.devicePixelRatio;globalThis.devicePixelRatio=2.625;t.after(()=>{if(oldDpr===undefined)delete globalThis.devicePixelRatio;else globalThis.devicePixelRatio=oldDpr;});
+  const record=recordingGL(),env=environment(t,{gl:record.gl,width:412,height:728}),source=grid(513,513),frames=[];
+  const renderer=new TerrainRenderer(env.canvas,source,{onRender:info=>frames.push(info)});
+  const quality=frame=>({renderer:frame.renderer,pixelRatio:frame.pixelRatio,meshStride:frame.meshStride,triangles:frame.triangles,sourceVertices:frame.sourceVertices,graphicsFallback:frame.graphicsFallback});
+  env.flush();renderer.zoomBy(1.2);env.flush();const portrait=quality(frames.at(-1));
+  assert.deepEqual(portrait,{renderer:'webgl2',pixelRatio:2,meshStride:2,triangles:131072,sourceVertices:263169,graphicsFallback:null});
+  // The Android receipt shows a zero native binding inside the parameter query,
+  // despite the earlier null/object rebind. Model that API failure after rotation;
+  // this does not claim to reproduce the driver's internal context scheduling.
+  record.setQueryBindingFault(true);env.resize(866,316);renderer.request();env.flush();env.flush();
+  assert.deepEqual(quality(frames.at(-1)),portrait,'rotation must retain the actual WebGL2 MSAA/DPR/mesh path');
+  assert.deepEqual([env.canvas.width,env.canvas.height],[1732,632]);
+  assert.equal(env.canvas.dataset.terrainPresentation,'deferred-msaa');assert.equal(env.canvas.dataset.terrainPending,'false');
+  assert.equal(record.counts.renderbufferQueries.length,0,'validation must not enter the driver query path that failed on rotation');
+  assert.equal(record.counts.missingRenderbufferBindings,0);assert.deepEqual(record.counts.framebufferSampleQueries.map(query=>query.value),[4,4]);
+  assert.equal(record.counts.resolves.length,3);assert.equal(record.pendingSyncs(),0);renderer.destroy();
+  assert.equal(record.liveFramebuffers(),0);assert.equal(record.liveRenderbuffers(),0);
+  assert.equal(record.counts.deletedFramebuffers,record.counts.framebuffers);assert.equal(record.counts.deletedRenderbuffers,record.counts.renderbuffers);assert.equal(record.counts.invalidObjectCalls,0);
+});
+
+test('framebuffer validation never admits changed MSAA or color/depth/stencil precision',t=>{
+  const failures=[
+    {name:'all attachments use fewer samples',reason:/sample count changed/,setup(record){const allocate=record.gl.renderbufferStorageMultisample;record.gl.renderbufferStorageMultisample=(target,_samples,...args)=>allocate(target,2,...args);}},
+    {name:'attachments disagree about samples',reason:/multisample framebuffer unavailable/,setup(record){const allocate=record.gl.renderbufferStorageMultisample;record.gl.renderbufferStorageMultisample=(target,samples,format,...args)=>allocate(target,format===record.gl.RGB8?samples:2,format,...args);}},
+    ...[['FRAMEBUFFER_ATTACHMENT_RED_SIZE',7],['FRAMEBUFFER_ATTACHMENT_GREEN_SIZE',7],['FRAMEBUFFER_ATTACHMENT_BLUE_SIZE',7],['FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE',8],['FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE',16],['FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE',4]].map(([parameter,value])=>({name:parameter,reason:/precision changed/,setup(record){const read=record.gl.getFramebufferAttachmentParameter;record.gl.getFramebufferAttachmentParameter=(target,attachment,key)=>{const actual=read(target,attachment,key);return key===record.gl[parameter]?value:actual;};}})),
+  ];
+  for(const failure of failures){
+    const record=recordingGL(),source=grid(3,3),frames=[];failure.setup(record);
+    const env=environment(t,{gl:record.gl}),renderer=new TerrainRenderer(env.canvas,source,{displayMask:displayMask(source,[255,0,0,255]),onRender:info=>frames.push(info)});
+    env.flush();assert.equal(frames.length,0,failure.name);assert.equal(record.counts.resolves.length,0);assert.equal(record.pendingSyncs(),0);
+    env.flush();assert.equal(frames.length,1);assert.equal(frames[0].renderer,'canvas2d');assert.equal(frames[0].graphicsFallback.stage,'render');assert.match(frames[0].graphicsFallback.reason,failure.reason);
     assert.equal(record.counts.missingRenderbufferBindings,0);renderer.destroy();
+    assert.equal(record.liveFramebuffers(),0);assert.equal(record.liveRenderbuffers(),0);assert.equal(record.counts.invalidObjectCalls,0);
+  }
+});
+
+test('framebuffer query errors and lost-context results fail closed and release allocated targets',t=>{
+  for(const mode of['null-samples','null-precision','error-with-valid-values','context-lost']){
+    const record=recordingGL(),frames=[];
+    if(mode==='null-samples'){
+      const read=record.gl.getParameter;record.gl.getParameter=key=>{const value=read(key);return key===record.gl.SAMPLES&&record.counts.framebufferSampleQueries.length?null:value;};
+    }else{
+      const read=record.gl.getFramebufferAttachmentParameter;
+      record.gl.getFramebufferAttachmentParameter=(target,attachment,key)=>{
+        const value=read(target,attachment,key);if(key!==record.gl.FRAMEBUFFER_ATTACHMENT_RED_SIZE)return value;
+        if(mode==='error-with-valid-values'){record.injectError(record.gl.INVALID_OPERATION);return value;}
+        if(mode==='context-lost')record.injectError(record.gl.CONTEXT_LOST_WEBGL);
+        return null;
+      };
+    }
+    const env=environment(t,{gl:record.gl}),renderer=new TerrainRenderer(env.canvas,grid(3,3),{onRender:info=>frames.push(info)});
+    env.flush();assert.equal(frames.length,0,mode);assert.equal(record.counts.resolves.length,0);assert.equal(record.pendingSyncs(),0);
+    env.flush();assert.equal(frames.length,1);assert.equal(frames[0].renderer,'canvas2d');assert.equal(frames[0].graphicsFallback.stage,'render');
+    renderer.destroy();assert.equal(record.liveFramebuffers(),0);assert.equal(record.liveRenderbuffers(),0);assert.equal(record.liveTextures(),0);assert.equal(record.counts.invalidObjectCalls,0);
   }
 });
 

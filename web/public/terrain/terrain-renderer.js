@@ -737,13 +737,6 @@ class TerrainGPU{
  }
  track(object,type){if(!object)throw new Error('Terrain GPU allocation failed');this.resources.push([object,type]);return object;}
  release(object,type){if(!object)return;this.gl['delete'+type](object);this.resources=this.resources.filter(([resource])=>resource!==object);}
- renderbufferParameter(buffer,parameter){
-  const gl=this.gl;
-  // Re-establish the native binding before each synchronous driver query.
-  // A repeated same-object bind may be elided by the WebGL command cache.
-  gl.bindRenderbuffer(gl.RENDERBUFFER,null);gl.bindRenderbuffer(gl.RENDERBUFFER,buffer);
-  return gl.getRenderbufferParameter(gl.RENDERBUFFER,parameter);
- }
  targetFor(width,height){
   if(this.frameTarget?.width===width&&this.frameTarget?.height===height)return this.frameTarget;
   if(this.frameTarget)for(const[object,type]of this.frameTarget.resources)this.release(object,type);
@@ -756,13 +749,18 @@ class TerrainGPU{
    for(const[buffer,internal,attachment]of[[color,gl.RGB8,gl.COLOR_ATTACHMENT0],[depth,format.depthFormat,this.displayMask?gl.DEPTH_STENCIL_ATTACHMENT:gl.DEPTH_ATTACHMENT]]){
     gl.bindRenderbuffer(gl.RENDERBUFFER,buffer);
     if(format.samples)gl.renderbufferStorageMultisample(gl.RENDERBUFFER,format.samples,internal,width,height);else gl.renderbufferStorage(gl.RENDERBUFFER,internal,width,height);
-    if(this.renderbufferParameter(buffer,gl.RENDERBUFFER_SAMPLES)!==format.samples)throw new Error('Terrain framebuffer sample count changed');
-    const sizes=buffer===color?[[gl.RENDERBUFFER_RED_SIZE,8],[gl.RENDERBUFFER_GREEN_SIZE,8],[gl.RENDERBUFFER_BLUE_SIZE,8],[gl.RENDERBUFFER_ALPHA_SIZE,0]]
-     :[[gl.RENDERBUFFER_DEPTH_SIZE,format.depth],[gl.RENDERBUFFER_STENCIL_SIZE,format.stencil]];
-    for(const[parameter,expected]of sizes)if(this.renderbufferParameter(buffer,parameter)!==expected)throw new Error('Terrain framebuffer precision changed');
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER,attachment,gl.RENDERBUFFER,buffer);
    }
    if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw new Error('Terrain multisample framebuffer unavailable');
+   // A complete framebuffer has the same sample count on every attachment.
+   // Query that bound target and its actual precision. Android WebView reported
+   // no native renderbuffer binding on a query after resize, even after rebinding.
+   if(gl.getParameter(gl.SAMPLES)!==format.samples)throw new Error('Terrain framebuffer sample count changed');
+   const sizes=[[gl.COLOR_ATTACHMENT0,gl.FRAMEBUFFER_ATTACHMENT_RED_SIZE,8],[gl.COLOR_ATTACHMENT0,gl.FRAMEBUFFER_ATTACHMENT_GREEN_SIZE,8],
+    [gl.COLOR_ATTACHMENT0,gl.FRAMEBUFFER_ATTACHMENT_BLUE_SIZE,8],[gl.COLOR_ATTACHMENT0,gl.FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE,0],
+    [gl.DEPTH_ATTACHMENT,gl.FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE,format.depth],
+    [this.displayMask?gl.STENCIL_ATTACHMENT:gl.DEPTH_ATTACHMENT,gl.FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE,format.stencil]];
+   for(const[attachment,parameter,expected]of sizes)if(gl.getFramebufferAttachmentParameter(gl.FRAMEBUFFER,attachment,parameter)!==expected)throw new Error('Terrain framebuffer precision changed');
    target.texture=this.texture(gl.RGB8,width,height,gl.RGB,gl.UNSIGNED_BYTE,null,gl.NEAREST);resources.push([target.texture,'Texture']);
    gl.bindFramebuffer(gl.FRAMEBUFFER,target.resolve);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,target.texture,0);
    if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE||gl.getError()!==gl.NO_ERROR)throw new Error('Terrain resolve framebuffer unavailable');
