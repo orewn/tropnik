@@ -248,7 +248,9 @@
   text-shadow:0 1px #fffefa,1px 0 #fffefa,0 -1px #fffefa,-1px 0 #fffefa,0 0 3px #fffefa;
 }
 .map-attribution-inline .map-credit-lines{min-width:0;flex:1 1 auto}
-.map-attribution-inline .map-source-credit{display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline}
+/* Manrope's glyph bounds extend above its 16px line box. Keep that ink inside
+   each measured source group without changing the shared 12/16 type scale. */
+.map-attribution-inline .map-source-credit{display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline;padding:2px 0}
 .map-attribution-inline .map-source-credit a{min-width:0}
 .map-attribution-inline a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .map-attribution-inline .map-attribution-link{
@@ -256,7 +258,7 @@
   min-width:44px;min-height:44px;padding:0 4px;background:none;border:0;border-radius:0;box-shadow:none;
   font:inherit;color:inherit;
 }
-.map-attribution-inline .map-satellite-credit{padding:0;border:0;border-radius:0;background:none;box-shadow:none;font:inherit}
+.map-attribution-inline .map-satellite-credit{padding:2px 0;border:0;border-radius:0;background:none;box-shadow:none;font:inherit}
 .map-attribution.map-attribution-inline[hidden]{display:none!important}
 .terrain-scene>.map-attribution.map-attribution-inline{max-width:calc(100% - var(--map-left,16px) - var(--map-right,16px))}
 
