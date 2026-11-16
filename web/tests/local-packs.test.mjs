@@ -204,6 +204,7 @@ test('Pages saves verify project-prefixed source URLs with catalogue-relative ha
     ['./map-config.ts',new URL('../lib/map-config.ts',import.meta.url).href],['./trail-overlay.generated.json',new URL('../lib/trail-overlay.generated.json',import.meta.url).href],
     ['./published-route.ts',new URL('../lib/published-route.ts',import.meta.url).href],
     ['./api-transport.ts',new URL('../lib/api-transport.ts',import.meta.url).href],
+    ['./user-facing-errors.ts',new URL('../lib/user-facing-errors.ts',import.meta.url).href],
   ])source=source.replace(JSON.stringify(relative),JSON.stringify(url)).replace("'"+relative+"'",JSON.stringify(url));
   const runtime=await import(moduleURL(source,'local.ts')),env=storage(t,{databaseName:'tropnik-tropa-local-v1'}),requests=[];
   t.mock.method(globalThis,'fetch',async(url,options)=>{requests.push({url,cache:options.cache});return new Response(checkedBytes);});

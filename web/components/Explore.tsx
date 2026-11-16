@@ -130,7 +130,7 @@ export function Explore({initialRegion,initialTrail,initialPublished=[]}:{initia
   if(!parent.regionId){setRegion(undefined);setViewportRegion(undefined);setQuery('');setFilters(DEFAULT_EXPLORE_FILTERS);}
   writeExploreState(parent.regionId,parent.trailId);
  },[region?.id,trail?.id,writeExploreState,requestSession,rememberPanelFocus]);
- const save=useCallback(async(t:Trail)=>{setSaving(t.id);try{await saveReference(t);setSaved(await savedPackIds());setNotice('Карточка сохранена на этом устройстве. Дата проверки и источник сохранены вместе с ней.');}catch(e){setNotice(errorText(e));}finally{setSaving('');}},[]);
+ const save=useCallback(async(t:Trail)=>{setSaving(t.id);try{await saveReference(t);setSaved(await savedPackIds());setNotice('Карточка сохранена на этом устройстве. Дата проверки и источник сохранены вместе с ней.');}catch(e){setNotice(errorText(e, 'storage'));}finally{setSaving('');}},[]);
  const clearQuery=useCallback(()=>setQuery(''),[]);
  const selectRegionFromPanel=useCallback((value:MapRegion)=>{rememberPanelFocus();selectRegion(value);},[rememberPanelFocus,selectRegion]);
  const selectTrailFromPanel=useCallback((value:Trail)=>{rememberPanelFocus();selectTrail(value);},[rememberPanelFocus,selectTrail]);

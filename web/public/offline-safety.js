@@ -62,17 +62,17 @@ export function parseOfflineSafety(localRaw, serverRaw) {
 
 export function saveLocalSafetyPassports(storage, passports) {
   const raw = JSON.stringify(passports);
-  if (raw.length > MAX_SAFETY_STORAGE_LENGTH) throw new RangeError('Паспорта занимают слишком много места для автономного просмотра. Сократите описания или удалите старые паспорта. Изменения не сохранены.');
+  if (raw.length > MAX_SAFETY_STORAGE_LENGTH) throw Object.assign(new RangeError('Паспорта занимают слишком много места для автономного просмотра. Сократите описания или удалите старые паспорта. Изменения не сохранены.'), {code: 'safety_passports_too_large'});
   storage.setItem(LOCAL_SAFETY_KEY, raw);
 }
 
 export function saveOfflineEmergencyCard(storage, card, now = new Date()) {
   const value = serverRecord({schemaVersion:1,savedAt:now.toISOString(),card});
-  if (!value) throw new Error('Сервис вернул неполную аварийную карточку. Обновите сведения перед сохранением.');
+  if (!value) throw Object.assign(new Error('Сервис вернул неполную аварийную карточку. Обновите сведения перед сохранением.'), {code: 'emergency_card_incomplete'});
   const existing = records(storage.getItem(EMERGENCY_CARD_KEY)).map(serverRecord).filter(Boolean);
   const next = [value,...existing.filter(item=>item.card.departureId!==value.card.departureId)].slice(0,20);
   const raw = JSON.stringify(next);
-  if (raw.length>MAX_SAFETY_STORAGE_LENGTH) throw new Error('Карточки занимают слишком много места. Удалите старую локальную копию.');
+  if (raw.length>MAX_SAFETY_STORAGE_LENGTH) throw Object.assign(new Error('Карточки занимают слишком много места. Удалите старую локальную копию.'), {code: 'emergency_cards_too_large'});
   storage.setItem(EMERGENCY_CARD_KEY, raw);
 }
 

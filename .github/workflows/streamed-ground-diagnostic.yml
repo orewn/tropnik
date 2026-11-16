@@ -151,7 +151,7 @@ jobs:
               assert.ok(tileCalls(optimized.main)+tileCalls(optimized.retained)<tileCalls(baseline.main));
             }
           }
-          for(const [cases,expectedFrames] of [[report.cases,46],[report.groundCache.cases,126],[streaming.cases,198]]){
+          for(const [cases,expectedFrames] of [[report.cases,62],[report.groundCache.cases,126],[streaming.cases,198]]){
             assert.equal(cases.reduce((sum,item)=>sum+item.frames.length,0),expectedFrames);
             for(const item of cases)for(const frame of item.frames){
               assert.deepEqual(frame.comparison,{differentPixels:0,maxChannelDelta:0,totalPixels:frame.width*frame.height});

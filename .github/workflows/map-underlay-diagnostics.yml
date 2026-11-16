@@ -42,6 +42,7 @@ jobs:
           import assert from 'node:assert/strict';
           import {createHash} from 'node:crypto';
           import {readFileSync} from 'node:fs';
+          import {MAP_OUTSIDE_COLOR} from './web/public/maps/russia-viewport.js';
           import {assertBrowserEnvironment} from './tools/pages-preview/browser-environment.mjs';
           const underlay = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-underlay-verification.json', 'utf8'));
           assert.equal(underlay.schemaVersion, 1);
@@ -56,7 +57,15 @@ jobs:
             assert.equal(hash, createHash('sha256').update(readFileSync(path)).digest('hex'));
           }
           assertBrowserEnvironment(underlay.environment, process.env.GITHUB_SHA);
-          const covers = {opaque:[true], 'fractional-zoom':[true], 'pan-sequence':[true,true,true,false,true], missing:[false], transparent:[false], rotated:[false], pitched:[false], satellite:[false], overview:[false], zoom12:[true,true,true,false,true], zoom13:[false], zoom18:[false], 'tiny-tile':[false], 'unwrapped-world':[true], 'boundaries-hidden':[true]};
+          const covers = {
+            opaque:[true], 'fractional-zoom':[true], 'pan-sequence':[true,true,true,false,true],
+            missing:[false], transparent:[false], rotated:[false], pitched:[false], satellite:[false],
+            'satellite-opaque-jpeg':[true], 'satellite-jpeg-fractional':[true,true], 'satellite-jpeg-country':[true],
+            'satellite-jpeg-world-copy':[true], 'satellite-jpeg-missing':[false], 'satellite-jpeg-rotated':[false],
+            'satellite-transparent-source':[false], overview:[false], zoom12:[true,true,true,false,true],
+            zoom13:[false], zoom18:[false], 'tiny-tile':[false], 'unwrapped-world':[true], 'boundaries-hidden':[true],
+          };
+          const outsidePaper = MAP_OUTSIDE_COLOR.slice(1).match(/../g).map(value => parseInt(value,16));
           assert.deepEqual(underlay.cases.map(item => item.dpr + '/' + item.name).sort(), [1,2].flatMap(dpr => Object.keys(covers).map(name => dpr + '/' + name)).sort());
           let underlayFrames = 0;
           for (const item of underlay.cases) {
@@ -64,6 +73,18 @@ jobs:
             assert.equal(item.contextAttributes.alpha, false);
             assert.equal(item.contextAttributes.willReadFrequently, item.policy.softwareRaster);
             assert.deepEqual(item.bitmapDimensions, [512,512]);
+            const satellite = item.name === 'satellite' || item.name.startsWith('satellite-');
+            if (item.name === 'satellite-transparent-source') {
+              assert.equal(item.imageryDecodeProof, undefined, 'A transparent source cannot carry the JPEG opacity proof');
+            } else {
+              const proof = item.imageryDecodeProof;
+              assert.equal(proof.mime, 'image/jpeg');
+              assert.deepEqual(proof.signature, [255,216,255]);
+              assert.ok(Number.isSafeInteger(proof.bytes) && proof.bytes > 3);
+              assert.deepEqual(proof.decodedDimensions, [512,512]);
+              assert.equal(proof.rasterAlpha, true);
+              assert.equal(proof.opaquePixels, 512*512);
+            }
             assert.equal(item.priorFrame.kind, 'distinct-opaque-checkerboards');
             assert.equal(item.priorFrame.comparison.differentPixels, 512*384*item.dpr*item.dpr);
             assert.equal(item.priorFrame.comparison.totalPixels, 512*384*item.dpr*item.dpr);
@@ -74,11 +95,12 @@ jobs:
             assert.deepEqual(item.frames.map(frame => frame.actualCoverage), covers[item.name]);
             assert.deepEqual(item.frames.map(frame => frame.expectedCoverage), covers[item.name]);
             if (item.name === 'tiny-tile') assert.ok(item.tileDeviceSpan <= 1);
-            const negatives = item.name === 'opaque' ? ['remove-route','remove-selectedBoundary','remove-mask'] : ['missing','transparent'].includes(item.name) ? ['force-unsafe-cover'] : [];
+            const negatives = item.name === 'opaque' ? ['remove-route','remove-selectedBoundary','remove-mask'] : ['missing','transparent'].includes(item.name) ? ['force-unsafe-cover'] : ['satellite-jpeg-missing','satellite-transparent-source'].includes(item.name) ? ['force-unsafe-satellite-cover'] : [];
             assert.deepEqual(item.negativeControls.map(control => control.name), negatives);
             for (const control of item.negativeControls) assert.ok(control.differentPixels > 0);
-            for (const frame of item.frames) {
+            for (const [frameIndex,frame] of item.frames.entries()) {
               underlayFrames++;
+              assert.equal(frame.index, frameIndex);
               assert.deepEqual([frame.width,frame.height], [512*item.dpr,384*item.dpr]);
               assert.deepEqual(frame.comparison, {differentPixels:0,maxChannelDelta:0,totalPixels:frame.width*frame.height});
               assert.match(frame.baselinePixelSHA256, /^[a-f0-9]{64}$/);
@@ -91,7 +113,28 @@ jobs:
               for (const key of ['mask','selectedArea','detail','relief','imagery']) assert.equal(optimized[key], baseline[key]);
               assert.equal(baseline.clear, 1);
               assert.equal(optimized.clear, frame.actualCoverage ? 0 : 1);
-              assert.equal(optimized.mask, 1);
+              assert.equal(optimized.mask, satellite ? 0 : 1);
+              if (satellite) {
+                assert.equal(baseline.selectedArea, 0);
+                assert.equal(optimized.selectedArea, 0);
+                assert.ok(optimized.imagery > 0);
+                assert.equal(optimized.relief, 0);
+              }
+              const expectsPhotoWitnesses = satellite && frameIndex === 0 && !['satellite-jpeg-missing','satellite-jpeg-rotated','satellite-transparent-source'].includes(item.name);
+              if (expectsPhotoWitnesses) {
+                assert.deepEqual(frame.offset, {x:0,y:0});
+                const coordinates = [];
+                for (const [x,y] of [[0,25],[-248,0],[15,5],[-248,-106]]) for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++) {
+                  coordinates.push([Math.floor((256+x)*item.dpr)+dx,Math.floor((192+y)*item.dpr)+dy]);
+                }
+                assert.deepEqual(frame.satellitePhotoWitnesses.map(witness => [witness.x,witness.y]), coordinates);
+                for (const witness of frame.satellitePhotoWitnesses) {
+                  assert.ok(Array.isArray(witness.actual) && witness.actual.length === 4 && witness.actual.every(value => Number.isInteger(value) && value >= 0 && value <= 255));
+                  assert.deepEqual(witness.actual, witness.source);
+                  assert.equal(witness.actual[3], 255);
+                  assert.ok(outsidePaper.some((value,index) => witness.source[index] !== value), 'A photo witness cannot equal the outside paper');
+                }
+              } else assert.equal(frame.satellitePhotoWitnesses, undefined);
               assert.equal(optimized.proofCalls, 1);
               if (frame.actualCoverage) assert.ok(item.tileDeviceSpan > 1);
               assert.deepEqual(frame.captures.map(capture => capture.phase), ['baseline','optimized']);
@@ -105,7 +148,7 @@ jobs:
               }
             }
           }
-          assert.equal(underlayFrames, 46);
+          assert.equal(underlayFrames, 62);
           NODE
       - name: Preserve the actual pixel proof
         if: always()

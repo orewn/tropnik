@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "scope": "android-pre-instrumentation-transport-failure",
+  "recordedAt": "2026-11-16T03:26:38.351379+00:00",
+  "sourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+  "workflowRunId": 43797407890,
+  "workflowRunURL": "https://github.com/orewn/tropnik/actions/runs/43797407890",
+  "event": "push",
+  "runAttempt": 1,
+  "buildJob": {
+    "id": 133069247877,
+    "conclusion": "success"
+  },
+  "deviceJob": {
+    "id": 133070490760,
+    "conclusion": "failure",
+    "failedStep": "Install and test the exact optimized universal artifact",
+    "phase": "installed APK byte readback, before required instrumentation"
+  },
+  "releaseRequested": false,
+  "releaseRequestedTrace": "2026-11-16T03:18:51.3982755Z release_requested=false",
+  "publication": "skipped",
+  "publicVerification": "skipped",
+  "publicReleaseLookup": {
+    "tag": "v0.4.34-preview",
+    "status": 404,
+    "observedAt": "2026-11-16T03:26:38.351991+00:00"
+  },
+  "instrumentation": {
+    "started": false,
+    "executedScenarioCount": 0,
+    "scenarioOutcomes": [],
+    "productTestFailureCount": null,
+    "installedArtifactBytesVerified": false,
+    "missingEvidenceFiles": [
+      "installed-apks.json",
+      "raw-instrumentation.log",
+      "device-result.json",
+      "tested-apks.sha256"
+    ],
+    "note": "Zero scenarios executed. This is not 10/11 or 0/11 failed application tests. No new renderer quality result exists for this run."
+  },
+  "observedFailure": {
+    "operation": "adb pull of installed universal base.apk",
+    "exitCode": 1,
+    "workflowExceptionTime": "2026-11-16T03:24:09.043Z",
+    "exceptionExcerpt": [
+      "2026-11-16T03:24:09.0429180Z Traceback (most recent call last):",
+      "2026-11-16T03:24:09.0431166Z     result = capture_installed(args.directory, args.root, args.sdk / \"platform-tools/adb\", args.serial, args.output)",
+      "2026-11-16T03:24:09.0432111Z   File \"/home/runner/work/tropnik/tropnik/tools/android-build/preview_artifacts.py\", line 257, in capture_installed",
+      "2026-11-16T03:24:09.0454061Z subprocess.CalledProcessError: Command '['/usr/local/lib/android/sdk/platform-tools/adb', '-s', 'emulator-5554', 'pull', '/data/app/~~St-zbW0yVzc7En6WovNbZw==/ru.tropa.app.preview-Th446DPcUTe34-laugVVaQ==/base.apk', '/tmp/tropnik-installed-ysploayf/tropnik-preview.apk']' returned non-zero exit status 1."
+    ],
+    "adbStderrAvailable": false,
+    "reasonStderrUnavailable": "capture_installed uses capture_output=True and does not report the failed subprocess stderr",
+    "transportDropTime": "2026-11-16T03:24:08.787Z",
+    "transportDestroyedTime": "2026-11-16T03:24:08.788Z",
+    "newTransportThreadsTime": "2026-11-16T03:24:09.332Z",
+    "transportTrace": [
+      {
+        "line": 8113,
+        "text": "11-16 03:24:08.787   445   537 I adbd    : host-17: connection terminated: write failed"
+      },
+      {
+        "line": 8114,
+        "text": "11-16 03:24:08.787   445   445 I adbd    : host-17: offline"
+      },
+      {
+        "line": 8115,
+        "text": "11-16 03:24:08.788   445   445 I adbd    : destroying transport host-17"
+      },
+      {
+        "line": 8116,
+        "text": "11-16 03:24:08.788   445   445 I adbd    : BlockingConnectionAdapter(host-17): stopping"
+      },
+      {
+        "line": 8117,
+        "text": "11-16 03:24:08.788   445   536 I adbd    : host-17: read failed: Success"
+      },
+      {
+        "line": 8118,
+        "text": "11-16 03:24:08.788   445   445 I adbd    : BlockingConnectionAdapter(host-17): stopped"
+      },
+      {
+        "line": 8119,
+        "text": "11-16 03:24:08.788   445   445 I adbd    : BlockingConnectionAdapter(host-17): destructing"
+      },
+      {
+        "line": 8120,
+        "text": "11-16 03:24:08.788   445   445 I adbd    : BlockingConnectionAdapter(host-17): already stopped"
+      },
+      {
+        "line": 8506,
+        "text": "11-16 03:24:09.332   445  3044 I adbd    : host-18: read thread spawning"
+      },
+      {
+        "line": 8507,
+        "text": "11-16 03:24:09.333   445   445 I adbd    : host-18: already offline"
+      },
+      {
+        "line": 8509,
+        "text": "11-16 03:24:09.333   445  3045 I adbd    : host-18: write thread spawning"
+      }
+    ],
+    "inferenceBoundary": "The adb transport failure is directly recorded during readback. The underlying cause of that transport break is not established. Required app instrumentation never started, so this does not establish a renderer regression or fix."
+  },
+  "buildArtifactAPK": {
+    "name": "tropnik-preview.apk",
+    "sizeBytes": 69231946,
+    "sha256": "dc8939fb45973ebd36e28026d8c413baf24f1a5576695c5a7cd9ace8343b3210",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "scope": "Build verifier result only; installed bytes were not verified in the failed device job."
+  },
+  "sharedRuntime": {
+    "sourceInputsSha256": "a42e8753de5e93999b8d98e038666225ad5ab5ea41f604ef8b4d18f18144e421",
+    "manifestSha256": "9b3d7eec2be92682150c905a05fba41391e281dd5967082361b3ae2ff8ec0250"
+  },
+  "deviceArtifact": {
+    "id": 14194594997,
+    "sizeBytes": 1495506,
+    "sha256": "57728be471c5ecd3b542a836b657a31b66193e18da4369864030d9c43510241b",
+    "downloadedArchiveSha256Verified": true,
+    "files": [
+      {
+        "path": "acceleration.txt",
+        "sizeBytes": 57,
+        "sha256": "4484bdd6d5e16c817d4dfc5cda05334055c86428c861c1d22e8cf67ce42fee49"
+      },
+      {
+        "path": "emulator-version.txt",
+        "sizeBytes": 655,
+        "sha256": "1a523c9091747b7bf48a755396278f2eca455352b40c281336f1c3e075607b54"
+      },
+      {
+        "path": "emulator.log",
+        "sizeBytes": 9867,
+        "sha256": "d377e924755a7b1fb374f3155f5855e08e51c49cf282a2825c18460986ffbb78"
+      },
+      {
+        "path": "final-screen.png",
+        "sizeBytes": 1312110,
+        "sha256": "ca3ce5b3ce004309f81f6287d250a3ea7402041379a068d47dd2d2851902b11d"
+      },
+      {
+        "path": "graphics-driver.txt",
+        "sizeBytes": 24560,
+        "sha256": "debe362448c48d796166b90637273597d904b0224510bc818d0bdfb4e4107ce8"
+      },
+      {
+        "path": "logcat.txt",
+        "sizeBytes": 1157942,
+        "sha256": "f2025822c1a22df4dd4e8537efec356d9b792b6fc4d4cf3ba86fd5796ede6e77"
+      },
+      {
+        "path": "system-image.properties",
+        "sizeBytes": 357,
+        "sha256": "809a6f5103c048607257f03f18e22dd740137e9009c99d4a496de846b6ee3412"
+      },
+      {
+        "path": "test-screenshots.tar",
+        "sizeBytes": 46,
+        "sha256": "c42aa6e0b0271ae1945db9ffd14797d4e0f23c0cbc0d90e63ec8fb41dc0f7fe2"
+      },
+      {
+        "path": "webview-version.txt",
+        "sizeBytes": 855,
+        "sha256": "9e33c80ae6aacf2ac72052013cf84b65ac066c0d9d0a25704b3cb9e3ca01329d"
+      }
+    ]
+  },
+  "rawLogs": [
+    {
+      "path": "dca8f32-android-build-job.log",
+      "sizeBytes": 148193,
+      "sha256": "a26dc056d2cad3664fcf39055d68596471ab5245f9a59f4cac52075cda7a2f21"
+    },
+    {
+      "path": "dca8f32-android-device-job.log",
+      "sizeBytes": 53019,
+      "sha256": "0dbcc00ca74ff30e1b41f17bc1f2ee7ffd41bc8fc4976200ee07d00f7f9fbab2"
+    }
+  ],
+  "rerunStarted": false,
+  "gatesChanged": false
+}

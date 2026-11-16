@@ -1,0 +1,498 @@
+{
+  "schemaVersion": 1,
+  "scope": "exact unpublished Android release candidate failure evidence",
+  "collectedAtUtc": "2026-11-16T03:12:01Z",
+  "sourceCommit": "45c3974ad37ee5d312f87179c16633b88e62a033",
+  "workflowRunId": 43794472635,
+  "workflowEvent": "workflow_dispatch",
+  "runUrl": "https://github.com/orewn/tropnik/actions/runs/43794472635",
+  "deviceJobId": 133063003869,
+  "deviceJobUrl": "https://github.com/orewn/tropnik/actions/runs/43794472635/job/133063003869",
+  "version": "0.4.34-preview",
+  "versionCode": 17,
+  "artifacts": {
+    "device": {
+      "id": 14194700370,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "bytes": 7901600,
+      "sha256": "e0a1461d98f67715a089701f2c7fb178bd115fd0b1605aa0aa463f03e7c2062b",
+      "downloadedArchive": {
+        "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1-instrumentation.zip",
+        "bytes": 7901600,
+        "sha256": "e0a1461d98f67715a089701f2c7fb178bd115fd0b1605aa0aa463f03e7c2062b"
+      },
+      "archiveDigestVerified": true
+    },
+    "build": {
+      "id": 14194500708,
+      "name": "tropnik-android-preview-1",
+      "bytes": 111861970,
+      "sha256": "d501e9d98f6a153d5cab9c1f871b7fa77e5e4189b45a304202126f19a717c5be",
+      "digestSource": "GitHub artifact metadata; archive not downloaded by this audit"
+    }
+  },
+  "candidateApk": {
+    "artifactName": "tropnik-preview.apk",
+    "bytes": 69231946,
+    "sha256": "d786eaabbef1a3b1a0a91a3ce087821c03b7dba986c84a93d3dec34223bac97d",
+    "publiclyReleased": false
+  },
+  "buildReceiptSha256": "5d36afebb82d2892145d1b5796580205b6db64947843ba75aa7d12714236575d",
+  "result": {
+    "status": "failed",
+    "tests": 11,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "deviceExecutionVerified": false,
+    "installedArtifactBytesVerified": true,
+    "releasePayloadDeviceVerified": false,
+    "testedArchitecture": "x86_64",
+    "physicalDeviceVerified": false
+  },
+  "caseOutcomes": [
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+      "statusCode": -2,
+      "failed": true,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    }
+  ],
+  "failure": {
+    "case": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+    "outerAssertion": "No visible terrain pixels in the central WebView rectangle",
+    "actualPixelCheckPassed": true,
+    "nestedAssertion": "The emulator must retain WebGL2",
+    "expected": "webgl2",
+    "actual": "canvas2d",
+    "testSourceLocations": [
+      "LocalExperienceTest.kt:1164",
+      "LocalExperienceTest.kt:1259",
+      "LocalExperienceTest.kt:1494",
+      "LocalExperienceTest.kt:1319"
+    ],
+    "firstGlTrace": {
+      "line": 43119,
+      "text": "11-16 03:03:09.586  2439  3160 E emuglGLESv2_enc: hardware/google/gfxstream/guest/GLESv2_enc/GL2Encoder.cpp:s_glGetRenderbufferParameteriv:6744 GL error 0x502 condition [0 == ctx->m_state->boundRenderbuffer()]"
+    },
+    "corroboratingGlTraces": [
+      {
+        "line": 43120,
+        "text": "11-16 03:03:09.586  2439  3160 E chromium: [ERROR:gles2_cmd_decoder_autogen.h(1779)] [.WebGL-0x20fc00af6900]GL ERROR :GL_INVALID_OPERATION : GetRenderbufferParameteriv: "
+      },
+      {
+        "line": 43137,
+        "text": "11-16 03:03:09.623  2439  2439 I chromium: [INFO:CONSOLE(0)] \"[.WebGL-0x20fc00af6900]GL ERROR :GL_INVALID_OPERATION : GetRenderbufferParameteriv: \", source: https://appassets.androidplatform.net/landscape/ (0)"
+      }
+    ],
+    "fallback": {
+      "stage": "render",
+      "reason": "Terrain framebuffer sample count changed"
+    },
+    "interpretation": "Observed MSAA sample-count query failure after orientation change while no renderbuffer was bound, followed by application Canvas2D fallback. The outer pixel-error label does not describe the nested failure. Source-level cause remains for renderer investigation; this report does not classify the event as an environment flake."
+  },
+  "rendererBeforeAfter": {
+    "scene-portrait-frame.json": {
+      "passed": true,
+      "orientation": 1,
+      "pixels": {
+        "passed": true,
+        "roi": [
+          216,
+          926,
+          864,
+          1767
+        ],
+        "sampleCount": 3072,
+        "distinctQuantizedColors": 76,
+        "dominantFraction": 0.5670572916666666,
+        "variedTiles": 8,
+        "tileColorCounts": [
+          42,
+          39,
+          11,
+          38,
+          45,
+          24,
+          15,
+          6,
+          1
+        ],
+        "thresholds": {
+          "minimumColors": 12,
+          "maximumDominantFractionExclusive": 0.95,
+          "minimumVariedTiles": 4
+        }
+      },
+      "frame": {
+        "frameNumber": 2,
+        "renderer": "webgl2",
+        "quality": "full",
+        "triangles": 131072,
+        "meshStride": 2,
+        "sourceVertices": 263169,
+        "pixelRatio": 2,
+        "presentation": "deferred-msaa",
+        "backingWidth": 824,
+        "backingHeight": 1456,
+        "ms": 3.5,
+        "view": {
+          "yaw": -0.48,
+          "pitch": 0.72,
+          "zoom": 1,
+          "offset": [
+            0,
+            0
+          ]
+        },
+        "graphicsFallback": null
+      },
+      "backend": "webgl2"
+    },
+    "scene-zoom-frame.json": {
+      "passed": true,
+      "orientation": 1,
+      "pixels": {
+        "passed": true,
+        "roi": [
+          216,
+          926,
+          864,
+          1767
+        ],
+        "sampleCount": 3072,
+        "distinctQuantizedColors": 63,
+        "dominantFraction": 0.6559244791666666,
+        "variedTiles": 7,
+        "tileColorCounts": [
+          33,
+          36,
+          9,
+          42,
+          39,
+          26,
+          5,
+          1,
+          1
+        ],
+        "thresholds": {
+          "minimumColors": 12,
+          "maximumDominantFractionExclusive": 0.95,
+          "minimumVariedTiles": 4
+        }
+      },
+      "frame": {
+        "frameNumber": 3,
+        "renderer": "webgl2",
+        "quality": "full",
+        "triangles": 131072,
+        "meshStride": 2,
+        "sourceVertices": 263169,
+        "pixelRatio": 2,
+        "presentation": "deferred-msaa",
+        "backingWidth": 824,
+        "backingHeight": 1456,
+        "ms": 1.1999999999825377,
+        "view": {
+          "yaw": -0.48,
+          "pitch": 0.72,
+          "zoom": 1.2,
+          "offset": [
+            0,
+            0
+          ]
+        },
+        "graphicsFallback": null
+      },
+      "backend": "webgl2"
+    },
+    "scene-landscape-frame.json": {
+      "passed": false,
+      "orientation": 2,
+      "pixels": {
+        "passed": true,
+        "roi": [
+          582,
+          470,
+          1945,
+          834
+        ],
+        "sampleCount": 3072,
+        "distinctQuantizedColors": 65,
+        "dominantFraction": 0.7405598958333334,
+        "variedTiles": 6,
+        "tileColorCounts": [
+          13,
+          42,
+          5,
+          1,
+          34,
+          13,
+          1,
+          21,
+          1
+        ],
+        "thresholds": {
+          "minimumColors": 12,
+          "maximumDominantFractionExclusive": 0.95,
+          "minimumVariedTiles": 4
+        }
+      },
+      "frame": {
+        "frameNumber": 4,
+        "renderer": "canvas2d",
+        "quality": "full",
+        "triangles": 32768,
+        "meshStride": 4,
+        "sourceVertices": 263169,
+        "pixelRatio": 1.5,
+        "presentation": "canvas2d",
+        "backingWidth": 1299,
+        "backingHeight": 474,
+        "ms": 345.79999999998836,
+        "view": {
+          "yaw": -0.48,
+          "pitch": 0.72,
+          "zoom": 1.2,
+          "offset": [
+            0,
+            0
+          ]
+        },
+        "graphicsFallback": {
+          "stage": "render",
+          "reason": "Terrain framebuffer sample count changed"
+        }
+      },
+      "backend": "canvas2d"
+    }
+  },
+  "previousSuccessfulDeviceEvidence": {
+    "sourceCommit": "de64392e2cce14f265aec5d982a7ccd26473f8e1",
+    "workflowRunId": 43784169968,
+    "artifactId": 14189932397,
+    "artifactSha256": "6dbc8f6ad244ebbf1e12c6d3457e27e7a75fd2d0b169246b7c9c396e8a44874f",
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "environmentComparison": {
+    "files": [
+      {
+        "file": "emulator-version.txt",
+        "byteIdentical": true,
+        "current": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/emulator-version.txt",
+          "bytes": 655,
+          "sha256": "1a523c9091747b7bf48a755396278f2eca455352b40c281336f1c3e075607b54"
+        },
+        "previous": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-de64392/emulator-version.txt",
+          "bytes": 655,
+          "sha256": "1a523c9091747b7bf48a755396278f2eca455352b40c281336f1c3e075607b54"
+        }
+      },
+      {
+        "file": "system-image.properties",
+        "byteIdentical": true,
+        "current": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/system-image.properties",
+          "bytes": 357,
+          "sha256": "809a6f5103c048607257f03f18e22dd740137e9009c99d4a496de846b6ee3412"
+        },
+        "previous": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-de64392/system-image.properties",
+          "bytes": 357,
+          "sha256": "809a6f5103c048607257f03f18e22dd740137e9009c99d4a496de846b6ee3412"
+        }
+      },
+      {
+        "file": "webview-version.txt",
+        "byteIdentical": true,
+        "current": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/webview-version.txt",
+          "bytes": 855,
+          "sha256": "9e33c80ae6aacf2ac72052013cf84b65ac066c0d9d0a25704b3cb9e3ca01329d"
+        },
+        "previous": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-de64392/webview-version.txt",
+          "bytes": 855,
+          "sha256": "9e33c80ae6aacf2ac72052013cf84b65ac066c0d9d0a25704b3cb9e3ca01329d"
+        }
+      },
+      {
+        "file": "acceleration.txt",
+        "byteIdentical": true,
+        "current": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/acceleration.txt",
+          "bytes": 57,
+          "sha256": "4484bdd6d5e16c817d4dfc5cda05334055c86428c861c1d22e8cf67ce42fee49"
+        },
+        "previous": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-de64392/acceleration.txt",
+          "bytes": 57,
+          "sha256": "4484bdd6d5e16c817d4dfc5cda05334055c86428c861c1d22e8cf67ce42fee49"
+        }
+      }
+    ],
+    "currentGles": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
+    "previousGles": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
+    "glesLineIdentical": true,
+    "scope": "Equality of recorded emulator/system-image/WebView/KVM files and GLES identification. Host runner hardware equivalence is not asserted."
+  },
+  "publication": {
+    "publishJobId": 133064310722,
+    "publishConclusion": "skipped",
+    "publicVerificationJobId": 133064310141,
+    "publicVerificationConclusion": "skipped",
+    "releaseLookup": {
+      "url": "https://api.github.com/repos/orewn/tropnik/releases/tags/v0.4.34-preview",
+      "checkedAtUtc": "2026-11-16T03:12:01Z",
+      "httpStatus": 404,
+      "message": "Not Found"
+    },
+    "generatedUniversalWebsiteManifestAvailable": false,
+    "publicCertificateComparisonAvailable": false,
+    "publicWebsiteUnchangedByThisFailure": true
+  },
+  "evidenceFiles": [
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/device-result.json",
+      "bytes": 4421,
+      "sha256": "656ade70d4eac9f42e617ac66ed92f1ed4efe7cec710da76f1d0b156a8a8ea81"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/installed-apks.json",
+      "bytes": 581,
+      "sha256": "1628823d671217cfb7b6f59d6fe29f70a48a8cc3c0b0fe583bb231ab6f4ae213"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/raw-instrumentation.log",
+      "bytes": 11043,
+      "sha256": "89345a034aa10a52e52b5aeadb37228b0981541f3944bcc9880d062f8ece89c1"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/TEST-LocalExperienceTest.xml",
+      "bytes": 1595,
+      "sha256": "3798e6a19779b8a177cadc083ffb28581f2e9be25d1f84f4c1bd9d817e009af8"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/logcat.txt",
+      "bytes": 6712837,
+      "sha256": "013231e7cb98b1989c00238a64e0fd18041cdeaa2abf05178d0e648369df6e29"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/graphics-driver.txt",
+      "bytes": 23975,
+      "sha256": "4b8b0aef30ba6e72d47fccc60f0868f2cc1210d1e65a1a93ed05e9dac2c6ae35"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/screenshots/qa/scene-portrait-frame.json",
+      "bytes": 4933,
+      "sha256": "39fcdb98f96dccf7726adf09bab1a4ac8e98db501d1a55f7fe55c2f4e1a9278a"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/screenshots/qa/scene-zoom-frame.json",
+      "bytes": 4948,
+      "sha256": "54636bf880c3b8daded94f8aff943f2aeb0c755c04fb8ad849e06ce9a0ed7362"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/screenshots/qa/scene-landscape-frame.json",
+      "bytes": 5199,
+      "sha256": "fffdf7ef90545943d97b9947a15d05e4830037572907b1c2ce01a59ba1fce488"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/screenshots/qa/scene-landscape-wait-failed.json",
+      "bytes": 5036,
+      "sha256": "924c639b42d0e999380543f470570fea8ac49bc3dcede9b732f51c52e7f20985"
+    },
+    {
+      "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-0.4.34-attempt1/screenshots/qa/scene-landscape-frame-failed.png",
+      "bytes": 229253,
+      "sha256": "9ff7fdd1679cee680089cea4894dab052a981a705e5b9a6a1ffa910ad1a2a73f"
+    }
+  ]
+}

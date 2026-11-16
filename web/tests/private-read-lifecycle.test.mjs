@@ -119,7 +119,9 @@ test('conversation and account changes abort old reads and late private results 
   assert.doesNotMatch(view.text(), /OLD PRIVATE BODY/);
   view.render({kind: 'departures', id: 'trip-b', user: {id: 'person-b'}});
   assert.equal(network.calls[1].signal.aborted, true); assert.equal(network.calls.length, 3);
+  await view.settle(); const currentAccountView = view.text();
   network.calls[1].finish(new ApiError(403, 'denied', 'OLD ACCOUNT ERROR')); await view.settle();
+  assert.equal(view.text(), currentAccountView, 'a stale account error cannot change the current UI, including its translated message');
   assert.doesNotMatch(view.text(), /OLD ACCOUNT ERROR/);
   network.calls[2].finish(null, [{id: 'current', body: 'CURRENT PRIVATE BODY', createdAt: '2026-11-13T00:00:00Z', visibility: 'visible'}]); await view.settle();
   assert.match(view.text(), /CURRENT PRIVATE BODY/); assert.doesNotMatch(view.text(), /OLD PRIVATE BODY|OLD ACCOUNT ERROR/);
@@ -136,6 +138,8 @@ test('a guide review error arriving after selection changes cannot replace the c
   buttons()[0].props.onClick(); view.render(); buttons()[1].props.onClick(); view.render();
   assert.equal(pending[0].signal.aborted, true);
   pending[1].resolve([{id: 'review-b', body: 'CURRENT GUIDE REVIEW', rating: 5, createdAt: '2026-11-13T00:00:00Z'}]); await view.settle();
+  const currentGuideView = view.text();
   pending[0].reject(new ApiError(502, 'invalid_response', 'STALE GUIDE ERROR')); await view.settle();
+  assert.equal(view.text(), currentGuideView, 'a stale guide error cannot change current reviews, including its translated message');
   assert.match(view.text(), /CURRENT GUIDE REVIEW/); assert.doesNotMatch(view.text(), /STALE GUIDE ERROR/);
 });

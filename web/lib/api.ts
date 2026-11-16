@@ -1,3 +1,4 @@
+import {apiErrorText, userErrorText, type UserErrorContext} from './user-facing-errors.ts';
 import type {Envelope, User} from './contract';
 import {API_TRANSPORT_LIMITS, apiResponseBytes, BodyLimitError, readBoundedJSON, requestDeadline, type ResponseByteBudget} from './api-transport.ts';
 
@@ -85,4 +86,4 @@ export async function serviceStatus(signal?: AbortSignal): Promise<boolean> {
   } finally { deadline.dispose(); }
 }
 
-export const errorText = (error: unknown) => error instanceof ApiError ? error.message : error instanceof Error && error.name !== 'TypeError' ? error.message : 'Не удалось связаться с сервером. Проверьте подключение и повторите попытку.';
+export const errorText = (error: unknown, context: UserErrorContext = 'action') => error instanceof ApiError ? apiErrorText(error.code, error.status) : userErrorText(error, context);

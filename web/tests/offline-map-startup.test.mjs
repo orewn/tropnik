@@ -30,6 +30,20 @@ class Element{
 function routeCoordinates(data){
  const points=[];const walk=value=>{if(Array.isArray(value)){if(typeof value[0]==='number')points.push(value);else value.forEach(walk);}else if(value&&typeof value==='object')walk(value.features??value.geometry??value.geometries??value.coordinates);};walk(data);return points;
 }
+test('offline source credit appears after the first painted frame and survives later loading without a collapse timer',()=>{
+ const map=new Element(),credits=new Element(),buttons=[{disabled:true},{disabled:true}],classes=[];
+ credits.hidden=true;map.classList={toggle:(name,value)=>classes.push({name,value})};
+ const visibility=source.slice(source.indexOf('const byId='),source.indexOf('\nfunction coordinates('));
+ const {mapVisible}=vm.runInNewContext(visibility+'\n({mapVisible})',{
+  document:{getElementById:id=>({map,'map-credits':credits})[id],querySelectorAll:selector=>{assert.equal(selector,'.map-tools button');return buttons;}},
+  window:{matchMedia:()=>({matches:false})},setTimeout:()=>assert.fail('Compact source credit must never schedule an automatic collapse'),
+ });
+ mapVisible(false);assert.equal(credits.hidden,true);assert.ok(buttons.every(button=>button.disabled));
+ mapVisible(true);assert.equal(credits.hidden,false);assert.ok(buttons.every(button=>!button.disabled));
+ mapVisible(false);assert.equal(credits.hidden,false);assert.ok(buttons.every(button=>button.disabled));
+ mapVisible(true);mapVisible(true);assert.equal(credits.hidden,false);
+ assert.equal(map.attributes['aria-busy'],'false');assert.deepEqual(classes,[false,true,false,true].map(visible=>({name:'map-is-loading',value:!visible})));
+});
 async function launch({importFails=false,startupError='',online=false,coarse=false,verify=verifyReviewedCoastalRoute,base='/'}={}){
  const calls={imports:[],visible:[],status:[],fit:[],routes:[],markers:[],cameras:[],layers:[],modes:[],pitches:[],floors:[],padding:[],obstacles:[],destroy:0,observerStops:0,coverageStops:0};
  const wrapper=new Element(),element=new Element();wrapper.appendChild(element);

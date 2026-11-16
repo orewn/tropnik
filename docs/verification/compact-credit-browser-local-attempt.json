@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-browser-startup-failure",
+  "attemptStartedAt": "2026-11-16T04:31:49.954Z",
+  "sourceScope": "Uncommitted working tree at attempt time. The original input hashes below are retained; this is not an exact-commit acceptance receipt.",
+  "baseCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+  "status": "blocked-before-cdp",
+  "releaseEligible": false,
+  "productScenariosExecuted": 0,
+  "productTestFailureCount": null,
+  "nativeFramesCaptured": 0,
+  "scope": "The real attribution JSX, full production CSS and bundled Cyrillic font bytes passed the bundle subtest. Chromium aborted before opening the fixture because the local environment rejected its Unix socket. Browser geometry, native input and screenshots remain pending the unchanged CI browser environment.",
+  "command": "node --test tools/pages-preview/tests/browser-map-attribution.browser.mjs",
+  "log": {
+    "bytes": 916,
+    "sha256": "8cfb517b3afdc67aca199268f869ef8b5fdc355a885028342dbcb312a10a988e",
+    "text": "✔ attribution fixture bundles the actual interactive component, complete CSS and Cyrillic font bytes (469.151575ms)\n✖ satellite attribution retains exact geometry over loading cycles with all visible credits and 44px controls (365.957752ms)\nℹ tests 2\nℹ suites 0\nℹ pass 1\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1647.388421\n\n✖ failing tests:\n\ntest at tools/pages-preview/tests/browser-map-attribution.browser.mjs:88:1\n✖ satellite attribution retains exact geometry over loading cycles with all visible credits and 44px controls (365.957752ms)\n  Error: Chromium exited before the operation completed (code null, signal SIGABRT)\n      at ChildProcess.onExit (file:///workspace/scratch/c44c63f212a5/tropinych/tools/pages-preview/browser-startup.mjs:31:14)\n      at ChildProcess.emit (node:events:514:28)\n      at ChildProcess._handle.onexit (node:internal/child_process:324:12)\n"
+  },
+  "originalReport": {
+    "schemaVersion": 2,
+    "verified": false,
+    "phase": "browser-startup",
+    "sourceCommit": null,
+    "evidence": "production-react-compact-credit-and-css-browser-geometry",
+    "sources": {
+      "layoutSHA256": "79995d193cf8a07d35485a6f995d6311e08750e6c3a908bf4ba29c853d622b76",
+      "fixtureSHA256": "cf0f0ccaf0c94daa706016e08309e60092a299f0529b13146f03bd8e87296ce9",
+      "cssFiles": [
+        {
+          "path": "app/globals.css",
+          "sha256": "1f240196bc1195bb1bea3287a9a9fd1069a95a016ad1a16bde631e885c26cfae"
+        },
+        {
+          "path": "app/tropnik-system.css",
+          "sha256": "36c73db4cda7be4fdcdb700bafbb72458beeb140a5c7197515faf941a70a58e6"
+        },
+        {
+          "path": "app/gotham.css",
+          "sha256": "739150d3bf718fc98132efe987a0f649e9b3c074d4e5465adc01c1bc1578bdb9"
+        },
+        {
+          "path": "app/terrain.css",
+          "sha256": "a022792e36394e73074da74975125bd7bc711b4e074a45011d9e7874810cd2a2"
+        },
+        {
+          "path": "app/map-design.css",
+          "sha256": "e64c515a830e85df3c1debb5646bf7f81a4a734def1202f186d91114aa112e61"
+        },
+        {
+          "path": "app/place-stories.css",
+          "sha256": "d061783615c3612fb8ae417284d7f4001b8a7a36573ae5c3ad1a2a911a03496b"
+        },
+        {
+          "path": "app/event-categories.css",
+          "sha256": "300e3dcfc3edf243c5d61847d709021d152c8e37c774e1a7d40426fd9cd3095d"
+        },
+        {
+          "path": "app/map-polish.css",
+          "sha256": "1bb41a523f155300f893321917b9adf077764e06f9ef6a93459443c349227360"
+        },
+        {
+          "path": "app/interface-refresh.css",
+          "sha256": "54851df88e8ee5234eadcae1285f06d7fc8e4a401c9425a1f220c7badc02ae4a"
+        },
+        {
+          "path": "app/map-ui-release.css",
+          "sha256": "8a15932b58ff7026e27fee624fb1b8e1ff846db25011822dd7dfe4b3626ed097"
+        },
+        {
+          "path": "app/seo-content.css",
+          "sha256": "cea7d2bdf8f36256c486a7f32a85949544f8cde38a479293d545f9b6dc864297"
+        },
+        {
+          "path": "app/final-polish.css",
+          "sha256": "ed4956c63b3ff7deb51e0c5caa94fa1afd23abfd2fcce5001b2523ae33901e5a"
+        },
+        {
+          "path": "app/map-sheet.css",
+          "sha256": "62a1aba65741f540c93372d8d8a0582c9d456cfc85bf690896c5fb9f1e0d0d78"
+        },
+        {
+          "path": "app/map-detail.css",
+          "sha256": "5166592719465282e590f6871730b0f1d58d0b4ec8480b758cea8988782d5480"
+        },
+        {
+          "path": "app/map-direction-marker.css",
+          "sha256": "c14012655af7a51cb36c556de32604bab78360e0d68153a237edee237dc1e71e"
+        },
+        {
+          "path": "app/custom-map.css",
+          "sha256": "f018c1cd2c8461d45e527d09eed5c93953d056b513afc482b62ca93893b79a3e"
+        },
+        {
+          "path": "@fontsource/manrope/cyrillic-400.css",
+          "sha256": "6ff7908e3f59c2c96c935e2236d3cb1b3bfa157763d85bf530f8b227dc3d8678"
+        },
+        {
+          "path": "@fontsource/manrope/cyrillic-500.css",
+          "sha256": "3b759c08be74805f5b051295afabaf1a7d5c368770fc38903b718ea09038b17c"
+        },
+        {
+          "path": "@fontsource/manrope/cyrillic-600.css",
+          "sha256": "02444808e22b9b998ce1d6e9040234b6f7ab7d604b740da61cc2c4aa83d25d3f"
+        },
+        {
+          "path": "@fontsource/manrope/cyrillic-700.css",
+          "sha256": "3847509773b8d018ef0b7fe63a444e0a1985cb3ca13fa5176664e289d0cfc9c4"
+        },
+        {
+          "path": "@fontsource/manrope/latin-400.css",
+          "sha256": "d5c53a6366731cbbc34eedb261a942da49256016c16fc5c2b381c25bb3c7b5bf"
+        },
+        {
+          "path": "@fontsource/manrope/latin-500.css",
+          "sha256": "7b4eb16c3857724bb47f5017a21c0ca3e11c36877b20da68297e1e290a7d85d8"
+        },
+        {
+          "path": "@fontsource/manrope/latin-600.css",
+          "sha256": "ccf132ff8e594fb11a350a1ab6eb7f0e4bea8d5ee70ba19fedd0a581d4ead8e8"
+        },
+        {
+          "path": "@fontsource/manrope/latin-700.css",
+          "sha256": "cce08640ef7fb4ba227f3bc303c8e65856c9aa0e47ee809727945fe8f712a751"
+        }
+      ],
+      "compiledCssSHA256": "6d7aa7fc3e10c1dd77d12cba317c6e9b18f72b64b263ae8096b52e2dab67d9a2",
+      "bundleSHA256": "0d5742a23c62e04894079d4794c0a1abd593e5ec6681b6eb33c325b1b6d65aef",
+      "uiFiles": [
+        {
+          "path": "components/CustomAtlas.tsx",
+          "sha256": "fca4d446ed56ea8fd80a4454f7067a82b482ea8fd09533e50e31059fd26cc39e"
+        },
+        {
+          "path": "components/PlaceStories.tsx",
+          "sha256": "d588b7529083c5c481eec8f74ea1b5034748e74b124d118c0f87e2794599d098"
+        }
+      ],
+      "files": [
+        {
+          "path": "components/MapAttribution.tsx",
+          "sha256": "0c0a28e302b129f07ec06df7124ac146d75fb7df88e0b6437479d7721e18b99b"
+        },
+        {
+          "path": "components/MapIcon.tsx",
+          "sha256": "b8329684685f74f1565af46718cc14a4532b572ca345c2f691f218226a352f23"
+        },
+        {
+          "path": "components/TropnikIcons.tsx",
+          "sha256": "16a94d050587bab2220f8d3ec7fd4a65ce5e76de0fdbc620972f10c514ab3266"
+        },
+        {
+          "path": "lib/map-satellite.ts",
+          "sha256": "369b5f6d99fb52c0754cd8dceea4de6959b9e9a6209e30796ec01cce560135f8"
+        },
+        {
+          "path": "lib/russia-map.ts",
+          "sha256": "0eac13c0921b2b78aeb83f576ec2e274b21c3c5b9932fa1a560b888186399b06"
+        }
+      ]
+    },
+    "profiles": [
+      {
+        "name": "compact-android",
+        "width": 320,
+        "height": 640,
+        "mobile": true,
+        "dpr": 2
+      },
+      {
+        "name": "iphone-portrait",
+        "width": 390,
+        "height": 844,
+        "mobile": true,
+        "dpr": 2
+      },
+      {
+        "name": "android-portrait",
+        "width": 412,
+        "height": 915,
+        "mobile": true,
+        "dpr": 2
+      },
+      {
+        "name": "phone-landscape",
+        "width": 844,
+        "height": 390,
+        "mobile": true,
+        "dpr": 2
+      },
+      {
+        "name": "desktop-webgl",
+        "width": 1440,
+        "height": 1000,
+        "mobile": false,
+        "dpr": 1
+      }
+    ],
+    "negativeControls": [],
+    "cases": [],
+    "footerCases": [],
+    "caseFailures": [],
+    "failure": {
+      "name": "Error",
+      "message": "Chromium exited before the operation completed (code null, signal SIGABRT)",
+      "stack": "Error: Chromium exited before the operation completed (code null, signal SIGABRT)\n    at ChildProcess.onExit (file:///workspace/scratch/c44c63f212a5/tropinych/tools/pages-preview/browser-startup.mjs:31:14)\n    at ChildProcess.emit (node:events:514:28)\n    at ChildProcess._handle.onexit (node:internal/child_process:324:12)"
+    },
+    "browserStartup": {
+      "schemaVersion": 1,
+      "binary": "chromium",
+      "pid": 40,
+      "detached": true,
+      "startedAtEpochMs": 1794803509954,
+      "limits": {
+        "readyMs": 60000,
+        "probeMs": 1000,
+        "pollMs": 100,
+        "stderrBytes": 32768,
+        "termMs": 1500,
+        "killMs": 1000
+      },
+      "status": "failed",
+      "probes": 3,
+      "exitCode": null,
+      "signalCode": "SIGABRT",
+      "spawnError": null,
+      "startupError": "Error: Chromium exited before the operation completed (code null, signal SIGABRT)\n    at ChildProcess.onExit (file:///workspace/scratch/c44c63f212a5/tropinych/tools/pages-preview/browser-startup.mjs:31:14)\n    at ChildProcess.emit (node:events:514:28)\n    at ChildProcess._handle.onexit (node:internal/child_process:324:12)",
+      "lastProbeError": "TypeError: fetch failed",
+      "lastProbeFailure": {
+        "name": "TypeError",
+        "message": "fetch failed",
+        "stack": "TypeError: fetch failed",
+        "cause": {
+          "name": "Error",
+          "message": "connect ECONNREFUSED 127.0.0.1:44231",
+          "stack": "Error: connect ECONNREFUSED 127.0.0.1:44231\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2083:16)",
+          "code": "ECONNREFUSED",
+          "errno": -111,
+          "syscall": "connect",
+          "address": "127.0.0.1",
+          "port": 44231
+        }
+      },
+      "startupFailure": {
+        "name": "Error",
+        "message": "Chromium exited before the operation completed (code null, signal SIGABRT)",
+        "stack": "Error: Chromium exited before the operation completed (code null, signal SIGABRT)\n    at ChildProcess.onExit (file:///workspace/scratch/c44c63f212a5/tropinych/tools/pages-preview/browser-startup.mjs:31:14)\n    at ChildProcess.emit (node:events:514:28)\n    at ChildProcess._handle.onexit (node:internal/child_process:324:12)"
+      },
+      "cleanup": {
+        "status": "stopped",
+        "signals": [
+          "SIGTERM"
+        ],
+        "errors": [],
+        "elapsedMs": 50.969975000000204
+      },
+      "elapsedMs": 346.15500299999985,
+      "stderrTail": "/usr/bin/chromium: 9: [: 5225709568: unexpected operator\n[40:40:1116/073150.241508:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)\n[1116/073150.242143:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)\n",
+      "stderrBytesCaptured": 328,
+      "stderrBytesTotal": 328,
+      "stderrTruncated": false
+    }
+  }
+}

@@ -26,6 +26,13 @@ const matrix=[
  {name:'rotated',bearing:17.3,cover:false},
  {name:'pitched',pitch:25,cover:false},
  {name:'satellite',mode:'satellite',transparent:true,cover:false},
+ {name:'satellite-opaque-jpeg',mode:'satellite',transparent:true,opaqueImagery:true,cover:true},
+ {name:'satellite-jpeg-fractional',mode:'satellite',transparent:true,opaqueImagery:true,zoom:8.25,frames:[{x:0,y:0,cover:true},{x:.375,y:.625,cover:true}]},
+ {name:'satellite-jpeg-country',mode:'satellite',transparent:true,opaqueImagery:true,zoom:2,cover:true},
+ {name:'satellite-jpeg-world-copy',mode:'satellite',transparent:true,opaqueImagery:true,unwrapped:true,cover:true},
+ {name:'satellite-jpeg-missing',mode:'satellite',transparent:true,opaqueImagery:true,missingImagery:true,cover:false},
+ {name:'satellite-jpeg-rotated',mode:'satellite',transparent:true,opaqueImagery:true,bearing:17.3,cover:false},
+ {name:'satellite-transparent-source',mode:'satellite',transparent:true,alphaImagery:true,cover:false},
  {name:'overview',mode:'overview',cover:false},
  {name:'zoom12',zoom:12,frames:[{x:0,y:0,cover:true},{x:.375,y:.625,cover:true},{x:120.25,y:.125,cover:true},{x:129.125,y:.125,cover:false},{x:.375,y:.625,cover:true}]},
  {name:'zoom13',zoom:13,cover:false},
@@ -58,7 +65,7 @@ const streamingPhases=name=>name==='trace-grid'?['cold','stroke-history',...Arra
 async function productionBundle(){
  const source=await readFile(enginePath,'utf8');
  assert.match(source,/private detailCoversViewport\(batch:TileBatch\|undefined\):boolean/);
- assert.match(source,/const detail=this\.displayDetail\(\),covered=this\.detailCoversViewport\(detail\);/);
+ assert.match(source,/const covered=satellite\?this\.imageryCoversViewport\(\):this\.detailCoversViewport\(detail\)/);
  assert.match(source,/if\(!covered\)\{ctx\.fillStyle=MAP_OUTSIDE_COLOR;ctx\.fillRect\(0,0,this\.canvas\.width,this\.canvas\.height\);\}/);
  const result=await build({absWorkingDir:web,bundle:true,write:false,format:'iife',platform:'browser',target:'chrome107',minify:false,metafile:true,logLevel:'silent',
   // This IIFE invokes production paint methods without constructing engine workers.
@@ -88,7 +95,7 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
  const dpr=options.dpr,width=512,height=384,zoom=options.zoom??8,z=options.tileZ??Math.ceil(zoom),n=2**z,scale=256*2**zoom;
  check(options.previewOnly===true||devicePixelRatio===dpr,'Actual emulated DPR differs from the requested pixel proof');
  const center={x:(options.unwrapped?n+.5:Math.floor(.626*n)+.5)/n,y:(Math.floor(.373*n)+.5)/n};
- const policy=mapCanvasPolicy(document),bitmaps=[],surfaces=[],engines=[],frames=[],negativeControls=[];
+ const policy=mapCanvasPolicy(document),bitmaps=[],surfaces=[],engines=[],frames=[],negativeControls=[];let imageryDecodeProof;
  const bitmap=async(kind,index=0)=>{
   const canvas=document.createElement('canvas');canvas.width=canvas.height=512;
   const ctx=canvas.getContext('2d',{alpha:true,willReadFrequently:policy.softwareRaster});
@@ -99,13 +106,28 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
   for(let y=9;y<512;y+=43)for(let x=7;x<512;x+=53)ctx.fillRect(x,y,19+(index*3),13);
   ctx.strokeStyle=kind==='relief'?'rgba(50,70,42,.5)':'#fff4c1';ctx.lineWidth=2.25;
   ctx.beginPath();ctx.moveTo(-1,1);ctx.lineTo(513,509);ctx.moveTo(3,509);ctx.lineTo(509,2);ctx.stroke();
-  const image=await createImageBitmap(canvas);bitmaps.push(image);return image;
+  let image;
+  if(kind==='imagery'){
+   // Native JPEG decode, then the unchanged worker's complete 512px raster
+   // operation on an alpha:true surface. Check every alpha value rather than
+   // assuming the canvas attribute makes the transferred bitmap opaque.
+   const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.95));check(blob?.type==='image/jpeg','Native JPEG encoder is required');
+   const bytes=new Uint8Array(await blob.arrayBuffer());check(bytes[0]===255&&bytes[1]===216&&bytes[2]===255,'Native source must have the real JPEG signature');
+   const decoded=await createImageBitmap(blob),raster=new OffscreenCanvas(512,512),paint=raster.getContext('2d',{alpha:true,willReadFrequently:policy.softwareRaster});
+   check(decoded.width===512&&decoded.height===512&&paint,'JPEG must decode to the requested dimensions');
+   paint.imageSmoothingEnabled=true;paint.imageSmoothingQuality='high';paint.drawImage(decoded,0,0,512,512);decoded.close();
+   const rgba=paint.getImageData(0,0,512,512).data;for(let index=3;index<rgba.length;index+=4)check(rgba[index]===255,'Decoded JPEG raster contains an unexpected transparent pixel');
+   imageryDecodeProof={mime:blob.type,signature:[...bytes.slice(0,3)],bytes:bytes.length,decodedDimensions:[512,512],rasterAlpha:true,opaquePixels:rgba.length/4};
+   image=raster.transferToImageBitmap();raster.width=0;raster.height=0;
+  }else image=await createImageBitmap(canvas);
+  bitmaps.push(image);return image;
  };
  const diff=(a,b)=>{check(a.length===b.length,'Pixel dimensions differ');let pixels=0,maxDelta=0;for(let i=0;i<a.length;i+=4){let changed=false;for(let c=0;c<4;c++){const delta=Math.abs(a[i+c]-b[i+c]);if(delta){changed=true;maxDelta=Math.max(maxDelta,delta);}}if(changed)pixels++;}return{differentPixels:pixels,maxChannelDelta:maxDelta,totalPixels:a.length/4};};
  const hash=async bytes=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(value=>value.toString(16).padStart(2,'0')).join('');
  try{
   const opaque=await Promise.all([0,1,2].map(index=>bitmap('opaque',index))),overviewBitmap=await bitmap('overview'),transparent=await bitmap('transparent'),reliefBitmap=await bitmap('relief'),imageryBitmap=await bitmap('imagery');
-  const type=new Map([...opaque.map(value=>[value,'detail']),[overviewBitmap,'overview'],[transparent,'detail'],[reliefBitmap,'relief'],[imageryBitmap,'imagery']]);
+  const transparentImagery=options.alphaImagery?await bitmap('transparent'):undefined;
+  const type=new Map([...opaque.map(value=>[value,'detail']),[overviewBitmap,'overview'],[transparent,'detail'],[reliefBitmap,'relief'],[imageryBitmap,'imagery'],...(transparentImagery?[[transparentImagery,'imagery']]:[])]);
   const tile=(kind,level,x,y,image,isTransparent=false)=>({key:`${kind}:${level}/${x}/${y}`,kind,z:level,x,y,bitmap:image,transparent:isTransparent,labels:[],contours:0,local:true});
   const radius=options.radius??1,cx=Math.floor(center.x*n),cy=Math.floor(center.y*n),tiles=[];
   for(let y=cy-radius;y<=cy+radius;y++)for(let x=cx-radius;x<=cx+radius;x++){
@@ -113,8 +135,9 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    tiles.push(tile('vector',z,x,y,options.transparent?transparent:opaque[((x+y)%3+3)%3],!!options.transparent));
   }
   const coarseZ=Math.max(0,Math.floor(zoom)-2),coarseN=2**coarseZ,overview=[],imagery=[];
-  for(let y=Math.floor(center.y*coarseN)-1;y<=Math.floor(center.y*coarseN)+1;y++)for(let x=Math.floor(center.x*coarseN)-1;x<=Math.floor(center.x*coarseN)+1;x++){
-   overview.push(tile('overview',coarseZ,x,y,overviewBitmap));imagery.push(tile('eox-s2',coarseZ,x,y,imageryBitmap));
+  for(let y=Math.max(0,Math.floor(center.y*coarseN)-1);y<=Math.min(coarseN-1,Math.floor(center.y*coarseN)+1);y++)for(let x=Math.floor(center.x*coarseN)-1;x<=Math.floor(center.x*coarseN)+1;x++){
+   overview.push(tile('overview',coarseZ,x,y,overviewBitmap));
+   if(!options.missingImagery||x!==Math.floor(center.x*coarseN)||y!==Math.floor(center.y*coarseN))imagery.push({...tile('eox-s2',coarseZ,x,y,options.alphaImagery?transparentImagery:imageryBitmap),opaque:options.opaqueImagery?true:undefined});
   }
   const batch={kind:'vector',generation:1,tiles},overviewBatch={kind:'overview',generation:1,tiles:overview},reliefBatch={kind:'relief',generation:1,tiles:tiles.map(value=>({...value,kind:'relief',bitmap:reliefBitmap}))};
   const coordinate=([x,y])=>mercatorUnproject({x:center.x+x/scale,y:center.y+y/scale});
@@ -144,6 +167,9 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    context.drawImage=function(image,...args){const kind=type.get(image);if(kind)count[kind]++;return drawImage(image,...args);};
    const proof=CustomMapEngine.prototype.detailCoversViewport;
    engine.detailCoversViewport=function(value){count.proofCalls++;return baseline&&!options.cacheProof?false:proof.call(this,value);};
+   engine.state.imagerySource=options.mode==='satellite'?'eox-s2':undefined;
+   const imageryProof=CustomMapEngine.prototype.imageryCoversViewport;
+   engine.imageryCoversViewport=function(){count.proofCalls++;return baseline&&!options.cacheProof?false:imageryProof.call(this);};
    const restore=CustomMapEngine.prototype.restoreGround;
    engine.restoreGround=function(signature){const restored=baseline&&options.cacheProof?false:restore.call(this,signature);if(restored)count.groundRestore++;return restored;};
    if(baseline&&options.cacheProof)engine.retainGround=()=>{};
@@ -171,11 +197,12 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
      captures:[{phase:'baseline',png:baseline.canvas.toDataURL('image/png').split(',')[1]},{phase:'optimized',png:optimized.canvas.toDataURL('image/png').split(',')[1]}]};frames.push(frame);
     check(comparison.differentPixels===0,`${options.name}/${phase}: retained ground changed ${comparison.differentPixels} pixels (max ${comparison.maxChannelDelta})`);
     check(old.operations.groundRestore===0&&current.operations.groundRestore===Number(expectedHit),`${options.name}/${phase}: the actual native ground cache did not follow its expected cold/warm lifecycle`);
-    check(old.operations.mask===1&&current.operations.mask===1,'Every cached frame must repaint the current outside and hole mask');
+    const expectedMask=options.mode==='satellite'?0:1;
+    check(old.operations.mask===expectedMask&&current.operations.mask===expectedMask,'Relief retains the outside/hole mask; satellite must retain a continuous photograph');
     check(old.operations.proofCalls===1&&current.operations.proofCalls===1,'Every frame rechecks the live opaque coverage guard');
     if(expectedHit){
      for(const key of ['clear','area','overview','detail','relief','imagery','selectedArea'])check(current.operations[key]===0,`${phase}: retained ground replayed ${key}`);
-     check(old.operations.selectedArea===1&&old.operations.overview+old.operations.detail+old.operations.imagery>0,'The uncached production baseline must paint actual source ground');
+     check(old.operations.selectedArea===(options.mode==='satellite'?0:1)&&old.operations.overview+old.operations.detail+old.operations.imagery>0,'The uncached production baseline must paint actual source ground without tinting satellite imagery');
     }
     if(!cacheEligible)for(const key of ['clear','area','overview','detail','relief','imagery','selectedArea'])check(current.operations[key]===old.operations[key],`${phase}: transformed fallback changed original ${key} operations`);
     if(index>=3){frame.changedFromPrevious=diff(previous,current.pixels);check(frame.changedFromPrevious.differentPixels>0,`${phase}: a stale cached route/overlay would be invisible to this fixture`);}
@@ -191,7 +218,7 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
   for(let index=0;index<movement.length;index++){
    const move=movement[index],next=mercatorUnproject({x:center.x+move.x/scale,y:center.y+move.y/scale});
    baseline.engine.camera.center=next;optimized.engine.camera.center=next;
-   const actualCoverage=CustomMapEngine.prototype.detailCoversViewport.call(optimized.engine,optimized.engine.displayDetail());
+   const actualCoverage=options.mode==='satellite'?CustomMapEngine.prototype.imageryCoversViewport.call(optimized.engine):CustomMapEngine.prototype.detailCoversViewport.call(optimized.engine,optimized.engine.displayDetail());
    check(actualCoverage===move.cover,`${options.name}/${index}: coverage guard was ${actualCoverage}, expected ${move.cover}`);
    const old=baseline.render(),current=optimized.render(),comparison=diff(old.pixels,current.pixels);
    const frame={index,offset:{x:move.x,y:move.y},expectedCoverage:move.cover,actualCoverage,comparison,operations:{baseline:old.operations,optimized:current.operations},baselinePixelSHA256:await hash(old.pixels),optimizedPixelSHA256:await hash(current.pixels),width:optimized.canvas.width,height:optimized.canvas.height,
@@ -204,7 +231,23 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    if(options.mode==='satellite')check(current.operations.imagery===imagery.length&&current.operations.relief===0,'The satellite case must draw its complete imagery rather than retained relief');
    if(options.mode==='overview')check(current.operations.detail===0&&current.operations.relief===0&&current.operations.imagery===0,'The overview case must not draw retained detail, relief or imagery');
    check(old.operations.clear===1&&current.operations.clear===(move.cover?0:1),'Only proven full opaque coverage may omit the paper clear');
-    check(current.operations.mask===1&&current.operations.proofCalls===1,'Every frame must retain the final outside mask and evaluate coverage once');
+   check(current.operations.mask===(options.mode==='satellite'?0:1)&&current.operations.proofCalls===1,'Every frame evaluates coverage once and applies the outside paper mask only to relief');
+   if(options.mode==='satellite'&&!options.missingImagery&&!options.alphaImagery&&!(options.bearing??0)&&!move.x&&!move.y){
+    check(current.operations.selectedArea===0,'Selected-area tint must not alter the photograph');
+    // The same genuine source bitmaps, drawn without any cartographic ink,
+    // give an independent expected pixel inside the source polygon's hole and
+    // beyond its outer boundary. A paper cut-out, leaked route or global tint
+    // changes these actual native RGBA samples, even if operation counts pass.
+    const photoOnly=make(true);photoOnly.engine.mask=undefined;photoOnly.engine.area=undefined;photoOnly.engine.selectedArea=undefined;photoOnly.engine.selectedBoundary=undefined;photoOnly.engine.boundaryVisible=false;photoOnly.engine.route=undefined;photoOnly.engine.paths=false;photoOnly.engine.imageryOverlay={...batch,tiles:[]};
+    const expected=photoOnly.render(),paper=MAP_OUTSIDE_COLOR.slice(1).match(/../g).map(value=>parseInt(value,16)),witnesses=[];
+    for(const point of [[0,25],[-248,0],[15,5],[-248,-106]])for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+     const x=Math.floor((width/2+point[0])*dpr)+dx,y=Math.floor((height/2+point[1])*dpr)+dy,at=(y*optimized.canvas.width+x)*4;
+     const actual=[...current.pixels.slice(at,at+4)],source=[...expected.pixels.slice(at,at+4)];
+     check(actual.every((value,c)=>value===source[c])&&actual[3]===255,'Satellite outside/hole witness differs from the actual photograph');
+     check(paper.some((value,c)=>source[c]!==value),'The photo witness cannot accidentally equal the outside paper colour');witnesses.push({x,y,actual,source});
+    }
+    frame.satellitePhotoWitnesses=witnesses;
+   }
    if(options.name==='opaque'){
     const expected=MAP_OUTSIDE_COLOR.slice(1).match(/../g).map(value=>parseInt(value,16));
     for(const point of [[0,0],[-248,0]])for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
@@ -223,8 +266,12 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
     const control=make();control.engine.detailCoversViewport=()=>true;const wrong=control.render();
     const result=diff(old.pixels,wrong.pixels);check(result.differentPixels>0,'The pixel comparison must detect an unsafe unconditional underlay skip');negativeControls.push({name:'force-unsafe-cover',...result});
    }
+   if(options.missingImagery||options.alphaImagery){
+    const control=make();control.engine.imageryCoversViewport=()=>true;const wrong=control.render();
+    const result=diff(old.pixels,wrong.pixels);check(result.differentPixels>0,'The native comparison must detect an unsafe missing/transparent satellite underlay skip');negativeControls.push({name:'force-unsafe-satellite-cover',...result});
+   }
   }
-  return{verified:true,name:options.name,dpr,policy,contextAttributes:optimized.context.getContextAttributes(),tileDeviceSpan:scale*dpr/n,bitmapDimensions:[512,512],separateLabelsAndDOMMarkersExcluded:true,priorFrame,frames,negativeControls};
+  return{verified:true,name:options.name,dpr,policy,contextAttributes:optimized.context.getContextAttributes(),tileDeviceSpan:scale*dpr/n,bitmapDimensions:[512,512],imageryDecodeProof:options.alphaImagery?undefined:imageryDecodeProof,separateLabelsAndDOMMarkersExcluded:true,priorFrame,frames,negativeControls};
  }catch(error){return{verified:false,name:options.name,dpr,error:String(error.stack||error),frames,negativeControls};}
  finally{for(const engine of engines)engine.releaseGround();for(const image of bitmaps)image.close();for(const canvas of surfaces)canvas.remove();}
 }
@@ -346,7 +393,8 @@ async function runStreamingPixels({CustomMapEngine,geometryPath,mercatorProject,
    check(comparison.differentPixels===0&&comparison.maxChannelDelta===0,`${options.name}/${phase}: streaming ground changed ${comparison.differentPixels} pixels (max ${comparison.maxChannelDelta})`);
    check(old.operations.updateHits===0&&old.operations.restoreHits===0&&old.operations.groundCalls.every(call=>call.surface==='main'&&!call.dirty&&call.clipDepth===0),'Baseline must execute the unretained production painter');
    for(const operations of [old.operations,current.operations])check(operations.contextStates.every(state=>state.saveDepth===0&&state.clipDepth===0&&state.restoreUnderflows===0),'Native context scopes must finish balanced without leaking a clip into the next frame');
-   check(old.operations.main.mask===1&&current.operations.main.mask===1,'Every streaming frame must redraw the current outside mask');
+   const expectedMask=phase==='satellite-retained'?0:1;
+   check(old.operations.main.mask===expectedMask&&current.operations.main.mask===expectedMask,'Streaming relief keeps the outside mask; a retained satellite photo stays continuous');
    if(mustIncrement){
     check(current.operations.updateHits===1&&dirtyCalls.length===1&&current.operations.groundCalls.length===1&&dirtyCalls[0].surface==='main'&&dirtyCalls[0].clipDepth===0,'A monotonic pair addition must paint unclipped native paths on main with bounded tile culling');
     check(current.operations.main.snapshotCopies===1&&current.operations.retained.visibleCopies===1&&current.operations.restoreHits===1&&frame.loadingSnapshotIdentity,'Streaming patch must capture one partial region and restore one current native surface');
@@ -427,7 +475,7 @@ test('production map underlay omission preserves every real Canvas pixel and all
     assert.equal(result.verified,true,result.error);assert.equal(result.dpr,dpr);
    }
   }
-  assert.equal(report.cases.length,matrix.length*2);assert.equal(report.cases.reduce((sum,item)=>sum+item.frames.length,0),46);
+  assert.equal(report.cases.length,matrix.length*2);assert.equal(report.cases.reduce((sum,item)=>sum+item.frames.length,0),62);
   for(const dpr of report.groundCache.dpr){
    await cdp.call('Emulation.setDeviceMetricsOverride',{width:512,height:384,deviceScaleFactor:dpr,mobile:false});await cdp.call('Page.navigate',{url:origin+'/'});
    let loaded=false;for(let attempt=0;attempt<60;attempt++){if(await evaluate("typeof window.runUnderlayGate==='function'")){loaded=true;break;}await sleep(50);}assert.ok(loaded,'The ground-cache production fixture did not load');

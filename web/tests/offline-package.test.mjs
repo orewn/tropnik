@@ -4,6 +4,7 @@ import { createHash, webcrypto } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+import {UserFacingError} from '../lib/user-facing-errors.ts';
 
 // Exercise the real TypeScript module with controlled I/O. Cache handles keep
 // their identity after CacheStorage.delete, as browser CacheStorage does.
@@ -79,7 +80,7 @@ function fixture(initial = packageData()) {
   const makeTab = ({ locking = true } = {}) => {
     const window = Object.assign(new EventTarget(), { caches, isSecureContext: true });
     const scope = {
-      exports: {}, window, caches, navigator: {
+      exports: {}, require: name => {assert.equal(name, './user-facing-errors.ts'); return {UserFacingError};}, window, caches, navigator: {
         locks: locking ? locks : undefined,
         storage: { async estimate() { return { quota: 100_000_000, usage: 0 }; }, async persist() { return true; } },
       },

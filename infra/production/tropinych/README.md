@@ -38,7 +38,8 @@ ss -ltnp
 назначены. Установите, кто обслуживает публичные 80/443, и добавляйте домен
 Тропиныча в действующий proxy, сохраняя сайты ДокНет.
 
-Нужен Linux x86-64 с Docker Compose. Следующие команды выполняются из каталога
+Нужен Linux x86-64 с Docker Compose; для проверок ниже — curl и Python 3.
+Следующие команды выполняются из каталога
 `infra` в отдельной копии репозитория после проверки сосуществования.
 Для новой установки:
 
@@ -59,12 +60,15 @@ Compose передаёт его в Next и Go, а также в сборку Nex
 режима индексации требует пересборки web, а не только перезапуска контейнера.
 
 ```bash
+set -o pipefail
 docker compose -f compose.yaml -f compose.web.yaml --env-file .env config --quiet
 docker compose -f compose.yaml -f compose.web.yaml --env-file .env build
 docker compose -f compose.yaml -f compose.web.yaml --env-file .env up -d
 docker compose -f compose.yaml -f compose.web.yaml --env-file .env ps
 curl --fail --silent --show-error http://127.0.0.1:8080/api/v1/health/ready
-curl --fail --silent --show-error http://127.0.0.1:3000/api/status
+curl --fail --silent --show-error --write-out '\n%{http_code}' \
+  http://127.0.0.1:3000/api/status/ | \
+  python3 -c 'import json,sys; body,code=sys.stdin.read().rsplit("\n",1); status=json.loads(body); valid=code=="200" and status.get("configured") is True and status.get("connected") is True and status.get("mode")=="connected"; print(body) if valid else sys.exit("Next/API readiness is not connected")'
 ```
 
 Обе проверки должны вернуть HTTP 200; `/api/status` должен сообщить
@@ -121,7 +125,10 @@ systemctl reload caddy
 После обновления DNS и выпуска сертификатов:
 
 ```bash
-curl --fail --silent --show-error https://xn--h1akbedl4b5a.xn--p1ai/api/status
+set -o pipefail
+curl --fail --silent --show-error --write-out '\n%{http_code}' \
+  https://xn--h1akbedl4b5a.xn--p1ai/api/status/ | \
+  python3 -c 'import json,sys; body,code=sys.stdin.read().rsplit("\n",1); status=json.loads(body); valid=code=="200" and status.get("configured") is True and status.get("connected") is True and status.get("mode")=="connected"; print(body) if valid else sys.exit("Next/API readiness is not connected")'
 curl --fail --silent --show-error https://xn--h1akbedl4b5a.xn--p1ai/api/v1/health/ready
 curl --fail --silent --show-error https://xn--h1akbedl4b5a.xn--p1ai/robots.txt
 curl --fail --silent --show-error https://xn--h1akbedl4b5a.xn--p1ai/sitemap.xml

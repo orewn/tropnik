@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "web-catalog-63e6bc1002c1116d",
+  "version": "web-catalog-f15022c7b40a371d",
   "regions": [
     {
       "id": "altai",
@@ -19123,7 +19123,7 @@
         "karelia",
         "territory-28173009B96976580001980"
       ],
-      "title": "Riekkalansaari Trail 55km",
+      "title": "Риеккалансаари трейл 55 км",
       "summary": "Маршрут RKT55 · Описание маршрута",
       "description": "Пеший маршрут по сведениям из открытой карты. На пути могут встречаться развилки и участки без описания. Перед выходом уточните состояние тропы и правила посещения.",
       "difficulty": "Сложность не оценена",
@@ -19138,7 +19138,7 @@
       "navigationReady": false,
       "sourceName": "OpenStreetMap",
       "sourceUrl": "https://www.openstreetmap.org/relation/18108422",
-      "sourceTitle": null,
+      "sourceTitle": "Riekkalansaari Trail 55km",
       "distanceNote": null,
       "accessStatus": null,
       "territoryIds": [
@@ -19693,7 +19693,7 @@
         "karelia",
         "territory-28173009B96976580001980"
       ],
-      "title": "Riekkalansaari Trail 35km",
+      "title": "Риеккалансаари трейл 35 км",
       "summary": "Маршрут RKT35 · Описание маршрута",
       "description": "Пеший маршрут по сведениям из открытой карты. На пути могут встречаться развилки и участки без описания. Перед выходом уточните состояние тропы и правила посещения.",
       "difficulty": "Сложность не оценена",
@@ -19708,7 +19708,7 @@
       "navigationReady": false,
       "sourceName": "OpenStreetMap",
       "sourceUrl": "https://www.openstreetmap.org/relation/18251715",
-      "sourceTitle": null,
+      "sourceTitle": "Riekkalansaari Trail 35km",
       "distanceNote": null,
       "accessStatus": null,
       "territoryIds": [
@@ -19761,7 +19761,7 @@
         "karelia",
         "territory-28173009B96976580001980"
       ],
-      "title": "Riekkalansaari Trail 12km",
+      "title": "Риеккалансаари трейл 12 км",
       "summary": "Маршрут RKT12 · Описание маршрута",
       "description": "Пеший маршрут по сведениям из открытой карты. На пути могут встречаться развилки и участки без описания. Перед выходом уточните состояние тропы и правила посещения.",
       "difficulty": "Сложность не оценена",
@@ -19776,7 +19776,7 @@
       "navigationReady": false,
       "sourceName": "OpenStreetMap",
       "sourceUrl": "https://www.openstreetmap.org/relation/18251716",
-      "sourceTitle": null,
+      "sourceTitle": "Riekkalansaari Trail 12km",
       "distanceNote": null,
       "accessStatus": null,
       "territoryIds": [
@@ -19829,7 +19829,7 @@
         "karelia",
         "territory-28173009B96976580001980"
       ],
-      "title": "Riekkalansaari Trail 25km",
+      "title": "Риеккалансаари трейл 25 км",
       "summary": "Маршрут RKT25 · Описание маршрута",
       "description": "Пеший маршрут по сведениям из открытой карты. На пути могут встречаться развилки и участки без описания. Перед выходом уточните состояние тропы и правила посещения.",
       "difficulty": "Сложность не оценена",
@@ -19844,7 +19844,7 @@
       "navigationReady": false,
       "sourceName": "OpenStreetMap",
       "sourceUrl": "https://www.openstreetmap.org/relation/18251717",
-      "sourceTitle": null,
+      "sourceTitle": "Riekkalansaari Trail 25km",
       "distanceNote": null,
       "accessStatus": null,
       "territoryIds": [
@@ -19897,7 +19897,7 @@
         "karelia",
         "territory-28173009B96976580001980"
       ],
-      "title": "Riekkalansaari Trail 7km",
+      "title": "Риеккалансаари трейл 7 км",
       "summary": "Маршрут RKT 7 · Описание маршрута",
       "description": "Пеший маршрут по сведениям из открытой карты. На пути могут встречаться развилки и участки без описания. Перед выходом уточните состояние тропы и правила посещения.",
       "difficulty": "Сложность не оценена",
@@ -19912,7 +19912,7 @@
       "navigationReady": false,
       "sourceName": "OpenStreetMap",
       "sourceUrl": "https://www.openstreetmap.org/relation/18251718",
-      "sourceTitle": null,
+      "sourceTitle": "Riekkalansaari Trail 7km",
       "distanceNote": null,
       "accessStatus": null,
       "territoryIds": [
@@ -19965,7 +19965,7 @@
         "karelia",
         "territory-28173009B96976580001980"
       ],
-      "title": "Riekkalansaari Trail 80km",
+      "title": "Риеккалансаари трейл 80 км",
       "summary": "Маршрут RKT80 · Описание маршрута",
       "description": "Пеший маршрут по сведениям из открытой карты. На пути могут встречаться развилки и участки без описания. Перед выходом уточните состояние тропы и правила посещения.",
       "difficulty": "Сложность не оценена",
@@ -19980,7 +19980,7 @@
       "navigationReady": false,
       "sourceName": "OpenStreetMap",
       "sourceUrl": "https://www.openstreetmap.org/relation/18257803",
-      "sourceTitle": null,
+      "sourceTitle": "Riekkalansaari Trail 80km",
       "distanceNote": null,
       "accessStatus": null,
       "territoryIds": [

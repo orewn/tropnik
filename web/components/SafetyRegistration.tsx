@@ -15,12 +15,14 @@ import {
   newSafetyPassport,
   parseSafetyPassportList,
   safetyReadiness,
+  safetyStatusLabels as statusLabels,
   safetyPassportSnapshot,
   transitionSafetyPassport,
   type SafetyParticipant,
   type SafetyPassport,
   type SafetyStatus,
 } from '@/lib/safety-passport';
+import {userErrorText} from '@/lib/user-facing-errors';
 import styles from './SafetyRegistration.module.css';
 
 type SafetyCatalog = {
@@ -35,16 +37,6 @@ function loadSafetyCatalog(): Promise<SafetyCatalog> {
   }));
   return safetyCatalogPromise;
 }
-
-const statusLabels: Record<SafetyStatus, string> = {
-  draft: 'Черновик',
-  ready: 'Пакет готов',
-  submitted: 'Отправка отмечена лично',
-  confirmed: 'Личная запись о подтверждении',
-  amendment_required: 'Нужно обновить уведомление',
-  active: 'Группа на маршруте',
-  closed: 'Поход закрыт',
-};
 
 const statusDescriptions: Record<SafetyStatus, string> = {
   draft: 'Заполните маршрут, контакты и состав группы.',
@@ -231,7 +223,7 @@ export function SafetyRegistration() {
   function writeSavedPassports(list: SafetyPassport[]): boolean {
     try { saveLocalSafetyPassports(localStorage, list); return true; }
     catch (error) {
-      setNotice(error instanceof RangeError ? error.message : 'Не удалось записать данные в браузер. Скачайте JSON-копию и проверьте свободное место.');
+      setNotice(userErrorText(error, 'storage'));
       return false;
     }
   }
@@ -283,7 +275,7 @@ export function SafetyRegistration() {
       const candidate = {...passport, ...patch, updatedAt: new Date().toISOString()};
       const transitioned = transitionSafetyPassport(candidate, next);
       persist(transitioned, next === 'ready' ? 'Пакет готов к переносу в официальную форму.' : 'Статус сохранён на этом устройстве.');
-    } catch (error) { setNotice(error instanceof Error ? error.message : 'Не удалось изменить статус.'); }
+    } catch (error) { setNotice(userErrorText(error, 'safety_status')); }
   }
 
   async function copyPackage() {
@@ -338,7 +330,7 @@ export function SafetyRegistration() {
           </section>
           <section className={`${styles.card} ${styles.privacyNote}`}>
             <strong>Персональные данные</strong>
-            <p>Черновики остаются только в localStorage этого браузера и не отправляются в Тропиныч. Хранилище браузера не является защищённым сейфом: на общем устройстве удалите паспорт после переноса.</p>
+            <p>Черновики сохраняются только в хранилище этого браузера и не отправляются в Тропиныч. Хранилище браузера не является защищённым сейфом: на общем устройстве удалите паспорт после переноса.</p>
           </section>
         </aside>
 

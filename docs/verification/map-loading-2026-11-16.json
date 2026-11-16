@@ -1,0 +1,3771 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-16",
+  "scope": "Historical accepted map loading/framebuffer optimization plus a separate pending Russian-interface/full-satellite/native-startup candidate",
+  "baseline": {
+    "sourceCommit": "0f451d5210b3b88c91d9d6af19b22e8b30211e8e",
+    "publicBuildId": "434582936e526a43"
+  },
+  "firstPassCommit": "204614cd17f2c95c7376e6202b0ff04fe06c3a53",
+  "secondPass": {
+    "sourceCommit": "de64392e2cce14f265aec5d982a7ccd26473f8e1",
+    "sourceTree": "63f3222c8d3b8521f0bbb8a3db8a6695b50012ec",
+    "runtimeSourceInputsSHA256": "24b2b3cf242a2c7cefd1143655eb34bcaf4d39ff35d08606441d37916a3e68a6",
+    "runtimeManifestSHA256": "97d189dfa0c55b99bd5e8f5f09fcd1309bbd94e702fd637ee9aada6e09731f94",
+    "webAndAndroidRuntimeIdentical": true,
+    "deterministicRuntimeRebuildPassed": true
+  },
+  "controlledEvidence": {
+    "scope": "Production modules under controlled delivery and instrumented test surfaces; operation counts and exact output equality, not physical-device FPS or provider-speed measurements",
+    "foregroundAdmission": {
+      "stalledPreviews": 24,
+      "beforeActivePreviewReads": 3,
+      "afterActivePreviewReads": 1,
+      "afterActiveVisibleReads": 2,
+      "totalHTTPConcurrency": 3,
+      "status": "historical-first-pass-probe",
+      "sourceCommit": "204614cd17f2c95c7376e6202b0ff04fe06c3a53",
+      "note": "First-pass reservation evidence without the later map-wide foreground-demand lease; these counts do not describe the final held-demand policy."
+    },
+    "wheel": {
+      "frames": 20,
+      "cssViewport": [
+        1440,
+        1000
+      ],
+      "dpr": 2,
+      "beforeFullCanvasCopies": 20,
+      "afterIntermediateFullCanvasCopies": 0,
+      "beforeDiagnosticWrites": 20,
+      "afterIntermediateDiagnosticWrites": 0,
+      "beforeIntermediateCopyBytes": 460800000,
+      "afterIntermediateCopyBytes": 0,
+      "settledSnapshotRetained": true
+    },
+    "satellite": {
+      "readyImageryCells": 12,
+      "delayedOverlayCells": 12,
+      "completeImageryVisibleBeforeOverlay": true,
+      "staleResponsesCannotReplaceCurrentView": true
+    },
+    "nearbyCameraViews": {
+      "positions": 400,
+      "identicalTileSetSize": 25,
+      "beforeLoadingGenerations": 82,
+      "afterLoadingGenerations": 1,
+      "beforeNetworkRequests": 25,
+      "afterNetworkRequests": 25
+    },
+    "firstCompleteDEM": {
+      "independentParents": {
+        "beforeResponseWaves": 17,
+        "afterResponseWaves": 10,
+        "unchangedTotalRequests": 54,
+        "unchangedTotalWaves": 18
+      },
+      "adjacentParents": {
+        "beforeResponseWaves": 7,
+        "afterResponseWaves": 4,
+        "unchangedTotalRequests": 22,
+        "unchangedTotalWaves": 8
+      }
+    },
+    "lateDEMNeighbors": {
+      "baselineCommit": "204614cd17f2c95c7376e6202b0ff04fe06c3a53",
+      "sourceSize": 512,
+      "stages": 9,
+      "beforeCalculatedAndUploadedPixels": 2359296,
+      "afterCalculatedAndUploadedPixels": 264196,
+      "beforeRedundantCopiedBytes": 9437184,
+      "afterRedundantCopiedBytes": 0,
+      "unchangedImageDecodes": 9,
+      "allStagesByteIdenticalToOriginalFullFormula": true,
+      "additionalSizesCompared": [
+        2,
+        4,
+        17,
+        256
+      ]
+    },
+    "progressiveLabels": {
+      "baselineCommit": "204614cd17f2c95c7376e6202b0ff04fe06c3a53",
+      "readyPairs": 24,
+      "labelsPerPair": 12,
+      "dpr": 2,
+      "before": {
+        "sourceCoordinates": 3600,
+        "priorityCalls": 3624,
+        "coverageTests": 3603,
+        "repeatKeys": 2818,
+        "screenCoordinates": 3603
+      },
+      "after": {
+        "sourceCoordinates": 288,
+        "priorityCalls": 288,
+        "coverageTests": 284,
+        "repeatKeys": 182,
+        "screenCoordinates": 3603
+      },
+      "exactPaintCommandsAndDiagnosticsAtEveryStage": true
+    },
+    "serviceWorkerDelivery": {
+      "condition": "Network body complete, cache disk commit held",
+      "beforeResponseDelivered": false,
+      "afterResponseDelivered": true,
+      "identicalResponseBytes": true,
+      "cacheWriteOwnedByFetchEvent": true,
+      "quotaFailureDoesNotRejectSuccessfulRead": true,
+      "rootAndPagesPathsTested": true
+    },
+    "foregroundDemandReplayBeforeRepair": {
+      "baselineCommit": "205d71c0f8236e873e1462d6363508eeef293823",
+      "grid": [
+        8,
+        8
+      ],
+      "zoom": 7,
+      "visibleUniqueReads": 164,
+      "decodedTiles": 128,
+      "haloItems": 512,
+      "physicalHTTPPeak": 3,
+      "fixedVectorResponseMs": 250,
+      "fixedDEMResponseMs": 450,
+      "previewSourcesQueued": 72,
+      "withPreviews": {
+        "firstPairMs": 3950,
+        "allPairsMs": 27400,
+        "previewsCompletedBeforeMain": 59
+      },
+      "withoutPreviewsControl": {
+        "firstPairMs": 2850,
+        "allPairsMs": 20400
+      },
+      "scope": "Deterministic production pool and loader replay with immediate decoder; isolates IO scheduling, not a real-browser latency prediction",
+      "status": "superseded-exploratory-replay",
+      "retainedFinalComparison": false,
+      "supersededBy": "controlledEvidence.foregroundDemandReplay",
+      "note": "The preliminary 27400/20400ms and 59-preview result is retained as exploratory history only. The final retained regression fixture below produces 28050/20450ms and 65 previews on the exact 205d71c baseline."
+    },
+    "foregroundDemandReplay": {
+      "status": "retained-final-regression-proof",
+      "baselineCommit": "205d71c0f8236e873e1462d6363508eeef293823",
+      "candidateSourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+      "candidateSourceStatus": "published source; retained controlled replay is separate from real-browser timing",
+      "testFile": "web/tests/custom-map-tiles.test.mjs",
+      "testName": "a visible 8 by 8 grid keeps all three reads and every measured halo while route previews wait",
+      "baselineSourcesVerifiedAgainstGit": true,
+      "baselineSourceSHA256": {
+        "web/lib/custom-map-tiles.ts": "7aef6b4ac114bc3605ae3209f29352f1cc5e59e78fe729d7f95764ebe15e962f",
+        "web/lib/map-resource-pool.ts": "97367edac47cc6b2640ac9d12b25dac7898ddc5f8e9086e70366ba60227ae949"
+      },
+      "grid": [
+        8,
+        8
+      ],
+      "zoom": 7,
+      "fixedVectorResponseMs": 250,
+      "fixedDEMResponseMs": 450,
+      "decoderDelivery": "immediate controlled worker replies",
+      "previewSourcesQueued": 72,
+      "withPreviews": {
+        "before": {
+          "firstPairMs": 3950,
+          "allPairsMs": 28050,
+          "previewsCompletedBeforeMain": 65
+        },
+        "after": {
+          "firstPairMs": 2850,
+          "allPairsMs": 20450,
+          "previewsCompletedBeforeMain": 0
+        }
+      },
+      "withoutPreviewsControl": {
+        "before": {
+          "firstPairMs": 2850,
+          "allPairsMs": 20450
+        },
+        "after": {
+          "firstPairMs": 2850,
+          "allPairsMs": 20450
+        }
+      },
+      "unchangedWorkAndBounds": {
+        "visibleUniqueReads": 164,
+        "decodedTiles": 128,
+        "completePairs": 64,
+        "haloItems": 512,
+        "physicalHTTPPeak": 3,
+        "preparedPayloadPeak": 6,
+        "decoderWorkerPeak": 1
+      },
+      "scope": "Deterministic production pool and loader replay with fixed response timing and immediate decoder delivery. Measures network admission only; not physical-device FPS, a provider-speed measurement, or a guarantee of the 15000ms native camera-settle deadline."
+    },
+    "foregroundDemandPolicy": {
+      "ownership": "One idempotent pool token per active CustomMapTiles instance with pending jobs, independently retained by multiple maps.",
+      "heldAcross": [
+        "asynchronous source discovery",
+        "primary reads",
+        "measured DEM halo assembly",
+        "ready payloads",
+        "decoder response"
+      ],
+      "newSpeculativeAdmissionsWhileHeld": 0,
+      "activeReadParking": "Only when all physical HTTP slots are occupied and an actual priority-0/1 read is queued; park only the number of reads needed, less already-draining reads. A held map may reclaim the last speculative slot.",
+      "sourceDiscoveryAloneAbortsRunningPreviews": false,
+      "sharedPreviewPromisesPreservedByParking": true,
+      "physicalSlotReleasedOnlyAfterReadCleanup": true,
+      "releaseOn": [
+        "all jobs completed",
+        "terminal source or decoder failure with no remaining jobs",
+        "deactivation",
+        "destruction"
+      ],
+      "synchronousPinThenLoadGapProtectedByDeferredReleaseRecheck": true,
+      "existingFullQueueSupersessionPolicyUnchanged": true,
+      "originalThreePreviewsPreservedWithMaxQueuedOne": true,
+      "limitsAndQualityCriteriaUnchanged": true
+    },
+    "framebufferRotationQueryFailure": {
+      "scope": "Deterministic model of the observed API failure after rotation, not a reproduction of the native driver scheduler or a physical-device performance benchmark.",
+      "baselineSourceCommit": "45c3974ad37ee5d312f87179c16633b88e62a033",
+      "candidateSourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+      "fault": "Renderbuffer parameter query reports no native binding after the existing null/object rebind.",
+      "baselineAfterRotation": {
+        "renderer": "canvas2d",
+        "pixelRatio": 1.5,
+        "meshStride": 4,
+        "triangles": 32768,
+        "graphicsFallback": {
+          "stage": "render",
+          "reason": "Terrain framebuffer sample count changed"
+        }
+      },
+      "candidateAfterRotation": {
+        "renderer": "webgl2",
+        "pixelRatio": 2,
+        "meshStride": 2,
+        "triangles": 131072,
+        "graphicsFallback": null
+      },
+      "originalGateUnchanged": true,
+      "nativeDriverResetMomentEstablished": false,
+      "logs": {
+        "baseline": {
+          "path": "/workspace/scratch/c44c63f212a5/terrain-rotation-query-baseline.log",
+          "bytes": 1758,
+          "sha256": "fb55189a5767b425177c510fe89d314bcb64569b2504cfb1bfe97eee589a307f"
+        },
+        "candidate": {
+          "path": "/workspace/scratch/c44c63f212a5/terrain-framebuffer-candidate.log",
+          "bytes": 5229,
+          "sha256": "7bbf6f43a7a2b468b347127f5bfec0c12ea6b7195e3a53817669ac53e7412350"
+        }
+      }
+    },
+    "currentWorkingTreeCandidate": {
+      "record": "releaseVerification.localizedSatelliteAndNativeStartupCandidate",
+      "scope": "The linked receipts bind targeted source snapshots only. Their JVM/control-environment results are not whole-candidate web, Android/Compose/R8 or installed-APK acceptance.",
+      "receipts": [
+        {
+          "path": "docs/verification/satellite-loading-2026-11-16.json",
+          "bytes": 4207,
+          "sha256": "0dbf0bb1f287199dc8517aca68306124cca6e119a856ab35871b21dc83c60bc9"
+        },
+        {
+          "path": "docs/verification/android-0.4.34-registry-cache.json",
+          "bytes": 12516,
+          "sha256": "0b2c88f9a3fc4ec46f4cd1718ca4ac64fac7b53cf66f71ad1d4ee3b99cc52613"
+        },
+        {
+          "path": "docs/verification/android-0.4.34-catalog-startup.json",
+          "bytes": 20543,
+          "sha256": "920aca23c34da1d719706410d2f00a0eea712b656030b27c1f8ab392f61990b2"
+        },
+        {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/satellite-queue-tests.log",
+          "bytes": 13518,
+          "sha256": "1e3f6ca4bdb61fc4476ad61d52c436d27f66a1b5bb888bb5e2e98ab5bb7e0602"
+        }
+      ]
+    }
+  },
+  "qualityPreserved": {
+    "sourceImagesAndElevations": true,
+    "tileResolutionAndDPR": true,
+    "contoursAndGeometry": true,
+    "labelDensityTypographyCollisionAndOrder": true,
+    "mandatoryMeasuredDEMNeighbors": true,
+    "HTTPReadyPayloadWorkerAndCacheBounds": true,
+    "existingPublicationGateThresholds": true
+  },
+  "localValidation": {
+    "webTests": {
+      "passed": 1032,
+      "failed": 0
+    },
+    "pagesToolingTests": {
+      "passed": 403,
+      "failed": 0
+    },
+    "engineTests": {
+      "passed": 100,
+      "failed": 0
+    },
+    "reliefAndLoaderFocusedTests": {
+      "passed": 87,
+      "failed": 0
+    },
+    "typescript": "passed",
+    "eslint": "passed",
+    "diffCheck": "passed",
+    "staticBuild": {
+      "buildId": "af9b6f75e1f01a2d",
+      "sourceCommit": null,
+      "pages": 719,
+      "referenceRoutes": 685,
+      "reasonSourceCommitIsNull": "Pre-commit working-tree validation"
+    },
+    "localChromium": {
+      "status": "unavailable",
+      "reason": "Browser startup failed before the page opened: Unix socket Operation not permitted"
+    },
+    "pagesToolingAfterGateRepair": {
+      "total": 406,
+      "passed": 405,
+      "failed": 1,
+      "failure": "Unchanged Drizzle schema generation reached its existing 15-second timeout while independent esbuild review processes also ran",
+      "isolatedDependencyChecks": {
+        "passed": 3,
+        "failed": 0,
+        "drizzleGenerationMilliseconds": 5220,
+        "timeoutUnchanged": true
+      },
+      "note": "CI repeats the complete suite; local timeout was not converted to success or omitted"
+    },
+    "foregroundDemandRepair": {
+      "sourceStatus": "working-tree source freeze",
+      "focusedTests": {
+        "passed": 78,
+        "failed": 0
+      },
+      "typescript": "passed",
+      "diffCheck": "passed",
+      "retainedBaselineReplay": "fails on the expected 28050 versus 20450 scheduling assertion",
+      "retainedCandidateReplay": "passed",
+      "independentReview": {
+        "status": "complete",
+        "blockers": 0,
+        "baselineGitBytesVerified": true,
+        "newPoolDemandTestsPassed": 4,
+        "existingPreemptionRegressionsPassed": 3,
+        "additionalLifecycleReplaysPassed": 3,
+        "candidateGridReplayPassed": true,
+        "initialParkAllQueueRegression": "found and corrected before source freeze; final policy parks only under actual foreground pressure"
+      },
+      "nativeBrowserValidation": "Not executed locally; subsequently passed in Pages run 43790896577 for source 70689a3, including full browser and exact native-worker pixel gates."
+    },
+    "scope": "Historical local checks below retain their original counts and outcomes. Published web acceptance for dca8f32 is recorded separately in releaseVerification. Current local checks belong to releaseVerification.localizedSatelliteAndNativeStartupCandidate.localValidation; this working-tree candidate has no native/CI or publication result yet.",
+    "framebufferRotationRepair": {
+      "sourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+      "fullWebTests": {
+        "passed": 1043,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "durationMs": 82614.784102,
+        "exitCode": 0
+      },
+      "pagesToolingTests": {
+        "passed": 410,
+        "failed": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "durationMs": 14984.472632,
+        "exitCode": 0
+      },
+      "rendererTests": {
+        "passed": 47,
+        "failed": 0,
+        "baselineRotationReplay": "expected failure on exact 45c3974 renderer",
+        "candidateRotationReplay": "passed with unchanged WebGL2/DPR/mesh quality"
+      },
+      "observerAndExistingValidators": {
+        "passed": 30,
+        "failed": 0,
+        "newObserverBaseline": {
+          "passed": 0,
+          "failed": 4,
+          "expectedFailure": true
+        },
+        "newObserverIndependentReview": {
+          "passed": 4,
+          "failed": 0
+        }
+      },
+      "immutableSourceShaderGate": {
+        "passed": 1,
+        "failed": 0,
+        "nativeBrowserPixelsExecutedLocally": false
+      },
+      "lint": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "typescript": {
+        "status": "passed",
+        "exitCode": 0
+      },
+      "sharedRuntimeReproduction": "passed",
+      "nativeLandscapeReproduction": "passed",
+      "verifyMapShell": {
+        "schemaVersion": 1,
+        "status": "passed",
+        "serviceWorkerVersion": "tropnik-shell-0.4.33-29b75f39d78b0db4",
+        "shellAssets": 24,
+        "shellBytes": 8015487,
+        "sharedMapFiles": 9,
+        "sharedMapBytes": 981197,
+        "territoryCount": 85,
+        "territoryGeometrySha256": "e470f86a415025be16e6061e7b74892cc0955bcd5159a422f2b8d7914947114d",
+        "territoryMetadataSha256": "b1207ae22641587ed6634c7b87a9b23c1630aedbb768f83db8d69faa3d52be23",
+        "routeGeometrySources": 615,
+        "verifiedPublicFiles": 648,
+        "networkRequests": 0
+      },
+      "independentReviews": {
+        "rendererBlockers": 0,
+        "observerBlockers": 0,
+        "gateThresholdsUnchanged": true,
+        "immutableReferencesUnchanged": true
+      },
+      "logs": {
+        "terrain-rotation-query-baseline.log": {
+          "path": "/workspace/scratch/c44c63f212a5/terrain-rotation-query-baseline.log",
+          "bytes": 1758,
+          "sha256": "fb55189a5767b425177c510fe89d314bcb64569b2504cfb1bfe97eee589a307f"
+        },
+        "terrain-framebuffer-candidate.log": {
+          "path": "/workspace/scratch/c44c63f212a5/terrain-framebuffer-candidate.log",
+          "bytes": 5229,
+          "sha256": "7bbf6f43a7a2b468b347127f5bfec0c12ea6b7195e3a53817669ac53e7412350"
+        },
+        "terrain-unmasked-observer-baseline.log": {
+          "path": "/workspace/scratch/c44c63f212a5/terrain-unmasked-observer-baseline.log",
+          "bytes": 8360,
+          "sha256": "e289d07e382c3eeff375a119ccf1d4f3e740c555a076bf015f614d99f2c2d9ae"
+        },
+        "terrain-unmasked-observer-candidate.log": {
+          "path": "/workspace/scratch/c44c63f212a5/terrain-unmasked-observer-candidate.log",
+          "bytes": 2473,
+          "sha256": "6903a8e846d52d9a71331655fa544329c4aa0991ef4bafa802c922b4db93b0b7"
+        },
+        "terrain-unmasked-source-candidate.log": {
+          "path": "/workspace/scratch/c44c63f212a5/terrain-unmasked-source-candidate.log",
+          "bytes": 226,
+          "sha256": "a8410f708209ddc3382ad80bb089c63d69574a8b99100a2240f2b78287f8e6bd"
+        },
+        "framebuffer-web-full.log": {
+          "path": "/workspace/scratch/c44c63f212a5/framebuffer-web-full.log",
+          "bytes": 109122,
+          "sha256": "e18e5ad8c35e74452361ee314cff5fc47fc42899751bf9f9fa18a4b2136440d5"
+        },
+        "framebuffer-pages-unit.log": {
+          "path": "/workspace/scratch/c44c63f212a5/framebuffer-pages-unit.log",
+          "bytes": 53313,
+          "sha256": "30bb8e9d798a6591a93d49730c0d8f218a7dffbc682ffadf28157f8f9a65f253"
+        },
+        "framebuffer-lint.log": {
+          "path": "/workspace/scratch/c44c63f212a5/framebuffer-lint.log",
+          "bytes": 56,
+          "sha256": "7a52c6eaae53f1dc110842e74fbd3d95fd1293d174c3192c07e098bb21454ffc"
+        },
+        "framebuffer-types.log": {
+          "path": "/workspace/scratch/c44c63f212a5/framebuffer-types.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "framebuffer-runtime-check.log": {
+          "path": "/workspace/scratch/c44c63f212a5/framebuffer-runtime-check.log",
+          "bytes": 403,
+          "sha256": "7a6948818cb116248eb595b3fc9c6ba629cbe5932604ee084d030e45d28be7e9"
+        },
+        "framebuffer-landscape-check.log": {
+          "path": "/workspace/scratch/c44c63f212a5/framebuffer-landscape-check.log",
+          "bytes": 2952,
+          "sha256": "2921311fe642d4ff512e0bd5dd62b1beb76e668ea77d5782cecf5c5ecb78154a"
+        },
+        "framebuffer-map-shell.log": {
+          "path": "/workspace/scratch/c44c63f212a5/framebuffer-map-shell.log",
+          "bytes": 461,
+          "sha256": "6fcab9675ab4f522b381bffb93632c25aab44d382c5ff86218485f70c5a66dbc"
+        }
+      },
+      "scope": "Local checks for the dca8f32 candidate; they do not replace its complete browser acceptance or exact-APK device gate."
+    },
+    "currentCandidateScope": "Current uncommitted source snapshot. Complete local unit/tooling and canonical runtime checks passed; native browser, exact-source CI, Android/Compose/R8 and installed-APK acceptance remain pending.",
+    "currentCandidateRecord": "releaseVerification.localizedSatelliteAndNativeStartupCandidate.localValidation"
+  },
+  "releaseVerification": {
+    "pagesRun": "https://github.com/orewn/tropnik/actions/runs/43797407925",
+    "androidRun": "https://github.com/orewn/tropnik/actions/runs/43797407890",
+    "selfHostedWebRun": "https://github.com/orewn/tropnik/actions/runs/43797407868",
+    "status": "dca8f32-web-published; 45c3974-android-failed-10-of-11; dca8f32-android-zero-executed; next-working-tree-candidate-not-published",
+    "publicBuildVerified": true,
+    "firstAndroidAttempt": {
+      "sourceCommit": "204614cd17f2c95c7376e6202b0ff04fe06c3a53",
+      "run": "https://github.com/orewn/tropnik/actions/runs/43782371220",
+      "passedScenarios": 10,
+      "failedScenarios": 1,
+      "failure": "Timeout waiting for trusted browser click after native map trail tap",
+      "cause": "Unconfirmed; next test preserves input and native selection evidence even on failure",
+      "thresholdsUnchanged": true
+    },
+    "firstWebPublication": {
+      "sourceCommit": "204614cd17f2c95c7376e6202b0ff04fe06c3a53",
+      "run": "https://github.com/orewn/tropnik/actions/runs/43782371210",
+      "buildId": "de8d4e4ce32bf0b5",
+      "publicBuildVerified": true,
+      "serviceWorkerVersion": "tropnik-tropnik-shell-de8d4e4ce32bf0b5",
+      "htmlEntry": "/tropnik/assets/index--Mzd8MIF.js",
+      "existingBrowserTabUpdate": {
+        "verified": true,
+        "manualUpdateApplied": true,
+        "ready": true,
+        "reliefReady": true,
+        "pendingTiles": 0,
+        "error": ""
+      }
+    },
+    "secondWebAttempt": {
+      "sourceCommit": "de64392e2cce14f265aec5d982a7ccd26473f8e1",
+      "run": "https://github.com/orewn/tropnik/actions/runs/43784170089",
+      "conclusion": "failure",
+      "stage": "Verify native worker tile opacity with exact pixels",
+      "failure": "Immutable candidate source hash precondition failed before browser/pixel comparison",
+      "expectedWorkerSHA256": "1817903d49d61ff46bdc7c7bd4b84f724a9af3093d1439e5bf19a1c84ec789e1",
+      "actualWorkerSHA256": "f530680286e305aeb9d79bd34c7d40669a0056f059dc64905da5c54af8d06513",
+      "pixelMismatchEstablished": false,
+      "deploymentSkipped": true,
+      "repair": "Separate immutable 3cb219f worker and all old dependencies from the new production candidate; preserve zero RGBA tolerance and full matrix"
+    },
+    "secondAndroidValidation": {
+      "sourceCommit": "de64392e2cce14f265aec5d982a7ccd26473f8e1",
+      "workflowRunId": "43784169968",
+      "recordedAt": "2026-11-16T01:15:56.538787+00:00",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deviceExecutionVerified": true,
+      "installedArtifactBytesVerified": true,
+      "releasePayloadDeviceVerified": true,
+      "testedArtifact": "tropnik-preview.apk",
+      "testedArchitecture": "x86_64",
+      "arm64DeviceExecutionVerified": false,
+      "physicalDeviceVerified": false,
+      "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+      "testedApks": {
+        "tropnik-preview.apk": {
+          "bytes": 69231946,
+          "sha256": "48030be625f84b54e704254d8cf48786f230b5e5037760612b55651edce10f23"
+        },
+        "tropnik-instrumentation-tests.apk": {
+          "bytes": 1184697,
+          "sha256": "437f89123462100cba295e79b6a374ae70ee0cc393a3bf6990a1e55d3f905f84"
+        }
+      },
+      "status": "passed",
+      "publicationRequested": false,
+      "trustedNativeTrailTouch": {
+        "completed": true,
+        "actualPressMs": 100,
+        "selectedRoute": "kolyma-black-creek",
+        "nativeDownUpAndTrustedClickRecorded": true,
+        "originalDeadlinePreserved": true
+      }
+    },
+    "webReleaseCandidateCommit": null,
+    "baselineGateRepair": {
+      "sourceCommit": "205d71c0f8236e873e1462d6363508eeef293823",
+      "baselineCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+      "immutableBaselineFiles": 7,
+      "baselineAndCandidateClosuresSeparate": true,
+      "tamperCheckedSourceFiles": 14,
+      "focusedTestsPassed": 5,
+      "nativePixelCases": 48,
+      "nativePixelComparisons": 144,
+      "nativePNGs": 288,
+      "nativeWorkers": 96,
+      "nativeDPRs": [
+        1,
+        1.5,
+        2
+      ],
+      "nativeRGBAAllowedDifference": 0,
+      "runtimeChanged": false
+    },
+    "thirdWebAttempt": {
+      "sourceCommit": "205d71c0f8236e873e1462d6363508eeef293823",
+      "run": "https://github.com/orewn/tropnik/actions/runs/43787684521",
+      "conclusion": "failure",
+      "stage": "Check UI smoothness before the full browser audit",
+      "failure": "Desktop Altai region did not finish all visible detail jobs within the unchanged 15000ms camera-settle deadline",
+      "workerPixelComparisonExecuted": false,
+      "deploymentSkipped": true,
+      "sourceBuildId": "07e889fe1fc7f37e",
+      "webTestsPassed": 1032,
+      "pagesToolingTestsPassed": 406,
+      "visibleCells": 64,
+      "readyCells": 53,
+      "pendingTileJobs": 11,
+      "fetching": 3,
+      "decoding": 1,
+      "foregroundReadsAmongThreeActiveFetches": 2,
+      "speculativeReadsAmongThreeActiveFetches": 1,
+      "last32CompletedFetches": {
+        "demandedZ7": 24,
+        "speculativeZ10": 8
+      },
+      "infiniteDeadlockEstablished": false,
+      "networkWasStillProgressing": true,
+      "note": "External-response durations also differed across runs. Competing prefetch is a confirmed additional cost, not proof of the sole cause or a guarantee of any network SLA."
+    },
+    "foregroundDemandCandidate": {
+      "sourceCommit": null,
+      "sourceStatus": "working-tree source freeze; historical commits above are not verification of this candidate",
+      "ciStatus": "pending",
+      "livePublicationStatus": "pending",
+      "livePublicationVerified": false,
+      "publicAPKStatus": "pending web acceptance and a new exact-APK release gate",
+      "historicalAndroid11Of11IsCurrentCandidateValidation": false,
+      "gateThresholdsUnchanged": true,
+      "recordScope": "Historical pre-commit source-freeze snapshot; superseded by foregroundDemandCandidate70689a3."
+    },
+    "foregroundDemandCandidate70689a3": {
+      "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+      "sourceTree": "ea4f8f55973561f9dd181f917112bbfd50f9dabf",
+      "parentCommit": "205d71c0f8236e873e1462d6363508eeef293823",
+      "mainUpdatedAtUTC": "2026-11-16T02:14Z",
+      "status": "pages-published-and-independent-public-files-verified",
+      "runtime": {
+        "sourceInputs": 61,
+        "outputFiles": 12,
+        "aliases": 1746,
+        "sourceInputsSHA256": "7b5f337cc10d4bafb38e8d28b2941aa33157baded38b52b5dd66c2715e2a1add",
+        "manifestSHA256": "fd073b1068f6cc95ca61697e9a3bbe3d5fe482ef2eb4da13242166bd323b3d74"
+      },
+      "localValidation": {
+        "fullWebTests": {
+          "passed": 1041,
+          "failed": 0,
+          "durationMs": 76995.236759
+        },
+        "lint": {
+          "status": "passed",
+          "exitCode": 0
+        },
+        "typescript": {
+          "status": "passed",
+          "exitCode": 0
+        },
+        "verifyMapShell": {
+          "status": "passed",
+          "files": 648,
+          "shellFiles": 24,
+          "sharedFiles": 9,
+          "territories": 85,
+          "sources": 615
+        },
+        "initialFullWebAttempt": {
+          "failed": 11,
+          "cause": "The service-worker inventory still referenced the previous generated runtime chunk.",
+          "repair": "Canonical prepare-offline followed by stamp regenerated the consistent inventory.",
+          "originalLogPreserved": true,
+          "subsequentFullRunPassed": true,
+          "historicalFailuresRetained": true
+        }
+      },
+      "workflows": {
+        "pages": {
+          "runId": "43790896577",
+          "url": "https://github.com/orewn/tropnik/actions/runs/43790896577",
+          "buildJobId": "133048829650",
+          "status": "completed",
+          "conclusion": "success",
+          "deployVerifiedAtUTC": "2026-11-16T02:41:23Z"
+        },
+        "android": {
+          "runId": "43790896568",
+          "url": "https://github.com/orewn/tropnik/actions/runs/43790896568",
+          "buildJobId": "133048829076",
+          "status": "in_progress",
+          "statusScope": "Historical 02:14 UTC submission snapshot; this receipt update does not refresh this separate workflow status."
+        },
+        "selfHostedWeb": {
+          "runId": "43790896719",
+          "url": "https://github.com/orewn/tropnik/actions/runs/43790896719",
+          "status": "in_progress",
+          "statusScope": "Historical 02:14 UTC submission snapshot; this receipt update does not refresh this separate workflow status."
+        }
+      },
+      "nativePixelProofStatus": "passed all 48 cases and 144 exact comparisons with zero RGBA difference",
+      "livePublicationStatus": "published",
+      "livePublicationVerified": true,
+      "publicAPKStatus": "First 0.4.34-preview request, run 43794472635, completed 10/11 and did not publish; public APK remains 0.4.33-preview. The separate framebuffer candidate is recorded under framebufferRotationCandidateDca8f32.",
+      "androidMetadataDraft": {
+        "baseCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+        "location": "release/android-0.4.34-main-20261116",
+        "runtimeChanged": false,
+        "publicationStatus": "The manual release request was made after Pages acceptance, then failed the exact-APK device gate with 10/11; no public APK was produced.",
+        "sourceCommit": "45c3974ad37ee5d312f87179c16633b88e62a033",
+        "metadataOnly": true,
+        "commitMessageSkipCI": true
+      },
+      "historicalResultsAreNotCurrentCandidateAcceptance": true,
+      "gateThresholdsUnchanged": true,
+      "statusHistory": [
+        {
+          "recordedAtUTC": "2026-11-16T02:14Z",
+          "status": "ci-in-progress-not-live",
+          "nativePixelProofStatus": "pending",
+          "livePublicationVerified": false,
+          "scope": "Original candidate submission snapshot; retained as history."
+        },
+        {
+          "recordedAtUTC": "2026-11-16T02:49:37Z",
+          "publicAPKStatus": "0.4.34-preview requested in run 43794472635; not published at this snapshot; public APK remains 0.4.33-preview",
+          "androidMetadataPublicationStatus": "Manual release workflow requested after Pages acceptance; exact-APK gates in progress.",
+          "scope": "Submission-time Android release status retained before the completed 45c3974 failure."
+        }
+      ],
+      "acceptance": {
+        "webTests": {
+          "passed": 1041,
+          "failed": 0
+        },
+        "pagesToolingTests": {
+          "passed": 406,
+          "failed": 0
+        },
+        "fullBrowser": {
+          "verified": true,
+          "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+          "rawReceipt": "fullBrowser",
+          "environmentProfile": "chromium-headless-software-swiftshader-webgl-v1",
+          "environmentCapturedAtUTC": "2026-11-16T02:21:09.797Z",
+          "browser": "Chrome/157.0.8103.50",
+          "siteSmoothness": {
+            "profiles": [
+              {
+                "schemaVersion": 1,
+                "profile": "android-portrait",
+                "engine": "tropnik-canvas",
+                "input": "touch",
+                "physicalDevice": false,
+                "cpuSlowdownRate": 1,
+                "cpuThrottleRestored": true,
+                "instrumented": false,
+                "passed": true,
+                "performanceIssues": [],
+                "performancePassed": true,
+                "scenarios": [
+                  {
+                    "name": "panel",
+                    "durationMs": 2192,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 31
+                    },
+                    "inputToNextFrame": {
+                      "count": 6,
+                      "p95Ms": 64.69999999995343,
+                      "maxMs": 64.69999999995343
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "explore-search",
+                    "durationMs": 1796.4000000000233,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 20.399999999906868
+                    },
+                    "inputToNextFrame": {
+                      "count": 28,
+                      "p95Ms": 64.59999999997672,
+                      "maxMs": 64.79999999993015
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "explore-filters",
+                    "durationMs": 2179.5999999999767,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 17
+                    },
+                    "inputToNextFrame": {
+                      "count": 8,
+                      "p95Ms": 47.70000000006985,
+                      "maxMs": 47.70000000006985
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "catalog-scroll",
+                    "durationMs": 861.5999999999767,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 22.70000000006985,
+                      "maxGapMs": 23
+                    },
+                    "inputToNextFrame": {
+                      "count": 1,
+                      "p95Ms": 48.29999999993015,
+                      "maxMs": 48.29999999993015
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "map-pan",
+                    "durationMs": 1348.4000000000233,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 23.199999999953434,
+                      "maxGapMs": 26
+                    },
+                    "inputToNextFrame": {
+                      "count": 1,
+                      "p95Ms": 46.40000000002328,
+                      "maxMs": 46.40000000002328
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "map-zoom",
+                    "durationMs": 7115.100000000093,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 22.300000000046566,
+                      "maxGapMs": 43.59999999997672
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 64.30000000004657,
+                      "maxMs": 64.30000000004657
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "layer-switch",
+                    "durationMs": 4497.599999999977,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 30.5
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 66,
+                      "maxMs": 66
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "site-search",
+                    "durationMs": 1585.7999999999302,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 16.900000000023283,
+                      "maxGapMs": 17.900000000023283
+                    },
+                    "inputToNextFrame": {
+                      "count": 34,
+                      "p95Ms": 47.59999999997672,
+                      "maxMs": 47.699999999953434
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  }
+                ],
+                "mapPanP95Ms": 23.2,
+                "mapZoomP95Ms": 22.3
+              },
+              {
+                "schemaVersion": 1,
+                "profile": "desktop-webgl",
+                "engine": "tropnik-canvas",
+                "input": "mouse",
+                "physicalDevice": false,
+                "cpuSlowdownRate": 1,
+                "cpuThrottleRestored": true,
+                "instrumented": false,
+                "passed": true,
+                "performanceIssues": [],
+                "performancePassed": true,
+                "scenarios": [
+                  {
+                    "name": "panel",
+                    "durationMs": 1211.5999999998603,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 17.299999999813735
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 32.799999999813735,
+                      "maxMs": 32.799999999813735
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "explore-search",
+                    "durationMs": 1548.5,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17.800000000046566,
+                      "maxGapMs": 21.600000000093132
+                    },
+                    "inputToNextFrame": {
+                      "count": 28,
+                      "p95Ms": 36.10000000009313,
+                      "maxMs": 38
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "explore-filters",
+                    "durationMs": 1849.1000000000931,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 16.899999999906868,
+                      "maxGapMs": 17.4000000001397
+                    },
+                    "inputToNextFrame": {
+                      "count": 8,
+                      "p95Ms": 32.9000000001397,
+                      "maxMs": 32.9000000001397
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "catalog-scroll",
+                    "durationMs": 447.60000000009313,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 16.9000000001397,
+                      "maxGapMs": 19.300000000046566
+                    },
+                    "inputToNextFrame": {
+                      "count": 1,
+                      "p95Ms": 44.89999999990687,
+                      "maxMs": 44.89999999990687
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "map-pan",
+                    "durationMs": 3197,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 29.5999999998603,
+                      "maxGapMs": 35.300000000046566
+                    },
+                    "inputToNextFrame": {
+                      "count": 2,
+                      "p95Ms": 47.5,
+                      "maxMs": 47.5
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "map-zoom",
+                    "durationMs": 10298.5,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 21.699999999953434,
+                      "maxGapMs": 41.699999999953434
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 47.10000000009313,
+                      "maxMs": 47.10000000009313
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "layer-switch",
+                    "durationMs": 4314,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 16.9000000001397,
+                      "maxGapMs": 32.5
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 47.39999999990687,
+                      "maxMs": 47.39999999990687
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "site-search",
+                    "durationMs": 1477,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17.300000000046566,
+                      "maxGapMs": 18.300000000046566
+                    },
+                    "inputToNextFrame": {
+                      "count": 34,
+                      "p95Ms": 33.199999999953434,
+                      "maxMs": 34.199999999953434
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  }
+                ],
+                "mapPanP95Ms": 29.6,
+                "mapZoomP95Ms": 21.7
+              }
+            ],
+            "scenarioCount": 16,
+            "longTaskCount": 0,
+            "worstInputToNextFrameMs": 66,
+            "maximumFrameGapMs": 43.6,
+            "panZoomP95LimitMs": 35,
+            "metricScope": "requestAnimationFrame callback intervals and input-to-next-frame opportunities; not physical display presentation, device FPS, or field INP"
+          },
+          "broaderAuditLongTasks": {
+            "mapInteractions": [
+              {
+                "profile": "android-portrait",
+                "longestTaskMs": 0
+              },
+              {
+                "profile": "desktop-webgl",
+                "longestTaskMs": 149
+              }
+            ],
+            "zoomDesigns": [
+              {
+                "profile": "android-portrait",
+                "longestTaskMs": 0
+              },
+              {
+                "profile": "desktop-webgl",
+                "longestTaskMs": 67
+              }
+            ],
+            "zeroLongTasksAcrossWholeAudit": false,
+            "scope": "The zero count belongs only to the sixteen siteSmoothness windows; the broader desktop interaction and zoom audits include 149ms and 67ms tasks."
+          }
+        },
+        "earlyUISmoothnessDiagnostic": {
+          "schemaVersion": 1,
+          "environment": {
+            "schemaVersion": 1,
+            "profile": "chromium-headless-software-swiftshader-webgl-v1",
+            "collection": "browser-target-cdp-before-measurement",
+            "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+            "capturedAt": "2026-11-16T02:17:54.527Z",
+            "requestedFlags": [
+              "--headless=new",
+              "--no-sandbox",
+              "--disable-dev-shm-usage",
+              "--disable-background-networking",
+              "--disable-component-update",
+              "--disable-default-apps",
+              "--disable-extensions",
+              "--disable-features=Translate,MediaRouter",
+              "--mute-audio",
+              "--no-first-run",
+              "--use-gl=angle",
+              "--use-angle=swiftshader-webgl",
+              "--enable-unsafe-swiftshader",
+              "--window-size=1920,1920",
+              "--ozone-override-screen-size=1920,1920"
+            ],
+            "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=44385 --user-data-dir=/tmp/tropnik-chrome-5202 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+            "browser": {
+              "product": "Chrome/157.0.8103.50",
+              "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+              "protocolVersion": "1.3",
+              "jsVersion": "15.7.112.23",
+              "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+            },
+            "gpu": {
+              "devices": [
+                {
+                  "vendorId": 65535,
+                  "deviceId": 65535,
+                  "vendorString": "Google Inc. (Google)",
+                  "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+                  "driverVendor": "SwANGLE",
+                  "driverVersion": "5.0.0"
+                }
+              ],
+              "auxAttributes": {
+                "displayType": "ANGLE_SWIFTSHADER",
+                "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+                "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+                "glVendor": "Google Inc. (Google)",
+                "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+                "skiaBackendType": "None",
+                "targetCpuBits": 64
+              },
+              "featureStatus": {
+                "2d_canvas": "unavailable_software",
+                "direct_rendering_display_compositor": "disabled_off_ok",
+                "gpu_compositing": "disabled_software",
+                "multiple_raster_threads": "enabled_on",
+                "opengl": "disabled_off",
+                "rasterization": "disabled_software",
+                "skia_graphite": "disabled_off",
+                "trees_in_viz": "disabled_off",
+                "video_decode": "disabled_software",
+                "video_encode": "disabled_software",
+                "vulkan": "disabled_off",
+                "webgl": "unavailable_software",
+                "webgpu": "unavailable_software",
+                "webgpu_on_vk_via_gl_interop": "disabled_off",
+                "webnn": "unavailable_software"
+              }
+            },
+            "runner": {
+              "os": {
+                "platform": "linux",
+                "release": "7.0.0-1014-aws",
+                "version": "#14~24.04.1-Ubuntu SMP PREEMPT Fri Sep 18 21:24:59 UTC 2026",
+                "arch": "x64"
+              },
+              "cpu": {
+                "models": [
+                  "Intel(R) Xeon(R) 6975P-C"
+                ],
+                "logicalCount": 4,
+                "availableParallelism": 4
+              },
+              "totalMemoryBytes": 16464306176,
+              "image": {
+                "os": "ubuntu24",
+                "version": "20261111.127.1"
+              }
+            },
+            "nativeSurface": {
+              "schemaVersion": 1,
+              "collection": "blank-target-before-emulation",
+              "window": {
+                "left": 10,
+                "top": 10,
+                "width": 1920,
+                "height": 1920,
+                "windowState": "normal"
+              },
+              "viewport": {
+                "url": "about:blank",
+                "visibilityState": "visible",
+                "innerWidth": 1920,
+                "innerHeight": 1833,
+                "outerWidth": 1920,
+                "outerHeight": 1920,
+                "devicePixelRatio": 1,
+                "screen": {
+                  "width": 1920,
+                  "height": 1920,
+                  "availWidth": 1920,
+                  "availHeight": 1920
+                }
+              }
+            }
+          },
+          "diagnostic": "ui-smoothness",
+          "diagnosticOnly": true,
+          "verified": false,
+          "releaseEligible": false,
+          "status": "completed",
+          "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+          "performanceIssues": [],
+          "performancePassed": true,
+          "updatedAt": "2026-11-16T02:19:02.747Z",
+          "rawReceipt": "earlyUISmoothnessDiagnostic",
+          "measurement": {
+            "profiles": [
+              {
+                "schemaVersion": 1,
+                "profile": "android-portrait",
+                "engine": "tropnik-canvas",
+                "input": "touch",
+                "physicalDevice": false,
+                "cpuSlowdownRate": 1,
+                "cpuThrottleRestored": true,
+                "instrumented": false,
+                "passed": true,
+                "performanceIssues": [],
+                "performancePassed": true,
+                "scenarios": [
+                  {
+                    "name": "panel",
+                    "durationMs": 2141.2000000000116,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 30.599999999976717
+                    },
+                    "inputToNextFrame": {
+                      "count": 6,
+                      "p95Ms": 64.60000000003492,
+                      "maxMs": 64.60000000003492
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "explore-search",
+                    "durationMs": 1796.899999999965,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17.099999999976717,
+                      "maxGapMs": 20
+                    },
+                    "inputToNextFrame": {
+                      "count": 28,
+                      "p95Ms": 64.5,
+                      "maxMs": 64.69999999995343
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "explore-filters",
+                    "durationMs": 2178.4000000000233,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 17.70000000001164
+                    },
+                    "inputToNextFrame": {
+                      "count": 8,
+                      "p95Ms": 48.100000000034925,
+                      "maxMs": 48.100000000034925
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "catalog-scroll",
+                    "durationMs": 861.7999999999884,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 22.599999999976717,
+                      "maxGapMs": 22.70000000001164
+                    },
+                    "inputToNextFrame": {
+                      "count": 1,
+                      "p95Ms": 48.90000000002328,
+                      "maxMs": 48.90000000002328
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "map-pan",
+                    "durationMs": 1347.9000000000233,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 21.5,
+                      "maxGapMs": 24.899999999965075
+                    },
+                    "inputToNextFrame": {
+                      "count": 1,
+                      "p95Ms": 46,
+                      "maxMs": 46
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "map-zoom",
+                    "durationMs": 6881.299999999988,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 20.600000000034925,
+                      "maxGapMs": 33.29999999998836
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 64.60000000003492,
+                      "maxMs": 64.60000000003492
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "layer-switch",
+                    "durationMs": 5197.5,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 30
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 64.60000000003492,
+                      "maxMs": 64.60000000003492
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "site-search",
+                    "durationMs": 1573.7000000000116,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 18
+                    },
+                    "inputToNextFrame": {
+                      "count": 34,
+                      "p95Ms": 46,
+                      "maxMs": 47.90000000002328
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  }
+                ],
+                "mapPanP95Ms": 21.5,
+                "mapZoomP95Ms": 20.6
+              },
+              {
+                "schemaVersion": 1,
+                "profile": "desktop-webgl",
+                "engine": "tropnik-canvas",
+                "input": "mouse",
+                "physicalDevice": false,
+                "cpuSlowdownRate": 1,
+                "cpuThrottleRestored": true,
+                "instrumented": false,
+                "passed": true,
+                "performanceIssues": [],
+                "performancePassed": true,
+                "scenarios": [
+                  {
+                    "name": "panel",
+                    "durationMs": 1211.100000000035,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 16.900000000023283,
+                      "maxGapMs": 17.100000000034925
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 32.600000000034925,
+                      "maxMs": 32.600000000034925
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "explore-search",
+                    "durationMs": 1548.5,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17.899999999965075,
+                      "maxGapMs": 24.600000000034925
+                    },
+                    "inputToNextFrame": {
+                      "count": 28,
+                      "p95Ms": 35.40000000002328,
+                      "maxMs": 35.5
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "explore-filters",
+                    "durationMs": 1848.7999999999884,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17,
+                      "maxGapMs": 17.5
+                    },
+                    "inputToNextFrame": {
+                      "count": 8,
+                      "p95Ms": 33.100000000034925,
+                      "maxMs": 33.100000000034925
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "catalog-scroll",
+                    "durationMs": 448.29999999998836,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 18.300000000046566,
+                      "maxGapMs": 19
+                    },
+                    "inputToNextFrame": {
+                      "count": 1,
+                      "p95Ms": 45.899999999965075,
+                      "maxMs": 45.899999999965075
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "map-pan",
+                    "durationMs": 4164.099999999977,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 29.600000000034925,
+                      "maxGapMs": 34.40000000002328
+                    },
+                    "inputToNextFrame": {
+                      "count": 2,
+                      "p95Ms": 47.59999999997672,
+                      "maxMs": 47.59999999997672
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "map-zoom",
+                    "durationMs": 10698.100000000035,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 21.899999999965075,
+                      "maxGapMs": 43.5
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 49.29999999998836,
+                      "maxMs": 49.29999999998836
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "layer-switch",
+                    "durationMs": 3930.5,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17.099999999976717,
+                      "maxGapMs": 33.09999999997672
+                    },
+                    "inputToNextFrame": {
+                      "count": 4,
+                      "p95Ms": 47.899999999965075,
+                      "maxMs": 47.899999999965075
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  },
+                  {
+                    "name": "site-search",
+                    "durationMs": 1470.8000000000466,
+                    "supported": {
+                      "longtask": true,
+                      "event": true,
+                      "layout-shift": true
+                    },
+                    "errors": [],
+                    "overflow": false,
+                    "hidden": false,
+                    "pendingInputFrames": 0,
+                    "frames": {
+                      "p95Ms": 17.20000000001164,
+                      "maxGapMs": 18.20000000001164
+                    },
+                    "inputToNextFrame": {
+                      "count": 34,
+                      "p95Ms": 33.399999999965075,
+                      "maxMs": 34.5
+                    },
+                    "longTasks": {
+                      "count": 0,
+                      "totalMs": 0
+                    }
+                  }
+                ],
+                "mapPanP95Ms": 29.6,
+                "mapZoomP95Ms": 21.9
+              }
+            ],
+            "scenarioCount": 16,
+            "longTaskCount": 0,
+            "worstInputToNextFrameMs": 64.7,
+            "maximumFrameGapMs": 43.5,
+            "panZoomP95LimitMs": 35,
+            "metricScope": "requestAnimationFrame callback intervals and input-to-next-frame opportunities; not physical display presentation, device FPS, or field INP"
+          },
+          "scope": "Earlier independent diagnostic window; original diagnosticOnly/verified/releaseEligible flags preserved. Its values do not replace the verified full browser audit."
+        },
+        "nativeWorkerTileOpacity": {
+          "verified": true,
+          "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+          "buildId": "676a297458f76653",
+          "rawReceipt": "nativeWorkerTileOpacity",
+          "matrix": {
+            "dpr": [
+              1,
+              1.5,
+              2
+            ],
+            "softwareRaster": [
+              false,
+              true
+            ],
+            "scenarios": [
+              "vector-z7",
+              "vector-z12",
+              "vector-z14",
+              "empty-mvt",
+              "overzoom18-child5-7",
+              "transparent-z14",
+              "transparent-empty",
+              "relief-z12"
+            ]
+          },
+          "cases": 48,
+          "comparisons": 144,
+          "pngs": 288,
+          "workers": 96,
+          "differentPixels": 0,
+          "maxChannelDelta": 0,
+          "comparedPixels": 58195968,
+          "rgbaAllowedDifference": 0,
+          "allCasesVerified": true,
+          "baselineCommit": "3cb219fdd8380fcf2580bfe37aa7d1f47523ba08",
+          "immutableBaselineClosureSeparate": true,
+          "alphaMetadataTransferAndCleanupChecksPassed": true,
+          "lateHaloNativePixelProofClaimed": false,
+          "lateHaloProofScope": "Separate nine-stage byte-equivalence oracle; this native browser relief case covers cold initial rendering."
+        },
+        "progressiveMapLoading": {
+          "verified": true,
+          "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+          "buildId": "676a297458f76653",
+          "rawReceipt": "progressiveMapLoading",
+          "finishedAtUTC": "2026-11-16T02:17:37.329Z",
+          "beforeAtEpochMs": 1794795450999,
+          "completeAtEpochMs": 1794795456932,
+          "beforeToCompleteMs": 5933,
+          "intentionalHaloHoldMs": 489.902481,
+          "heldURL": "https://tiles.mapterhorn.com/11/1345/620.webp",
+          "finalState": {
+            "ready": true,
+            "loading": false,
+            "mode": "detail",
+            "committedMode": "detail",
+            "imageryLoading": false,
+            "reliefReady": true,
+            "localDetail": false,
+            "error": "",
+            "residentTiles": 96,
+            "pendingTiles": 0
+          },
+          "finalResources": {
+            "resident": 96,
+            "pending": 0,
+            "fetching": 0,
+            "decoding": false,
+            "enabled": true,
+            "failedSources": 0,
+            "stages": {},
+            "errors": []
+          },
+          "pageErrors": [],
+          "localHttpErrors": [],
+          "scope": "Real fetch/decoder/painter with an intentionally held DEM halo; not an Altai settle duration or provider-speed benchmark."
+        },
+        "altaiSettleGate": {
+          "passed": true,
+          "deadlineMs": 15000,
+          "deadlineUnchanged": true,
+          "cleanSettleDurationMs": null,
+          "excludedNavigationIntervalsMs": [
+            5606,
+            7017
+          ],
+          "reason": "The recorded intervals include broader navigation. No isolated settleMapCamera duration was recorded."
+        }
+      },
+      "publicVerification": {
+        "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+        "buildId": "676a297458f76653",
+        "deployVerifiedAtUTC": "2026-11-16T02:41:23Z",
+        "independentHTTPVerifiedAtUTC": "2026-11-16T02:42:04Z",
+        "htmlEntry": "/tropnik/assets/index-CWWg8Jho.js",
+        "serviceWorkerVersion": "tropnik-tropnik-shell-676a297458f76653",
+        "sourceBuildEntryAndServiceWorkerMatched": true,
+        "existingBrowserTabUpdate": {
+          "tabId": "30",
+          "oldEntry": "/tropnik/assets/index--Mzd8MIF.js",
+          "newEntry": "/tropnik/assets/index-CWWg8Jho.js",
+          "manualUpdateApplied": true,
+          "updateControl": "Обновить",
+          "satelliteAllReady": true,
+          "reliefZoom8AllReady": true,
+          "altai": {
+            "center": [
+              87.292029,
+              50.5
+            ],
+            "zoom": 6.1,
+            "ready": true,
+            "reliefReady": true,
+            "pending": 0,
+            "fetching": 0,
+            "errors": []
+          },
+          "scope": "Direct observation of the existing live user tab after the normal update action."
+        },
+        "screenshot": {
+          "path": "docs/verification/map-loading-70689a3.jpg",
+          "recordedAtUTC": "2026-11-16T02:46:09.700Z",
+          "bytes": 170383,
+          "sha256": "57a6b73bedb2544cf5e8665d521e6a15a92f69c21c07c0ae7888cfc90aba77c9"
+        }
+      },
+      "rawReceipts": {
+        "fullBrowser": {
+          "filename": "70689a3-browser-verification.json",
+          "bytes": 17289919,
+          "sha256": "6293447adbf698470bc3c9da89e4e7a40b0078d6081400775f92dd99d51dc74d",
+          "workflowRunId": "43790896577",
+          "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3"
+        },
+        "earlyUISmoothnessDiagnostic": {
+          "filename": "70689a3-browser-ui-smoothness-diagnostic.json",
+          "bytes": 528367,
+          "sha256": "589ce4d7d0f88007c9b08ca114ba6011f9d96809353638623120ee8117155210",
+          "workflowRunId": "43790896577",
+          "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3"
+        },
+        "progressiveMapLoading": {
+          "filename": "70689a3-browser-map-loading-verification.json",
+          "bytes": 1709029,
+          "sha256": "8df15bed63ed4d4f31a53b8633b2f1f7b6fada70b13eb010fd520b7b6ad7797f",
+          "workflowRunId": "43790896577",
+          "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3"
+        },
+        "nativeWorkerTileOpacity": {
+          "filename": "70689a3-browser-map-tile-opacity-verification.json",
+          "bytes": 599331,
+          "sha256": "ce8884fa4f17a52f179a35fc607e9eb1dbdbf617accc047c766b8d076aadde18",
+          "workflowRunId": "43790896577",
+          "sourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3"
+        }
+      },
+      "supersededByWebSourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+      "recordScope": "Historical accepted publication and its own browser/screenshot evidence; superseded by the accepted dca8f32 web publication."
+    },
+    "currentCandidateRecord": "localizedSatelliteAndNativeStartupCandidate",
+    "selfHostedWebRunScope": "Successful validation of the dca8f32 Next standalone preview; not evidence of production API deployment.",
+    "androidReleaseRequest034": {
+      "version": "0.4.34-preview",
+      "versionCode": 17,
+      "requestId": "android-0-4-34-preview-map-loading-20261116",
+      "sourceCommit": "45c3974ad37ee5d312f87179c16633b88e62a033",
+      "baseRuntimeSourceCommit": "70689a39fe0775a1456eec93235f101d9f40e6b3",
+      "metadataOnly": true,
+      "runtimeChanged": false,
+      "commitMessageSkipCI": true,
+      "event": "workflow_dispatch",
+      "inputs": {
+        "run_instrumentation": true,
+        "publish_preview": true
+      },
+      "workflowRunId": "43794472635",
+      "url": "https://github.com/orewn/tropnik/actions/runs/43794472635",
+      "createdAtUTC": "2026-11-16T02:49:37Z",
+      "buildJobId": "133060039949",
+      "status": "completed",
+      "published": false,
+      "publicAPKVersionAtSnapshot": "0.4.33-preview",
+      "scope": "First explicit new exact-APK release request after web acceptance. It failed its original WebGL2 rotation assertion; its APK was not published. Historical and later successes are separate attempts.",
+      "statusHistory": [
+        {
+          "recordedAtUTC": "2026-11-16T02:49:37Z",
+          "status": "in_progress",
+          "published": false,
+          "scope": "Original release-request submission snapshot retained before recording its completed failure."
+        }
+      ],
+      "conclusion": "failure",
+      "buildConclusion": "success",
+      "deviceJobId": "133063003869",
+      "deviceResult": {
+        "status": "failed",
+        "tests": 11,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "deviceExecutionVerified": false,
+        "installedArtifactBytesVerified": true,
+        "releasePayloadDeviceVerified": false,
+        "testedArchitecture": "x86_64",
+        "physicalDeviceVerified": false
+      },
+      "passedScenarios": 10,
+      "failedScenarios": 1,
+      "candidateApk": {
+        "artifactName": "tropnik-preview.apk",
+        "bytes": 69231946,
+        "sha256": "d786eaabbef1a3b1a0a91a3ce087821c03b7dba986c84a93d3dec34223bac97d",
+        "publiclyReleased": false
+      },
+      "failure": {
+        "case": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+        "outerAssertion": "No visible terrain pixels in the central WebView rectangle",
+        "actualPixelCheckPassed": true,
+        "nestedAssertion": "The emulator must retain WebGL2",
+        "expected": "webgl2",
+        "actual": "canvas2d",
+        "testSourceLocations": [
+          "LocalExperienceTest.kt:1164",
+          "LocalExperienceTest.kt:1259",
+          "LocalExperienceTest.kt:1494",
+          "LocalExperienceTest.kt:1319"
+        ],
+        "firstGlTrace": {
+          "line": 43119,
+          "text": "11-16 03:03:09.586  2439  3160 E emuglGLESv2_enc: hardware/google/gfxstream/guest/GLESv2_enc/GL2Encoder.cpp:s_glGetRenderbufferParameteriv:6744 GL error 0x502 condition [0 == ctx->m_state->boundRenderbuffer()]"
+        },
+        "corroboratingGlTraces": [
+          {
+            "line": 43120,
+            "text": "11-16 03:03:09.586  2439  3160 E chromium: [ERROR:gles2_cmd_decoder_autogen.h(1779)] [.WebGL-0x20fc00af6900]GL ERROR :GL_INVALID_OPERATION : GetRenderbufferParameteriv: "
+          },
+          {
+            "line": 43137,
+            "text": "11-16 03:03:09.623  2439  2439 I chromium: [INFO:CONSOLE(0)] \"[.WebGL-0x20fc00af6900]GL ERROR :GL_INVALID_OPERATION : GetRenderbufferParameteriv: \", source: https://appassets.androidplatform.net/landscape/ (0)"
+          }
+        ],
+        "fallback": {
+          "stage": "render",
+          "reason": "Terrain framebuffer sample count changed"
+        },
+        "interpretation": "Observed MSAA sample-count query failure after orientation change while no renderbuffer was bound, followed by application Canvas2D fallback. The outer pixel-error label does not describe the nested failure. Source-level cause remains for renderer investigation; this report does not classify the event as an environment flake."
+      },
+      "failureEvidence": {
+        "path": "docs/verification/android-0.4.34-attempt1.json",
+        "bytes": 16968,
+        "sha256": "0b64d26dbe09df2c8f4c3de14a0fc4ff8382b40d076a323e1ac69eeb26ed9ab7"
+      },
+      "deviceArtifact": {
+        "id": 14194700370,
+        "name": "tropnik-android-api35-instrumentation-1",
+        "bytes": 7901600,
+        "sha256": "e0a1461d98f67715a089701f2c7fb178bd115fd0b1605aa0aa463f03e7c2062b",
+        "archiveDigestVerified": true
+      },
+      "publication": {
+        "publishJobId": 133064310722,
+        "publishConclusion": "skipped",
+        "publicVerificationJobId": 133064310141,
+        "publicVerificationConclusion": "skipped",
+        "releaseLookup": {
+          "url": "https://api.github.com/repos/orewn/tropnik/releases/tags/v0.4.34-preview",
+          "checkedAtUtc": "2026-11-16T03:12:01Z",
+          "httpStatus": 404,
+          "message": "Not Found"
+        },
+        "generatedUniversalWebsiteManifestAvailable": false,
+        "publicCertificateComparisonAvailable": false,
+        "publicWebsiteUnchangedByThisFailure": true
+      },
+      "nextCandidateRecord": "framebufferRotationCandidateDca8f32"
+    },
+    "framebufferRotationCandidateDca8f32": {
+      "sourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+      "sourceTree": "f1566121fb672f1f944ba9cae5d0a46d809d6279",
+      "parentCommit": "45c3974ad37ee5d312f87179c16633b88e62a033",
+      "createdAtUTC": "2026-11-16T03:18:37Z",
+      "status": "web-published-and-publicly-verified; android-push-stopped-before-instrumentation",
+      "rendererSHA256": "63d759259b0cebdb40530cf00d454c0d10f34e1626ef58709d1a7e4f4564882a",
+      "localValidationRecord": "localValidation.framebufferRotationRepair",
+      "triggeringFailureRecord": "releaseVerification.androidReleaseRequest034",
+      "runtime": {
+        "sourceInputs": 61,
+        "outputFiles": 12,
+        "aliases": 1746,
+        "sourceInputsSHA256": "a42e8753de5e93999b8d98e038666225ad5ab5ea41f604ef8b4d18f18144e421",
+        "manifestSHA256": "9b3d7eec2be92682150c905a05fba41391e281dd5967082361b3ae2ff8ec0250",
+        "webAndAndroidCopiesMatch": true,
+        "sharedJavaScriptAndChunksChanged": false,
+        "standaloneWebAndAndroidScenesRegenerated": true,
+        "offlineSceneInventoryAndServiceWorkerRegenerated": true
+      },
+      "qualityRequirements": {
+        "actualBoundFramebufferSamplesStrictEquality": true,
+        "completeFramebufferRequired": true,
+        "actualAttachmentRGBAlphaDepthStencilStrictEquality": true,
+        "finalGLErrorCheckPreserved": true,
+        "resourceCleanupPreserved": true,
+        "shadersAndGeometryUnchanged": true,
+        "DPRMeshStrideAndMSAAUnchanged": true,
+        "publicationGateThresholdsUnchanged": true,
+        "nativePixelAcceptance": "All targeted pixel gates, the full four-profile browser matrix, deployment and public verification passed on exact dca8f32. Android installed-byte/device acceptance remains absent."
+      },
+      "workflows": {
+        "pages": {
+          "runId": "43797407925",
+          "url": "https://github.com/orewn/tropnik/actions/runs/43797407925",
+          "buildJobId": "133069248020",
+          "status": "completed",
+          "conclusion": "success",
+          "targetedNativeGates": {
+            "observedAtUTC": "2026-11-16T03:25:40Z",
+            "status": "passed",
+            "steps": [
+              {
+                "name": "Verify worker trail pixels against the direct renderer",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify native worker tile opacity with exact pixels",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify production Canvas underlay pixel parity",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify Russia mask pixels and GPU context recovery",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify full-mask shader pixel parity at both device pixel ratios",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify completed-frame presentation against the immutable direct renderer",
+                "conclusion": "success"
+              },
+              {
+                "name": "Verify unmasked Android terrain, GPU allocation and resize pixel parity",
+                "conclusion": "success"
+              }
+            ],
+            "scope": "Historical targeted-gate snapshot at 03:25:40 UTC. Full browser acceptance and deployment subsequently succeeded; see fullBrowserMatrix and publicVerification."
+          },
+          "activeStage": null,
+          "buildStartedAtUTC": "2026-11-16T03:18:40Z",
+          "buildCompletedAtUTC": "2026-11-16T03:44:33Z",
+          "deployJobId": "133077526186",
+          "deployStartedAtUTC": "2026-11-16T03:44:39Z",
+          "deployCompletedAtUTC": "2026-11-16T03:45:05Z",
+          "workflowUpdatedAtUTC": "2026-11-16T03:45:06Z",
+          "fullBrowserMatrix": {
+            "status": "completed",
+            "conclusion": "success",
+            "startedAtUTC": "2026-11-16T03:25:34Z",
+            "completedAtUTC": "2026-11-16T03:44:16Z",
+            "durationSeconds": 1122,
+            "timestampScope": "Actual workflow step timestamps, not polling times"
+          },
+          "deploymentSucceededAtUTC": "2026-11-16T03:44:57.0691326Z",
+          "publicVerificationRecordedAtUTC": "2026-11-16T03:45:02.5763264Z"
+        },
+        "android": {
+          "runId": "43797407890",
+          "url": "https://github.com/orewn/tropnik/actions/runs/43797407890",
+          "event": "push",
+          "buildJobId": "133069247877",
+          "status": "completed",
+          "conclusion": "failure",
+          "releaseRequested": false,
+          "releaseRequestScope": "Confirmed by the completed build log at 03:18:51.3982755 UTC: release_requested=false.",
+          "buildConclusion": "success",
+          "deviceJobId": "133070490760",
+          "deviceConclusion": "failure",
+          "failedStep": "Install and test the exact optimized universal artifact",
+          "failurePhase": "installed APK byte readback, before required instrumentation",
+          "instrumentation": {
+            "started": false,
+            "executedScenarioCount": 0,
+            "scenarioOutcomes": [],
+            "productTestFailureCount": null,
+            "installedArtifactBytesVerified": false,
+            "missingEvidenceFiles": [
+              "installed-apks.json",
+              "raw-instrumentation.log",
+              "device-result.json",
+              "tested-apks.sha256"
+            ],
+            "note": "Zero scenarios executed. This is not 10/11 or 0/11 failed application tests. No new renderer quality result exists for this run."
+          },
+          "failure": {
+            "operation": "adb pull of installed universal base.apk",
+            "exitCode": 1,
+            "workflowExceptionTime": "2026-11-16T03:24:09.043Z",
+            "exceptionExcerpt": [
+              "2026-11-16T03:24:09.0429180Z Traceback (most recent call last):",
+              "2026-11-16T03:24:09.0431166Z     result = capture_installed(args.directory, args.root, args.sdk / \"platform-tools/adb\", args.serial, args.output)",
+              "2026-11-16T03:24:09.0432111Z   File \"/home/runner/work/tropnik/tropnik/tools/android-build/preview_artifacts.py\", line 257, in capture_installed",
+              "2026-11-16T03:24:09.0454061Z subprocess.CalledProcessError: Command '['/usr/local/lib/android/sdk/platform-tools/adb', '-s', 'emulator-5554', 'pull', '/data/app/~~St-zbW0yVzc7En6WovNbZw==/ru.tropa.app.preview-Th446DPcUTe34-laugVVaQ==/base.apk', '/tmp/tropnik-installed-ysploayf/tropnik-preview.apk']' returned non-zero exit status 1."
+            ],
+            "adbStderrAvailable": false,
+            "reasonStderrUnavailable": "capture_installed uses capture_output=True and does not report the failed subprocess stderr",
+            "transportDropTime": "2026-11-16T03:24:08.787Z",
+            "transportDestroyedTime": "2026-11-16T03:24:08.788Z",
+            "newTransportThreadsTime": "2026-11-16T03:24:09.332Z",
+            "transportTrace": [
+              {
+                "line": 8113,
+                "text": "11-16 03:24:08.787   445   537 I adbd    : host-17: connection terminated: write failed"
+              },
+              {
+                "line": 8114,
+                "text": "11-16 03:24:08.787   445   445 I adbd    : host-17: offline"
+              },
+              {
+                "line": 8115,
+                "text": "11-16 03:24:08.788   445   445 I adbd    : destroying transport host-17"
+              },
+              {
+                "line": 8116,
+                "text": "11-16 03:24:08.788   445   445 I adbd    : BlockingConnectionAdapter(host-17): stopping"
+              },
+              {
+                "line": 8117,
+                "text": "11-16 03:24:08.788   445   536 I adbd    : host-17: read failed: Success"
+              },
+              {
+                "line": 8118,
+                "text": "11-16 03:24:08.788   445   445 I adbd    : BlockingConnectionAdapter(host-17): stopped"
+              },
+              {
+                "line": 8119,
+                "text": "11-16 03:24:08.788   445   445 I adbd    : BlockingConnectionAdapter(host-17): destructing"
+              },
+              {
+                "line": 8120,
+                "text": "11-16 03:24:08.788   445   445 I adbd    : BlockingConnectionAdapter(host-17): already stopped"
+              },
+              {
+                "line": 8506,
+                "text": "11-16 03:24:09.332   445  3044 I adbd    : host-18: read thread spawning"
+              },
+              {
+                "line": 8507,
+                "text": "11-16 03:24:09.333   445   445 I adbd    : host-18: already offline"
+              },
+              {
+                "line": 8509,
+                "text": "11-16 03:24:09.333   445  3045 I adbd    : host-18: write thread spawning"
+              }
+            ],
+            "inferenceBoundary": "The adb transport failure is directly recorded during readback. The underlying cause of that transport break is not established. Required app instrumentation never started, so this does not establish a renderer regression or fix."
+          },
+          "buildArtifactAPK": {
+            "name": "tropnik-preview.apk",
+            "sizeBytes": 69231946,
+            "sha256": "dc8939fb45973ebd36e28026d8c413baf24f1a5576695c5a7cd9ace8343b3210",
+            "abis": [
+              "arm64-v8a",
+              "armeabi-v7a",
+              "x86_64"
+            ],
+            "scope": "Build verifier result only; installed bytes were not verified in the failed device job."
+          },
+          "deviceArtifact": {
+            "id": 14194594997,
+            "sizeBytes": 1495506,
+            "sha256": "57728be471c5ecd3b542a836b657a31b66193e18da4369864030d9c43510241b",
+            "downloadedArchiveSha256Verified": true,
+            "files": [
+              {
+                "path": "acceleration.txt",
+                "sizeBytes": 57,
+                "sha256": "4484bdd6d5e16c817d4dfc5cda05334055c86428c861c1d22e8cf67ce42fee49"
+              },
+              {
+                "path": "emulator-version.txt",
+                "sizeBytes": 655,
+                "sha256": "1a523c9091747b7bf48a755396278f2eca455352b40c281336f1c3e075607b54"
+              },
+              {
+                "path": "emulator.log",
+                "sizeBytes": 9867,
+                "sha256": "d377e924755a7b1fb374f3155f5855e08e51c49cf282a2825c18460986ffbb78"
+              },
+              {
+                "path": "final-screen.png",
+                "sizeBytes": 1312110,
+                "sha256": "ca3ce5b3ce004309f81f6287d250a3ea7402041379a068d47dd2d2851902b11d"
+              },
+              {
+                "path": "graphics-driver.txt",
+                "sizeBytes": 24560,
+                "sha256": "debe362448c48d796166b90637273597d904b0224510bc818d0bdfb4e4107ce8"
+              },
+              {
+                "path": "logcat.txt",
+                "sizeBytes": 1157942,
+                "sha256": "f2025822c1a22df4dd4e8537efec356d9b792b6fc4d4cf3ba86fd5796ede6e77"
+              },
+              {
+                "path": "system-image.properties",
+                "sizeBytes": 357,
+                "sha256": "809a6f5103c048607257f03f18e22dd740137e9009c99d4a496de846b6ee3412"
+              },
+              {
+                "path": "test-screenshots.tar",
+                "sizeBytes": 46,
+                "sha256": "c42aa6e0b0271ae1945db9ffd14797d4e0f23c0cbc0d90e63ec8fb41dc0f7fe2"
+              },
+              {
+                "path": "webview-version.txt",
+                "sizeBytes": 855,
+                "sha256": "9e33c80ae6aacf2ac72052013cf84b65ac066c0d9d0a25704b3cb9e3ca01329d"
+              }
+            ]
+          },
+          "publication": "skipped",
+          "publicVerification": "skipped",
+          "publicReleaseLookup": {
+            "tag": "v0.4.34-preview",
+            "status": 404,
+            "observedAt": "2026-11-16T03:26:38.351991+00:00"
+          },
+          "failureEvidence": {
+            "path": "docs/verification/dca8f32-android-transport-failure.json",
+            "bytes": 7176,
+            "sha256": "9579b1754390830e3e71b6eb8daf50783be95641f71f2f91457057058a447e39"
+          },
+          "rerunStarted": false,
+          "gatesChanged": false,
+          "scope": "This run stopped at installed-APK byte readback. No required device scenario ran, so it provides neither an application-test failure count nor proof of the renderer fix."
+        },
+        "selfHostedWeb": {
+          "runId": "43797407868",
+          "url": "https://github.com/orewn/tropnik/actions/runs/43797407868",
+          "jobId": "133069247827",
+          "status": "completed",
+          "conclusion": "success",
+          "jobCompletedAtUTC": "2026-11-16T03:19:43Z",
+          "scope": "Next standalone preview validation only, not deployment or proof of a connected API."
+        }
+      },
+      "livePublicationVerified": true,
+      "publicAPKPublished": false,
+      "nextReleaseRequest": "Held before submission when the user extended scope to Russian UI and further optimization. The next uncommitted candidate must pass its own full web acceptance, installed-byte proof and all 11 device scenarios before publication.",
+      "statusScope": "Exact dca8f32 web passed full Pages acceptance and was published; its Android push failed during ADB installed-byte readback with zero scenarios executed. Neither this push nor the earlier 45c3974 request published an APK. The new working-tree candidate is separate and pending.",
+      "statusHistory": [
+        {
+          "recordedAtUTC": "2026-11-16T03:18:37Z",
+          "status": "ci-in-progress-not-live",
+          "workflows": {
+            "android": {
+              "runId": "43797407890",
+              "url": "https://github.com/orewn/tropnik/actions/runs/43797407890",
+              "event": "push",
+              "buildJobId": "133069247877",
+              "status": "in_progress",
+              "conclusion": null,
+              "releaseRequested": false,
+              "releaseRequestScope": "The request file is unchanged; this push validates the candidate without publishing. Build-log confirmation is collected separately."
+            }
+          },
+          "scope": "Submission-time snapshot retained before recording the transport failure."
+        },
+        {
+          "status": "full-web-acceptance-in-progress; android-push-stopped-before-instrumentation",
+          "livePublicationVerified": false,
+          "pages": {
+            "runId": "43797407925",
+            "url": "https://github.com/orewn/tropnik/actions/runs/43797407925",
+            "buildJobId": "133069248020",
+            "status": "in_progress",
+            "conclusion": null,
+            "targetedNativeGates": {
+              "observedAtUTC": "2026-11-16T03:25:40Z",
+              "status": "passed",
+              "steps": [
+                {
+                  "name": "Verify worker trail pixels against the direct renderer",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Verify native worker tile opacity with exact pixels",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Verify production Canvas underlay pixel parity",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Verify Russia mask pixels and GPU context recovery",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Verify full-mask shader pixel parity at both device pixel ratios",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Verify completed-frame presentation against the immutable direct renderer",
+                  "conclusion": "success"
+                },
+                {
+                  "name": "Verify unmasked Android terrain, GPU allocation and resize pixel parity",
+                  "conclusion": "success"
+                }
+              ],
+              "scope": "Targeted production native pixel gates passed. The complete browser matrix and deployment are still pending; these step results alone are not full release acceptance."
+            },
+            "activeStage": "Verify real mobile rendering and sheet interaction and desktop map interactions"
+          },
+          "scope": "Superseded partial CI snapshot retained during reconciliation; actual full-matrix and deploy completion are recorded below."
+        }
+      ],
+      "acceptance": {
+        "webTests": {
+          "passed": 1043,
+          "scope": "Local exact dca8f32 source validation, retained in localValidation.framebufferRotationRepair"
+        },
+        "pagesToolingTests": {
+          "passed": 410,
+          "scope": "Local exact dca8f32 source validation"
+        },
+        "fullBrowser": {
+          "verified": true,
+          "sourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+          "profileCount": 4,
+          "environment": {
+            "profile": "chromium-headless-software-swiftshader-webgl-v1",
+            "browser": {
+              "product": "Chrome/157.0.8103.50",
+              "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+              "protocolVersion": "1.3",
+              "jsVersion": "15.7.112.23",
+              "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+            },
+            "physicalDevice": false
+          },
+          "uiSmoothness": {
+            "scenarioCount": 16,
+            "longTaskCountInScenarioWindows": 0,
+            "maxInputToNextFrameMs": 65.20000000006985,
+            "maxFrameGapMs": 42.60000000009313,
+            "panZoom": [
+              {
+                "profile": "android-portrait",
+                "scenario": "map-pan",
+                "p95Ms": 20.600000000093132
+              },
+              {
+                "profile": "android-portrait",
+                "scenario": "map-zoom",
+                "p95Ms": 21
+              },
+              {
+                "profile": "desktop-webgl",
+                "scenario": "map-pan",
+                "p95Ms": 29.899999999906868
+              },
+              {
+                "profile": "desktop-webgl",
+                "scenario": "map-zoom",
+                "p95Ms": 22.5
+              }
+            ],
+            "broaderMapInteractionLongTasks": [
+              {
+                "profile": "android-portrait",
+                "longestTaskMs": 50
+              },
+              {
+                "profile": "desktop-webgl",
+                "longestTaskMs": 144
+              }
+            ],
+            "scope": "Full accepted browser audit; not early diagnostic, physical phone FPS, presented pixels or field INP."
+          },
+          "scope": "Full accepted browser-verification.json; separate from the early diagnostic. Callback timing is not physical-device FPS, presented pixels or field INP."
+        },
+        "nativeWorkerTileOpacity": {
+          "cases": 48,
+          "comparisons": 144,
+          "pngs": 288,
+          "workers": 96,
+          "differentPixels": 0,
+          "maxChannelDelta": 0,
+          "verified": true
+        },
+        "framebufferPresentation": {
+          "verified": true,
+          "rendererSHA256": "63d759259b0cebdb40530cf00d454c0d10f34e1626ef58709d1a7e4f4564882a",
+          "caseCount": 8,
+          "comparisonCount": 20,
+          "differentPixels": 0,
+          "maxChannelDelta": 0,
+          "allocations": [
+            {
+              "case": "dpr1-full-initial",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                }
+              ]
+            },
+            {
+              "case": "dpr1-full-rotated-zoomed",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                },
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                }
+              ]
+            },
+            {
+              "case": "dpr1-mixed-initial",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                }
+              ]
+            },
+            {
+              "case": "dpr1-mixed-rotated-zoomed",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                },
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 512,
+                  "height": 384,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                }
+              ]
+            },
+            {
+              "case": "dpr2-full-initial",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                }
+              ]
+            },
+            {
+              "case": "dpr2-full-rotated-zoomed",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                },
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                }
+              ]
+            },
+            {
+              "case": "dpr2-mixed-initial",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                }
+              ]
+            },
+            {
+              "case": "dpr2-mixed-rotated-zoomed",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                },
+                {
+                  "samples": 4,
+                  "format": 32849,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 0,
+                  "stencilBits": 0
+                },
+                {
+                  "samples": 4,
+                  "format": 35056,
+                  "width": 1024,
+                  "height": 768,
+                  "depthBits": 24,
+                  "stencilBits": 8
+                }
+              ]
+            }
+          ]
+        },
+        "unmaskedTerrain": {
+          "verified": true,
+          "rendererSHA256": "63d759259b0cebdb40530cf00d454c0d10f34e1626ef58709d1a7e4f4564882a",
+          "caseCount": 2,
+          "comparisonCount": 12,
+          "differentPixels": 0,
+          "maxChannelDelta": 0,
+          "allocations": [
+            {
+              "case": "dpr1-unmasked-lifecycle",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "requestedSamples": 4,
+                  "format": 32849,
+                  "width": 512,
+                  "height": 384,
+                  "samples": 4,
+                  "precision": {
+                    "redBits": 8,
+                    "greenBits": 8,
+                    "blueBits": 8,
+                    "alphaBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 33190,
+                  "width": 512,
+                  "height": 384,
+                  "samples": 4,
+                  "precision": {
+                    "depthBits": 24,
+                    "stencilBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 32849,
+                  "width": 384,
+                  "height": 512,
+                  "samples": 4,
+                  "precision": {
+                    "redBits": 8,
+                    "greenBits": 8,
+                    "blueBits": 8,
+                    "alphaBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 33190,
+                  "width": 384,
+                  "height": 512,
+                  "samples": 4,
+                  "precision": {
+                    "depthBits": 24,
+                    "stencilBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 32849,
+                  "width": 384,
+                  "height": 512,
+                  "samples": 4,
+                  "precision": {
+                    "redBits": 8,
+                    "greenBits": 8,
+                    "blueBits": 8,
+                    "alphaBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 33190,
+                  "width": 384,
+                  "height": 512,
+                  "samples": 4,
+                  "precision": {
+                    "depthBits": 24,
+                    "stencilBits": 0
+                  }
+                }
+              ]
+            },
+            {
+              "case": "dpr2-unmasked-lifecycle",
+              "variant": "optimized",
+              "allocations": [
+                {
+                  "requestedSamples": 4,
+                  "format": 32849,
+                  "width": 1024,
+                  "height": 768,
+                  "samples": 4,
+                  "precision": {
+                    "redBits": 8,
+                    "greenBits": 8,
+                    "blueBits": 8,
+                    "alphaBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 33190,
+                  "width": 1024,
+                  "height": 768,
+                  "samples": 4,
+                  "precision": {
+                    "depthBits": 24,
+                    "stencilBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 32849,
+                  "width": 768,
+                  "height": 1024,
+                  "samples": 4,
+                  "precision": {
+                    "redBits": 8,
+                    "greenBits": 8,
+                    "blueBits": 8,
+                    "alphaBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 33190,
+                  "width": 768,
+                  "height": 1024,
+                  "samples": 4,
+                  "precision": {
+                    "depthBits": 24,
+                    "stencilBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 32849,
+                  "width": 768,
+                  "height": 1024,
+                  "samples": 4,
+                  "precision": {
+                    "redBits": 8,
+                    "greenBits": 8,
+                    "blueBits": 8,
+                    "alphaBits": 0
+                  }
+                },
+                {
+                  "requestedSamples": 4,
+                  "format": 33190,
+                  "width": 768,
+                  "height": 1024,
+                  "samples": 4,
+                  "precision": {
+                    "depthBits": 24,
+                    "stencilBits": 0
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "progressiveMapLoading": {
+          "beforeToCompleteMs": 4553,
+          "pendingToCompleteMs": 2000,
+          "differentEligiblePixels": 0,
+          "completeState": {
+            "ready": true,
+            "loading": false,
+            "mode": "detail",
+            "committedMode": "detail",
+            "imageryLoading": false,
+            "reliefReady": true,
+            "localDetail": false,
+            "error": "",
+            "residentTiles": 96,
+            "pendingTiles": 0
+          },
+          "scope": "Real browser fetch/decoder/painter with deliberately delayed DEM; not an Android-device or provider-speed benchmark"
+        },
+        "serviceWorkerUpdate": {
+          "verified": true,
+          "timeoutProbeMs": 15000.7998046875,
+          "deadlineThresholdUnchanged": true
+        }
+      },
+      "publicVerification": {
+        "sourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+        "buildId": "20d8550543018ac9",
+        "deployVerifiedAtUTC": "2026-11-16T03:45:02.5763264Z",
+        "independentHTTPReadRangeUTC": {
+          "first": "2026-11-16T03:46:07.760691+00:00",
+          "last": "2026-11-16T03:46:42.536493+00:00"
+        },
+        "htmlEntry": "/tropnik/assets/index-DCQgZ7o5.js",
+        "serviceWorkerVersion": "tropnik-tropnik-shell-20d8550543018ac9",
+        "sourceBuildEntryAndServiceWorkerMatched": true,
+        "deployVerification": {
+          "verified": true,
+          "url": "https://orewn.github.io/tropnik/",
+          "buildId": "20d8550543018ac9",
+          "sourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+          "publicHttpChecks": 29,
+          "apkDelivery": "github-release",
+          "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-preview.apk",
+          "apkBytes": 69231946,
+          "apkSha256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408",
+          "browserRenderingTested": true,
+          "browserProfiles": 4,
+          "serviceWorkerUpdateTested": true,
+          "serviceWorkerTimeoutMs": 15000.7998046875,
+          "mapLoadingTested": true,
+          "tileOpacityTested": true,
+          "tileOpacityComparisons": 144
+        },
+        "independentHTTP": {
+          "schemaVersion": 1,
+          "sourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+          "buildId": "20d8550543018ac9",
+          "serviceWorkerVersion": "tropnik-tropnik-shell-20d8550543018ac9",
+          "entrypoint": "/tropnik/assets/index-DCQgZ7o5.js",
+          "entrypointResponse": {
+            "url": "https://orewn.github.io/tropnik/assets/index-DCQgZ7o5.js",
+            "status": 200,
+            "sizeBytes": 190714,
+            "sha256": "12c81ca46c049ca766a57f5c61c03076ff10ada0f806cd040e1751225d2b799b",
+            "contentType": "application/javascript; charset=utf-8",
+            "etag": "\"6afa7c38-2e8fa\"",
+            "observedAt": "2026-11-16T03:46:42.536493+00:00"
+          },
+          "apiConnected": false,
+          "serverCodeIncluded": false,
+          "receipts": {
+            "build-info.json": {
+              "url": "https://orewn.github.io/tropnik/build-info.json",
+              "status": 200,
+              "sizeBytes": 419296,
+              "sha256": "6d4989b502984f0ab664ad552c7c9808b1cdd9f063078a8d534a8dab30d044ee",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-665e0\"",
+              "observedAt": "2026-11-16T03:46:07.760691+00:00"
+            },
+            "browser-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-verification.json",
+              "status": 200,
+              "sizeBytes": 17285032,
+              "sha256": "5a4b2d5a56a252e4e34334036ecb07e1f6de09fb24235407668fb52c88f23425",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-107bfa8\"",
+              "observedAt": "2026-11-16T03:46:14.805986+00:00"
+            },
+            "browser-ui-smoothness-diagnostic.json": {
+              "url": "https://orewn.github.io/tropnik/browser-ui-smoothness-diagnostic.json",
+              "status": 200,
+              "sizeBytes": 525650,
+              "sha256": "257552a14655d0a4b14fc560487e9adaa5f870404eaabd949b542e8e7b85c6aa",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-80552\"",
+              "observedAt": "2026-11-16T03:46:13.449568+00:00"
+            },
+            "browser-map-loading-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-map-loading-verification.json",
+              "status": 200,
+              "sizeBytes": 1707715,
+              "sha256": "9726da57a759c6255ee762194ad548669b2d07404fcd13057daa10ba6e68929a",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-1a0ec3\"",
+              "observedAt": "2026-11-16T03:46:13.530584+00:00"
+            },
+            "browser-map-tile-opacity-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-map-tile-opacity-verification.json",
+              "status": 200,
+              "sizeBytes": 599337,
+              "sha256": "5c5a7847115a66de5badc0effea9623efeb68744f3d394d014a4de887d7f6332",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-92529\"",
+              "observedAt": "2026-11-16T03:46:13.412896+00:00"
+            },
+            "browser-map-underlay-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-map-underlay-verification.json",
+              "status": 200,
+              "sizeBytes": 1814399,
+              "sha256": "8ae2c791df39052859b86094dd49c79c8b39ae5f0ecdf27a3e23eea947d3653e",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-1baf7f\"",
+              "observedAt": "2026-11-16T03:46:18.661299+00:00"
+            },
+            "browser-terrain-mask-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-terrain-mask-verification.json",
+              "status": 200,
+              "sizeBytes": 43239,
+              "sha256": "c163e878d92b09cef2c3f1d560bbe30a862ba942ef86507a5b69c99a40b41755",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-a8e7\"",
+              "observedAt": "2026-11-16T03:46:18.592382+00:00"
+            },
+            "browser-terrain-full-mask-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-terrain-full-mask-verification.json",
+              "status": 200,
+              "sizeBytes": 101208,
+              "sha256": "237dcbc66b208cde8eeff78dcb95b03d160102293306ef92a5753cae68459c41",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-18b58\"",
+              "observedAt": "2026-11-16T03:46:18.616510+00:00"
+            },
+            "browser-terrain-presentation-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-terrain-presentation-verification.json",
+              "status": 200,
+              "sizeBytes": 127211,
+              "sha256": "1fb107b8ef836d4513d1a4c5b0c8523ed03dca59493c8cf15648bca836337e3f",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-1f0eb\"",
+              "observedAt": "2026-11-16T03:46:18.552611+00:00"
+            },
+            "browser-terrain-unmasked-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-terrain-unmasked-verification.json",
+              "status": 200,
+              "sizeBytes": 74373,
+              "sha256": "a88bfbf1fe7680d22d3f4b07b3cf6a5da29eeabe15733e164cbec2edf688e7fd",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-12285\"",
+              "observedAt": "2026-11-16T03:46:23.980485+00:00"
+            },
+            "browser-service-worker-update-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-service-worker-update-verification.json",
+              "status": 200,
+              "sizeBytes": 21093,
+              "sha256": "8ddfc1cf1201909914764f86eb36e7ab6e4e92663e1d9f107dc28fdc643b487d",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-5265\"",
+              "observedAt": "2026-11-16T03:46:23.972156+00:00"
+            },
+            "browser-map-controls-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-map-controls-verification.json",
+              "status": 200,
+              "sizeBytes": 29726,
+              "sha256": "7a9fb18f3c97fe24c0b6e007132e48b796d92c0bf5864b4ff3fcfd2ebd249eb6",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-741e\"",
+              "observedAt": "2026-11-16T03:46:23.966375+00:00"
+            },
+            "browser-trail-overlay-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-trail-overlay-verification.json",
+              "status": 200,
+              "sizeBytes": 32884,
+              "sha256": "c41b0472f9f44217b6ce2e582f8a258795532699c4856988fab901213ab56d26",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-8074\"",
+              "observedAt": "2026-11-16T03:46:23.976250+00:00"
+            },
+            "browser-trail-raster-verification.json": {
+              "url": "https://orewn.github.io/tropnik/browser-trail-raster-verification.json",
+              "status": 200,
+              "sizeBytes": 145472,
+              "sha256": "505b8d1298dacc311b94f2b5069cbd912df53c7d53e5c2be3a1313ee6c5c49aa",
+              "contentType": "application/json; charset=utf-8",
+              "etag": "\"6afa7c38-23840\"",
+              "observedAt": "2026-11-16T03:46:28.913375+00:00"
+            },
+            "index.html": {
+              "url": "https://orewn.github.io/tropnik/index.html",
+              "status": 200,
+              "sizeBytes": 14130,
+              "sha256": "735c36476325d51f2647f38a71e4723a2c3c742ce1379a2da35dbef36f31e6d4",
+              "contentType": "text/html; charset=utf-8",
+              "etag": "\"6afa7c38-3732\"",
+              "observedAt": "2026-11-16T03:46:28.724699+00:00"
+            },
+            "sw.js": {
+              "url": "https://orewn.github.io/tropnik/sw.js",
+              "status": 200,
+              "sizeBytes": 18249,
+              "sha256": "3e9c83f76d13bb0487cc1e4706330d8f0f00d2e5e6c99d77c12499cbeddbcc86",
+              "contentType": "application/javascript; charset=utf-8",
+              "etag": "\"6afa7c38-4749\"",
+              "observedAt": "2026-11-16T03:46:28.709518+00:00"
+            }
+          }
+        },
+        "existingBrowserTabUpdate": {
+          "tabId": "30",
+          "manualReloadPerformed": true,
+          "officialUpdateClicked": true,
+          "updateControl": "Обновить",
+          "entryAfterUpdate": "/tropnik/assets/index-DCQgZ7o5.js",
+          "entryUnchangedByUpdateClick": true,
+          "updateControlDisappeared": true,
+          "satellite": {
+            "ready": true,
+            "committedMode": "satellite",
+            "residentTiles": 96,
+            "pending": 0,
+            "fetching": 0,
+            "errors": []
+          },
+          "subsequentReliefAndZoomActions": "unknown; transport disconnected before final observation",
+          "screenshot": null,
+          "finalCUADeliverable": null,
+          "scope": "Direct observations reported by the root operator in this session. Do not relabel the earlier 70689a3 screenshot as dca8f32 evidence."
+        }
+      },
+      "rawReceipts": {
+        "dca8f32-pages-run-final.json": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/dca8f32-pages-run-final.json",
+          "bytes": 13045,
+          "sha256": "4e7ce3c029104e12fb6b1c2b377cd6b06b837280f7518a9eb01eb168216ff3f5"
+        },
+        "dca8f32-pages-jobs-final.json": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/dca8f32-pages-jobs-final.json",
+          "bytes": 14506,
+          "sha256": "de8bdabc191eb1c9a1517c33e0f2f90f8392a93e27cb6a5d563e488432e39c1f"
+        },
+        "dca8f32-pages-deploy-final.log": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/dca8f32-pages-deploy-final.log",
+          "bytes": 19207,
+          "sha256": "2d9720e67abc0fe3340c5db087bdc95d4ea1cfbaf238f9f9d5ab4a319c52f475"
+        },
+        "dca8f32-pages-deployment-proof.json": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/dca8f32-pages-deployment-proof.json",
+          "bytes": 968,
+          "sha256": "08c2530dfc18d217fa85a0d7b9ed05d6d9b008e2d30beee31d6141b991bfcbc0"
+        },
+        "dca8f32-public-http-proof.json": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/dca8f32-public-http-proof.json",
+          "bytes": 7286,
+          "sha256": "b3ce31249a3b1eb5e01fc36ce3bb91978d40a49e3aa561571a33452cbfc1c316"
+        },
+        "dca8f32-public-acceptance-summary.json": {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/dca8f32-public-acceptance-summary.json",
+          "bytes": 12629,
+          "sha256": "34c442a2dd993e9fec741d60b77846e97f77579f4ddd6a92572bc80289b55749"
+        }
+      }
+    },
+    "currentPublishedWebRecord": "framebufferRotationCandidateDca8f32",
+    "publicBuildVerifiedScope": "Only the exact dca8f32 public web publication is currently confirmed. The latest working-tree localization/satellite/native-startup candidate is not covered.",
+    "androidRunScope": "Latest historical push run is dca8f32 and stopped before instrumentation. The earlier explicit publication request is androidReleaseRequest034. No workflow has yet been submitted for the new uncommitted candidate.",
+    "lastAcceptedWebSourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+    "localizedSatelliteAndNativeStartupCandidate": {
+      "baseCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+      "sourceCommit": null,
+      "sourceTree": null,
+      "status": "working-tree-candidate; complete local web/tooling checks passed; exact-source native/CI acceptance pending",
+      "publishedWeb": false,
+      "publishedAPK": false,
+      "releaseRequestSubmitted": false,
+      "workflowRuns": {
+        "pages": null,
+        "android": null
+      },
+      "plannedAPK": {
+        "version": "0.4.34-preview",
+        "versionCode": 17,
+        "universalABIs": [
+          "arm64-v8a",
+          "armeabi-v7a",
+          "x86_64"
+        ]
+      },
+      "russianInterface": {
+        "genericMapLabelExample": {
+          "source": "off-road",
+          "display": "Бездорожье"
+        },
+        "knownRouteDisplayTitle": "Риеккалансаари трейл",
+        "knownRouteDistancesKm": [
+          7,
+          12,
+          25,
+          35,
+          55,
+          80
+        ],
+        "existingOfflineCardsDisplayLocalized": true,
+        "rawSourceTitleSnapshotsAndExportsRewritten": false,
+        "scope": "Russian interface messages and complete known generic labels. Unknown proper names, author/provider names, licences, URLs and raw source data are preserved; no claim that all geographic names contain only Cyrillic."
+      },
+      "compactSourceCredits": {
+        "permanentLinkedAttribution": true,
+        "fullNoticesDestination": "Источники",
+        "preserved": [
+          "actual satellite provider",
+          "source detail limit",
+          "loading status",
+          "copyright/year/liability notices",
+          "source and licence links"
+        ]
+      },
+      "satellite": {
+        "fullPhotographicBackground": true,
+        "countryMaskCutsPhotograph": false,
+        "selectedTerritoryTintsPhotograph": false,
+        "scopeForCartographicInkAndRoutesPreserved": true,
+        "scaling": "Interpolation of existing source pixels; no new measured detail above source zoom limit",
+        "progressiveSameProviderImagery": true,
+        "coldActivationAndProviderSwitchAtomic": true,
+        "crossProviderMosaicMixed": false,
+        "retainedFallbackCellLimit": 64,
+        "existingTargetCellBudget": 64,
+        "sourceIdentityWorldCopiesAndGeometryPreserved": true,
+        "controlledQueue": {
+          "scenario": "active map; enqueue 32 vector overlays then 32 photographs; 900ms vector/100ms JPEG; immediate decoder; controlled scheduling time, not device FPS",
+          "baselineCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+          "baseline": {
+            "initialSourceKinds": [
+              "vector",
+              "vector",
+              "vector"
+            ],
+            "initialPumpCalls": 64,
+            "firstImageryAtControlledMs": 1000,
+            "firstVectorAtControlledMs": 900,
+            "completedAtControlledMs": 10900,
+            "sourceReads": 64,
+            "decodedTiles": 64,
+            "physicalPeak": 3,
+            "payloadPeak": 3
+          },
+          "candidate": {
+            "initialSourceKinds": [
+              "imagery",
+              "vector",
+              "vector"
+            ],
+            "initialPumpCalls": 1,
+            "firstImageryAtControlledMs": 100,
+            "firstVectorAtControlledMs": 900,
+            "completedAtControlledMs": 11000,
+            "sourceReads": 64,
+            "decodedTiles": 64,
+            "physicalPeak": 3,
+            "payloadPeak": 3
+          }
+        },
+        "controlledStreaming": {
+          "scenario": "same-provider imagery streaming, real engine, controlled tile delivery",
+          "viewport": [
+            1440,
+            1000
+          ],
+          "dpr": 2,
+          "sourceCells": 35,
+          "bitmap": [
+            512,
+            512
+          ],
+          "intermediateFullCanvasCopies": 0,
+          "committedFullCanvasCopies": 1,
+          "networkTimingMeasured": false
+        },
+        "allRequestCompletionImproved": false,
+        "allRequestCompletionDeltaMs": 100,
+        "scope": "First-photo timing is controlled scheduling, not an internet/device FPS measurement. Full group completion is 10900 ms baseline and 11000 ms candidate. Photographic appearance intentionally changes and requires fresh native pixel acceptance.",
+        "jpegOpaqueUnderlayGuard": {
+          "implementationStatus": "implemented; local positive/negative regression tests passed; native JPEG/pixel acceptance pending",
+          "downloadedJPEGSignature": [
+            255,
+            216,
+            255
+          ],
+          "callerFilenameMIMEOrWorkerFlagAcceptedAsOpacityProof": false,
+          "successfulUnchangedWorkerDecodeRequired": true,
+          "workerSourceByteIdenticalToBaseline": true,
+          "sourceZoomMustEqualRequestedZoom": true,
+          "decodedOutputBitmap": [
+            512,
+            512
+          ],
+          "opacityAssignedAfterRequestSpread": true,
+          "sameProviderUniformGridRequired": true,
+          "fullCurrentBackingViewportRequired": true,
+          "backingPixelGuard": 4,
+          "northUpAndZeroPitchRequired": true,
+          "cameraZoomRange": [
+            1,
+            12
+          ],
+          "maximumDPR": 2,
+          "maximumCohortCells": 64,
+          "readyRefinementsMayFillProofHoles": false,
+          "skippedOnlyWithCompleteProof": [
+            "paper clear",
+            "country fill",
+            "overview underlay"
+          ],
+          "fallbacksRetainUnderlays": [
+            "missing or transparent imagery",
+            "unknown JPEG proof",
+            "provider mismatch",
+            "mixed grids",
+            "closed bitmap",
+            "rotation",
+            "pitch",
+            "DPR above proof range",
+            "zoom above proof range",
+            "source polar edge"
+          ],
+          "sourcePixelsResolutionRoutesAndLabelsPreserved": true,
+          "nativeDecodeOrPixelProofExecutedLocally": false
+        },
+        "nativeAcceptance": {
+          "status": "pending; browser not launched for this final candidate",
+          "executedLocally": false,
+          "fixture": "tools/pages-preview/tests/browser-map-underlay.browser.mjs",
+          "scenarios": [
+            "opaque",
+            "fractional-zoom",
+            "pan-sequence",
+            "missing",
+            "transparent",
+            "rotated",
+            "pitched",
+            "satellite",
+            "satellite-opaque-jpeg",
+            "satellite-jpeg-fractional",
+            "satellite-jpeg-country",
+            "satellite-jpeg-world-copy",
+            "satellite-jpeg-missing",
+            "satellite-jpeg-rotated",
+            "satellite-transparent-source",
+            "overview",
+            "zoom12",
+            "zoom13",
+            "zoom18",
+            "tiny-tile",
+            "unwrapped-world",
+            "boundaries-hidden"
+          ],
+          "scenariosPerDPR": 22,
+          "dpr": [
+            1,
+            2
+          ],
+          "caseExecutionsRequired": 44,
+          "framesRequired": 62,
+          "jpegProofRequired": {
+            "signature": [
+              255,
+              216,
+              255
+            ],
+            "decodedDimensions": [
+              512,
+              512
+            ],
+            "rasterAlpha": true,
+            "opaquePixels": 262144
+          },
+          "transparentSourceMustHaveNoJPEGProof": true,
+          "missingAndTransparentSourceNegativeControl": "force-unsafe-satellite-cover; differentPixels > 0",
+          "satellitePhotoWitnesses": {
+            "firstFrameScenariosPerDPR": 5,
+            "samplesPerFrame": 36,
+            "sourceHoleAndOutsidePolygonPointsIncludingRouteStroke": true,
+            "actualEqualsPhotoOnlySourceRGBA": true,
+            "requiredAlpha": 255,
+            "mustDifferFromOutsidePaper": true
+          },
+          "satelliteMaskAndSelectedTintOperationsRequired": 0,
+          "groundCacheFramesRequired": 126,
+          "streamingFramesRequired": 198,
+          "nativePixelsZeroDifferenceRequired": true,
+          "sourceFixturePNGHashesAndNativeEnvironmentRequired": true,
+          "originalPerformanceAndMemoryLimitsPreserved": true,
+          "exactInstalledAPKScenarioCountRequired": 11,
+          "scope": "These are mandatory fresh acceptance requirements, not completed results. Bundle-only and synthetic validator checks cannot satisfy them."
+        }
+      },
+      "nativeMapRegistry": {
+        "applicationOwned": true,
+        "immutable": true,
+        "successOnlySynchronizedCache": true,
+        "perResourceSizeAndSHAChecksPreserved": true,
+        "perViewStateShared": false,
+        "controlledRepeatedViews": {
+          "acquisitions": 10,
+          "readsAndParsesBefore": 10,
+          "readsAndParsesAfter": 1,
+          "medianAllocatedBytesBefore": 144035760.0,
+          "medianAllocatedBytesAfter": 14403576.0,
+          "medianBatchMsBefore": 611.955607,
+          "medianBatchMsAfter": 57.188216,
+          "includesFirstParse": true,
+          "devicePerformanceMeasured": false
+        },
+        "sourceLevelJVMTestsPassed": 10
+      },
+      "nativeCatalogStartup": {
+        "dispatcher": "Dispatchers.IO",
+        "sameSuccessOnlySynchronizedLazy": true,
+        "honestLoadingAndRetry": true,
+        "existingViewModelsAndNavigationUnchanged": true,
+        "processDeathRestorationAdded": false,
+        "timeToDataImprovementClaimed": false,
+        "existingWorkFixture": {
+          "sourceBytes": 2176050,
+          "sourceSHA256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0",
+          "median": {
+            "firstReferenceListMs": 0.087218,
+            "jsonDecodeMs": 64.520633,
+            "catalogParseMs": 25.786004,
+            "totalMs": 104.721029,
+            "readMs": 12.752192,
+            "allocatedBytes": 44887024.0
+          },
+          "androidAssetReadUsed": false,
+          "devicePerformanceMeasured": false
+        },
+        "sourceLevelJVMTestsPassed": 6,
+        "jvmAssertionsEnabled": true,
+        "deviceScenarioBodiesByteUnchanged": 11,
+        "startupWait": {
+          "boundedMs": 15000,
+          "condition": "one actual displayed explore_list",
+          "errorFailsImmediately": true,
+          "sleepOrSkip": false,
+          "mapTimingThresholdsChanged": false
+        }
+      },
+      "controlledEvidence": [
+        {
+          "path": "docs/verification/satellite-loading-2026-11-16.json",
+          "bytes": 20031,
+          "sha256": "c35d7fa1e97d8f26508639d2bfc3d0f4851d8f0cd3f3d7ea382b5fe48d6d917d"
+        },
+        {
+          "path": "docs/verification/android-0.4.34-registry-cache.json",
+          "bytes": 12516,
+          "sha256": "0b2c88f9a3fc4ec46f4cd1718ca4ac64fac7b53cf66f71ad1d4ee3b99cc52613"
+        },
+        {
+          "path": "docs/verification/android-0.4.34-catalog-startup.json",
+          "bytes": 20543,
+          "sha256": "920aca23c34da1d719706410d2f00a0eea712b656030b27c1f8ab392f61990b2"
+        },
+        {
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/satellite-queue-tests.log",
+          "bytes": 13518,
+          "sha256": "1e3f6ca4bdb61fc4476ad61d52c436d27f66a1b5bb888bb5e2e98ab5bb7e0602"
+        }
+      ],
+      "validationScope": "Current uncommitted source snapshot. Complete local unit/tooling and canonical runtime checks passed; native browser, exact-source CI, Android/Compose/R8 and installed-APK acceptance remain pending.",
+      "pendingAcceptance": [
+        "Final immutable source commit and exact-source CI validation of the locally regenerated assets",
+        "Full browser matrix and public web verification for that source",
+        "Android/Compose/R8 build",
+        "Exact installed-byte provenance and all 11 mandatory device scenarios",
+        "Native pixels, rotation, map timing and all unchanged quality gates"
+      ],
+      "deviceFPSOrGlobalSpeedupClaimed": false,
+      "localValidation": {
+        "scope": "Current uncommitted source snapshot. Complete local unit/tooling and canonical runtime checks passed; native browser, exact-source CI, Android/Compose/R8 and installed-APK acceptance remain pending.",
+        "sourceCommit": null,
+        "webTests": {
+          "file": "web-release-candidate.log",
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/web-release-candidate.log",
+          "bytes": 266627,
+          "sha256": "5d92a3c86e4f40aa86f748b743dd1d021e81ee154b15dd488346da29b5a9a156",
+          "summary": {
+            "tests": 1116,
+            "suites": 0,
+            "pass": 1116,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0,
+            "duration_ms": 104400.531737
+          },
+          "scope": "Complete local web unit/regression suite; no native browser run",
+          "exitCode": 0
+        },
+        "pagesToolingTests": {
+          "file": "pages-release-candidate.log",
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/pages-release-candidate.log",
+          "bytes": 110488,
+          "sha256": "c2e0dbc5b9cc60cf3db5697321fd8b21cdb7f00677b23a4ef6e4fcf05745645a",
+          "summary": {
+            "tests": 413,
+            "suites": 0,
+            "pass": 413,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0,
+            "duration_ms": 16788.487526
+          },
+          "scope": "Complete local Pages tooling unit/regression suite; no native browser run",
+          "exitCode": 0
+        },
+        "satelliteFocusedTests": {
+          "file": "satellite-final-focused.log",
+          "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/satellite-final-focused.log",
+          "bytes": 50680,
+          "sha256": "24273d485d23a98aaeac79a3181d0cf62b89c1f8fc3ee49b88a42ebb2a8e88f0",
+          "summary": {
+            "tests": 198,
+            "suites": 0,
+            "pass": 198,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0,
+            "duration_ms": 12345.971782
+          },
+          "scope": "Focused real production-module unit/control-environment regression",
+          "exitCode": 0
+        },
+        "workflowPublicationRegressionTests": {
+          "file": "underlay-workflow-regression-tests.log",
+          "path": "/workspace/scratch/c44c63f212a5/underlay-workflow-regression-tests.log",
+          "bytes": 1079,
+          "sha256": "21b3268ca1cf0d11b86e552b01043c80a20706f6d2398cab558cb1e2f801a96f",
+          "summary": {
+            "tests": 9,
+            "suites": 0,
+            "pass": 9,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0,
+            "duration_ms": 425.641692
+          },
+          "scope": "Existing publication/workflow contract tests; no native pixels",
+          "exitCode": 0
+        },
+        "nativeFixtureBundleOnly": {
+          "file": "satellite-opaque-underlay-bundle-only.log",
+          "path": "/workspace/scratch/c44c63f212a5/satellite-opaque-underlay-bundle-only.log",
+          "bytes": 233,
+          "sha256": "9f6eb86ca8321c0aa6f535990bcbda767a164c5213097f0268dd3a79b8a585a6",
+          "summary": {
+            "tests": 1,
+            "suites": 0,
+            "pass": 1,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0,
+            "todo": 0,
+            "duration_ms": 272.900153
+          },
+          "scope": "Actual engine/fixture bundle only; browser not launched",
+          "exitCode": 0
+        },
+        "syntheticWorkflowValidatorChecks": {
+          "passed": 132,
+          "nativeBrowserExecuted": false,
+          "log": {
+            "path": "/workspace/scratch/c44c63f212a5/underlay-workflow-validator-check.log",
+            "bytes": 451,
+            "sha256": "8ab40774b7e4283a0bdeb7471ce2346767890d660e3ad9186f9204dd5799178b"
+          }
+        },
+        "lint": {
+          "status": "passed",
+          "exitCode": 0,
+          "log": {
+            "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/web-release-lint.log",
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "scope": "Final local ESLint process exited 0; empty log"
+        },
+        "canonicalRuntime": {
+          "status": "generated and local check-only reproduction passed",
+          "sourceInputsSha256": "b919323caf20c17562d23528531bbbba9eef56814fe20ef481d6e27dffdb8500",
+          "manifestSha256": "b2d2171104deddb313e9bbf64717a52d56a8847f79e4cfabc03006f2999659d3",
+          "sourceFiles": 63,
+          "outputFiles": 12,
+          "resourceAliases": 1746,
+          "identicalWebAndAndroidManifestBytes": true,
+          "manifests": [
+            {
+              "path": "web/public/custom-map/manifest.json",
+              "bytes": 534178,
+              "sha256": "b2d2171104deddb313e9bbf64717a52d56a8847f79e4cfabc03006f2999659d3"
+            },
+            {
+              "path": "android/app/src/main/assets/custom-map/manifest.json",
+              "bytes": 534178,
+              "sha256": "b2d2171104deddb313e9bbf64717a52d56a8847f79e4cfabc03006f2999659d3"
+            }
+          ],
+          "logs": [
+            {
+              "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/generate-custom-map-final.log",
+              "bytes": 404,
+              "sha256": "138e6b93cd16c903821cf2ed3777ad0f2f72a3dc7890827f69025855767b6d2d"
+            },
+            {
+              "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/check-custom-map-candidate.log",
+              "bytes": 403,
+              "sha256": "10df096407cea449f9d7f5acbf95d6d3c0a93c5acdd09879a535109245f66366"
+            },
+            {
+              "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/generate-offline-final.log",
+              "bytes": 262,
+              "sha256": "2c51efadd0b9dc63fa68b3a162a4bee78dcd1f0a8ef98bdcc6a36ae57a422783"
+            }
+          ],
+          "scope": "Canonical runtime bytes are current; this is not installed-byte proof or publication"
+        },
+        "staticBuild": {
+          "buildId": "f57803e6e56b42f7",
+          "sourceCommit": null,
+          "hasApk": true,
+          "apiConnected": false,
+          "serverCodeIncluded": false,
+          "exitCode": 0,
+          "status": "local static build passed",
+          "pages": 719,
+          "referenceRoutes": 685,
+          "localHTTPChecks": 77,
+          "browserRenderingTested": false,
+          "includedPublicAPKVersion": "0.4.33-preview",
+          "newAPKProducedOrVerified": false,
+          "published": false,
+          "log": {
+            "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/web-static-candidate.log",
+            "bytes": 12524,
+            "sha256": "0e1a4df02c27dee8bb8d75a5104e525075114a10393d328b52f736ecc982210c"
+          },
+          "scope": "Local uncommitted static build; hasApk references the existing public APK, not a new Android release"
+        }
+      }
+    }
+  },
+  "separateDeploymentBoundaries": {
+    "customDomainVerifiedAsTropinych": false,
+    "customDomainObservedHTTPTitle": "ДокНет — рабочее пространство врача",
+    "customDomainObservedHTTPSStatus": null,
+    "publicPagesAPIConnected": false,
+    "existingPublicAPKVersion": "0.4.33-preview",
+    "plannedPublicAPKVersion": "0.4.34-preview",
+    "plannedPublicAPKVersionCode": 17,
+    "newPublicAPKPublicationStatus": "45c3974 failed 10/11 device scenarios; the subsequent dca8f32 push executed zero scenarios after an ADB readback failure. Neither published. Public APK remains 0.4.33-preview. A new uncommitted localization/satellite/native-startup candidate is held for its own web and exact-APK acceptance.",
+    "customDomainAccess": {
+      "panel": "https://cloud.reg.ru/panel/",
+      "observed": "sign-in required",
+      "serverSettingsChanged": false,
+      "authenticatedServerConnectionEstablished": false
+    },
+    "newPublicAPKIncludedInScope": true,
+    "androidWorkflowReleaseRequested": false,
+    "androidReleaseRequestRecord": "releaseVerification.androidReleaseRequest034",
+    "customDomainObservationScope": "Latest public read-only observations at 2026-11-16 03:40:09 UTC; the earlier HTTPS 503 is retained only in customDomainObservationHistory. No authenticated server access, mutation or API-connected verification is asserted.",
+    "selfHostedWebCISuccessImpliesDeployedAPI": false,
+    "androidWorkflowReleaseRequestedScope": "No new release request has been submitted for the current uncommitted candidate. Historical dca8f32 push confirmed release_requested=false; the earlier 45c3974 explicit request and 10/11 failure remain separately recorded.",
+    "currentCandidateRecord": "releaseVerification.localizedSatelliteAndNativeStartupCandidate",
+    "customDomainObservationHistory": [
+      {
+        "httpTitle": "ДокНет — рабочее пространство врача",
+        "httpsStatus": 503,
+        "scope": "Earlier public HTTP/HTTPS observation retained as history. Exact observation timestamp was not recorded in the earlier receipt; HTTP title was DocNet and HTTPS returned 503."
+      }
+    ],
+    "customDomainObservedHTTPStatus": 200,
+    "customDomainObservedHTTPSOutcome": "timeout after 8 seconds; no HTTP status received",
+    "customDomainLatestReadOnlyObservation": {
+      "checkedAtUTC": "2026-11-16T03:40:09Z",
+      "requests": [
+        {
+          "url": "http://xn--h1akbedl4b5a.xn--p1ai/",
+          "checkedAtUTC": "2026-11-16T03:40:09.262618+00:00",
+          "scope": "public read only; no authentication or server mutation",
+          "httpStatus": 200,
+          "location": null,
+          "contentType": "text/html; charset=utf-8",
+          "title": "ДокНет — рабочее пространство врача"
+        },
+        {
+          "url": "https://xn--h1akbedl4b5a.xn--p1ai/",
+          "checkedAtUTC": "2026-11-16T03:40:09.321345+00:00",
+          "scope": "public read only; no authentication or server mutation",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "httpsTimeoutSeconds": 8,
+      "authenticationUsed": false,
+      "serverSettingsChanged": false,
+      "sourceEvidence": {
+        "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/public-domain-20261116-0340.json",
+        "bytes": 588,
+        "sha256": "5d8e114b033b443e0fd9bf3df378c7fc912c8c5ac0d5dcd1a00958717b61059b"
+      },
+      "scope": "Public read-only observations only. HTTP served DocNet; HTTPS timed out without an HTTP response. This does not establish any current 503 status or production API deployment."
+    },
+    "currentPublishedWebSourceCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+    "currentPublishedWebBuildId": "20d8550543018ac9"
+  },
+  "qualityPreservedScope": "The existing qualityPreserved assertions and earlier zero-difference proofs describe the three historical loading passes and framebuffer repair. The new candidate keeps source/detail requirements but intentionally changes Russian display labels, source-credit layout and the full photographic background; it needs separate acceptance.",
+  "statusReconciledAtUTC": "2026-11-16T05:10:53.798514+00:00"
+}

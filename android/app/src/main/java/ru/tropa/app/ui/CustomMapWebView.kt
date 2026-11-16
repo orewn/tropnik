@@ -27,9 +27,9 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 import ru.tropa.app.BuildConfig
+import ru.tropa.app.TropaApplication
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.net.URI
 import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
@@ -38,39 +38,17 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
-internal const val CUSTOM_MAP_ORIGIN = "https://map.tropnik.invalid"
 private const val CUSTOM_MAP_DOCUMENT = "$CUSTOM_MAP_ORIGIN/custom-map/index.html"
-private const val MAX_MAP_RESOURCE_BYTES = 8 * 1024 * 1024
 private const val MAX_ROUTE_BYTES = 16 * 1024 * 1024
 private val CATALOGUE_TRAIL_ID = Regex("[a-z0-9-]{1,128}")
 
-/** Closed URL policy shared by the resource broker and focused JVM tests.
- * Remote requests never inherit a session, cookies, account or caller headers. */
-internal object CustomMapResourcePolicy {
-    fun safePath(path: String): Boolean = path.startsWith('/') && path.length <= 512 &&
-        Regex("/[A-Za-z0-9_./-]*").matches(path) && path.split('/').drop(1).all { it.isNotEmpty() && it != "." && it != ".." }
-
-    fun remoteAllowed(value: String): Boolean = runCatching {
-        val uri = URI(value)
-        if (uri.scheme != "https" || uri.port !in listOf(-1, 443) || uri.userInfo != null || uri.fragment != null || uri.rawQuery != null || uri.rawPath != uri.path || !safePath(uri.path)) return@runCatching false
-        when (uri.host) {
-            "tiles.openfreemap.org" -> uri.path.startsWith("/planet/")
-            "tiles.mapterhorn.com" -> Regex("/\\d{1,2}/\\d{1,7}/\\d{1,7}\\.webp").matches(uri.path)
-            "tiles.maps.eox.at" -> Regex("/wmts/1\\.0\\.0/(s2cloudless_3857|bluemarble_3857)/default/g/\\d{1,2}/\\d{1,7}/\\d{1,7}\\.jpg").matches(uri.path)
-            else -> false
-        }
-    }.getOrDefault(false)
-}
-
-private data class MapAsset(val path: String, val size: Int, val sha256: String)
 private data class CurrentMapRoute(val url: String, val bytes: ByteArray)
 
 /** Each view owns its broker and bounded buffers. Every request is intercepted,
  * including failures; WebView itself is never allowed onto the network. */
 private class CustomMapResources(context: Context, private val networkFailure: () -> Unit, private val localFailure: () -> Unit) {
     private val assets = context.applicationContext.assets
-    private val manifest = JSONObject(assets.open("custom-map/manifest.json").bufferedReader().use { it.readText() })
-    private val allowed = mutableMapOf<String, MapAsset>()
+    private val allowed = (context.applicationContext as TropaApplication).mapAssetRegistry.entries
     private val calls = ConcurrentHashMap.newKeySet<Call>()
     private val networkPermits = Semaphore(3, true)
     private val client = OkHttpClient.Builder().followRedirects(false).followSslRedirects(false)
@@ -80,25 +58,6 @@ private class CustomMapResources(context: Context, private val networkFailure: (
         releaseNetwork = { try { client.connectionPool.evictAll() } finally { client.dispatcher.executorService.shutdown() } },
     )
     @Volatile private var route: CurrentMapRoute? = null
-
-    init {
-        require(manifest.getInt("schemaVersion") == 1 && manifest.getString("runtime") == "tropnik-canvas" && manifest.getString("origin") == CUSTOM_MAP_ORIGIN)
-        fun add(url: String, path: String, size: Int, sha: String) {
-            require(CustomMapResourcePolicy.safePath(url) && CustomMapResourcePolicy.safePath("/$path") && size in 1..MAX_MAP_RESOURCE_BYTES && Regex("[a-f0-9]{64}").matches(sha))
-            require(allowed.put(url, MapAsset(path, size, sha)) == null)
-        }
-        val files = manifest.getJSONArray("files")
-        for (index in 0 until files.length()) {
-            val file = files.getJSONObject(index);val path = file.getString("path")
-            add("/custom-map/$path", "custom-map/$path", file.getInt("sizeBytes"), file.getString("sha256"))
-        }
-        val aliases = manifest.getJSONArray("resourceAliases")
-        for (index in 0 until aliases.length()) {
-            val alias = aliases.getJSONObject(index)
-            add(alias.getString("url"), alias.getString("assetPath"), alias.getInt("sizeBytes"), alias.getString("sha256"))
-        }
-        allowed["/offline-map/manifest.json"] = requireNotNull(allowed["/custom-map/offline-manifest.json"])
-    }
 
     fun setOnline(value: Boolean) {
         network.setOnline(value)

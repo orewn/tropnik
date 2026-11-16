@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-16T04:44:40.014459+00:00",
+  "baseCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+  "candidateCommit": null,
+  "scope": "Move the existing bundled-catalogue initializer off Android Main behind an honest Activity startup gate; source-level evidence, not APK acceptance",
+  "change": {
+    "applicationOwnership": "The same success-only synchronized Lazy<Catalog> is read by catalog and prepared by CatalogStartup",
+    "coldDispatcher": "Dispatchers.IO",
+    "warmReadyPath": "Immediate existing value; no dispatcher hop or new catalogue",
+    "initialState": "Loading until the full original Catalog.load succeeds; no empty placeholder catalogue",
+    "failureState": "Fixed Russian explanation and explicit retry; failed IO/validation is not cached",
+    "cancellation": "CancellationException propagates and an inactive composition cannot publish Ready; a completed immutable catalogue can be reused by the next owner",
+    "viewModels": "Existing Activity-owned MainViewModel and OnlineViewModel are first requested only in the Ready branch",
+    "selectedRoute": "Existing retained ViewModel navigation, selected route, and offline snapshot are not reset by bootstrap or retry",
+    "processDeathRestorationAdded": false,
+    "timeToDataImprovementClaimed": false,
+    "catalogueParsingOrPayloadChanged": false,
+    "mapRenderingOrDetailChanged": false,
+    "abiOrSigningOrVersionChanged": false,
+    "releaseGateThresholdsChanged": false,
+    "deviceSetupChange": "One @Before bounded 15-second wait for exactly one displayed explore_list; startup error fails immediately; no sleep or skip"
+  },
+  "sourceFiles": [
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/MainActivity.kt",
+      "bytes": 4334,
+      "sha256": "1c31425a4a93c69663103c24ed754ff465400a8a46a954de498177f561d76b5d"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/TropaApplication.kt",
+      "bytes": 1390,
+      "sha256": "ae723d39e7d19c7b643b8ac1015ea3c01de0073b4bc4b0ddd615e293535fcbfa"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/CatalogStartup.kt",
+      "bytes": 729,
+      "sha256": "471351e7f0dc170118a997afe04ceff11596d8f3d824ff5a641f1d918bcc45e3"
+    },
+    {
+      "path": "android/app/src/test/java/ru/tropa/app/CatalogStartupTest.kt",
+      "bytes": 7669,
+      "sha256": "c53683a9527d310ec55e244954d92fcaec8f62e5ff35911085b436cfc72b218c"
+    },
+    {
+      "path": "android/app/src/androidTest/java/ru/tropa/app/LocalExperienceTest.kt",
+      "bytes": 95873,
+      "sha256": "875e9c76f0f6c8266aa2ab0bfafea19d776402f6f367c0850d6f869148554433"
+    },
+    {
+      "path": "tools/android-build/test_catalog_startup_threading.py",
+      "bytes": 4330,
+      "sha256": "c60de19d5160c2b81a96d1ca73cfff06057896e1568773c61f28b4aaa46eb7fe"
+    }
+  ],
+  "localValidation": {
+    "compiler": "Kotlin 2.2.21",
+    "javaRuntime": "OpenJDK 21.0.13",
+    "jvmTarget": 17,
+    "coroutines": "kotlinx-coroutines-core-jvm 1.10.2, matching the app dependency",
+    "productionClassesCompiled": [
+      "CatalogStartup"
+    ],
+    "jvmAssertionsEnabled": true,
+    "junit": {
+      "passed": 6,
+      "failed": 0,
+      "seconds": 0.195,
+      "rawOutput": "JUnit version 4.13.2\n......\nTime: 0.195\n\nOK (6 tests)\n\n"
+    },
+    "coveredCases": [
+      "Cold read/parse leaves the same single caller thread responsive",
+      "24 concurrent callers and 100 warm reads share exactly one successful initializer/value",
+      "IO and validation failures remain unready and can retry",
+      "Already warm catalogue bypasses dispatcher and reread",
+      "Cancelled owner cannot publish ready while the completed asset remains reusable",
+      "Initializer cancellation propagates and is not cached"
+    ],
+    "sourceGuards": [
+      {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/android-build",
+          "-p",
+          "test_catalog_startup_threading.py"
+        ],
+        "exitCode": 0,
+        "rawOutput": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.002s\n\nOK\n"
+      },
+      {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/android-build",
+          "-p",
+          "test_tropa_map_threading.py"
+        ],
+        "exitCode": 0,
+        "rawOutput": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.001s\n\nOK\n"
+      }
+    ],
+    "sourceBoundaryProof": {
+      "allDeviceScenarioBodiesByteUnchanged": true,
+      "scenarioNames": [
+        "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+        "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+        "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+        "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+        "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+        "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+        "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+        "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+        "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+        "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+        "terminalDocumentFailureAfterFirstFrameCanPrepareANewView"
+      ],
+      "scenarioCount": 11,
+      "android/app/src/main/java/ru/tropa/app/MainViewModel.kt": {
+        "byteUnchanged": true,
+        "sha256": "ffeb3ab6f66d687ca4acfe23a5696f554aecf94c3e777f298bc067ff0d8c3370"
+      },
+      "android/app/src/main/java/ru/tropa/app/ui/TropaApp.kt": {
+        "byteUnchanged": true,
+        "sha256": "b6b914b5be1a698d183fb1ccfc84ad4b74ea6009a78d58668613c75cd6ba06f5"
+      },
+      "android/app/src/main/AndroidManifest.xml": {
+        "byteUnchanged": true,
+        "sha256": "8c4acce94e79887232188284a42bb96272597744662e35a78ffa13a6cf72e577"
+      },
+      "android/app/build.gradle.kts": {
+        "byteUnchanged": true,
+        "sha256": "d8710645786720e8827ae5372c0eec92bbda14414e0195695f6a0438d7168549"
+      }
+    },
+    "androidComposeOrApplicationCompiledHere": false,
+    "androidSdkAvailable": false,
+    "androidGradleOrR8RunHere": false,
+    "deviceScenariosRunHere": 0,
+    "testFixtureCorrection": {
+      "firstAssertionsEnabledRun": {
+        "tests": 6,
+        "assertionFailures": 2,
+        "scope": "Two exception reference-identity assertions, not production failures",
+        "rawOutput": "JUnit version 4.13.2\n.E..E...\nTime: 0.39\nThere were 2 failures:\n1) readAndValidationFailuresStayUnreadyAndCanBeRetried(ru.tropa.app.CatalogStartupTest)\njava.lang.AssertionError: expected same:<java.io.IOException: fixture read failed> was not:<java.io.IOException: fixture read failed>\n\tat org.junit.Assert.fail(Assert.java:89)\n\tat org.junit.Assert.failNotSame(Assert.java:829)\n\tat org.junit.Assert.assertSame(Assert.java:772)\n\tat org.junit.Assert.assertSame(Assert.java:783)\n\tat ru.tropa.app.CatalogStartupTest$readAndValidationFailuresStayUnreadyAndCanBeRetried$1.invokeSuspend(CatalogStartupTest.kt:97)\n\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n\tat kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:98)\n\tat kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)\n\tat kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:94)\n\tat kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:70)\n\tat kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)\n\tat kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)\n\tat kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)\n\tat ru.tropa.app.CatalogStartupTest.readAndValidationFailuresStayUnreadyAndCanBeRetried(CatalogStartupTest.kt:82)\n2) initializerCancellationPropagatesAndNeverBecomesCachedFailureOrSuccess(ru.tropa.app.CatalogStartupTest)\njava.lang.AssertionError: expected same:<java.util.concurrent.CancellationException: fixture cancelled> was not:<java.util.concurrent.CancellationException: fixture cancelled>\n\tat org.junit.Assert.fail(Assert.java:89)\n\tat org.junit.Assert.failNotSame(Assert.java:829)\n\tat org.junit.Assert.assertSame(Assert.java:772)\n\tat org.junit.Assert.assertSame(Assert.java:783)\n\tat ru.tropa.app.CatalogStartupTest$initializerCancellationPropagatesAndNeverBecomesCachedFailureOrSuccess$1.invokeSuspend(CatalogStartupTest.kt:159)\n\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)\n\tat kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:98)\n\tat kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)\n\tat kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:94)\n\tat kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:70)\n\tat kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)\n\tat kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)\n\tat kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)\n\tat ru.tropa.app.CatalogStartupTest.initializerCancellationPropagatesAndNeverBecomesCachedFailureOrSuccess(CatalogStartupTest.kt:150)\n\nFAILURES!!!\nTests run: 6,  Failures: 2\n\n"
+      },
+      "resolution": "Verify exact exception type/message and require the original exception in the cause chain, accommodating coroutine debug stacktrace recovery; final run uses -ea"
+    }
+  },
+  "catalogueWorkMeasurement": {
+    "purpose": "Quantify the existing work moved off Main, not a before/after device startup benchmark",
+    "fixture": "Actual production Catalog.parse/toRoute over the existing bundled catalogue; JVM File read plus desktop org.json 20250517",
+    "androidAssetsExercised": false,
+    "deviceStartupOrFpsMeasured": false,
+    "data": {
+      "sourceSha256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0",
+      "median": {
+        "firstReferenceListMs": 0.087218,
+        "jsonDecodeMs": 64.520633,
+        "catalogParseMs": 25.786004,
+        "totalMs": 104.721029,
+        "readMs": 12.752192,
+        "allocatedBytes": 44887024.0
+      },
+      "kind": "source-level-jvm-catalogue-fixture",
+      "javaVersion": "21.0.13",
+      "warmups": 4,
+      "actualCatalogParseAndToRoute": true,
+      "androidAssetReadUsed": false,
+      "sourceBytes": 2176050,
+      "samples": [
+        {
+          "firstReferenceListMs": 0.372136,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 61.896541,
+          "catalogParseMs": 31.522177,
+          "referenceRoutes": 685,
+          "totalMs": 103.787281,
+          "readMs": 9.996427,
+          "allocatedBytes": 44925304
+        },
+        {
+          "firstReferenceListMs": 0.08165,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 57.470433,
+          "catalogParseMs": 30.282082,
+          "referenceRoutes": 685,
+          "totalMs": 99.399699,
+          "readMs": 11.565534,
+          "allocatedBytes": 44925352
+        },
+        {
+          "firstReferenceListMs": 0.082586,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 64.520633,
+          "catalogParseMs": 23.095073,
+          "referenceRoutes": 685,
+          "totalMs": 104.721029,
+          "readMs": 17.022737,
+          "allocatedBytes": 44925304
+        },
+        {
+          "firstReferenceListMs": 0.087218,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 60.860948,
+          "catalogParseMs": 25.786004,
+          "referenceRoutes": 685,
+          "totalMs": 96.495893,
+          "readMs": 9.761723,
+          "allocatedBytes": 44886832
+        },
+        {
+          "firstReferenceListMs": 0.095516,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 76.120532,
+          "catalogParseMs": 85.02724,
+          "referenceRoutes": 685,
+          "totalMs": 186.720725,
+          "readMs": 25.477437,
+          "allocatedBytes": 44886832
+        },
+        {
+          "firstReferenceListMs": 0.092282,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 75.43703,
+          "catalogParseMs": 35.27815,
+          "referenceRoutes": 685,
+          "totalMs": 123.559654,
+          "readMs": 12.752192,
+          "allocatedBytes": 44887472
+        },
+        {
+          "firstReferenceListMs": 0.079945,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 84.583756,
+          "catalogParseMs": 21.346081,
+          "referenceRoutes": 685,
+          "totalMs": 121.11047,
+          "readMs": 15.100688,
+          "allocatedBytes": 44886832
+        },
+        {
+          "firstReferenceListMs": 0.135523,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 63.961307,
+          "catalogParseMs": 20.947176,
+          "referenceRoutes": 685,
+          "totalMs": 95.980453,
+          "readMs": 10.936447,
+          "allocatedBytes": 44887024
+        },
+        {
+          "firstReferenceListMs": 0.081648,
+          "routes": 686,
+          "regions": 100,
+          "jsonDecodeMs": 80.577886,
+          "catalogParseMs": 18.515183,
+          "referenceRoutes": 685,
+          "totalMs": 113.711812,
+          "readMs": 14.537095,
+          "allocatedBytes": 44886832
+        }
+      ],
+      "devicePerformanceMeasured": false
+    },
+    "productionSources": [
+      {
+        "path": "android/app/src/main/java/ru/tropa/app/data/Catalog.kt",
+        "bytes": 10167,
+        "sha256": "8ee860ac5dfd87dfffcf4b43c97232080d94a2b94f0d942044f95388c93f0d18"
+      },
+      {
+        "path": "android/app/src/main/java/ru/tropa/app/data/OnlineModels.kt",
+        "bytes": 8082,
+        "sha256": "d160d9548d4513fc39ca3c572a532acd5d7f098a8f386b37d6fd2bc044f531d0"
+      }
+    ],
+    "fixtureSources": [
+      {
+        "name": "CatalogBenchmark.kt",
+        "bytes": 2506,
+        "sha256": "3d2f8ca1744de487a977839c15f1a13ca21cdc7f2bb3c05b4f88814593d8d5e6"
+      },
+      {
+        "name": "CatalogContextStub.kt",
+        "bytes": 352,
+        "sha256": "3f71b5ddc2dfbe4707b23c2cfb0a44872cb3cceeaf98c32749d350d50940737a"
+      }
+    ]
+  },
+  "registryIntegrationReview": {
+    "manifestApplication": ".TropaApplication",
+    "hiltUsed": false,
+    "registryOwner": "TropaApplication.mapAssetRegistry, internal within the same Android app module",
+    "registryAssetReadDuringApplicationConstruction": false,
+    "registryLoader": "Deferred lambda captures Application assets; each WebView keeps its own network/route/lifetime state",
+    "perResourceIntegrityAndWebViewLifecycle": "Unchanged from the registry-cache audit",
+    "importsAndTypes": "Static integration reviewed; full Android/Compose compilation remains canonical CI work"
+  },
+  "reproduction": {
+    "command": "python3 deployment-monitor/android-performance-diagnosis/run-startup-jvm.py",
+    "commands": {
+      "compile": [
+        "java",
+        "-cp",
+        "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/annotations-13.0.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/hamcrest-core-1.3.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/junit-4.13.2.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-compiler-embeddable-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-daemon-embeddable-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-reflect-1.6.10.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-script-runtime-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-stdlib-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlinx-coroutines-core-jvm-1.10.2.jar",
+        "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
+        "-no-stdlib",
+        "-no-reflect",
+        "-jvm-target",
+        "17",
+        "-classpath",
+        "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/annotations-13.0.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/hamcrest-core-1.3.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/junit-4.13.2.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-compiler-embeddable-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-daemon-embeddable-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-reflect-1.6.10.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-script-runtime-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-stdlib-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlinx-coroutines-core-jvm-1.10.2.jar",
+        "-d",
+        "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/startup-test-classes",
+        "/workspace/scratch/c44c63f212a5/tropinych/android/app/src/main/java/ru/tropa/app/CatalogStartup.kt",
+        "/workspace/scratch/c44c63f212a5/tropinych/android/app/src/test/java/ru/tropa/app/CatalogStartupTest.kt"
+      ],
+      "run": [
+        "java",
+        "-ea",
+        "-cp",
+        "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/startup-test-classes:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlin-stdlib-2.2.21.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/kotlinx-coroutines-core-jvm-1.10.2.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/junit-4.13.2.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/hamcrest-core-1.3.jar:/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/toolchain/annotations-13.0.jar",
+        "org.junit.runner.JUnitCore",
+        "ru.tropa.app.CatalogStartupTest"
+      ]
+    },
+    "runner": {
+      "bytes": 2231,
+      "sha256": "274ef291ee829a109e4184fba018ba58797b7bdc3f6c589f71c286cc296843fc"
+    },
+    "coroutinesArtifact": {
+      "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.10.2/kotlinx-coroutines-core-jvm-1.10.2.jar",
+      "bytes": 1479317,
+      "sha256": "5ca175b38df331fd64155b35cd8cae1251fa9ee369709b36d42e0a288ccce3fd"
+    },
+    "rawReceipts": [
+      {
+        "name": "startup-compile.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "startup-jvm-tests.log",
+        "bytes": 55,
+        "sha256": "7c601854b9dd585c06e846de55fc3cb8b180b45a0c11ab7d408df44c6884828f"
+      },
+      {
+        "name": "startup-jvm-tests-assertions.log",
+        "bytes": 2710,
+        "sha256": "4b1de812db6ed907366c44fae396e219dfe6e3efeb112e04a12cb513d3c16e9a"
+      },
+      {
+        "name": "startup-threading-guards.json",
+        "bytes": 675,
+        "sha256": "73be2765a65a278d802b28a88b038d0ec830b878987381e7dff9e6ed3e33c5f6"
+      },
+      {
+        "name": "startup-source-boundary-proof.json",
+        "bytes": 1487,
+        "sha256": "55ce9e7bf9b42e40e12e30cb1d20459a12f016da57fdfe7e52b59e49ccc90af0"
+      },
+      {
+        "name": "catalog-benchmark.json",
+        "bytes": 3081,
+        "sha256": "d5b1a9d8791440023286d89c004b8f81e877a95e487e980f2a74b95532becdfc"
+      }
+    ]
+  },
+  "remainingAcceptance": [
+    "Canonical Android Gradle and R8 build on exact committed source",
+    "Installed-byte provenance and all 11 unchanged mandatory device scenarios",
+    "Native pixels/rotation/map timing and integrity gates",
+    "Publication only after full web and Android acceptance"
+  ],
+  "publication": {
+    "apkBuiltHere": false,
+    "publishedHere": false,
+    "releaseRequestedHere": false
+  }
+}

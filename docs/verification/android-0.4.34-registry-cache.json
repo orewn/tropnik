@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-16T04:29:51.235940+00:00",
+  "baseCommit": "dca8f32e360fdecc4d09335dad45f076a54e7e5f",
+  "candidateCommit": null,
+  "scope": "Application-owned immutable custom-map manifest registry; standalone source-level JVM evidence, not APK acceptance",
+  "change": {
+    "cached": "Only fully validated Map<String,MapAsset> records for immutable installed APK assets",
+    "ownership": "One registry instance in TropaApplication; lazy synchronized success, failed reads/validation retry",
+    "parserTreeRetained": false,
+    "perViewStateShared": false,
+    "perViewStateRetainedInRegistry": [],
+    "notCached": [
+      "WebView",
+      "route geometry",
+      "bitmap or tile bytes",
+      "network calls or sockets",
+      "UI callbacks",
+      "account/session data"
+    ],
+    "resourceByteBudgetChanged": false,
+    "renderingOrDetailChanged": false,
+    "abiOrSigningOrVersionChanged": false,
+    "releaseGateChanges": false
+  },
+  "sourceFiles": [
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/TropaApplication.kt",
+      "bytes": 1095,
+      "sha256": "fe8ac751d94fb38e148cd54830ced7c38676a6173e442b6d6adb72a2080530d7"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/CustomMapWebView.kt",
+      "bytes": 22859,
+      "sha256": "df783c7749fc17ef8655099a0ecedfa156af4b3b56c3e84c77ae95cb971af36d"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/CustomMapAssetRegistry.kt",
+      "bytes": 2025,
+      "sha256": "d90a32b377d11c94686bf536bedd0872b3ad43f96017276bad5dc27ee27bf3f9"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/CustomMapResourcePolicy.kt",
+      "bytes": 1314,
+      "sha256": "aeb9c433f49805685dcb7850961fa4697f293fcce172f360648d9642ba78695d"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/MapNetworkLifetime.kt",
+      "bytes": 1611,
+      "sha256": "49b53a2169452ee6819659f147f6b2de54d347573839dcabe47e5f0e9af99302"
+    },
+    {
+      "path": "android/app/src/test/java/ru/tropa/app/ui/CustomMapAssetRegistryTest.kt",
+      "bytes": 5799,
+      "sha256": "570749bf2e8af7e75c58d6cfa703a154f2484fe93e4dcf2705ebcf9b43006a0e"
+    },
+    {
+      "path": "android/app/src/test/java/ru/tropa/app/ui/CustomMapResourcePolicyTest.kt",
+      "bytes": 2417,
+      "sha256": "9a23078215d0f4e7d736cc0f025ba09e73ebf0c855742c01b8b98503644ec562"
+    },
+    {
+      "path": "android/app/src/test/java/ru/tropa/app/ui/MapNetworkLifetimeTest.kt",
+      "bytes": 2337,
+      "sha256": "e68278079edb3aeba2751c3ba1bc00bcbbdfa381e8d5e6e236b9dfef8cf1e0d5"
+    }
+  ],
+  "integrityProof": {
+    "resourceUrlPolicyUnchanged": true,
+    "perResourceReadSizeAndShaVerificationUnchanged": true,
+    "perViewNetworkAndRouteCloseUnchanged": true,
+    "webViewBridgeSettingsAndLifecycleUnchanged": true
+  },
+  "localValidation": {
+    "compiler": "Kotlin2.2.21",
+    "javaRuntime": "OpenJDK21.0.13",
+    "jvmTarget": 17,
+    "productionClassesCompiled": [
+      "CustomMapAssetRegistry",
+      "CustomMapResourcePolicy",
+      "MapNetworkLifetime"
+    ],
+    "junit": {
+      "passed": 10,
+      "newRegistryTests": 5,
+      "existingPolicyTests": 3,
+      "existingNetworkLifetimeTests": 2,
+      "seconds": 1.468,
+      "rawOutput": "JUnit version 4.13.2\n..........\nTime: 1.468\n\nOK (10 tests)\n\n"
+    },
+    "threadingSourceGuard": {
+      "passed": 4,
+      "command": "python3 -m unittest discover -s tools/android-build -p test_tropa_map_threading.py"
+    },
+    "gitDiffCheck": "PASS",
+    "androidSdkAvailable": false,
+    "androidGradleOrR8RunHere": false,
+    "deviceScenariosRunHere": 0
+  },
+  "benchmark": {
+    "kotlinCompiler": "2.2.21",
+    "medianSharedAllocatedBytes": 14403576.0,
+    "registryEntries": 1758,
+    "samplesPerMode": 9,
+    "kind": "source-level-jvm-work-fixture",
+    "javaVersion": "21.0.13",
+    "medianSharedMs": 57.188216,
+    "manifestSha256": "9b3d7eec2be92682150c905a05fba41391e281dd5967082361b3ae2ff8ec0250",
+    "sharedRegistryIncludingFirstParse": [
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 25.413483,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 48.979804,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 196.294895,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 70.309148,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 57.188216,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 52.76111,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 70.808732,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 77.396634,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 1,
+        "milliseconds": 26.127314,
+        "allocatedBytes": 14403576,
+        "acquisitions": 10
+      }
+    ],
+    "repeatedParser": [
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 281.709882,
+        "allocatedBytes": 144035760,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 870.467601,
+        "allocatedBytes": 144035760,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 669.218043,
+        "allocatedBytes": 144035760,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 594.438574,
+        "allocatedBytes": 144036152,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 562.673983,
+        "allocatedBytes": 144035760,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 611.955607,
+        "allocatedBytes": 144035760,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 621.713685,
+        "allocatedBytes": 144035760,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 715.946512,
+        "allocatedBytes": 144035912,
+        "acquisitions": 10
+      },
+      {
+        "manifestReadsAndParses": 10,
+        "milliseconds": 273.475109,
+        "allocatedBytes": 144035760,
+        "acquisitions": 10
+      }
+    ],
+    "jsonDependency": "org.json:json:20250517",
+    "manifestBytes": 533835,
+    "devicePerformanceMeasured": false,
+    "warmupPairs": 4,
+    "acquisitionsPerSample": 10,
+    "medianRepeatedMs": 611.955607,
+    "jvmTarget": 17,
+    "medianRepeatedAllocatedBytes": 144035760.0,
+    "dataQualityChanged": false
+  },
+  "benchmarkInterpretation": {
+    "operation": "10 independent map-view registry acquisitions; repeated construction vs one shared success, including its first parse",
+    "manifestReadsAndParsesBefore": 10,
+    "manifestReadsAndParsesAfter": 1,
+    "allocationReductionPercent": 90.0,
+    "timingIsVmWorkFixtureOnly": true,
+    "notAnApkStartupOrDeviceFpsClaim": true,
+    "fixtureManifestIsPriorDcaRuntime": true,
+    "finalLocalizedRuntimeRequiresOwnCanonicalChecks": true
+  },
+  "reproduction": {
+    "runner": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/run-registry-jvm.py",
+    "jvmCommand": "python3 /workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/run-registry-jvm.py",
+    "benchmarkCommand": "python3 /workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/run-registry-jvm.py --benchmark",
+    "fixture": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/RegistryBenchmark.kt",
+    "files": [
+      {
+        "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/RegistryBenchmark.kt",
+        "bytes": 3316,
+        "sha256": "f756895ba1ea812c29339269392e614ec61a33fb648858833eb0dbdf24070fa1"
+      },
+      {
+        "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/registry-benchmark.json",
+        "bytes": 3229,
+        "sha256": "a8b736c990b2593165d646b4d85c878d9fc82307295336d20e0bc139042862a3"
+      },
+      {
+        "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/registry-jvm-tests.log",
+        "bytes": 60,
+        "sha256": "f40ad64b373cde7326614b5249d822d260d317b948dcd0d2ff2b08b002803460"
+      },
+      {
+        "path": "/workspace/scratch/c44c63f212a5/deployment-monitor/android-performance-diagnosis/run-registry-jvm.py",
+        "bytes": 2919,
+        "sha256": "1e6467e819220b13c157f6ea25744037820e01b1130afa01bc91e950fcae2d42"
+      }
+    ],
+    "toolchain": [
+      {
+        "file": "annotations-13.0.jar",
+        "bytes": 17536,
+        "sha256": "ace2a10dc8e2d5fd34925ecac03e4988b2c0f851650c94b8cef49ba1bd111478"
+      },
+      {
+        "file": "hamcrest-core-1.3.jar",
+        "bytes": 45024,
+        "sha256": "66fdef91e9739348df7a096aa384a5685f4e875584cce89386a7a47251c4d8e9"
+      },
+      {
+        "file": "junit-4.13.2.jar",
+        "bytes": 384581,
+        "sha256": "8e495b634469d64fb8acfa3495a065cbacc8a0fff55ce1e31007be4c16dc57d3"
+      },
+      {
+        "file": "kotlin-compiler-embeddable-2.2.21.jar",
+        "bytes": 56908512,
+        "sha256": "9588fa696ac5507af764fd5660df6894185e12704ec1bc3f5cb772af4987f295"
+      },
+      {
+        "file": "kotlin-daemon-embeddable-2.2.21.jar",
+        "bytes": 347987,
+        "sha256": "91c0673c22e44b054ae0314d323860ebe1f3aff3f0ebc74fff82c4733dde09be"
+      },
+      {
+        "file": "kotlin-reflect-1.6.10.jar",
+        "bytes": 3038560,
+        "sha256": "3277ac102ae17aad10a55abec75ff5696c8d109790396434b496e75087854203"
+      },
+      {
+        "file": "kotlin-script-runtime-2.2.21.jar",
+        "bytes": 44769,
+        "sha256": "2b1519b427b514d1536c1b425674b03fe914af637924028e9959c6625442df51"
+      },
+      {
+        "file": "kotlin-stdlib-2.2.21.jar",
+        "bytes": 1761445,
+        "sha256": "6558a3d233da56a20934b32159f9db5f86ed5816ef098f78a2c223dc6abb79dd"
+      },
+      {
+        "file": "kotlinx-coroutines-core-jvm-1.8.0.jar",
+        "bytes": 1548360,
+        "sha256": "9860906a1937490bf5f3b06d2f0e10ef451e65b95b269f22daf68a3d1f5065c5"
+      },
+      {
+        "file": "json-20250517.jar",
+        "bytes": 82710,
+        "sha256": "3ea61b2a06e31edf1c91134fe9106b0ebb16628be169f3db75bc7a2b06b45796"
+      }
+    ]
+  },
+  "limits": [
+    "The registry stays resident for the application lifetime; no WebView, graphics buffer, network owner or selected route is retained.",
+    "Standalone pure-class compilation does not compile the Android integration; full canonical Gradle/R8 and all11 exact universal APK device scenarios remain mandatory.",
+    "The desktop JSON dependency matches the existing JVM test dependency, while Android platform JSON/runtime timing can differ.",
+    "Synchronous catalogue startup remains a diagnosed separate issue; no UI bootstrap change is included."
+  ],
+  "publication": {
+    "requested": false,
+    "apkBuiltHere": false,
+    "apkPublishedHere": false
+  },
+  "followUpIntegration": {
+    "recordedAt": "2026-11-16T04:44:40.014459+00:00",
+    "note": "The original sourceFiles snapshot above predates the approved catalogue startup gate. The registry implementation and per-view boundaries are unchanged; TropaApplication gained catalogue prewarming using the same catalogue lazy.",
+    "originalApplicationSnapshot": {
+      "path": "android/app/src/main/java/ru/tropa/app/TropaApplication.kt",
+      "bytes": 1095,
+      "sha256": "fe8ac751d94fb38e148cd54830ced7c38676a6173e442b6d6adb72a2080530d7"
+    },
+    "currentApplicationSnapshot": {
+      "path": "android/app/src/main/java/ru/tropa/app/TropaApplication.kt",
+      "bytes": 1390,
+      "sha256": "ae723d39e7d19c7b643b8ac1015ea3c01de0073b4bc4b0ddd615e293535fcbfa"
+    },
+    "startupEvidence": "docs/verification/android-0.4.34-catalog-startup.json",
+    "androidModuleCompilationStillRequired": true
+  }
+}

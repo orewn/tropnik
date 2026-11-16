@@ -24,6 +24,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Assert.assertEquals
@@ -55,6 +56,18 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 class LocalExperienceTest {
     @get:Rule val app = createAndroidComposeRule<MainActivity>()
+
+    @Before fun waitForCatalogueStartup() {
+        // Catalogue preparation is asynchronous. Await the actual usable UI;
+        // map-specific readiness and timing budgets stay in each scenario.
+        app.waitUntil(timeoutMillis = 15_000) {
+            check(app.onAllNodesWithTag("catalog_startup_error").fetchSemanticsNodes().isEmpty()) {
+                "Bundled catalogue startup failed"
+            }
+            app.onAllNodesWithTag("explore_list").fetchSemanticsNodes().size == 1
+        }
+        app.onNodeWithTag("explore_list").assertIsDisplayed()
+    }
 
     @Test fun sessionTransitionsFailClosedAndDiscardLatePrivateWork() {
         fun mount(fixture: SessionFaultHarness, seed: Boolean = true) {

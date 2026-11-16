@@ -13,6 +13,8 @@ import type {MapCoverage} from '../public/maps/map-coverage-lod.js';
 import type {MapTileLabel} from './custom-map-painter';
 import {drawMapSymbol} from './custom-map-symbols';
 import {drawMapLabel,mapLabelBudget,mapLabelLayout,mapLabelPriority,mapLabelRepeatDistance,mapLabelRepeatKey,mapLabelStyle} from './custom-map-labels';
+import {mapLabelDisplayText} from './custom-map-label-language';
+import {retainImageryFallback} from './custom-map-imagery';
 import {mapCanvasPolicy,type MapCanvasPolicy} from './map-canvas-policy';
 import {copyMapLabelDiagnostic,MAP_LABEL_INSPECTION_EVENT,MAP_LABEL_SAMPLE_LIMIT,MAX_RECORDED_MAP_LABELS,selectRecordedMapLabels} from './custom-map-label-inspection';
 import {hitTrailOverlay,overlayBoundsIntersect,overlayPartLine,trailOverlayParts,TRAIL_OVERLAY_ZOOMS,type OverlayBounds,type TrailOverlayEntry} from './map-trail-overlay';
@@ -33,7 +35,7 @@ type GroundContext=CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D;
 type GroundRect={left:number;top:number;right:number;bottom:number};
 type GroundPixelGeometry={scale:number;ratio:number;center:MapPoint;width:number;height:number;centerX:number;centerY:number};
 type GroundPatch={rect:GroundRect;geometry:GroundPixelGeometry};
-type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;coverageEpoch?:number;value?:string;repeatDistance?:number;repeatKey?:string};
+type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;displayText:string;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;coverageEpoch?:number;value?:string;repeatDistance?:number;repeatKey?:string};
 type TileLabelMetadata=Pick<CustomMapTile,'key'|'z'|'x'|'y'|'labels'>&{records:Array<{point:MapPoint;source:MapTileLabel;candidate:LabelCandidate}>};
 type FeatureGeometry=GeoJSON.GeoJSON|undefined;
 type PathCollection={path:Path2D;bounds:[number,number,number,number]};
@@ -46,7 +48,7 @@ const DIRECT_TRAIL_COMPLEXITY=4096;
 const GROUND_SNAPSHOT_BYTES=32*1024*1024;
 
 function labelCandidate(id:string,coordinate:[number,number],label:MapTileLabel,color?:string):LabelCandidate{
-  return{id,coordinate,label,color,priority:mapLabelPriority(label),sourceAnchor:`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`};
+  return{id,coordinate,label,displayText:mapLabelDisplayText(label),color,priority:mapLabelPriority(label),sourceAnchor:`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`};
 }
 function sameLabelSource(a:MapTileLabel,b:MapTileLabel):boolean{
   return a.x===b.x&&a.y===b.y&&a.text===b.text&&a.kind===b.kind&&a.rank===b.rank&&a.elevation===b.elevation&&a.priorityCity===b.priorityCity&&a.placeClass===b.placeClass&&a.symbol===b.symbol;
@@ -170,6 +172,7 @@ export class CustomMapEngine {
   private detail?:TileBatch;
   private relief?:TileBatch;
   private imagery?:TileBatch;
+  private loadingImagery?:TileBatch;
   private imageryOverlay?:TileBatch;
   private loadingGround?:LoadingGround;
   private generation=0;
@@ -257,12 +260,12 @@ export class CustomMapEngine {
   getCoverage(){return this.coverage;}
   getState(){return{...this.state};}
   inspect(){
-    const describe=(batch?:TileBatch)=>batch?.tiles.map(tile=>{const n=2**tile.z,sw=mercatorUnproject({x:tile.x/n,y:(tile.y+1)/n}),ne=mercatorUnproject({x:(tile.x+1)/n,y:tile.y/n});return{key:tile.key,kind:tile.kind,z:tile.z,x:tile.x,y:tile.y,local:tile.local,width:tile.bitmap.width,height:tile.bitmap.height,bounds:[sw[0],sw[1],ne[0],ne[1]],transparent:!!tile.transparent,...(tile.reliefCoverage?{reliefCoverage:tile.reliefCoverage}:{})};})||[];
+    const describe=(batch?:TileBatch)=>batch?.tiles.map(tile=>{const n=2**tile.z,sw=mercatorUnproject({x:tile.x/n,y:(tile.y+1)/n}),ne=mercatorUnproject({x:(tile.x+1)/n,y:tile.y/n});return{key:tile.key,kind:tile.kind,z:tile.z,x:tile.x,y:tile.y,local:tile.local,width:tile.bitmap.width,height:tile.bitmap.height,bounds:[sw[0],sw[1],ne[0],ne[1]],transparent:!!tile.transparent,opaque:tile.opaque===true,...(tile.reliefCoverage?{reliefCoverage:tile.reliefCoverage}:{})};})||[];
     const padding={top:this.padding.top??0,right:this.padding.right??0,bottom:this.padding.bottom??0,left:this.padding.left??0};
     // During resize the previous sheet insets can briefly exceed the new size.
     // Inspection must stay safe until the layout observer supplies fresh values.
     const visible=Object.values(padding).every(value=>Number.isFinite(value)&&value>=0)&&padding.left+padding.right<this.size.width&&padding.top+padding.bottom<this.size.height;
-    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',catalogueOverlay:{sources:this.trailOverlay.length,preparedSources:this.paths?this.trailOverlaySources:0,preparedParts:this.paths?this.trailOverlayParts:0,exactSources:this.paths?this.trailOverlayDetails:0,currentViewportReady:!this.paths||this.trailOverlayViewportReady,pending:!!(this.paths&&this.trailRasterParts?.length&&this.trailRaster?.getState().pending),error:this.paths?this.trailRasterError:''},reviewedCoastal:{selected:!!this.reviewedCoastalRoute,overlaySources:this.paths?this.reviewedCoastalOverlaySources:0},drawRevision:this.drawRevision,labelRevision:this.labelRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},loadingGround:this.loadingGround?{generation:this.loadingGround.generation,requestedCells:this.loadingGround.requestedCells,readyCells:this.loadingGround.detail.tiles.length,detail:describe(this.loadingGround.detail),relief:describe(this.loadingGround.relief)}:null,labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
+    return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',catalogueOverlay:{sources:this.trailOverlay.length,preparedSources:this.paths?this.trailOverlaySources:0,preparedParts:this.paths?this.trailOverlayParts:0,exactSources:this.paths?this.trailOverlayDetails:0,currentViewportReady:!this.paths||this.trailOverlayViewportReady,pending:!!(this.paths&&this.trailRasterParts?.length&&this.trailRaster?.getState().pending),error:this.paths?this.trailRasterError:''},reviewedCoastal:{selected:!!this.reviewedCoastalRoute,overlaySources:this.paths?this.reviewedCoastalOverlaySources:0},drawRevision:this.drawRevision,labelRevision:this.labelRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},loadingImagery:this.loadingImagery?{generation:this.loadingImagery.generation,source:this.loadingImagery.kind,readyCells:this.loadingImagery.tiles.length,tiles:describe(this.loadingImagery)}:null,loadingGround:this.loadingGround?{generation:this.loadingGround.generation,requestedCells:this.loadingGround.requestedCells,readyCells:this.loadingGround.detail.tiles.length,detail:describe(this.loadingGround.detail),relief:describe(this.loadingGround.relief)}:null,labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
   }
   private publishInspection(){
     if(this.disposed)return;
@@ -347,7 +350,7 @@ export class CustomMapEngine {
   setMode(mode:CustomMapMode){
     if(this.mode===mode){if(this.state.error)this.retry();return;}this.mode=mode;this.currentKeys='';
     if(mode==='overview'){
-      this.detail=undefined;this.relief=undefined;this.imagery=undefined;this.imageryOverlay=undefined;
+      this.detail=undefined;this.relief=undefined;this.imagery=undefined;this.loadingImagery=undefined;this.imageryOverlay=undefined;
       this.updateState({committedMode:'overview',reliefReady:false,localDetail:false,imagerySource:undefined});
     }
     // Both directions keep the last complete ground. A transparent overlay
@@ -680,7 +683,19 @@ export class CustomMapEngine {
     // so a small pan cannot restart progress and discard already paired cells.
     const requests=[...overviewRequests,...detailRequests,...reliefRequests,...imageryRequests],keys=requests.map(customTileKey).sort().join('|');
     if(keys===this.currentKeys)return;this.currentKeys=keys;const generation=++this.generation;this.loadingGround=undefined;
-    const retainedKeys=()=>[this.overview,this.detail,this.relief,this.imagery,this.imageryOverlay].flatMap(batch=>batch?.tiles.map(t=>t.key)||[]);
+    // Carry real, already displayed refinements across another pan or zoom.
+    // This replaces the old fallback cohort (at most 64 tiles), rather than
+    // retaining an unbounded history alongside the next 64 requested images.
+    if(this.imagery&&this.loadingImagery?.kind===this.imagery.kind){
+      const kind=this.imagery.kind,max=kind==='eox-s2'?14:8;
+      const window=imageryRequests.length&&kind===source?imageryRequests:tileRequests(this.camera,view,Math.min(max,z),kind);
+      this.imagery={...this.imagery,tiles:retainImageryFallback(this.imagery.tiles,this.loadingImagery.tiles,window)};
+    }
+    this.loadingImagery=undefined;
+    const progressiveImagery=this.mode==='satellite'&&this.displayingSatellite()&&this.imagery?.kind===source;
+    const imageryBaseKeys=new Set(this.imagery?.tiles.map(tile=>tile.key));
+    const imageryReady=new Map<string,CustomMapTile>();
+    const retainedKeys=()=>[this.overview,this.detail,this.relief,this.imagery,this.loadingImagery,this.imageryOverlay].flatMap(batch=>batch?.tiles.map(t=>t.key)||[]);
     this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);
     this.updateState({loading:requests.length>0,imageryLoading:imageryRequests.length>0,imageryTarget:imageryRequests.length?source:undefined});
     const current=()=>!this.disposed&&generation===this.generation;
@@ -692,7 +707,18 @@ export class CustomMapEngine {
     const detailReady=new Map<string,CustomMapTile>(),reliefReady=new Map<string,CustomMapTile>(),paired=new Set<string>();
     const cell=(tile:CustomTileRequest)=>`${tile.z}/${tile.x}/${tile.y}`;
     const reveal=(tile:CustomMapTile)=>{
-      if(!progressive||!current()||(tile.kind!=='vector'&&tile.kind!=='relief'))return;
+      if(!current())return;
+      // A same-provider JPEG is independently complete. Show it on top of the
+      // retained real photograph without waiting for its slowest neighbour.
+      // First activation and provider changes still commit atomically, so two
+      // different mosaics never form a misleading patchwork.
+      if(progressiveImagery&&tile.kind===source){
+        if(imageryBaseKeys.has(tile.key))return;
+        imageryReady.set(tile.key,tile);
+        this.loadingImagery={kind:source,generation,tiles:imageryRequests.flatMap(request=>{const ready=imageryReady.get(customTileKey(request));return ready?[ready]:[];})};
+        this.schedule();return;
+      }
+      if(!progressive||(tile.kind!=='vector'&&tile.kind!=='relief'))return;
       const key=cell(tile);(tile.kind==='vector'?detailReady:reliefReady).set(key,tile);
       if(paired.has(key)||!detailReady.has(key)||(reliefRequests.length&&!reliefReady.has(key)))return;
       paired.add(key);
@@ -716,7 +742,7 @@ export class CustomMapEngine {
       if(result.value.tiles.length&&(!result.failed||!this.overview)){this.overview=result.value;this.schedule();}
       if(!detailRequests.length&&!imageryRequests.length){
         if(result.failed){this.updateState({error:'Обзор карты загрузился не полностью. Повторите загрузку.'});return;}
-        this.detail=undefined;this.relief=undefined;this.imagery=undefined;this.imageryOverlay=undefined;this.loadingGround=undefined;
+        this.detail=undefined;this.relief=undefined;this.imagery=undefined;this.loadingImagery=undefined;this.imageryOverlay=undefined;this.loadingGround=undefined;
         this.updateState({committedMode:'overview',reliefReady:false,localDetail:false,imagerySource:undefined,...(navigator.onLine?{error:''}:{})});this.schedule();
       }
     });
@@ -745,7 +771,7 @@ export class CustomMapEngine {
         // holding an otherwise complete image behind their network deadline.
         const detailFailed=!!satelliteDetail&&!this.batchCoversMask(satelliteDetail.value);
         if(satelliteDetail&&!detailFailed)this.imageryOverlay=satelliteDetail.value;
-        this.loadingGround=undefined;this.imagery=imagery.value;this.detail=undefined;this.relief=undefined;imageryCommitted=true;
+        this.loadingGround=undefined;this.loadingImagery=undefined;this.imagery=imagery.value;this.detail=undefined;this.relief=undefined;imageryCommitted=true;
         const overlay=this.imageryOverlay;
         this.updateState({committedMode:'satellite',imageryLoading:false,imagerySource:source,reliefReady:false,localDetail:!!overlay?.tiles.length&&overlay.tiles.every(t=>t.local),...(detailFailed?{error:overlayError}:navigator.onLine?{error:''}:{})});this.schedule();
       }),
@@ -758,7 +784,7 @@ export class CustomMapEngine {
         this.updateState({imageryLoading:false,error:'Подробная карта загрузилась не полностью. Повторите загрузку.'});return;
       }
       this.loadingGround=undefined;
-      this.detail=detail.value;this.relief=reliefRequests.length?relief.value:undefined;this.imagery=undefined;this.imageryOverlay=undefined;
+      this.detail=detail.value;this.relief=reliefRequests.length?relief.value:undefined;this.imagery=undefined;this.loadingImagery=undefined;this.imageryOverlay=undefined;
       this.updateState({committedMode:'detail',imagerySource:undefined,imageryTarget:undefined,reliefReady:relief.value.tiles.length>0,localDetail:detail.value.tiles.length>0&&detail.value.tiles.every(t=>t.local),...(navigator.onLine?{error:''}:{})});
       this.schedule();
     });
@@ -771,7 +797,12 @@ export class CustomMapEngine {
       this.retryAfterOnline();
     }});
   }
-  private batchCoversMask(batch:TileBatch|undefined){return !batch?.missing?.some(tile=>mapTileIntersectsCoverage(this.coverage?.area,tile,this.camera.zoom,this.pitch));}
+  private batchCoversMask(batch:TileBatch|undefined){
+    // Photographs cover the whole viewport, including sea and neighbouring
+    // land. A missing outside-Russia image is no longer hidden by a paper mask.
+    if(batch?.kind==='eox-s2'||batch?.kind==='eox-bluemarble')return !batch.missing?.length;
+    return !batch?.missing?.some(tile=>mapTileIntersectsCoverage(this.coverage?.area,tile,this.camera.zoom,this.pitch));
+  }
   private displayingSatellite(){return this.state.committedMode==='satellite'&&!!this.imagery;}
   private displayDetail(){return this.displayingSatellite()?this.imageryOverlay:this.detail;}
   private worldTransform(ctx:GroundContext=this.context){
@@ -792,6 +823,16 @@ export class CustomMapEngine {
   }
   private detailCoversViewport(batch:TileBatch|undefined):boolean{
     if(this.mode!=='detail'||this.pitch!==0||(this.camera.bearingDegrees??0)!==0||this.camera.zoom<4.7||this.camera.zoom>12||batch?.kind!=='vector'||!batch.tiles.length||batch.tiles.length>MAX_VISIBLE_TILES)return false;
+    return this.opaqueTilesCoverViewport(batch);
+  }
+  private imageryCoversViewport():boolean{
+    const batch=this.imagery;
+    if(!this.displayingSatellite()||this.pitch!==0||(this.camera.bearingDegrees??0)!==0||this.camera.zoom<1||this.camera.zoom>12||!batch||batch.kind!==this.state.imagerySource||(batch.kind!=='eox-s2'&&batch.kind!=='eox-bluemarble')||!batch.tiles.length||batch.tiles.length>MAX_VISIBLE_TILES)return false;
+    // Only the retained cohort proves coverage. Ready refinements cannot fill
+    // holes in this proof, and a mixed-zoom fallback always keeps the underlay.
+    return this.opaqueTilesCoverViewport(batch);
+  }
+  private opaqueTilesCoverViewport(batch:TileBatch):boolean{
     const ratio=this.pixelRatio,width=this.canvas.width,height=this.canvas.height,scale=256*2**this.camera.zoom,center=mercatorProject(this.camera.center),z=batch.tiles[0].z;
     if(![ratio,width,height,this.size.width,this.size.height,scale,center.x,center.y].every(Number.isFinite)||ratio<=0||ratio>2||width<=0||height<=0||width>32768||height>32768||this.size.width<=0||this.size.height<=0||Math.abs(center.x)>2||center.y<0||center.y>1||!Number.isInteger(z)||z<0||z>18)return false;
     const n=2**z;
@@ -806,10 +847,11 @@ export class CustomMapEngine {
     if(![x0,x1,y0,y1].every(Number.isSafeInteger)||x1<x0||y1<y0||y0<0||y1>=n||(x1-x0+1)*(y1-y0+1)>MAX_VISIBLE_TILES)return false;
     const cells=new Set<string>();
     for(const tile of batch.tiles){
-      // Every admitted worker output is a full 512px opaque vector raster.
-      // Closed/missing bitmaps, mixed grids and satellite overlays cannot hide
-      // the base, even when the batch itself has already been committed.
-      if(tile.kind!=='vector'||tile.transparent!==false||tile.z!==z||!Number.isSafeInteger(tile.x)||!Number.isInteger(tile.y)||tile.y<0||tile.y>=n||tile.bitmap.width!==512||tile.bitmap.height!==512)return false;
+      // The vector worker fills opaque paper; imagery needs the tile loader's
+      // successful JPEG proof. Closed/missing bitmaps, mixed grids and a
+      // transparent cartographic overlay can never hide the base.
+      const opaque=batch.kind==='vector'?tile.kind==='vector'&&tile.transparent===false:tile.kind===batch.kind&&tile.opaque===true;
+      if(!opaque||tile.z!==z||!Number.isSafeInteger(tile.x)||!Number.isInteger(tile.y)||tile.y<0||tile.y>=n||tile.bitmap.width!==512||tile.bitmap.height!==512)return false;
       cells.add(`${tile.x}/${tile.y}`);
     }
     // Recheck the current backing pixels on every frame: a retained batch can
@@ -820,7 +862,7 @@ export class CustomMapEngine {
   private groundSignature(detail:TileBatch|undefined,satellite:boolean,covered:boolean):readonly unknown[]{
     const ctx=this.context;
     return[this.canvas.width,this.canvas.height,this.size.width,this.size.height,this.pixelRatio,...this.camera.center,this.camera.zoom,this.camera.bearingDegrees??0,this.pitch,
-      this.mode,this.state.committedMode,satellite,covered,this.area,this.overview,detail,this.imagery,this.relief,this.boundaries,this.boundaryVisible,this.reliefVisible,this.selectedArea,this.selectedBoundary,
+      this.mode,this.state.committedMode,satellite,covered,this.area,this.overview,detail,this.imagery,this.loadingImagery,this.relief,this.boundaries,this.boundaryVisible,this.reliefVisible,this.selectedArea,this.selectedBoundary,
       ctx.lineCap,ctx.lineJoin,ctx.miterLimit];
   }
   private sameGroundSignature(signature:readonly unknown[]){
@@ -907,6 +949,10 @@ export class CustomMapEngine {
     // exact opaque ground after a settled paint, before any route or mask is
     // added. Moving frames keep their original painter without extra copies.
     if(this.moving||this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable)return;
+    // Progressive photos already coalesce into one scheduled frame. Capturing
+    // a full backing canvas for every newly ready JPEG would add up to 64
+    // unnecessary copies; retain once the cohort succeeds or finishes failing.
+    if(this.state.imageryLoading&&this.loadingImagery)return;
     // A compatible streaming surface is patched before reaching this method.
     // Seed an incompatible view once; unsupported geometry keeps the original
     // direct renderer without capturing a transient full canvas per pair.
@@ -939,15 +985,23 @@ export class CustomMapEngine {
         if(this.area){ctx.fillStyle='#dce5cf';ctx.fill(this.area,'evenodd');}
         this.drawTiles(this.overview,.95,ctx,patch);
       }
-      if(satellite)this.drawTiles(this.imagery,1,ctx,patch);
-      if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent))this.drawTiles(detail,1,ctx,patch);
+      if(satellite){
+        // Upscale the actual source image smoothly; no generated detail or
+        // altered geometry is introduced above the provider's native zoom.
+        ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+        this.drawTiles(this.imagery,1,ctx,patch);this.drawTiles(this.loadingImagery,1,ctx,patch);ctx.restore();
+      }
+      if(this.mode!=='overview'&&this.camera.zoom>=4.7&&(!satellite||detail?.tiles[0]?.transparent)){
+        if(satellite&&this.area){ctx.save();ctx.clip(this.area,'evenodd');this.drawTiles(detail,1,ctx,patch);ctx.restore();}
+        else this.drawTiles(detail,1,ctx,patch);
+      }
       if(!satellite&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=4.7)this.drawTiles(this.relief,.82,ctx,patch);
       if(!satellite&&this.mode==='detail'&&this.camera.zoom>=4.7&&this.loadingGround){
         this.drawTiles(this.loadingGround.detail,1,ctx,patch);
         if(this.reliefVisible)this.drawTiles(this.loadingGround.relief,.82,ctx,patch);
       }
       if(this.boundaryVisible&&this.boundaries){ctx.strokeStyle=satellite?'rgba(245,248,232,.45)':'rgba(95,123,87,.45)';ctx.lineWidth=.65/scale;ctx.stroke(this.boundaries);}
-      if(this.selectedArea){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');}
+      if(this.selectedArea&&!satellite){ctx.fillStyle='rgba(92,128,70,.10)';ctx.fill(this.selectedArea,'evenodd');}
       // Clipped territory polygons include artificial coverage-cell edges. Only
       // the source boundary lines may outline the selected territory.
       if(this.selectedBoundary){ctx.strokeStyle=satellite?'#e7eacc':'#688360';ctx.lineWidth=1.3/scale;ctx.stroke(this.selectedBoundary);}
@@ -955,17 +1009,23 @@ export class CustomMapEngine {
   }
   private draw(){
     if(this.disposed||!this.active)return;const ctx=this.context;
-    const detail=this.displayDetail(),covered=this.detailCoversViewport(detail);
-    const satellite=this.displayingSatellite(),signature=this.groundSignature(detail,satellite,covered);let scale:number;
+    const detail=this.displayDetail(),satellite=this.displayingSatellite();
+    const covered=satellite?this.imageryCoversViewport():this.detailCoversViewport(detail),signature=this.groundSignature(detail,satellite,covered);let scale:number;
     if(this.restoreGround(signature)||this.updateLoadingGround(signature,detail,satellite,covered))scale=this.worldTransform();
     else{scale=this.drawGround(detail,satellite,covered);this.retainGround(signature);}
+    // Restrict the product's route/catalogue ink, never the satellite photo.
+    // Keeping this clip separate from the base removes the country cut-out
+    // without admitting foreign vector features or unreviewed coastal routes.
+    const clipRoutes=satellite&&!!this.area&&(this.paths||!!this.route&&!this.reviewedCoastalRoute);
+    if(clipRoutes){ctx.save();ctx.clip(this.area!,'evenodd');}
     if(this.paths){
       this.drawTrailOverlay(scale,satellite);
     }
     if(this.route&&!this.reviewedCoastalRoute){ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#fffef5';ctx.lineWidth=(routeStrokeWidth(this.camera.zoom)+3)/scale;ctx.stroke(this.route.path);ctx.strokeStyle='#244d3c';ctx.lineWidth=routeStrokeWidth(this.camera.zoom)/scale;ctx.stroke(this.route.path);}
-    if(this.mask){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fill(this.mask,'evenodd');}
+    if(clipRoutes)ctx.restore();
+    if(!satellite&&this.mask){ctx.fillStyle=MAP_OUTSIDE_COLOR;ctx.fill(this.mask,'evenodd');}
     // Only an issued SHA-256-verified source snapshot may cross the reviewed
-    // 32.22 m coastal mismatch. The country/terrain mask remains unchanged.
+    // 32.22 m coastal mismatch. The route/terrain coverage remains unchanged.
     if(this.paths&&this.reviewedCoastalOverlayBatch){
       const width=this.camera.zoom<8?1.4:2;ctx.lineCap='round';ctx.lineJoin='round';
       ctx.strokeStyle=satellite?'rgba(30,48,37,.9)':'rgba(255,254,245,.9)';ctx.lineWidth=(width+2)/scale;ctx.stroke(this.reviewedCoastalOverlayBatch);
@@ -1048,8 +1108,8 @@ export class CustomMapEngine {
     const occupied=[...this.obstacles,...this.markerObstacles],seen=new Set<string>(),repeated=new Map<string,MapPoint[]>(),candidates=this.prepareLabelCandidates(this.coverage.area);
     this.labelDiagnosticTotal=candidates.length;let count=0;const budget=mapLabelBudget(this.size.width,this.size.height);
     for(const candidate of candidates){
-      const {id,coordinate,label,color,sourceAnchor}=candidate;
-      const diagnostic:CustomMapLabelDiagnostic={id,label:label.text,coordinate,visible:false,reason:'budget'};
+      const {id,coordinate,label,displayText,color,sourceAnchor}=candidate;
+      const diagnostic:CustomMapLabelDiagnostic={id,label:displayText,coordinate,visible:false,reason:'budget'};
       if(this.labelDiagnostics.length<MAX_RECORDED_MAP_LABELS)this.labelDiagnostics.push(diagnostic);
       if(count>=budget)continue;
       if(seen.has(sourceAnchor)){diagnostic.reason='duplicate';continue;}
@@ -1059,12 +1119,12 @@ export class CustomMapEngine {
       if(!candidate.insideCoverage){diagnostic.reason='outside-coverage';continue;}
       const p=this.project(coordinate),style=mapLabelStyle(label,this.camera.zoom,color);
       if(p.x<24||p.x>this.size.width-24||p.y<32||p.y>this.size.height-20){diagnostic.reason='outside-viewport';continue;}
-      const value=candidate.value??=(label.kind==='peak'&&label.elevation!==undefined?`${label.text?label.text+' · ':''}${Math.round(label.elevation)} м`:label.text);
+      const value=candidate.value??=(label.kind==='peak'&&label.elevation!==undefined?`${displayText?displayText+' · ':''}${Math.round(label.elevation)} м`:displayText);
       ctx.font=`${style.weight} ${style.fontSize}px Manrope, sans-serif`;
       const width=ctx.measureText(value).width,layout=mapLabelLayout(label,p,width,!!value,style),{rect}=layout;
       diagnostic.x=p.x;diagnostic.y=p.y;diagnostic.width=width;diagnostic.rect=rect;
       if(rect.left<12||rect.right>this.size.width-12||rect.top<12||rect.bottom>this.size.height-12){diagnostic.reason='outside-viewport';continue;}
-      const repeatDistance=candidate.repeatDistance??=mapLabelRepeatDistance(label),repeatKey=candidate.repeatKey??=mapLabelRepeatKey(label);
+      const repeatDistance=candidate.repeatDistance??=mapLabelRepeatDistance(label),repeatKey=candidate.repeatKey??=mapLabelRepeatKey(displayText===label.text?label:{...label,text:displayText});
       if(value&&repeatDistance&&(repeated.get(repeatKey)||[]).some(previous=>Math.hypot(p.x-previous.x,p.y-previous.y)<repeatDistance)){diagnostic.reason='repeated-name';continue;}
       if(occupied.some(r=>rect.left<r.right&&rect.right>r.left&&rect.top<r.bottom&&rect.bottom>r.top)){diagnostic.reason='collision';continue;}
       occupied.push(rect);seen.add(sourceAnchor);
@@ -1077,7 +1137,7 @@ export class CustomMapEngine {
   }
   destroy(){
     if(this.disposed)return;this.disposed=true;this.markerPointer=undefined;cancelAnimationFrame(this.frame);this.stopAnimation();clearTimeout(this.settleTimer);
-    this.resize.disconnect();this.pointer.cancel();this.loadingGround=undefined;this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
+    this.resize.disconnect();this.pointer.cancel();this.loadingGround=undefined;this.loadingImagery=undefined;this.listeners.forEach(([target,name,fn,options])=>target.removeEventListener(name,fn,options));this.listeners=[];
     this.unbindCoverage?.();this.coverage?.dispose();this.tiles.destroy();this.canvas.remove();this.labelCanvas.remove();this.markerLayer.remove();this.markers.clear();this.routeEdges=[];
     this.coveragePaths=new WeakMap();this.area=undefined;this.mask=undefined;this.boundaries=undefined;this.selectedArea=undefined;this.selectedBoundary=undefined;
     this.releaseGround();this.trailRaster?.destroy();this.trailRaster=undefined;this.trailRasterParts=undefined;this.trailRasterPartCache=new WeakMap();this.trailOverlayPaintedEntries=[];

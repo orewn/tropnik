@@ -60,7 +60,7 @@ export function connectorResponse(result: unknown): Response {
     {
       status: "upstream_error",
       message:
-        "The app did not return a confirmed result. The action may have completed; check before trying again.",
+        "Приложение не подтвердило результат. Действие могло выполниться; проверьте результат перед повторной попыткой.",
     },
     { status: 502, headers: { "Cache-Control": "private, no-store" } },
   );
@@ -74,10 +74,23 @@ export function connectorErrorRecovery(
 ): { message: string; action?: { label: string; href: string } } {
   if (error.status === "reauthentication_required") {
     return {
-      message: error.message,
-      action: { label: `Connect ${connectorName}`, href: reconnectHref },
+      message: `Для ${connectorName} требуется повторное подключение. Подключите приложение заново.`,
+      action: { label: `Подключить ${connectorName}`, href: reconnectHref },
     };
   }
-  // Other outcomes do not prove that consent is missing or that replay is safe.
-  return { message: error.message };
+  // Preserve the upstream diagnostic on the input. Presentation follows the
+  // confirmed status; a transport or provider failure never proves no action ran.
+  const messages: Record<string, string> = {
+    invalid_request: 'Приложение отклонило параметры запроса. Проверьте введённые данные.',
+    request_context_expired: 'Срок действия запроса истёк. Обновите страницу перед повторной попыткой.',
+    connector_access_disabled: 'Доступ к приложению отключён. Проверьте настройки подключения.',
+    tool_not_found: 'Это действие приложения больше недоступно. Обновите страницу.',
+    tool_not_allowed: 'Это действие приложения недоступно для текущего подключения.',
+    rate_limited: 'Приложение временно ограничило число запросов. Подождите; перед повторной попыткой проверьте результат.',
+    binding_unavailable: 'Подключённые приложения сейчас недоступны. Попробуйте позже.',
+  };
+  const message = Object.prototype.hasOwnProperty.call(messages, error.status)
+    ? messages[error.status]
+    : 'Приложение не подтвердило результат. Действие могло выполниться; проверьте результат перед повторной попыткой.';
+  return { message };
 }

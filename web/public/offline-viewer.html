@@ -30,15 +30,12 @@
 <button id="overview" aria-label="Показать Россию целиком" title="Показать Россию целиком" disabled><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H4v6m14-6h6v6M4 18v6h6m14-6v6h-6M9 14h10m-5-5v10"/></svg></button>
 </div>
 <div id="map-status" role="status" aria-live="polite">Открываем карту России…</div>
-<div id="map-credits" class="map-attribution" hidden>
-<div id="map-credit-body" class="map-attribution-content">
-<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a><span> · </span><a href="/sources">Данные и лицензии</a>
-<details><summary>Другие поставщики и рельеф</summary>
-<p>Картографические данные и оформление: <a href="https://openmaptiles.org" target="_blank" rel="noreferrer">OpenMapTiles</a>, <a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a>. Регионы: geoBoundaries. <a href="/data/russia-boundaries-provenance.json" target="_blank" rel="noreferrer">Источник географии РФ</a>.</p>
-<p>Рельеф © Mapterhorn; Copernicus WorldDEM-30 © DLR e.V. 2010–2014 и Airbus Defence and Space GmbH 2014–2018, предоставлен по программе COPERNICUS Европейским союзом и ESA. Все права сохранены. <a href="/terrain/ATTRIBUTION.txt" target="_blank" rel="noreferrer">Полная атрибуция</a> · <a href="/terrain/sources/Copernicus-GLO30-LICENSE.pdf" target="_blank" rel="noreferrer">Лицензия рельефа</a>.</p>
-</details>
+<div id="map-credits" class="map-attribution map-attribution-inline" hidden>
+<div class="map-source-credit">
+<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© участники OpenStreetMap</a>
+<a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a>
 </div>
-<button id="map-credit-toggle" class="map-attribution-toggle" aria-label="Свернуть сведения об источниках" aria-expanded="true" aria-controls="map-credit-body"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 25a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm0-12v7m0-12v.2"/></svg></button>
+<a class="map-attribution-link" href="/sources" aria-label="Источники данных карты и лицензии">Источники</a>
 </div>
 </section>
 </main>

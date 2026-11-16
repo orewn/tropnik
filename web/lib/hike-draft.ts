@@ -1,3 +1,4 @@
+import {UserFacingError, userErrorText} from './user-facing-errors.ts';
 import type {CompositePlan, CompositePlanOptions, ResolvedPlanGeometry, TrailConnectionIndex} from './trail-connections';
 
 export type HikeDraftStage = {
@@ -50,20 +51,20 @@ function draftId(): string {
 }
 
 function object(value: unknown, label: string): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label}: ожидается объект JSON.`);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new UserFacingError(`${label}: ожидается объект JSON.`);
   const prototype = Object.getPrototypeOf(value);
-  if (prototype !== Object.prototype && prototype !== null) throw new Error(`${label}: ожидается обычный объект JSON.`);
+  if (prototype !== Object.prototype && prototype !== null) throw new UserFacingError(`${label}: ожидается обычный объект JSON.`);
   return value as Record<string, unknown>;
 }
 
 function text(value: unknown, label: string, maximum: number, allowEmpty = false): string {
-  if (typeof value !== 'string') throw new Error(`${label}: ожидается текст.`);
-  if (value.length > maximum) throw new Error(`${label}: не больше ${maximum} символов.`);
-  if (!allowEmpty && !value.trim()) throw new Error(`${label}: заполните значение.`);
+  if (typeof value !== 'string') throw new UserFacingError(`${label}: ожидается текст.`);
+  if (value.length > maximum) throw new UserFacingError(`${label}: не больше ${maximum} символов.`);
+  if (!allowEmpty && !value.trim()) throw new UserFacingError(`${label}: заполните значение.`);
   // JSON can contain control characters or lone surrogates which XML 1.0 cannot represent.
   if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/u.test(value) ||
       [...value].some(character => {const point = character.codePointAt(0)!; return point >= 0xD800 && point <= 0xDFFF;})) {
-    throw new Error(`${label}: удалите недопустимые служебные символы.`);
+    throw new UserFacingError(`${label}: удалите недопустимые служебные символы.`);
   }
   return value;
 }
@@ -71,11 +72,11 @@ function text(value: unknown, label: string, maximum: number, allowEmpty = false
 function timestamp(value: unknown, label: string): string {
   const source = text(value, label, 40);
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(source)) {
-    throw new Error(`${label}: нужна дата в формате ISO UTC.`);
+    throw new UserFacingError(`${label}: нужна дата в формате ISO UTC.`);
   }
   const parsed = new Date(source);
   if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 19) !== source.slice(0, 19)) {
-    throw new Error(`${label}: некорректная дата.`);
+    throw new UserFacingError(`${label}: некорректная дата.`);
   }
   return parsed.toISOString();
 }
@@ -87,38 +88,38 @@ function optionalReference(value: unknown, label: string): string | undefined {
 /** Shape validation also strips unknown fields: imported JSON never supplies executable route geometry. */
 function readDraft(value: unknown): HikeDraft {
   const source = object(value, 'Поход');
-  if (source.schemaVersion !== 1) throw new Error('Эта версия файла похода не поддерживается. Нужен schemaVersion: 1.');
+  if (source.schemaVersion !== 1) throw new UserFacingError('Эта версия файла похода не поддерживается. Поддерживается формат файла версии 1.');
   const id = text(source.id, 'Идентификатор похода', 128);
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/.test(id)) throw new Error('Идентификатор похода содержит недопустимые символы.');
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/.test(id)) throw new UserFacingError('Идентификатор похода содержит недопустимые символы.');
   const name = text(source.name, 'Название похода', MAX_NAME).trim();
   const createdAt = timestamp(source.createdAt, 'Дата создания');
   const updatedAt = timestamp(source.updatedAt, 'Дата изменения');
-  if (Date.parse(updatedAt) < Date.parse(createdAt)) throw new Error('Дата изменения не может быть раньше даты создания.');
+  if (Date.parse(updatedAt) < Date.parse(createdAt)) throw new UserFacingError('Дата изменения не может быть раньше даты создания.');
   const sourceDigest = text(source.sourceDigest, 'Версия данных', 64);
-  if (!/^[a-f0-9]{64}$/.test(sourceDigest)) throw new Error('В файле отсутствует корректная версия исходных данных троп.');
+  if (!/^[a-f0-9]{64}$/.test(sourceDigest)) throw new UserFacingError('В файле отсутствует корректная версия исходных данных троп.');
   const notes = text(source.notes, 'Заметки', MAX_NOTES, true);
-  if (!Array.isArray(source.stages) || source.stages.length > MAX_STAGES) throw new Error(`В походе может быть не больше ${MAX_STAGES} этапов.`);
+  if (!Array.isArray(source.stages) || source.stages.length > MAX_STAGES) throw new UserFacingError(`В походе может быть не больше ${MAX_STAGES} этапов.`);
   let previousDay = 1;
   const stages: HikeDraftStage[] = Array.from(source.stages, (value, index) => {
     const stage = object(value, `Этап ${index + 1}`);
     const trailId = text(stage.trailId, `Тропа этапа ${index + 1}`, 200);
     if (typeof stage.day !== 'number' || !Number.isInteger(stage.day) || stage.day < 1 || stage.day > MAX_DAYS) {
-      throw new Error(`Этап ${index + 1}: день должен быть целым числом от 1 до ${MAX_DAYS}.`);
+      throw new UserFacingError(`Этап ${index + 1}: день должен быть целым числом от 1 до ${MAX_DAYS}.`);
     }
-    if (stage.day < previousDay) throw new Error('Дни этапов должны идти по порядку и не уменьшаться.');
+    if (stage.day < previousDay) throw new UserFacingError('Дни этапов должны идти по порядку и не уменьшаться.');
     previousDay = stage.day;
     const entryConnectionId = optionalReference(stage.entryConnectionId, `Стык этапа ${index + 1}`);
-    if (index === 0 && entryConnectionId !== undefined) throw new Error('У первого этапа не может быть входного стыка с предыдущей тропой.');
+    if (index === 0 && entryConnectionId !== undefined) throw new UserFacingError('У первого этапа не может быть входного стыка с предыдущей тропой.');
     let via: string[] | undefined;
     if (stage.via !== undefined) {
-      if (!Array.isArray(stage.via) || stage.via.length > MAX_VIA) throw new Error(`Этап ${index + 1}: не больше ${MAX_VIA} промежуточных точек.`);
+      if (!Array.isArray(stage.via) || stage.via.length > MAX_VIA) throw new UserFacingError(`Этап ${index + 1}: не больше ${MAX_VIA} промежуточных точек.`);
       via = Array.from(stage.via, (point, position) => text(point, `Промежуточная точка ${position + 1} этапа ${index + 1}`, 240));
     }
     return {trailId, day: stage.day, ...(entryConnectionId !== undefined ? {entryConnectionId} : {}), ...(via !== undefined ? {via} : {})};
   });
   const start = optionalReference(source.start, 'Начало похода');
   const finish = optionalReference(source.finish, 'Конец похода');
-  if (!stages.length && (start !== undefined || finish !== undefined)) throw new Error('Добавьте этап перед выбором начала и конца похода.');
+  if (!stages.length && (start !== undefined || finish !== undefined)) throw new UserFacingError('Добавьте этап перед выбором начала и конца похода.');
   return {schemaVersion: 1, id, name, createdAt, updatedAt, sourceDigest, stages,
     ...(start !== undefined ? {start} : {}), ...(finish !== undefined ? {finish} : {}), notes};
 }
@@ -134,22 +135,22 @@ function endpointNode(reference: string, trailId: string): number | null {
 /** Incomplete drafts may omit choices; every supplied reference must belong to this exact index. */
 export function validateHikeDraft(value: unknown, index: TrailConnectionIndex): HikeDraft {
   const draft = readDraft(value);
-  if (index.schemaVersion !== 1 || draft.sourceDigest !== index.sourceDigest) throw new Error(STALE_MESSAGE);
+  if (index.schemaVersion !== 1 || draft.sourceDigest !== index.sourceDigest) throw new UserFacingError(STALE_MESSAGE);
   const connections = new Map(index.connections.map(connection => [connection.id, connection]));
   const checkEndpoint = (reference: string, trailId: string, label: string) => {
     const node = endpointNode(reference, trailId);
-    if (node === null || !index.routes[trailId]?.nodes[node]) throw new Error(`${label}: точка отсутствует на выбранной тропе. Выберите её заново.`);
+    if (node === null || !index.routes[trailId]?.nodes[node]) throw new UserFacingError(`${label}: точка отсутствует на выбранной тропе. Выберите её заново.`);
   };
   draft.stages.forEach((stage, position) => {
     if (!Object.prototype.hasOwnProperty.call(index.routes, stage.trailId)) {
-      throw new Error(`Этап ${position + 1}: тропа отсутствует в данных или не имеет геометрии для планирования.`);
+      throw new UserFacingError(`Этап ${position + 1}: тропа отсутствует в данных или не имеет геометрии для планирования.`);
     }
     for (const reference of stage.via || []) checkEndpoint(reference, stage.trailId, `Промежуточная точка этапа ${position + 1}`);
     if (stage.entryConnectionId !== undefined) {
       const connection = connections.get(stage.entryConnectionId), previous = draft.stages[position - 1].trailId;
       if (!connection || !((connection.trailA === previous && connection.trailB === stage.trailId) ||
           (connection.trailB === previous && connection.trailA === stage.trailId))) {
-        throw new Error(`Этап ${position + 1}: выбранный стык не соединяет эти две последовательные тропы.`);
+        throw new UserFacingError(`Этап ${position + 1}: выбранный стык не соединяет эти две последовательные тропы.`);
       }
     }
   });
@@ -181,7 +182,7 @@ export function hikeDraftPathKey(draft: HikeDraft): string {
 }
 
 export function safeHikeFilename(name: string, extension?: 'json' | 'gpx'): string {
-  if (extension !== undefined && extension !== 'json' && extension !== 'gpx') throw new Error('Неподдерживаемое расширение файла похода.');
+  if (extension !== undefined && extension !== 'json' && extension !== 'gpx') throw new UserFacingError('Неподдерживаемое расширение файла похода.');
   let stem = name.normalize('NFC').replace(/\.(?:gpx|json)$/i, '')
     .replace(/[^\p{L}\p{N}\p{M}._-]+/gu, '-').replace(/-+/g, '-').replace(/^[._-]+|[._-]+$/g, '');
   stem = [...stem].slice(0, 80).join('').replace(/[._-]+$/g, '') || 'поход';
@@ -209,11 +210,11 @@ function decimal(value: number): string {
 /** Shared by the download control and exporter so an enabled action always has the same requirements. */
 function requireHikeGpxExport(value: HikeDraft, plan: CompositePlan, resolved: ResolvedPlanGeometry): HikeDraft & {start: string; finish: string} {
   const draft = readDraft(value);
-  if (!draft.stages.length) throw new Error('Добавьте этапы перед экспортом GPX.');
-  if (!draft.start || !draft.finish) throw new Error('Выберите начало и конец похода перед экспортом GPX.');
+  if (!draft.stages.length) throw new UserFacingError('Добавьте этапы перед экспортом GPX.');
+  if (!draft.start || !draft.finish) throw new UserFacingError('Выберите начало и конец похода перед экспортом GPX.');
   const connectionIds = draft.stages.slice(1).map(stage => stage.entryConnectionId);
-  if (connectionIds.some(id => id === undefined)) throw new Error('Выберите стык между каждым из последовательных этапов.');
-  if (plan.sourceDigest !== draft.sourceDigest) throw new Error(STALE_MESSAGE);
+  if (connectionIds.some(id => id === undefined)) throw new UserFacingError('Выберите стык между каждым из последовательных этапов.');
+  if (plan.sourceDigest !== draft.sourceDigest) throw new UserFacingError(STALE_MESSAGE);
   const plannedVia = (plan as CompositePlan & {via?: Record<number, string[]>}).via || {};
   if (JSON.stringify(plan.trailIds) !== JSON.stringify(draft.stages.map(stage => stage.trailId)) ||
       JSON.stringify(plan.connectionIds) !== JSON.stringify(connectionIds) || plan.stages.length !== draft.stages.length ||
@@ -221,24 +222,24 @@ function requireHikeGpxExport(value: HikeDraft, plan: CompositePlan, resolved: R
       plan.stages.some((stage, i) => stage.trailId !== draft.stages[i].trailId) ||
       plan.stages[0].fromNode !== endpointNode(draft.start, draft.stages[0].trailId) ||
       plan.stages[plan.stages.length - 1].toNode !== endpointNode(draft.finish, draft.stages[draft.stages.length - 1].trailId)) {
-    throw new Error('Расчёт не соответствует текущему походу. Пересчитайте путь перед экспортом.');
+    throw new UserFacingError('Расчёт не соответствует текущему походу. Пересчитайте путь перед экспортом.');
   }
   const exportableIssues = new Set(['access_closed', 'access_restricted', 'unverified_transfer', 'unverified_crossing', 'disconnected_stage']);
   const blocker = plan.issues.find(issue => !exportableIssues.has(issue.code));
-  if (blocker) throw new Error(`GPX пока недоступен: ${blocker.message}`);
-  if (resolved.issues.length) throw new Error(`Геометрия не готова к экспорту: ${resolved.issues[0].message}`);
-  if (!Number.isFinite(plan.knownDistanceM) || plan.knownDistanceM <= 0 || !resolved.segments.length) throw new Error('Нет рассчитанных участков для экспорта GPX.');
+  if (blocker) throw new UserFacingError(`GPX пока недоступен: ${blocker.message}`);
+  if (resolved.issues.length) throw new UserFacingError(`Геометрия не готова к экспорту: ${resolved.issues[0].message}`);
+  if (!Number.isFinite(plan.knownDistanceM) || plan.knownDistanceM <= 0 || !resolved.segments.length) throw new UserFacingError('Нет рассчитанных участков для экспорта GPX.');
   const expectedStages = plan.stages.flatMap((stage, i) => stage.connected && stage.refs.length ? [i] : []);
   if (resolved.features.length !== expectedStages.length || resolved.features.some((feature, i) =>
     feature.properties.stage !== expectedStages[i] || feature.properties.trailId !== plan.stages[expectedStages[i]].trailId)) {
-    throw new Error('Не все рассчитанные этапы загружены. Дождитесь геометрии и повторите экспорт.');
+    throw new UserFacingError('Не все рассчитанные этапы загружены. Дождитесь геометрии и повторите экспорт.');
   }
   for (const segment of resolved.segments) {
-    if (!Array.isArray(segment) || segment.length < 2) throw new Error('В GPX есть пустой участок. Пересчитайте путь.');
+    if (!Array.isArray(segment) || segment.length < 2) throw new UserFacingError('В GPX есть пустой участок. Пересчитайте путь.');
     for (const point of segment) if (!Array.isArray(point) || !Number.isFinite(point[0]) || !Number.isFinite(point[1]) || Math.abs(point[0]) > 180 || Math.abs(point[1]) > 90) {
-      throw new Error('В геометрии есть некорректные координаты. Экспорт остановлен.');
+      throw new UserFacingError('В геометрии есть некорректные координаты. Экспорт остановлен.');
     }
-    if (!segment.some(point => point[0] !== segment[0][0] || point[1] !== segment[0][1])) throw new Error('В GPX есть пустой участок. Пересчитайте путь.');
+    if (!segment.some(point => point[0] !== segment[0][0] || point[1] !== segment[0][1])) throw new UserFacingError('В GPX есть пустой участок. Пересчитайте путь.');
   }
   return {...draft, start: draft.start, finish: draft.finish};
 }
@@ -250,7 +251,7 @@ export function getHikeGpxExportState(value: HikeDraft, plan: CompositePlan, res
     requireHikeGpxExport(value, plan, resolved);
     return {canExport: true};
   } catch (error) {
-    return {canExport: false, reason: error instanceof Error ? error.message : 'Не удалось проверить план для GPX. Пересчитайте путь.'};
+    return {canExport: false, reason: userErrorText(error, 'plan_export')};
   }
 }
 

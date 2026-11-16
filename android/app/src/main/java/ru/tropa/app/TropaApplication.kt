@@ -9,9 +9,17 @@ import ru.tropa.app.data.LocationReader
 import ru.tropa.app.data.OfflinePacks
 import ru.tropa.app.data.SessionVault
 import ru.tropa.app.data.PrivateConversations
+import ru.tropa.app.ui.CustomMapAssetRegistry
 
 class TropaApplication : Application() {
-    val catalog by lazy { Catalog.load(this) }
+    internal val mapAssetRegistry = CustomMapAssetRegistry {
+        assets.open("custom-map/manifest.json").bufferedReader().use { it.readText() }
+    }
+    private val bundledCatalog = lazy(LazyThreadSafetyMode.SYNCHRONIZED) { Catalog.load(this) }
+    private val catalogStartup = CatalogStartup(bundledCatalog)
+    val catalog by bundledCatalog
+    internal val catalogReady: Boolean get() = catalogStartup.isReady
+    internal suspend fun prepareCatalog(): Catalog = catalogStartup.prepare()
     val database by lazy { LocalDatabase.open(this) }
     val offlinePacks by lazy { OfflinePacks(this, database.dao(), catalog) }
     val connectivity by lazy { ConnectivityMonitor(this) }

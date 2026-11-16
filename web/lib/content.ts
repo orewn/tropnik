@@ -214,10 +214,13 @@ export const trails: Trail[] = [
     .replaceAll('Геометрия из открытой базы не является проверенным навигационным треком.', 'Перед выходом сопоставьте путь на карте с актуальным описанием маршрута.')
     .replaceAll('Данные OpenStreetMap', 'Описание маршрута');
   const sourceTitle = merged.title;
+  // Confirmed Russian event name: https://startrail.ru/riekkalansaari
+  // Display only: retain the original sourceTitle, route IDs and geometry.
+  const russianTitle = sourceTitle.replace(/^Riekkalansaari Trail (7|12|25|35|55|80)km$/, 'Риеккалансаари трейл $1 км');
   const title = /^Маршрут OSM \d+$/.test(sourceTitle)
     ? `Тропа без названия · ${regionNames.get(merged.regionId) || 'Россия'}`
     : /^[\p{L}\p{N}]$/u.test(sourceTitle.trim())
-      ? `Маршрут ${sourceTitle.trim()} · ${regionNames.get(merged.regionId) || 'Россия'}` : sourceTitle;
+      ? `Маршрут ${sourceTitle.trim()} · ${regionNames.get(merged.regionId) || 'Россия'}` : russianTitle;
   return {...merged, title, ...(title !== sourceTitle ? {sourceTitle: merged.sourceTitle || sourceTitle} : {}),
     description: clean(merged.description), subtitle: clean(merged.subtitle), notes: merged.notes.map(clean),
     ...(merged.operatingNotice ? {operatingNotice: {...merged.operatingNotice, title: clean(merged.operatingNotice.title), body: clean(merged.operatingNotice.body)}} : {}),

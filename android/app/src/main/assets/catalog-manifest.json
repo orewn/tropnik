@@ -3,8 +3,8 @@
   "id": "tropnik-reference-catalog-v1",
   "catalog": {
     "path": "catalog.json",
-    "bytes": 2176050,
-    "sha256": "f6bb98b660bf8fdd72f148b40757ea636d1a4c5b69a1e0b68e507751ce2108f0"
+    "bytes": 2176319,
+    "sha256": "1e37c7dbe3d4a35ab67a42509d25fca4579b5b2a5ba250fcff633107a740b2db"
   },
   "sourceInputs": [
     {
@@ -24,8 +24,8 @@
     },
     {
       "path": "web/lib/content.ts",
-      "bytes": 23218,
-      "sha256": "08d73e3ddba8f93c3f5fc516bad5cc31fd4ce27d8e522fc9d1e793734a7cd9bb"
+      "bytes": 23508,
+      "sha256": "651d3ffe7e6f28fb86fa0ccfd21b95110654295e530051ccd04523afc38c061f"
     },
     {
       "path": "web/lib/catalog.generated.json",

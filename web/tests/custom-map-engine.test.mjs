@@ -32,7 +32,7 @@ assert.equal(createHash('sha256').update(streamingLabels).digest('hex'),'ecf5646
 
 function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false,pixelRatio=1,beforeZoom,onGesture,onClick,onMarker}={}){
  let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[],rasters=[],grounds=[];
- let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0};
+ let paintingLabels=false;const labelWork={sourceCoordinates:0,screenCoordinates:0,coverageTests:0,priorityCalls:0,repeatKeys:0,displayNames:0};
  class Target{
   listeners=new Map();
   addEventListener(type,listener,options){const capture=typeof options==='boolean'?options:!!options?.capture,listeners=this.listeners.get(type)||[];if(!listeners.some(item=>item.listener===listener&&item.capture===capture))listeners.push({listener,capture,passive:typeof options==='object'&&!!options?.passive});this.listeners.set(type,listeners);}
@@ -59,9 +59,9 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   rect(...args){this.commands.push(['rect',...args]);}closePath(){this.commands.push(['closePath']);}addPath(path){this.commands.push(['addPath',path]);}
  }
  function createContext(surface){
- const record=call=>calls.push({...call,surface,matrix:[...context.matrix],composite:context.globalCompositeOperation,alpha:context.globalAlpha,lineCap:context.lineCap,lineJoin:context.lineJoin,miterLimit:context.miterLimit});
- const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,lineCap:'butt',lineJoin:'miter',miterLimit:10,globalAlpha:1,globalCompositeOperation:'source-over',stack:[],matrix:[1,0,0,1,0,0],
-  save(){this.stack.push({...Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','lineCap','lineJoin','miterLimit','globalAlpha','globalCompositeOperation','textAlign','textBaseline'].map(key=>[key,this[key]])),matrix:[...this.matrix]});record({op:'save'});},
+ const record=call=>calls.push({...call,surface,matrix:[...context.matrix],composite:context.globalCompositeOperation,alpha:context.globalAlpha,lineCap:context.lineCap,lineJoin:context.lineJoin,miterLimit:context.miterLimit,imageSmoothingEnabled:context.imageSmoothingEnabled,imageSmoothingQuality:context.imageSmoothingQuality});
+ const context={font:'10px sans-serif',fillStyle:'#000000',strokeStyle:'#000000',lineWidth:1,lineCap:'butt',lineJoin:'miter',miterLimit:10,globalAlpha:1,globalCompositeOperation:'source-over',imageSmoothingEnabled:true,imageSmoothingQuality:'low',stack:[],matrix:[1,0,0,1,0,0],
+  save(){this.stack.push({...Object.fromEntries(['font','fillStyle','strokeStyle','lineWidth','lineCap','lineJoin','miterLimit','globalAlpha','globalCompositeOperation','imageSmoothingEnabled','imageSmoothingQuality','textAlign','textBaseline'].map(key=>[key,this[key]])),matrix:[...this.matrix]});record({op:'save'});},
   restore(){Object.assign(this,this.stack.pop());record({op:'restore'});},
   setTransform(...matrix){this.matrix=matrix;record({op:'setTransform',args:matrix});},
   resetTransform(){this.matrix=[1,0,0,1,0,0];record({op:'resetTransform',args:[]});},
@@ -120,7 +120,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
   load(request){const key=tileKey(request);if(this.cache.has(key))return Promise.resolve(this.cache.get(key));if(this.jobs.has(key))return this.jobs.get(key).promise;
    const job={key,request:{...request},settled:false};job.promise=new Promise((done,reject)=>{job.done=done;job.reject=reject;});this.jobs.set(key,job);this.requests.push(job);return job.promise;
   }
-  resolve(job,{labels=[],local=false}={}){assert.equal(job.settled,false);job.settled=true;const bitmap={key:job.key,width:512,height:512,closed:false,close(){this.closed=true;}},tile={...job.request,key:job.key,bitmap,labels,local,contours:0};if(this.jobs.get(job.key)===job)this.jobs.delete(job.key);if(!this.destroyed)this.cache.set(job.key,tile);job.done(tile);return tile;}
+  resolve(job,{labels=[],local=false,opaque}={}){assert.equal(job.settled,false);job.settled=true;const bitmap={key:job.key,width:512,height:512,closed:false,close(){this.closed=true;}},tile={...job.request,key:job.key,bitmap,labels,local,contours:0,opaque};if(this.jobs.get(job.key)===job)this.jobs.delete(job.key);if(!this.destroyed)this.cache.set(job.key,tile);job.done(tile);return tile;}
   reject(job,message='Source failed'){assert.equal(job.settled,false);job.settled=true;if(this.jobs.get(job.key)===job)this.jobs.delete(job.key);job.reject(new Error(message));}
   destroy(){this.destroyed=true;this.active=false;for(const tile of this.cache.values())tile.bitmap.close();this.cache.clear();}
  }
@@ -172,7 +172,7 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
    let path=resolve(dirname(filename),specifier);if(!existsSync(path))path+='.ts';assert.ok(path.startsWith(root+'/'),'Only real local map modules may load');
    const result=load(path);if(specifier==='./custom-map-tiles'){tileKey=result.customTileKey;return{...result,CustomMapTiles:Tiles};}
    if(engineModule){
-    const watched=specifier==='./custom-map-camera'?{mercatorUnproject:'sourceCoordinates',project:'screenCoordinates'}:specifier==='../public/maps/russia-viewport.js'?{inRussiaCoverage:'coverageTests'}:specifier==='./custom-map-labels'?{mapLabelPriority:'priorityCalls',mapLabelRepeatKey:'repeatKeys'}:{};
+    const watched=specifier==='./custom-map-camera'?{mercatorUnproject:'sourceCoordinates',project:'screenCoordinates'}:specifier==='../public/maps/russia-viewport.js'?{inRussiaCoverage:'coverageTests'}:specifier==='./custom-map-labels'?{mapLabelPriority:'priorityCalls',mapLabelRepeatKey:'repeatKeys'}:specifier==='./custom-map-label-language'?{mapLabelDisplayText:'displayNames'}:{};
     if(Object.keys(watched).length)return{...result,...Object.fromEntries(Object.entries(watched).map(([name,count])=>[name,(...args)=>{if(paintingLabels)labelWork[count]++;return result[name](...args); }]))};
    }
    return result;
@@ -578,6 +578,95 @@ test('pending and failed satellite batches retain the actual previous ground unt
  assert.deepEqual(env.lastDraw().filter(call=>call.op==='drawImage').map(call=>call.key),ground);
  env.engine.setMode('satellite');env.complete();await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().imagerySource,'eox-s2');assert.equal(env.engine.getState().imageryLoading,false);
  assert.equal(env.engine.inspect().tiles.imagery.length,pending.length);assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key.startsWith('eox-s2:')));
+});
+
+test('satellite photographs fill the viewport while country coverage clips only cartographic and route ink',async t=>{
+ const env=fixture({view:{...camera,bearingDegrees:17},pixelRatio:2});t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setRoute({type:'LineString',coordinates:[[39,43.5],[40.5,43.5],[43,43.5]]},'coverage-route');env.flush();
+ const mask=env.lastDraw().findLast(call=>call.op==='fill'&&call.rule==='evenodd')?.path;assert.ok(mask);
+ env.engine.setMode('satellite');env.complete();await env.settle();
+ const draw=env.lastDraw(),photos=draw.filter(call=>call.op==='drawImage'&&call.key?.startsWith('eox-'));
+ assert.ok(photos.length>0);assert.equal(draw.some(call=>call.op==='fill'&&call.path===mask),false,'The paper country cut-out must never cover a committed photograph');
+ assert.equal(draw.some(call=>call.op==='fill'&&call.color==='rgba(92,128,70,.10)'),false,'Satellite colours must not be tinted by the selected-area mask');
+ const firstClip=draw.findIndex(call=>call.op==='clip');assert.ok(firstClip>draw.findLastIndex(call=>photos.includes(call)),'The photograph must be drawn before the Russian product-area clip');
+ assert.ok(draw.some((call,index)=>index>firstClip&&call.op==='drawImage'&&call.key?.startsWith('vector:')),'The transparent object layer stays inside its own country clip');
+ const route=draw.findIndex(call=>call.op==='stroke'&&call.color==='#244d3c');assert.ok(route>firstClip);
+ const routeClip=draw.slice(0,route).findLast(call=>call.op==='clip');assert.ok(routeClip);assert.equal(routeClip.args[1],'evenodd');
+ let activeClip;const scopes=[];
+ for(const call of draw.slice(0,route)){if(call.op==='save')scopes.push(activeClip);else if(call.op==='restore')activeClip=scopes.pop();else if(call.op==='clip')activeClip=call.args[0];}
+ assert.equal(activeClip,routeClip.args[0],'The country clip must still be active when the actual route is stroked');
+ for(const photo of photos){assert.equal(photo.bitmap.width,512);assert.equal(photo.bitmap.height,512);assert.equal(photo.imageSmoothingEnabled,true);assert.equal(photo.imageSmoothingQuality,'high');}
+ assert.equal(env.context.imageSmoothingQuality,'low','Photographic upscale settings must not change cartographic rasterization');
+ assertViewportRequests(env,env.engine.inspect().tiles.imagery,800,600);
+});
+
+test('an image missing outside Russian coverage blocks full-viewport satellite commit and remains retryable',async t=>{
+ const env=fixture({coverageArea:collection});t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');
+ const images=env.pending('eox-s2');assert.ok(images.length>1);env.store.reject(images[0],'Missing sea or neighbouring land image');env.complete();await env.settle();
+ assert.equal(env.engine.getState().committedMode,'detail');assert.match(env.engine.getState().error,/Спутниковая карта загрузилась не полностью/);
+ assert.equal(env.engine.inspect().tiles.imagery.length,0);assert.equal(env.engine.getState().imageryLoading,false);
+ const before=env.store.requests.length;env.engine.retry();assert.equal(env.store.requests.length,before+1,'Only the failed photo is fetched again');env.complete();await env.settle();
+ assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().error,'');assert.equal(env.engine.inspect().tiles.imagery.length,images.length);
+});
+
+test('same-provider ready imagery refines the scaled real fallback immediately and survives a failed neighbour',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');env.complete();await env.settle();
+ const before=plain(env.engine.inspect().tiles.imagery);env.engine.setCamera({...camera,zoom:9});await env.settle();
+ const images=env.pending('eox-s2');assert.ok(images.length>2);env.store.resolve(images[0]);await env.settle();
+ let current=env.engine.inspect();assert.equal(current.state.committedMode,'satellite');assert.equal(current.state.imagerySource,'eox-s2');assert.equal(current.state.imageryLoading,true);
+ assert.equal(current.loadingImagery.readyCells,1);assert.equal(current.loadingImagery.tiles[0].key,images[0].key);
+ let paint=env.lastDraw().filter(call=>call.op==='drawImage'&&call.key?.startsWith('eox-'));
+ assert.ok(paint.some(call=>call.key===images[0].key),'A complete JPEG may not wait for the rest of its batch');
+ for(const tile of before){assert.ok(paint.some(call=>call.key===tile.key),'The real lower-resolution image remains beneath every unfinished cell');assert.ok(env.store.pins.at(-1).includes(tile.key));}
+ assert.ok(paint.findIndex(call=>call.key===images[0].key)>paint.findLastIndex(call=>before.some(tile=>tile.key===call.key)));
+ env.store.reject(images[1]);env.complete();await env.settle();current=env.engine.inspect();
+ assert.equal(current.state.committedMode,'satellite');assert.match(current.state.error,/Спутниковая карта загрузилась не полностью/);assert.equal(current.loadingImagery.readyCells,images.length-1);
+ paint=env.lastDraw().filter(call=>call.op==='drawImage');assert.ok(paint.some(call=>call.key===images[0].key));assert.equal(paint.some(call=>call.key===images[1].key),false);
+ const retained=current.loadingImagery.tiles.map(tile=>tile.key);env.engine.retry();await env.settle();
+ for(const key of retained)assert.ok(env.store.pins.at(-1).includes(key),'A displayed ready image must stay pinned through retry');
+ env.complete();await env.settle();assert.equal(env.engine.getState().error,'');assert.equal(env.engine.inspect().loadingImagery,null);
+ assert.ok(env.engine.inspect().tiles.imagery.every(tile=>tile.z===9));assert.equal(env.engine.inspect().tiles.imagery.length,images.length);
+});
+
+test('a superseded satellite zoom preserves ready fallback pixels but cannot publish a late prior generation',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');env.complete();await env.settle();
+ env.engine.setCamera({...camera,zoom:9});const old=env.pending('eox-s2');assert.ok(old.length>1);env.store.resolve(old[0]);await env.settle();
+ const readyKey=old[0].key;env.engine.setCamera({...camera,zoom:10});await env.settle();
+ assert.ok(env.engine.inspect().tiles.imagery.some(tile=>tile.key===readyKey),'A second zoom keeps the already displayed real parent image');
+ assert.ok(env.store.pins.at(-1).includes(readyKey));assert.ok(env.engine.inspect().tiles.imagery.length<=64);
+ const current=env.pending('eox-s2').filter(job=>job.request.z===10);assert.ok(current.length>0);env.store.resolve(current[0]);await env.settle();
+ const generation=env.engine.inspect().loadingImagery.generation;env.store.resolve(old[1]);await env.settle();
+ assert.equal(env.engine.inspect().loadingImagery.generation,generation);assert.equal(env.engine.inspect().loadingImagery.tiles.some(tile=>tile.key===old[1].key),false);
+ assert.equal(env.lastDraw().some(call=>call.op==='drawImage'&&call.key===old[1].key),false,'A stale callback cannot leak a retired mosaic onto the current view');
+ env.complete();await env.settle();assert.equal(env.engine.inspect().loadingImagery,null);assert.ok(env.engine.inspect().tiles.imagery.every(tile=>tile.z===10));
+ env.engine.destroy();assert.equal(env.engine.inspect().loadingImagery,null);
+});
+
+test('a provider change never mixes partial Blue Marble images with the retained Sentinel photograph',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');env.complete();await env.settle();
+ const before=plain(env.engine.inspect().tiles.imagery);env.engine.setCamera({center:[180,67.5],zoom:8,bearingDegrees:0});
+ const images=env.pending('eox-bluemarble');assert.ok(images.length>1);for(const job of images.slice(1))env.store.resolve(job);await env.settle();
+ assert.equal(env.engine.inspect().loadingImagery,null);assert.deepEqual(plain(env.engine.inspect().tiles.imagery),before);assert.equal(env.engine.getState().imagerySource,'eox-s2');
+ assert.equal(env.lastDraw().some(call=>call.op==='drawImage'&&call.key?.startsWith('eox-bluemarble:')),false);
+ env.store.reject(images[0]);env.complete();await env.settle();assert.ok(env.engine.getState().error);assert.equal(env.engine.getState().imagerySource,'eox-s2');
+ env.engine.retry();env.complete();await env.settle();assert.equal(env.engine.getState().imagerySource,'eox-bluemarble');assert.equal(env.engine.getState().error,'');
+ assert.ok(env.engine.inspect().tiles.imagery.every(tile=>tile.kind==='eox-bluemarble'));
+});
+
+test('streaming full-resolution satellite cells coalesces paints without a full-canvas snapshot per JPEG',async t=>{
+ const env=fixture({groundCache:true,width:1440,height:1000,pixelRatio:2});t.after(()=>env.engine.destroy());await env.ready();
+ env.engine.setMode('satellite');env.complete();await env.settle();env.engine.setCamera({...camera,zoom:9});await env.settle();
+ const images=env.pending('eox-s2');assert.ok(images.length>10);env.complete(job=>!job.request.kind.startsWith('eox-'));await env.settle();
+ const copies=()=>env.calls.filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage'&&call.bitmap===env.engine.canvas&&call.args.length===2).length;
+ const before=copies(),revision=env.engine.inspect().drawRevision;
+ // Several worker/cache completions in one turn still own one animation frame.
+ for(const job of images.slice(0,3))env.store.resolve(job);await env.settle();assert.equal(env.engine.inspect().drawRevision,revision+1);
+ for(const job of images.slice(3,-1)){env.store.resolve(job);await env.settle();}
+ assert.equal(copies(),before,'No intermediate photo refinement may copy the full 2880×2000 backing canvas');
+ assert.equal(env.engine.inspect().loadingImagery.readyCells,images.length-1);assert.ok(env.engine.inspect().loadingImagery.tiles.every(tile=>tile.width===512&&tile.height===512));
+ env.store.resolve(images.at(-1));await env.settle();assert.equal(copies(),before+1,'One exact reusable ground is captured after the image cohort finishes');
+ assert.equal(env.engine.inspect().loadingImagery,null);assert.equal(env.engine.getState().imageryLoading,false);assert.equal(env.frames.size,0);
+ t.diagnostic(JSON.stringify({scenario:'same-provider imagery streaming, real engine, controlled tile delivery',viewport:[1440,1000],dpr:2,sourceCells:images.length,bitmap:[512,512],intermediateFullCanvasCopies:0,committedFullCanvasCopies:1,networkTimingMeasured:false}));
 });
 
 test('opaque cartography and relief commit as one complete ground, with partial and total failures retried in place',async t=>{
@@ -1033,11 +1122,69 @@ test('source outdoor glyphs and names share one whole collision footprint at the
   {point:{x:400,y:575},text:'Bottom camp',symbol:'camp',rank:4},
  ];
  env.complete(()=>true,job=>({labels:job.request.kind==='vector'?candidates.map(({point,text,...options})=>env.labelFor(job,env.coordinateAt(point),text,{kind:'poi',...options})).filter(label=>label.x>=0&&label.x<1&&label.y>=0&&label.y<1):[]}));await env.settle();
- const labels=plain(env.engine.getLabelDiagnostics()),camp=labels.find(label=>label.label==='Camp'),unnamed=labels.find(label=>label.label===''),collision=labels.find(label=>label.label==='Overlapping name'),bottom=labels.find(label=>label.label==='Bottom camp');
+ const labels=plain(env.engine.getLabelDiagnostics()),camp=labels.find(label=>label.label==='Лагерь'),unnamed=labels.find(label=>label.label===''),collision=labels.find(label=>label.label==='Overlapping name'),bottom=labels.find(label=>label.label==='Bottom camp');
  assert.equal(camp.visible,true);assert.equal(unnamed.visible,true,'A classified but unnamed water point retains its source symbol');assert.equal(collision.reason,'collision');
  assert.equal(bottom.visible,false,'A glyph must not admit a name that extends below the canvas');
- const draw=env.lastDraw(),text=draw.find(call=>call.op==='fillText'&&call.text==='Camp');assert.ok(text.y>camp.y);assert.ok(camp.rect.top<=camp.y-12&&camp.rect.bottom>=text.y+6);assert.equal(draw.some(call=>call.op==='fillText'&&call.text===''),false);
+ const draw=env.lastDraw(),text=draw.find(call=>call.op==='fillText'&&call.text==='Лагерь');assert.ok(text.y>camp.y);assert.ok(camp.rect.top<=camp.y-12&&camp.rect.bottom>=text.y+6);assert.equal(draw.some(call=>call.op==='fillText'&&call.text===''),false);
  assert.ok(draw.filter(call=>call.op==='stroke'&&typeof call.path?.source==='string').length>=6,'Source glyphs use the actual own vector paths');
+});
+
+test('Russian map display keeps source metadata and cached work while translated aliases share repetition rules',async t=>{
+ const view={...camera,zoom:14},env=fixture({view,width:1200,height:700});t.after(()=>env.engine.destroy());await turn();
+ const candidates=[
+  {point:{x:240,y:180},text:'off-road',kind:'path',rank:1},
+  {point:{x:470,y:180},text:'off road',kind:'path',rank:2},
+  {point:{x:960,y:180},text:'OFF_ROAD',kind:'path',rank:3},
+  {point:{x:240,y:360},text:'Лесная тропа',kind:'path',rank:4},
+  {point:{x:720,y:360},text:'Off-road Panorama',kind:'path',rank:5},
+  {point:{x:1000,y:520},text:'Summit',kind:'peak',rank:0,elevation:3210.4,symbol:'peak'},
+  {point:{x:200,y:520},text:'',kind:'poi',rank:0,symbol:'water'},
+ ],sources=[];
+ env.engine.setLabels([{id:'external-footway',coordinate:env.coordinateAt({x:600,y:520}),label:'footway',kind:'path',rank:0}]);
+ env.complete(()=>true,job=>{
+  if(job.request.kind!=='vector')return{};
+  const labels=candidates.map(({point,text,...options})=>env.labelFor(job,env.coordinateAt(point),text,options)).filter(label=>label.x>=0&&label.x<1&&label.y>=0&&label.y<1);
+  sources.push({labels,original:plain(labels)});labels.forEach(Object.freeze);Object.freeze(labels);return{labels};
+ });await env.settle();
+ const diagnostics=env.engine.getLabelDiagnostics(),draw=env.lastDraw(),rawAliases=new Set(['off-road','off road','OFF_ROAD','footway','Summit']);
+ assert.equal(diagnostics.some(label=>rawAliases.has(label.label)),false,'Public label text must describe the Russian text shown on the map');
+ assert.equal(draw.some(call=>['fillText','strokeText','measureText'].includes(call.op)&&rawAliases.has(call.text)),false,'Raw generic English must not reach the text canvas or its measurements');
+ assert.equal(diagnostics.filter(label=>label.visible&&label.label==='Бездорожье').length,2);
+ assert.equal(diagnostics.find(label=>label.id.endsWith(':off road')).reason,'repeated-name','Translated synonyms share the same readable-distance rule');
+ assert.equal(draw.filter(call=>call.op==='fillText'&&call.text==='Бездорожье').length,2);
+ for(const text of ['Лесная тропа','Off-road Panorama','Пешеходная дорожка','Вершина · 3210 м'])assert.ok(draw.some(call=>call.op==='fillText'&&call.text===text),text);
+ assert.ok(diagnostics.find(label=>label.label===''&&label.visible),'An unnamed classified water point retains its source symbol');
+ const russian=diagnostics.find(label=>label.visible&&label.label==='Бездорожье');
+ assert.equal(russian.width,draw.find(call=>call.op==='measureText'&&call.text==='Бездорожье').width);
+ assert.ok(russian.rect.right-russian.rect.left>=russian.width,'The whole Russian name participates in the collision footprint');
+ assert.equal(env.engine.inspectLabels({schemaVersion:1,names:['Бездорожье'],limit:10}).labels.length,3,'Named inspection finds displayed names including suppressed repetitions');
+ for(const {labels,original}of sources)assert.deepEqual(plain(labels),original,'Source text, coordinates, classification and measured elevations stay unchanged');
+ const work=plain(env.labelWork);assert.ok(work.displayNames>0);
+ env.engine.setObstacles([{left:10,top:10,right:20,bottom:20}]);env.flush();
+ env.engine.setCamera({...view,bearingDegrees:7},false);env.flush();
+ for(const key of ['sourceCoordinates','priorityCalls','repeatKeys','displayNames'])assert.equal(env.labelWork[key],work[key],'Warm label frames cannot repeat static '+key);
+ // A cohort rebuild must still hit the per-tile cache. Keeping a translated
+ // copy in candidate.label would break its source-reference identity check.
+ env.engine.setLabels([]);env.flush();
+ for(const key of ['sourceCoordinates','priorityCalls','repeatKeys','displayNames'])assert.equal(env.labelWork[key],work[key],'Unchanged tile labels must survive cohort invalidation without repeating '+key);
+ for(const {labels,original}of sources)assert.deepEqual(plain(labels),original);
+});
+
+test('Russian display text refreshes once when a retained source label changes',async t=>{
+ const env=fixture({view:{...camera,zoom:14}});t.after(()=>env.engine.destroy());await turn();
+ const job=env.pending('vector').find(job=>{const label=env.labelFor(job,camera.center,'');return label.x>=0&&label.x<1&&label.y>=0&&label.y<1;});assert.ok(job);
+ const source=env.labelFor(job,camera.center,'off-road',{kind:'path',rank:1});
+ env.complete(other=>other!==job);const tile=env.store.resolve(job,{labels:[source]});await env.settle();
+ assert.ok(env.lastDraw().some(call=>call.op==='fillText'&&call.text==='Бездорожье'));assert.equal(tile.labels[0],source);assert.equal(source.text,'off-road');
+ const prepared=env.labelWork.displayNames;
+ source.text='forest road';env.engine.setLabels([]);env.flush();
+ assert.equal(env.labelWork.displayNames,prepared+1);assert.equal(tile.labels[0],source);assert.equal(source.text,'forest road');
+ assert.ok(env.lastDraw().some(call=>call.op==='fillText'&&call.text==='Лесная дорога'));
+ assert.equal(env.engine.getLabelDiagnostics().some(label=>label.label==='Бездорожье'),false,'Changed source metadata cannot retain a stale translation');
+ tile.labels[0]={...source,text:'Тропа «Ель»'};env.engine.setLabels([]);env.flush();
+ assert.equal(env.labelWork.displayNames,prepared+2);assert.ok(env.lastDraw().some(call=>call.op==='fillText'&&call.text==='Тропа «Ель»'));
+ const warm=plain(env.labelWork);env.engine.setLabels([]);env.flush();
+ for(const key of ['sourceCoordinates','priorityCalls','repeatKeys','displayNames'])assert.equal(env.labelWork[key],warm[key]);
 });
 
 test('trail and lake names repeat only at readable distances while distinct same-named points remain',async t=>{
@@ -1658,7 +1805,7 @@ test('selected Chukotka keeps the real polygon fill but never outlines the sourc
  const hidden=coveragePaint(env);assert.equal(hidden.boundaries,undefined);assert.equal(hidden.selected,painted.selected);assert.equal(hidden.selectedBoundary,painted.selectedBoundary);assert.equal(hidden.mask,mask);
  env.engine.setMode('satellite');env.complete();await env.settle();
  assert.equal(env.lastDraw().find(call=>call.op==='stroke'&&call.color==='#e7eacc')?.path,painted.selectedBoundary,'Satellite preserves the same real selected border');
- assert.equal(env.lastDraw().find(call=>call.op==='fill'&&call.color==='rgba(92,128,70,.10)')?.path,painted.selected);
+ assert.equal(env.lastDraw().some(call=>call.op==='fill'&&call.color==='rgba(92,128,70,.10)'),false,'The selected territory keeps its real border without tinting the satellite photograph');
  assert.deepEqual(plain(env.engine.getCamera()),cameraBefore);assert.equal(JSON.stringify([territory,boundary]),sourceBefore);
  env.engine.setRegion([]);env.flush();assert.equal(coveragePaint(env).selected,undefined);assert.equal(env.lastDraw().some(call=>call.op==='stroke'&&call.color==='#e7eacc'),false);
  env.engine.destroy();const count=env.calls.length;notifyCoverage(env,{revision:1});env.flush();assert.equal(env.calls.length,count);
@@ -1667,6 +1814,43 @@ test('selected Chukotka keeps the real polygon fill but never outlines the sourc
 function underlayPaint(env){
  const draw=env.lastDraw();return{draw,paper:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='fillRect'),area:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='fill'&&call.color==='#dce5cf'),overview:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='drawImage'&&call.alpha===.95)};
 }
+
+test('a complete proven opaque JPEG cohort omits only the hidden paper, country fill and overview',async t=>{
+ for(const zoom of [2,8,8.25,12])await t.test(`zoom ${zoom}`,async t=>{
+  const env=fixture({view:{...camera,zoom},width:800,height:600,pixelRatio:2});t.after(()=>env.engine.destroy());await env.ready();
+  env.engine.setMode('satellite');env.complete(()=>true,job=>({opaque:job.request.kind.startsWith('eox-')?true:undefined}));await env.settle();
+  const map=env.engine,proof=map.imageryCoversViewport;assert.equal(proof.call(map),true);
+  map.imageryCoversViewport=()=>false;map.schedule();env.flush();const baseline=underlayPaint(env);
+  map.imageryCoversViewport=proof;map.schedule();env.flush();const optimized=underlayPaint(env);
+  assert.equal(baseline.paper.length,1);assert.equal(baseline.area.length,1);assert.ok(baseline.overview.length>0);
+  assert.equal(optimized.paper.length,0);assert.equal(optimized.area.length,0);assert.equal(optimized.overview.length,0);
+  const retained=baseline.draw.filter(call=>!baseline.paper.includes(call)&&!baseline.area.includes(call)&&!baseline.overview.includes(call));
+  assert.deepEqual(optimized.draw,retained,'The actual photograph, country clips, borders, routes and labels keep their original draw order and parameters');
+  assert.ok(map.inspect().tiles.imagery.every(tile=>tile.width===512&&tile.height===512&&tile.opaque));
+  assert.deepEqual([map.canvas.width,map.canvas.height],[1600,1200]);
+ });
+});
+
+test('uncertain satellite opacity, incomplete coverage and incompatible transforms keep every safety underlay',async t=>{
+ const cases=[
+  ['unknown JPEG proof',map=>{map.imagery.tiles[0].opaque=undefined;}],
+  ['missing centre cell',map=>{map.imagery={...map.imagery,tiles:map.imagery.tiles.slice(1)};}],
+  ['provider mismatch',map=>{map.state={...map.state,imagerySource:'eox-bluemarble'};}],
+  ['mixed source grids',map=>{map.imagery.tiles[0].z+=1;}],
+  ['closed bitmap',map=>{map.imagery.tiles[0].bitmap.width=0;}],
+  ['transparent cartographic raster',map=>{map.imagery.tiles[0].kind='vector';map.imagery.tiles[0].transparent=true;}],
+  ['rotated',map=>{map.camera={...map.camera,bearingDegrees:1};}],
+  ['pitched',map=>{map.pitch=1;}],
+  ['DPR outside proof',map=>{map.pixelRatio=2.5;}],
+  ['overzoom outside proof',map=>{map.camera={...map.camera,zoom:13};}],
+  ['source polar edge',map=>{map.camera={...map.camera,center:[40.5,85.05]};}],
+ ];
+ for(const [name,change]of cases)await t.test(name,async t=>{
+  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');env.complete(()=>true,job=>({opaque:job.request.kind.startsWith('eox-')?true:undefined}));await env.settle();
+  assert.equal(env.engine.imageryCoversViewport(),true);change(env.engine);assert.equal(env.engine.imageryCoversViewport(),false);
+  env.engine.schedule();env.flush();const painted=underlayPaint(env);assert.equal(painted.paper.length,1);assert.equal(painted.area.length,1);assert.ok(painted.overview.length>0);
+ });
+});
 
 test('fully covered opaque detail skips only the occluded underlays and preserves mask, route, selected border and labels',async t=>{
  const env=fixture();t.after(()=>env.engine.destroy());

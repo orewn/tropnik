@@ -32,7 +32,7 @@ export default function Sources() {
     <details>
       <summary>Подготовленные наборы высот и покрытия земли</summary>
       <p>Для исследования источников и дальнейшей разработки сохранены два перекрывающихся пакета Южно-Сахалинска и соседних склонов. Они собраны из открытой модели Copernicus GLO-30 и классификации <a href="https://esa-worldcover.org/en/data-access" target="_blank" rel="noreferrer">ESA WorldCover 2021</a>. Высоты исходной модели имеют шаг около 30 м, классы покрытия земли — около 10 м. В пакетах сохранены классы леса, воды, застройки и открытой местности. Это не снимок текущего состояния и не координаты отдельных деревьев. Паспорт каждого пакета содержит точные границы, источники и контрольные суммы.</p>
-      <p>WorldCover: ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021), processed by ESA WorldCover consortium. Лицензия <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>.</p>
+      <p>Проект ESA WorldCover 2021. Содержит изменённые данные Copernicus Sentinel за 2021 год, обработанные консорциумом ESA WorldCover. Лицензия <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>.</p>
     </details>
 
     <h2>Истории о местах</h2>
@@ -47,7 +47,7 @@ export default function Sources() {
     <details>
       <summary>Авторы карты и условия использования</summary>
       <ul>
-        <li><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> — <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noreferrer">ODbL 1.0</a>.</li>
+        <li><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© участники OpenStreetMap</a> — <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noreferrer">ODbL 1.0</a>.</li>
         <li><a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">© OpenMapTiles</a>, MapTiler.com и участники проекта — оформление CC BY 4.0, программные материалы BSD 3-Clause. <a href="/offline-map/licenses/OpenMapTiles-LICENSE.md">Полный текст лицензии</a>.</li>
         <li><a href="https://openfreemap.org/" target="_blank" rel="noreferrer">OpenFreeMap</a>, © Zsolt Ero — MIT; условия включённых материалов перечислены в <a href="/offline-map/licenses/OpenFreeMap-LICENSE.md">уведомлении об авторстве</a>.</li>
         <li><a href="https://www.naturalearthdata.com/about/terms-of-use/" target="_blank" rel="noreferrer">Natural Earth</a> — общественное достояние.</li>
@@ -56,14 +56,14 @@ export default function Sources() {
     </details>
     <details id="satellite-attribution">
       <summary>Авторство спутниковых снимков</summary>
-      <p lang="en"><a href="https://cloudless.eox.at" target="_blank" rel="noreferrer">EOxCloudless</a> by <a href="https://eox.at" target="_blank" rel="noreferrer">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016 &amp; 2017). <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>.</p>
+      <p lang="ru"><a href="https://cloudless.eox.at" target="_blank" rel="noreferrer">EOxCloudless</a> от <a href="https://eox.at" target="_blank" rel="noreferrer">EOX IT Services GmbH</a> (содержит изменённые данные Copernicus Sentinel за 2016 и 2017 годы). <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>.</p>
       <p>В районе Чукотки и острова Врангеля исходная подробная мозаика содержит белые пробелы. Когда эта область попадает в кадр, показывается настоящий обзорный спутниковый снимок <a href="https://science.nasa.gov/earth/earth-observatory/" target="_blank" rel="noreferrer">NASA Blue Marble</a> через <a href="https://maps.eox.at/#data" target="_blank" rel="noreferrer">EOX::Maps</a>. Это обзорная мозаика с меньшей детализацией; увеличение не добавляет новых деталей. При сильном увеличении заметны стыки исходной мозаики. За пределами этой области подробный источник восстанавливается автоматически.</p>
-      <p lang="en">Blue Marble: NASA Earth Observatory. Imagery delivery: EOX::Maps, EOX IT Services GmbH.</p>
+      <p lang="ru">Blue Marble: NASA Earth Observatory. Снимки предоставлены через EOX::Maps компанией EOX IT Services GmbH.</p>
     </details>
     <details>
       <summary>Авторство рельефа</summary>
-      <p lang="en">Terrain © Mapterhorn; produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.</p>
-      <p lang="en">The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.</p>
+      <p lang="ru">Рельеф © Mapterhorn. Создан с использованием Copernicus WorldDEM-30 © DLR e.V. 2010-2014 и © Airbus Defence and Space GmbH 2014-2018, предоставленного Европейским союзом и ESA в рамках COPERNICUS. Все права сохранены.</p>
+      <p lang="ru">Организации, отвечающие за программу Copernicus по закону или на основании делегированных полномочий, не несут ответственности за использование Copernicus WorldDEM-30.</p>
       <p>При дальнейшем распространении сохраняются эти уведомления и условия <a href="/terrain/sources/Copernicus-GLO30-LICENSE.pdf">лицензии Copernicus GLO-30</a>. Тропиныч не заявляет об официальном одобрении со стороны названных организаций.</p>
     </details>
     <details>

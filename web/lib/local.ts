@@ -1,3 +1,4 @@
+import {UserFacingError} from './user-facing-errors.ts';
 import type { Trail } from './content';
 import {readRouteGeometry} from './route-geometry.ts';
 import {loadVerifiedRouteGeometry,ROUTE_SOURCE_DATA_ROOT} from './route-source-integrity.ts';
@@ -12,7 +13,7 @@ function database():Promise<IDBDatabase> {
   return new Promise((resolve,reject)=>{
     const req=indexedDB.open(DB_NAME,1);
     req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('packs'))db.createObjectStore('packs',{keyPath:'id'});};
-    req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error || new Error('Хранилище недоступно'));
+    req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error || new UserFacingError('Хранилище недоступно'));
   });
 }
 export async function packs():Promise<SavedPack[]> {
@@ -34,8 +35,8 @@ function transaction<T>(db:IDBDatabase,mode:IDBTransactionMode,request:(store:ID
       tx=db.transaction('packs',mode);
       const active=tx;
       let failure:DOMException|null=null;
-      active.onerror=()=>reject(failure||active.error||new Error('Не удалось обновить хранилище.'));
-      active.onabort=()=>reject(failure||active.error||new Error('Операция с хранилищем отменена.'));
+      active.onerror=()=>reject(failure||active.error||new UserFacingError('Не удалось обновить хранилище.'));
+      active.onabort=()=>reject(failure||active.error||new UserFacingError('Операция с хранилищем отменена.'));
       const result=request(active.objectStore('packs'));
       result.onerror=()=>{failure=result.error;};
       active.oncomplete=()=>resolve(result.result);
@@ -75,7 +76,7 @@ async function savedGeometry(trail:Trail){
 export async function saveReference(trail:Trail):Promise<SavedPack> {
   let geometry:unknown|null;
   try{geometry=await savedGeometry(trail);}
-  catch(error){throw new Error('Не удалось проверить и сохранить геометрию. Пакет не изменён.',{cause:error});}
+  catch(error){throw new UserFacingError('Не удалось проверить и сохранить геометрию. Пакет не изменён.',{cause:error});}
   const value:SavedPack={id:trail.id,title:trail.title,regionId:trail.regionId,savedAt:new Date().toISOString(),sourceCheckedAt:trail.checkedAt,kind:'reference',trail,geometry,bytes:0};
   value.bytes=new Blob([JSON.stringify(value)]).size;
   const db=await database();

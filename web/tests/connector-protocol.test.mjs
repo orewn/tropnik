@@ -99,7 +99,18 @@ test('public connector responses keep null JSON and reject ambiguous raw error e
 test('connector recovery offers reconnect only for a confirmed authentication request', () => {
   const href = 'https://preview.invalid/connect';
   assert.deepEqual(connectorErrorRecovery({status:'reauthentication_required', message:'Connect again'}, 'Fixture', href), {
-    message:'Connect again', action:{label:'Connect Fixture', href},
+    message:'Для Fixture требуется повторное подключение. Подключите приложение заново.', action:{label:'Подключить Fixture', href},
   });
-  assert.deepEqual(connectorErrorRecovery({status:'rate_limited', message:'Try later'}, 'Fixture', href), {message:'Try later'});
+  assert.deepEqual(connectorErrorRecovery({status:'rate_limited', message:'Try later'}, 'Fixture', href), {message:'Приложение временно ограничило число запросов. Подождите; перед повторной попыткой проверьте результат.'});
+});
+
+test('connector presentation never leaks provider diagnostics or offers blind replay', () => {
+  for (const status of ['tool_error', 'upstream_error', 'internal_error', 'unknown', '__proto__']) {
+    const error = {status, message:'Provider failed after action commit'};
+    const recovery = connectorErrorRecovery(error, 'Fixture', 'https://preview.invalid/connect');
+    assert.match(recovery.message, /Действие могло выполниться/);
+    assert.match(recovery.message, /проверьте результат/);
+    assert.equal(recovery.action, undefined);
+    assert.equal(error.message, 'Provider failed after action commit', 'diagnostics stay intact');
+  }
 });

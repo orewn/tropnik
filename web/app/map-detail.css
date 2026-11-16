@@ -237,7 +237,30 @@
     overflow:auto;overscroll-behavior:contain;
   }
 }
-/* A short portrait cannot fit five vertical actions, Layers and the licence
+/* Source credit stays in normal footer flow, without an opening legal panel.
+   A text halo preserves contrast over imagery without putting a card over it. */
+.map-attribution.map-attribution-inline,
+.explore-layout .map-attribution.map-attribution-inline,
+.explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta>.map-attribution.map-attribution-inline{
+  display:flex;align-items:flex-end;gap:8px;max-width:100%;min-width:0;
+  padding:0;border:0;border-radius:0;background:none;box-shadow:none;
+  color:var(--ink);font-family:Manrope,system-ui,sans-serif;font-size:12px;line-height:16px;
+  text-shadow:0 1px #fffefa,1px 0 #fffefa,0 -1px #fffefa,-1px 0 #fffefa,0 0 3px #fffefa;
+}
+.map-attribution-inline .map-credit-lines{min-width:0;flex:1 1 auto}
+.map-attribution-inline .map-source-credit{display:flex;flex-wrap:wrap;gap:0 8px;align-items:baseline}
+.map-attribution-inline .map-source-credit a{min-width:0}
+.map-attribution-inline a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.map-attribution-inline .map-attribution-link{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  min-width:44px;min-height:44px;padding:0 4px;background:none;border:0;border-radius:0;box-shadow:none;
+  font:inherit;color:inherit;
+}
+.map-attribution-inline .map-satellite-credit{padding:0;border:0;border-radius:0;background:none;box-shadow:none;font:inherit}
+.map-attribution.map-attribution-inline[hidden]{display:none!important}
+.terrain-scene>.map-attribution.map-attribution-inline{max-width:calc(100% - var(--map-left,16px) - var(--map-right,16px))}
+
+/* A short portrait cannot fit five vertical actions, Layers and the source
    control in the same column. Reuse the expanded drawer's horizontal rail. */
 @media(max-width:700px) and (max-height:720px) and (orientation:portrait){
   /* Context, story and modes share a single header row. Its 60px slot leaves

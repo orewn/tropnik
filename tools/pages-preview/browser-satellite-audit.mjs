@@ -166,6 +166,45 @@ function viewIntersectsOverview(frame){
  return 176+Math.ceil((west-183)/360)*360<=east;
 }
 
+/** Independently invert the observed CSS rectangle. Every positive-area cell
+ * of the visible viewport needs its own decoded bitmap at the requested source
+ * level. World-copy x is deliberately not wrapped: an image at x0 cannot fill
+ * the right-hand x256 cell, even though both use the same public JPEG URL. */
+export function assertSatelliteViewportCoverage(frame,source,context='satellite viewport'){
+ const {customMap:map,camera,rect,viewport}=frame;
+ assert.ok(SOURCES[source],`${context}: unknown imagery provider`);
+ assert.equal(map?.pitch,0,`${context}: this independent coverage proof requires the observed flat map`);
+ assert.equal(map.camera.bearingDegrees??0,0,`${context}: this independent coverage proof requires the observed north-up map`);
+ assert.equal(camera.tileSize,256);
+ assert.ok(Math.abs(map.camera.center[0]-camera.longitude)<1e-8&&Math.abs(map.camera.center[1]-camera.latitude)<1e-8&&Math.abs(map.camera.zoom-camera.zoom)<1e-8,`${context}: imagery inspection has a stale camera`);
+ for(const dimension of ['width','height']){
+  const css=dimension==='width'?'cssWidth':'cssHeight';
+  assert.ok(Number.isFinite(viewport?.[dimension])&&viewport[dimension]>0);
+  assert.ok(Math.abs(map.viewport?.[dimension]-rect[dimension])<1&&Math.abs(map.canvas?.[css]-rect[dimension])<1,`${context}: imagery inspection has stale canvas dimensions`);
+ }
+ assert.ok(camera.centerX===undefined||Math.abs(camera.centerX-map.viewport.width/2)<1e-8);
+ assert.ok(camera.centerY===undefined||Math.abs(camera.centerY-map.viewport.height/2)<1e-8);
+ const visible={left:Math.max(0,rect.left),top:Math.max(0,rect.top),right:Math.min(viewport.width,rect.left+rect.width),bottom:Math.min(viewport.height,rect.top+rect.height)};
+ assert.ok(visible.right>visible.left&&visible.bottom>visible.top,`${context}: no map inside the browser viewport`);
+ const [west,north]=unprojectMapPoint({x:visible.left,y:visible.top},camera,rect),[east,south]=unprojectMapPoint({x:visible.right,y:visible.bottom},camera,rect);
+ const z=Math.min(SOURCES[source].maxZoom,Math.max(0,Math.floor(camera.zoom))),n=2**z;
+ const row=latitude=>(1-Math.asinh(Math.tan(latitude*Math.PI/180))/Math.PI)/2*n;
+ const x0=Math.floor((west+180)/360*n),x1=Math.ceil((east+180)/360*n)-1,y0=Math.floor(row(north)),y1=Math.ceil(row(south))-1;
+ assert.ok([x0,x1,y0,y1].every(Number.isSafeInteger)&&x1>=x0&&y1>=y0&&y0>=0&&y1<n,`${context}: invalid projected viewport cells`);
+ assert.ok((x1-x0+1)*(y1-y0+1)<=64,`${context}: viewport exceeds the existing native bitmap budget`);
+ const tiles=map.tiles.imagery,cells=new Set();
+ for(const tile of tiles){
+  assert.equal(tile.kind,source,`${context}: another provider cannot fill a missing image`);
+  assert.equal(tile.z,z,`${context}: ready imagery changed the requested source detail level`);
+  const key=tile.x+'/'+tile.y;assert.ok(!cells.has(key),`${context}: a duplicate bitmap cannot fill a viewport cell`);cells.add(key);
+ }
+ const required=[];
+ for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+  const key=x+'/'+y;assert.ok(cells.has(key),`${context}: satellite viewport is uncovered at ${z}/${key}`);required.push({z,x,y});
+ }
+ return{method:'independent-axis-aligned-viewport-cell-union',source,visible,cells:required};
+}
+
 function assertReady(frame,source,network,context){
  assert.equal(frame.imagery,'satellite',`${context}: ordinary map fallback is not satellite proof`);
  assert.equal(frame.state,'ready',`${context}: imagery is not ready`);assert.equal(frame.source,source);assert.equal(frame.target,source);
@@ -188,6 +227,7 @@ function assertReady(frame,source,network,context){
    assert.equal(tile.kind,source);const x=((tile.x%2**tile.z)+2**tile.z)%2**tile.z;
    assert.ok([...loaded.values()].some(item=>item.tile.z===tile.z&&item.tile.x===x&&item.tile.y===tile.y),`${context}: a committed bitmap has no completed public imagery response`);
   }
+  assertSatelliteViewportCoverage(frame,source,context);
  }
 }
 
@@ -199,7 +239,7 @@ export function satellitePerformanceIssues(report,profile){
 
 export function assertSatelliteContinuityAudit(report,profile,engine){
  const input=profile!=='desktop-webgl'?'touch':'mouse',context=profile+'/satellite';
- assert.equal(report?.schemaVersion,5,`${context}: satellite preload/continuity/recovery evidence is missing`);assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);assert.equal(report.input,input);
+ assert.equal(report?.schemaVersion,6,`${context}: satellite viewport/preload/continuity/recovery evidence is missing`);assert.equal(report.passed,true);assert.equal(report.profile,profile);assert.equal(report.engine,engine);assert.equal(report.input,input);
  assert.equal(report.region,SATELLITE_REGION);assert.equal(report.visualReviewRequired,true);assert.deepEqual(report.steps?.map(frame=>frame.stage),STAGES);
  assert.ok(report.resources?.requests.length<=512);assert.equal(report.resources.discardedRequests,0,'Satellite resource proof overflowed its bounded recorder');
  assert.ok(Number.isInteger(report.resources.sequence)&&report.resources.sequence>0);
@@ -279,7 +319,7 @@ export function assertSatelliteContinuityAudit(report,profile,engine){
  * Its performance interval is never reset between providers or image captures. */
 export async function runSatelliteContinuityAudit(cdp,profile,helpers,{output=OUTPUT}={}){
  const {loadProfile,evaluate,waitValue,sleep,settledMap,closeMapSheet,clearMapStories,pointerSelector,elementPoint,diagnosticPhase}=helpers;
- const report={schemaVersion:5,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',region:SATELLITE_REGION,passed:false,visualReviewRequired:true,steps:[],pans:[],zooms:[],setupZooms:[],toggles:[],screenshots:[],startedAt:new Date().toISOString()};
+ const report={schemaVersion:6,profile:profile.name,engine:profile.engine,input:profile.mobile?'touch':'mouse',region:SATELLITE_REGION,passed:false,visualReviewRequired:true,steps:[],pans:[],zooms:[],setupZooms:[],toggles:[],screenshots:[],startedAt:new Date().toISOString()};
  let currentStage='loading-region';const observer=observeSatelliteResources(cdp,()=>currentStage);
  const save=async()=>{report.resources=observer.snapshot();await mkdir(output,{recursive:true});await writeFile(new URL(`${profile.name}-satellite-continuity.json`,output),JSON.stringify(report,null,2)+'\n');};
  const phase=async name=>{currentStage=name;report.stage=name;await diagnosticPhase(cdp,'satellite-continuity/'+name);};

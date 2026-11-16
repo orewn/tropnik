@@ -1,3 +1,5 @@
+import {UserFacingError} from './user-facing-errors.ts';
+
 export type OfflineManifest = {
   id: string;
   title: string;
@@ -25,7 +27,7 @@ const changeEvent = 'tropnik-offline-map-change';
 
 async function mutateMap<T>(operation: () => Promise<T>, signal?: AbortSignal): Promise<T> {
   if (!navigator.locks?.request) {
-    throw new Error('Браузер не поддерживает безопасное изменение пакета между вкладками. Обновите браузер и повторите. Сохранённую карту можно открыть.');
+    throw new UserFacingError('Браузер не поддерживает безопасное изменение пакета между вкладками. Обновите браузер и повторите. Сохранённую карту можно открыть.');
   }
   return navigator.locks.request(mutationLock, { mode: 'exclusive', signal }, async () => {
     signal?.throwIfAborted();
@@ -87,11 +89,11 @@ export async function removeMap(): Promise<void> {
 
 export async function downloadMap(onProgress: (loaded: number, total: number) => void, signal?: AbortSignal): Promise<MapReceipt> {
   if (!window.isSecureContext || !('caches' in window) || !crypto.subtle) {
-    throw new Error('Для сохранения подробной карты нужен защищённый HTTPS-адрес и поддержка хранилища браузером.');
+    throw new UserFacingError('Для сохранения подробной карты нужен защищённый HTTPS-адрес и поддержка хранилища браузером.');
   }
   return mutateMap(async () => {
     const response = await fetch('/offline-map/manifest.json', { cache: 'no-store', signal });
-    if (!response.ok) throw new Error('Паспорт карты недоступен. Скачивание не начато.');
+    if (!response.ok) throw new UserFacingError('Паспорт карты недоступен. Скачивание не начато.');
     const manifest = await response.clone().json() as OfflineManifest;
     if (!manifest.complete || typeof manifest.id !== 'string' || !/^[\w.-]{1,160}$/.test(manifest.id)
       || !Array.isArray(manifest.files) || !manifest.files.length || manifest.files.length > 1000
@@ -99,13 +101,13 @@ export async function downloadMap(onProgress: (loaded: number, total: number) =>
         || !/^\w[\w /.-]+$/.test(file.path) || !/^[a-f0-9]{64}$/.test(file.sha256)
         || !Number.isSafeInteger(file.bytes) || file.bytes < 0)
       || new Set(manifest.files.map(file => file.path)).size !== manifest.files.length) {
-      throw new Error('Паспорт карты не прошёл проверку.');
+      throw new UserFacingError('Паспорт карты не прошёл проверку.');
     }
     const required = manifest.files.reduce((sum, file) => sum + file.bytes, 0);
-    if (!Number.isSafeInteger(required)) throw new Error('Размер пакета карты не прошёл проверку.');
+    if (!Number.isSafeInteger(required)) throw new UserFacingError('Размер пакета карты не прошёл проверку.');
     const quota = await navigator.storage?.estimate();
     if (typeof quota?.quota === 'number' && typeof quota.usage === 'number' && quota.quota - quota.usage < required * 1.5) {
-      throw new Error('Недостаточно свободного места для карты. Освободите место и повторите.');
+      throw new UserFacingError('Недостаточно свободного места для карты. Освободите место и повторите.');
     }
     // A replacement never writes into the last verified copy, even if the
     // clock repeats a timestamp or two tabs request the same manifest.
@@ -125,11 +127,11 @@ export async function downloadMap(onProgress: (loaded: number, total: number) =>
           const file = manifest.files[index++];
           const url = '/offline-map/' + file.path.split('/').map(encodeURIComponent).join('/');
           const result = await fetch(url, { cache: 'no-store', signal: transfer.signal });
-          if (!result.ok) throw new Error('Не все части карты удалось скачать. Пакет не помечен готовым.');
+          if (!result.ok) throw new UserFacingError('Не все части карты удалось скачать. Пакет не помечен готовым.');
           const bytes = await result.arrayBuffer();
-          if (bytes.byteLength !== file.bytes) throw new Error('Размер файла карты отличается от паспорта.');
+          if (bytes.byteLength !== file.bytes) throw new UserFacingError('Размер файла карты отличается от паспорта.');
           const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))).map(value => value.toString(16).padStart(2, '0')).join('');
-          if (digest !== file.sha256) throw new Error('Проверка целостности карты не пройдена.');
+          if (digest !== file.sha256) throw new UserFacingError('Проверка целостности карты не пройдена.');
           transfer.signal.throwIfAborted();
           await cache.put(url, new Response(bytes, { headers: { 'Content-Type': result.headers.get('Content-Type') || 'application/octet-stream' } }));
           onProgress(++loaded, manifest.files.length);

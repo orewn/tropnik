@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 import ts from 'typescript';
 import {MAP_RESOURCE_LIMITS} from '../lib/map-config.ts';
@@ -9,10 +10,17 @@ const turn=()=>new Promise(resolve=>setImmediate(resolve));
 const preparedPayloads=state=>(state.stages.ready||0)+(state.stages.halo||0)+state.fetching;
 const source=readFileSync(new URL('../lib/custom-map-tiles.ts',import.meta.url),'utf8');
 // The CommonJS VM has no import.meta; keep a module URL distinct from the document.
-const compiled=ts.transpileModule(source.replaceAll('import.meta.url',JSON.stringify('https://preview.test/lib/custom-map-tiles.ts')),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+const compile=source=>ts.transpileModule(source.replaceAll('import.meta.url',JSON.stringify('https://preview.test/lib/custom-map-tiles.ts')),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+const compiled=compile(source);
+// Exact scheduler source from dca8f32e360fdecc4d09335dad45f076a54e7e5f.
+// Keep the old implementation immutable so the controlled comparison cannot
+// accidentally acquire the optimization being measured.
+const beforeCoalescing=readFileSync(new URL('./fixtures/custom-map-tiles-dca8f32.ts.txt',import.meta.url),'utf8');
+assert.equal(createHash('sha1').update('blob '+Buffer.byteLength(beforeCoalescing)+'\0').update(beforeCoalescing).digest('hex'),'3ed0a32a8dfc44553e2a55d4a4603a845b51128b');
+const beforeCoalescingCompiled=compile(beforeCoalescing);
 const poolSource=readFileSync(new URL('../lib/map-resource-pool.ts',import.meta.url),'utf8');
 const poolCompiled=ts.transpileModule(poolSource,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
-function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManifest,onDownload}={}){
+function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManifest,onDownload,tileModule=compiled}={}){
   const downloads=[],workers=[],bitmaps=[],manifestReads=[];
   let pool;
   if(sourcePool){
@@ -32,7 +40,7 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
   }
   const testModule={exports:{}};
   const navigator={onLine:online};
-  vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,Error,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,queueMicrotask,console,
+  vm.runInNewContext(tileModule,{module:testModule,exports:testModule.exports,Error,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,queueMicrotask,console,
     require(name){
       if(name==='./map-preload')return {holdPublicMapForeground:()=>pool?pool.holdForeground():()=>{},loadPublicBytes:(url,priority,signal)=>pool?pool.get(url,priority,signal):new Promise((resolve,reject)=>{const request={url,resolve,reject,signal,priority};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>{
         if(url.includes('manifest')){manifestReads.push(url);return readManifest?readManifest():{files:files.map(path=>({path}))};}
@@ -46,6 +54,33 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
   return{store,downloads,workers,bitmaps,manifestReads,navigator,resolveDownloads,pool,createStore:()=>new testModule.exports.CustomMapTiles(softwareRaster),key:testModule.exports.customTileKey};
 }
 const request=(x=0)=>({kind:'overview',z:4,x,y:5});
+
+test('satellite opacity requires downloaded JPEG bytes and a successful full-size decoder output',async t=>{
+ const cases=[['eox-s2',[255,216,255,224],true],['eox-bluemarble',[255,216,255,225],true],['eox-s2',[255,216],undefined],['eox-s2',[255,216,0,224],undefined],['eox-s2',[137,80,78,71,13,10,26,10],undefined],['eox-s2',[31,139,8,0],undefined],['overview',[255,216,255,224],undefined]];
+ for(const [kind,header,opaque]of cases)await t.test(`${kind}/${header.join('-')}`,async t=>{
+  const env=fixture();t.after(()=>env.store.destroy());const tile={kind,z:4,x:1,y:5,opaque:true};env.store.pin([env.key(tile)]);
+  const promise=env.store.load(tile);await turn();const bytes=new Uint8Array(header);env.downloads[0].resolve(bytes.buffer);await turn();
+  assert.equal(env.store.peek(env.key(tile)),undefined,'Header recognition alone must not publish a usable opaque tile');
+  const message=env.workers[0].complete({opaque:true});const result=await promise;
+  assert.equal(result.opaque,opaque,'Caller/worker flags, filename and MIME cannot prove opacity');
+  assert.deepEqual([...new Uint8Array(message.bytes)],header,'Opacity recognition may not rewrite source bytes');
+  assert.equal(Object.hasOwn(message,'opaque'),false,'The unchanged worker receives its original raster job contract');
+  assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);
+ });
+});
+
+test('a failed or incompatible JPEG decoder cannot publish opacity',async t=>{
+ for(const failure of ['decode','dimensions'])await t.test(failure,async t=>{
+  const env=fixture();t.after(()=>env.store.destroy());const tile={kind:'eox-s2',z:4,x:1,y:5,opaque:true};env.store.pin([env.key(tile)]);
+  const promise=env.store.load(tile).catch(error=>error);await turn();env.downloads[0].resolve(new Uint8Array([255,216,255,224]).buffer);await turn();
+  if(failure==='decode'){
+   const worker=env.workers[0],message=worker.messages.shift();worker.onmessage({data:{id:message.id,error:'Truncated JPEG could not be decoded',opaque:true}});
+   assert.match((await promise).message,/Truncated JPEG/);assert.equal(env.store.peek(env.key(tile)),undefined);
+  }else{
+   env.workers[0].complete({bitmap:{width:256,height:512,close(){}},opaque:true});assert.equal((await promise).opaque,undefined);
+  }
+ });
+});
 
 async function releaseDemandFixture(env,promises,stores=[env.store]){
   for(const store of stores)store.destroy();
@@ -228,6 +263,137 @@ test('rapid tile demand bounds both network concurrency and decoded-source backl
   const paused=env.store.snapshot();assert.equal(paused.decoding,true);assert.ok(preparedPayloads(paused)<=6);assert.equal(env.workers[0].messages.length,1);
   assert.ok(env.downloads.length<=7,'a slow decoder must exert back pressure on downloads');
   env.store.destroy();await Promise.all(outcomes);assert.equal(env.workers[0].terminated,true);
+});
+
+
+test('active satellite demand reaches a photo while the earlier vector batch is still stalled',async t=>{
+  for(const kind of ['eox-s2','eox-bluemarble'])await t.test(kind,async t=>{
+    const env=fixture({sourcePool:true}),promises=[];t.after(()=>releaseDemandFixture(env,promises));
+    const cells=Array.from({length:32},(_,index)=>({z:7,x:91+index%8,y:39+Math.floor(index/8)}));
+    const vectors=cells.map(cell=>({...cell,kind:'vector',transparent:true})),photos=cells.map(cell=>({...cell,kind}));
+    const requests=[...vectors,...photos];env.store.pin(requests.map(env.key));
+    const outcomes=requests.map(value=>env.store.load(value).catch(error=>error));promises.push(...outcomes);
+    assert.equal(env.store.snapshot().enabled,true,'exercise the ordinary active load path, without pausing the queue');
+    await turn();
+    assert.equal(env.downloads.length,3);assert.equal(env.store.snapshot().fetching,3);
+    const photo=env.downloads.find(read=>read.url.endsWith('.jpg'));
+    assert.ok(photo,'imagery must compete in the first three source slots');
+    assert.ok(env.downloads.some(read=>read.url.endsWith('.pbf')),'vector overlays retain their share of the same slots');
+    photo.resolve(new Uint8Array([1,2,3,4]).buffer);await turn();
+    assert.equal(env.workers.length,1);const job=env.workers[0].complete();await turn();
+    assert.equal(job.kind,'raster');assert.equal(job.mime,'image/jpeg');
+    assert.equal(job.sourceZ,7);assert.equal(job.paintZoom,7);
+    assert.ok(env.downloads.filter(read=>read.url.endsWith('.pbf')).every(read=>!read.done),'the real photo is decoded before any held vector response arrives');
+    assert.equal(env.store.resident,1);assert.equal(env.store.peek(env.key(photos[0])).bitmap.width,512);
+    assert.ok(env.pool.stats().active<=3);assert.ok(preparedPayloads(env.store.snapshot())<=6);
+  });
+});
+
+test('a pending load microtask respects replacement, pause, destruction and duplicate leases',async t=>{
+  await t.test('replacement reuses the scheduled turn without starting obsolete source discovery',async t=>{
+    const manifests=[],env=fixture({sourcePool:true,readManifest:()=>{manifests.push(true);return{files:[]};}}),promises=[];
+    t.after(()=>releaseDemandFixture(env,promises));
+    const tile={kind:'vector',z:7,x:95,y:43};env.store.pin([env.key(tile)]);
+    const first=env.store.load(tile);promises.push(first.catch(error=>error));
+    assert.equal(env.store.load(tile),first,'duplicate consumers share the original promise before admission');
+    env.store.pin([]);env.store.pin([env.key(tile)]);
+    const replacement=env.store.load(tile);promises.push(replacement.catch(error=>error));
+    assert.notEqual(replacement,first);assert.equal(env.store.load(tile),replacement);
+    const preview=env.pool.get('/preview/pending-replacement',2);promises.push(preview);
+    assert.equal(manifests.length,0);assert.equal(env.downloads.length,0);assert.equal(env.store.pending,1);
+    await turn();assert.match((await promises[0]).message,/view changed/);
+    assert.equal(manifests.length,1);assert.equal(env.downloads.length,1);assert.equal(env.downloads[0].aborted,undefined);
+    assert.equal(env.store.snapshot().failedSources,0);assert.equal(env.store.snapshot().errors.length,0);
+    env.resolveDownloads();await turn();env.workers[0].complete();await replacement;await turn();
+    assert.equal(env.downloads.at(-1).url,'/preview/pending-replacement');env.resolveDownloads();await preview;
+  });
+  await t.test('pause before admission yields the lease and immediate resume preserves all jobs',async t=>{
+    const env=fixture({sourcePool:true}),promises=[];t.after(()=>releaseDemandFixture(env,promises));
+    const requests=[1,2,3].map(request);env.store.pin(requests.map(env.key));
+    promises.push(...requests.map(value=>env.store.load(value).catch(error=>error)));
+    env.store.setActive(false);const preview=env.pool.get('/preview/pending-pause',2);promises.push(preview);
+    await turn();assert.equal(env.downloads.length,1);assert.equal(env.downloads[0].url,'/preview/pending-pause');
+    assert.equal(env.store.pending,3);assert.equal(env.store.snapshot().fetching,0);assert.equal(env.workers.length,0);
+    env.store.setActive(true);
+    assert.equal(env.store.snapshot().fetching,3,'resume still admits work immediately');
+    await turn();assert.equal(env.downloads[0].aborted,true);
+    assert.equal(env.downloads.filter(read=>read.url.startsWith('/maps/')&&!read.done).length,3);
+  });
+  await t.test('destroy before admission cannot recreate resources or retain foreground demand',async t=>{
+    const env=fixture({sourcePool:true}),promises=[];t.after(()=>releaseDemandFixture(env,promises));
+    const pending=env.store.load({kind:'vector',z:7,x:95,y:43}).catch(error=>error);promises.push(pending);
+    const preview=env.pool.get('/preview/pending-destroy',2);promises.push(preview);
+    env.store.destroy();await turn();
+    assert.match((await pending).message,/released/);assert.equal(env.store.pending,0);assert.equal(env.store.snapshot().fetching,0);
+    assert.equal(env.manifestReads.length,0);assert.equal(env.workers.length,0);
+    assert.deepEqual(env.downloads.map(read=>read.url),['/preview/pending-destroy']);env.resolveDownloads();await preview;
+  });
+});
+
+test('active batched demand admits all 160 visible jobs before rejecting only the next request',async t=>{
+  const env=fixture({sourcePool:true}),promises=[];t.after(()=>releaseDemandFixture(env,promises));
+  const cells=Array.from({length:64},(_,index)=>({z:7,x:40+index%8,y:44+Math.floor(index/8)}));
+  const requests=[...Array.from({length:32},(_,index)=>({kind:'overview',z:4,x:index%8,y:Math.floor(index/8)})),...cells.map(cell=>({...cell,kind:'vector',transparent:true})),...cells.map(cell=>({...cell,kind:'eox-s2'}))];
+  env.store.pin(requests.map(env.key));const pending=requests.map(value=>env.store.load(value));promises.push(...pending.map(value=>value.catch(error=>error)));
+  assert.equal(env.store.pending,160);assert.equal(env.store.snapshot().stages.queued,160);
+  assert.equal(env.store.load(requests[159]),pending[159],'a duplicate still fits at the hard pending limit');
+  const overflow=env.store.load({kind:'eox-s2',z:7,x:60,y:44}).catch(error=>error);promises.push(overflow);
+  assert.match((await overflow).message,/queue is full/);await turn();
+  assert.equal(env.store.pending,160);assert.equal(env.downloads.length,3);
+  assert.equal(env.pool.stats().active,3);assert.ok(env.pool.stats().queued<=72);
+  env.store.destroy();const outcomes=await Promise.all(promises.slice(0,160));
+  assert.ok(outcomes.every(error=>/released/.test(error.message)),'none of the admitted visible jobs was silently dropped or rejected by a smaller queue');
+});
+
+test('controlled active satellite replay compares the pinned old scheduler with load coalescing',async t=>{
+  async function replay(tileModule){
+    let now=0,physicalPeak=0,payloadPeak=0,firstImageryAt,firstVectorAt,pumpCalls=0;
+    const completed=[],promises=[],env=fixture({tileModule,sourcePool:true,onDownload:read=>{
+      read.startedAt=now;read.due=now+(read.url.endsWith('.pbf')?900:100);
+      physicalPeak=Math.max(physicalPeak,env.downloads.filter(value=>!value.done).length);
+    }});
+    t.after(()=>releaseDemandFixture(env,promises));
+    const originalPump=env.store.pump.bind(env.store);env.store.pump=()=>{pumpCalls++;return originalPump();};
+    const cells=Array.from({length:32},(_,index)=>({z:7,x:91+index%8,y:39+Math.floor(index/8)}));
+    const requests=[...cells.map(cell=>({...cell,kind:'vector',transparent:true})),...cells.map(cell=>({...cell,kind:'eox-s2'}))];
+    env.store.pin(requests.map(env.key));
+    const visible=requests.map(tile=>env.store.load(tile).then(value=>{
+      if(value.kind==='eox-s2')firstImageryAt??=now;
+      else if(value.kind==='vector')firstVectorAt??=now;
+      return value;
+    }));promises.push(...visible);
+    await turn();
+    const firstWave=env.downloads.map(read=>read.url.endsWith('.jpg')?'imagery':'vector');
+    const initialPumpCalls=pumpCalls;
+    for(let step=0;env.store.pending;step++){
+      assert.ok(step<1000,'the finite replay must complete with actual active source work');
+      while(env.workers.some(worker=>worker.messages.length)){
+        for(const worker of env.workers)if(worker.messages.length)completed.push(worker.complete());await turn();
+      }
+      payloadPeak=Math.max(payloadPeak,preparedPayloads(env.store.snapshot()));
+      if(!env.store.pending)break;
+      const active=env.downloads.filter(read=>!read.done);assert.ok(active.length,'pending work cannot be stranded after coalescing');
+      now=Math.min(...active.map(read=>read.due));
+      for(const read of active.filter(read=>read.due===now))read.resolve(new Uint8Array([1,2,3,4]).buffer);
+      await turn();
+    }
+    const tiles=await Promise.all(visible);
+    const submitted=completed.map(job=>({kind:job.kind,z:job.z,x:job.x,y:job.y,paintZoom:job.paintZoom,sourceZ:job.sourceZ,sourceKey:job.sourceKey,paths:job.paths,transparent:job.transparent,boundaries:job.boundaries,mime:job.mime,softwareRaster:job.softwareRaster,bytes:Array.from(new Uint8Array(job.bytes))})).sort((a,b)=>a.sourceKey.localeCompare(b.sourceKey));
+    const result={firstWave,initialPumpCalls,firstImageryAt,firstVectorAt,completedAt:now,physicalPeak,payloadPeak,sources:env.downloads.map(read=>read.url).sort(),submitted,tiles:tiles.map(tile=>({key:tile.key,width:tile.bitmap.width,height:tile.bitmap.height})).sort((a,b)=>a.key.localeCompare(b.key))};
+    await releaseDemandFixture(env,promises);return result;
+  }
+  const baseline=await replay(beforeCoalescingCompiled),candidate=await replay(compiled);
+  const timing=value=>({initialSourceKinds:value.firstWave,initialPumpCalls:value.initialPumpCalls,firstImageryAtControlledMs:value.firstImageryAt,firstVectorAtControlledMs:value.firstVectorAt,completedAtControlledMs:value.completedAt,sourceReads:value.sources.length,decodedTiles:value.submitted.length,physicalPeak:value.physicalPeak,payloadPeak:value.payloadPeak});
+  t.diagnostic(JSON.stringify({scenario:'active map; enqueue 32 vector overlays then 32 photographs; 900ms vector/100ms JPEG; immediate decoder; controlled scheduling time, not device FPS',baselineCommit:'dca8f32e360fdecc4d09335dad45f076a54e7e5f',baseline:timing(baseline),candidate:timing(candidate)}));
+  assert.deepEqual(baseline.firstWave,['vector','vector','vector']);
+  assert.equal(candidate.firstWave.filter(kind=>kind==='imagery').length,1);assert.equal(candidate.firstWave.filter(kind=>kind==='vector').length,2);
+  assert.equal(baseline.initialPumpCalls,64);assert.equal(candidate.initialPumpCalls,1);
+  assert.equal(baseline.firstImageryAt,1000);assert.equal(candidate.firstImageryAt,100);
+  assert.equal(candidate.firstVectorAt,baseline.firstVectorAt);
+  assert.deepEqual(candidate.sources,baseline.sources,'source URLs and physical request counts stay identical');
+  assert.deepEqual(candidate.submitted,baseline.submitted,'the real scheduler submits the same bytes, detail and style to the unchanged worker');
+  assert.deepEqual(candidate.tiles,baseline.tiles,'output tile identity and resolution stay identical');
+  for(const value of [baseline,candidate]){assert.equal(value.sources.length,64);assert.equal(value.submitted.length,64);assert.equal(value.physicalPeak,3);assert.ok(value.payloadPeak<=6);}
 });
 
 test('a cold mixed viewport starts measured relief alongside vectors within the original three slots',async t=>{

@@ -104,7 +104,7 @@ export function SafetyPanel({departure, user, participants, onChanged}: Props) {
   function saveCard() {
     if (!card) return;
     try { saveOfflineEmergencyCard(localStorage, card); setNotice('Карточка сохранена на этом устройстве. Откройте автономный просмотр перед выходом.'); }
-    catch (failure) { setError(failure instanceof Error ? failure.message : 'Не удалось сохранить карточку. Проверьте свободное место.'); }
+    catch (failure) { setError(errorText(failure, 'storage')); }
   }
   async function checkPoint(kind: 'control_point' | 'incident') {
     if (inFlight.current) return;

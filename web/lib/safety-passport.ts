@@ -1,8 +1,20 @@
+import {UserFacingError} from './user-facing-errors.ts';
+
 export const SAFETY_PASSPORT_SCHEMA = 1 as const;
 export const SAFETY_STORAGE_KEY = 'tropnik-safety-passports-v1';
 export const MCHS_REGISTRATION_URL = 'https://forms.mchs.gov.ru/registration_tourist_groups';
 
 export type SafetyStatus = 'draft' | 'ready' | 'submitted' | 'confirmed' | 'amendment_required' | 'active' | 'closed';
+
+export const safetyStatusLabels: Record<SafetyStatus, string> = {
+  draft: 'Черновик',
+  ready: 'Пакет готов',
+  submitted: 'Отправка отмечена лично',
+  confirmed: 'Личная запись о подтверждении',
+  amendment_required: 'Нужно обновить уведомление',
+  active: 'Группа на маршруте',
+  closed: 'Поход закрыт',
+};
 
 export type SafetyParticipant = {
   id: string;
@@ -174,11 +186,11 @@ export function allowedSafetyTransition(current: SafetyStatus, next: SafetyStatu
 }
 
 export function transitionSafetyPassport(passport: SafetyPassport, next: SafetyStatus, now = new Date()): SafetyPassport {
-  if (!allowedSafetyTransition(passport.status, next)) throw new Error(`Недопустимый переход ${passport.status} → ${next}`);
-  if (['ready', 'submitted', 'confirmed', 'active'].includes(next) && !safetyReadiness(passport).complete) throw new Error('Сначала заполните обязательные сведения.');
-  if (next === 'confirmed' && !passport.mchsReference.trim()) throw new Error('Укажите номер или подтверждение регистрации.');
-  if (next === 'active' && !passport.prestartCallAt) throw new Error('Сначала отметьте предвыходное уточнение сведений.');
-  if (next === 'closed' && !passport.returnedAt) throw new Error('Сначала отметьте сообщение о возвращении.');
+  if (!allowedSafetyTransition(passport.status, next)) throw new UserFacingError(`Нельзя изменить статус «${safetyStatusLabels[passport.status]}» на «${safetyStatusLabels[next]}». Проверьте текущий этап уведомления.`);
+  if (['ready', 'submitted', 'confirmed', 'active'].includes(next) && !safetyReadiness(passport).complete) throw new UserFacingError('Сначала заполните обязательные сведения.');
+  if (next === 'confirmed' && !passport.mchsReference.trim()) throw new UserFacingError('Укажите номер или подтверждение регистрации.');
+  if (next === 'active' && !passport.prestartCallAt) throw new UserFacingError('Сначала отметьте предвыходное уточнение сведений.');
+  if (next === 'closed' && !passport.returnedAt) throw new UserFacingError('Сначала отметьте сообщение о возвращении.');
   const timestamp = now.toISOString();
   return {
     ...passport,

@@ -3,12 +3,12 @@ import {SATELLITE_PROVIDERS,type SatelliteSourceId} from './map-satellite';
 import type {MapTileLabel,ReliefCoverage,ReliefHaloOffset,ReliefHaloPayload,ReliefHaloSource} from './custom-map-painter';
 
 export type CustomTileKind='vector'|'relief'|'overview'|SatelliteSourceId;
-export type CustomMapTile={key:string;kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;bitmap:ImageBitmap;labels:MapTileLabel[];contours:number;local:boolean;paths?:boolean;transparent?:boolean;boundaries?:boolean;reliefCoverage?:ReliefCoverage};
+export type CustomMapTile={key:string;kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;bitmap:ImageBitmap;labels:MapTileLabel[];contours:number;local:boolean;paths?:boolean;transparent?:boolean;boundaries?:boolean;opaque?:boolean;reliefCoverage?:ReliefCoverage};
 export type CustomTileRequest={kind:CustomTileKind;z:number;x:number;y:number;paintZoom?:number;paths?:boolean;transparent?:boolean;boundaries?:boolean};
 type TileSource={url:string;local:boolean;mime:string};
 type HaloPlan={offsets:ReliefHaloOffset[];index:number;sourceZ:number;parentX:number;parentY:number;files?:Set<string>;copies:Map<string,ArrayBuffer>;bytes:number};
 type HaloDependency={item:Omit<ReliefHaloSource,'bytes'>}|{reason:'coverage'|'unavailable'};
-type Work={id:number;request:CustomTileRequest;key:string;resolve:(tile:CustomMapTile)=>void;reject:(error:Error)=>void;controller:AbortController;source?:TileSource;bytes?:ArrayBuffer;halo?:ReliefHaloPayload;haloPlan?:HaloPlan;local?:boolean;mime?:string;sourceZ?:number;sourceKey?:string;stage:'queued'|'fetching'|'halo'|'ready'|'decoding'};
+type Work={id:number;request:CustomTileRequest;key:string;resolve:(tile:CustomMapTile)=>void;reject:(error:Error)=>void;controller:AbortController;source?:TileSource;bytes?:ArrayBuffer;halo?:ReliefHaloPayload;haloPlan?:HaloPlan;local?:boolean;mime?:string;sourceZ?:number;sourceKey?:string;jpegSource?:boolean;stage:'queued'|'fetching'|'halo'|'ready'|'decoding'};
 const MAX_RESIDENT=96,MAX_BITMAPS=288,MAX_PENDING=160,MAX_FETCHING=3,MAX_READY=6,MAX_TILE_BYTES=8*1024*1024;
 const canonicalX=(x:number,z:number)=>((x%2**z)+2**z)%2**z;
 function paintZoomFor(tile:CustomTileRequest):number{
@@ -46,6 +46,7 @@ export class CustomMapTiles {
   private serial=0;
   private disposed=false;
   private enabled=true;
+  private pumpScheduled=false;
   private releaseForeground?:()=>void;
   private foregroundReleaseQueued=false;
   private template?:Promise<string>;
@@ -90,7 +91,7 @@ export class CustomMapTiles {
     let resolve!:(tile:CustomMapTile)=>void,reject!:(error:Error)=>void;
     const promise=new Promise<CustomMapTile>((yes,no)=>{resolve=yes;reject=no;});
     const work:Work={id:++this.serial,request,key,resolve,reject,controller:new AbortController(),stage:'queued'};
-    this.jobs.set(key,{work,promise});this.updateForeground();this.pump();return promise;
+    this.jobs.set(key,{work,promise});this.updateForeground();this.schedulePump();return promise;
   }
   private files(){
     return this.localFiles??=loadPublicJSON<{files:Array<{path:string}>}>('/offline-map/manifest.json').then(m=>new Set(m.files.map(f=>f.path))).catch(()=>{
@@ -144,6 +145,14 @@ export class CustomMapTiles {
     // MVT's repeated layers may be empty: OpenFreeMap deliberately responds
     // HTTP 200 with zero bytes for an empty tile. Images still need real data.
     if(!bytes.byteLength&&work.request.kind!=='vector')throw new Error('Empty raster map source');
+    // Use the downloaded bytes, never a filename, MIME header or caller flag.
+    // JPEG's FF D8 FF signature is defined by WHATWG MIME Sniffing §6.1.
+    // This is only a candidate proof: publish opacity after successful native
+    // decoding into the unchanged complete 512px raster below.
+    if(work.request.kind==='eox-s2'||work.request.kind==='eox-bluemarble'){
+      const signature=new Uint8Array(bytes,0,Math.min(3,bytes.byteLength));
+      work.jpegSource=signature.length===3&&signature[0]===0xff&&signature[1]===0xd8&&signature[2]===0xff&&work.sourceZ===work.request.z;
+    }
     work.bytes=bytes.slice(0);
     if(work.request.kind==='relief'){
       const {z,x,y}=work.request,sourceZ=work.sourceZ!,factor=2**(z-sourceZ),parentX=Math.floor(x/factor),parentY=Math.floor(y/factor);
@@ -209,7 +218,7 @@ export class CustomMapTiles {
         worker.onmessage=(event:MessageEvent<{id:number;bitmap?:ImageBitmap;labels?:MapTileLabel[];contours?:number;reliefCoverage?:ReliefCoverage;error?:string}>)=>{
           const item=this.active;if(!item||event.data.id!==item.id||this.disposed){event.data.bitmap?.close();return;}
           clearTimeout(this.timer);this.active=undefined;
-          if(event.data.bitmap)this.finish(item,{key:item.key,...item.request,bitmap:event.data.bitmap,labels:event.data.labels||[],contours:event.data.contours||0,local:!!item.local,...(event.data.reliefCoverage?{reliefCoverage:event.data.reliefCoverage}:{})});
+          if(event.data.bitmap)this.finish(item,{key:item.key,...item.request,bitmap:event.data.bitmap,labels:event.data.labels||[],contours:event.data.contours||0,local:!!item.local,...(event.data.reliefCoverage?{reliefCoverage:event.data.reliefCoverage}:{}),opaque:item.jpegSource===true&&item.sourceZ===item.request.z&&event.data.bitmap.width===512&&event.data.bitmap.height===512?true:undefined});
           else this.finish(item,undefined,new Error(event.data.error||'Tile decoding failed'));
         };
         worker.onerror=event=>this.failWorker(event.message||'Map tile worker failed');
@@ -247,6 +256,14 @@ export class CustomMapTiles {
     // In-flight/shared sources above are skipped, so a stalled central edge
     // still leaves the other physical slots available to complete neighbours.
     return first;
+  }
+  private schedulePump(){
+    if(this.pumpScheduled||this.disposed||!this.enabled)return;
+    this.pumpScheduled=true;
+    // The engine queues complete layer batches in one turn. Wait until all
+    // layers are present before the first fair selection, otherwise the first
+    // vector batch occupies every source slot before imagery can compete.
+    queueMicrotask(()=>{this.pumpScheduled=false;this.pump();});
   }
   private pump(){
     if(this.disposed||!this.enabled)return;

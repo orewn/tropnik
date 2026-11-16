@@ -1,17 +1,17 @@
 import {RUSSIA_BOUNDS,russiaCamera,russiaPadding,inRussiaCoverage,coveredRussiaBounds,russiaLongitude} from '/maps/russia-viewport.js';
 
 const byId=id=>document.getElementById(id),status=text=>{byId('map-status').textContent=text;};
+// Display confirmed Russian names in existing saved cards without rewriting their source snapshots.
+// Event name: https://startrail.ru/riekkalansaari
+const routeTitle=text=>(typeof text==='string'?text:'Маршрут без названия').replace(/^Riekkalansaari Trail (7|12|25|35|55|80)km$/, 'Риеккалансаари трейл $1 км');
 const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let saved=[],hasPilot=false,selected=null,driver,coverage=null,creditsStarted=false,creditsPinned=false,mapVisibility;
-function setCredits(expanded){byId('map-credit-body').hidden=!expanded;byId('map-credit-toggle').setAttribute('aria-expanded',String(expanded));byId('map-credit-toggle').setAttribute('aria-label',expanded?'Свернуть сведения об источниках':'Данные карты и лицензии');}
-byId('map-credit-toggle').onclick=()=>{creditsPinned=true;setCredits(byId('map-credit-body').hidden);};
+let saved=[],hasPilot=false,selected=null,driver,coverage=null,creditsStarted=false,mapVisibility;
 function mapVisible(visible){
  if(mapVisibility===visible)return;mapVisibility=visible;
  byId('map').classList.toggle('map-is-loading',!visible);byId('map').setAttribute('aria-busy',String(!visible));
  for(const button of document.querySelectorAll('.map-tools button'))button.disabled=!visible;
  if(visible&&!creditsStarted){
   creditsStarted=true;byId('map-credits').hidden=false;
-  setTimeout(()=>{const element=byId('map-credits');if(creditsPinned||element.matches(':hover')||element.contains(document.activeElement))return;setCredits(false);},8000);
  }
 }
 function coordinates(data){
@@ -141,7 +141,7 @@ async function loadSaved(){return new Promise((resolve,reject)=>{const req=index
 function show(pack){
  selected=pack;const card=byId('card');card.replaceChildren();
  if(!pack){driver?.draw(null);const title=document.createElement('h2');title.textContent='Сохранённые карточки';card.append(title);return;}
- const title=document.createElement('h2');title.textContent=pack.title;const description=document.createElement('p');description.textContent=pack.trail.description;card.append(title,description);
+ const title=document.createElement('h2');title.textContent=routeTitle(pack.title);const description=document.createElement('p');description.textContent=pack.trail.description;card.append(title,description);
  if(pack.trail.operatingNotice){const notice=document.createElement('p');notice.className='restriction';notice.textContent=pack.trail.operatingNotice.body;card.append(notice);}
  const meta=document.createElement('p');meta.textContent=`Источник: ${pack.trail.sourceName}. Загружен ${pack.sourceCheckedAt}. Геометрия справочная, навигационная готовность не подтверждена.`;card.append(meta);
  try{const url=new URL(pack.trail.sourceUrl);if(url.protocol==='https:'||url.protocol==='http:'){
@@ -171,7 +171,7 @@ const results=await Promise.allSettled([createMap(),loadSaved(),findPilot()]);
 if(results[0].status==='fulfilled'){driver=results[0].value;status('Россия · полный охват');}
 else{byId('map').setAttribute('aria-busy','false');status('Не удалось открыть географию России. Сохранённые карточки доступны ниже.');console.error('Offline Russia map',results[0].reason);}
 if(results[1].status==='fulfilled')saved=results[1].value;
-for(const pack of saved){const option=document.createElement('option');option.value=pack.id;option.textContent=pack.title;byId('saved').append(option);}
+for(const pack of saved){const option=document.createElement('option');option.value=pack.id;option.textContent=routeTitle(pack.title);byId('saved').append(option);}
 byId('pilot').hidden=!hasPilot;byId('pilot').disabled=!driver;
 byId('summary').textContent=results[1].status==='fulfilled'?`Сохранённых карточек: ${saved.length}.${hasPilot?' Подробная карта Бзерпинского района сохранена.':' Доступен обзор. Подробный пакет ещё не скачан.'}`:'Список карточек недоступен. Откройте управление картами при подключении.';
 const params=new URLSearchParams(location.search);

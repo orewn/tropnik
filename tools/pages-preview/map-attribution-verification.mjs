@@ -12,44 +12,46 @@ const repoRoot=resolve(import.meta.dirname,'../..'),sha=bytes=>createHash('sha25
 export const MAP_ATTRIBUTION_PROFILES=BROWSER_REQUIRED_VIEWS.map(({name,width,height,deviceScaleFactor})=>({name,width,height,mobile:name!=='desktop-webgl',dpr:deviceScaleFactor}));
 export const MAP_ATTRIBUTION_SCENARIOS=[{name:'detail',source:'eox-s2',zoom:14},{name:'detail-limit',source:'eox-s2',zoom:18},{name:'overview',source:'eox-bluemarble',zoom:8},{name:'overview-limit',source:'eox-bluemarble',zoom:12}];
 export const MAP_ATTRIBUTION_LAYOUT_CASES=[
- ...[701,930,931,1024].flatMap(width=>[false,true].map(expanded=>({name:`sidebar-${width}-${expanded?'expanded':'collapsed'}`,profile:{name:`sidebar-${width}`,width,height:1000,dpr:1,mobile:false},satellite:true,expanded,sheetOpen:false}))),
- ...MAP_ATTRIBUTION_PROFILES.flatMap(profile=>[false,true].map(satellite=>({name:`${profile.name}-${satellite?'retained':'pending'}`,profile,satellite,expanded:false,sheetOpen:false}))),
- ...MAP_ATTRIBUTION_PROFILES.filter(profile=>profile.mobile&&profile.height>profile.width).flatMap(profile=>[false,true].map(satellite=>({name:`${profile.name}-sheet-open-${satellite?'retained':'pending'}`,profile,satellite,expanded:false,sheetOpen:true}))),
+ ...[701,930,931,1024].flatMap(width=>[false,true].map(returning=>({name:'sidebar-'+width+'-'+(returning?'returning':'fresh'),profile:{name:'sidebar-'+width,width,height:1000,dpr:1,mobile:false},satellite:true,returning,sheetOpen:false}))),
+ ...MAP_ATTRIBUTION_PROFILES.flatMap(profile=>[false,true].map(satellite=>({name:profile.name+'-'+(satellite?'retained':'pending'),profile,satellite,returning:false,sheetOpen:false}))),
+ ...MAP_ATTRIBUTION_PROFILES.filter(profile=>profile.mobile&&profile.height>profile.width).flatMap(profile=>[false,true].map(satellite=>({name:profile.name+'-sheet-open-'+(satellite?'retained':'pending'),profile,satellite,returning:false,sheetOpen:true}))),
 ];
-export const attributionGeometry=value=>({rect:value.rect,atlas:value.atlas,credit:value.credit,content:value.content,toggle:value.toggle,anchors:value.anchors,details:value.details,statusRect:value.status.rect,contentText:value.contentText});
+export const attributionGeometry=value=>({rect:value.rect,atlas:value.atlas,credit:value.credit,sourceCredit:value.sourceCredit,sourceLink:value.sourceLink,sourceAnchors:value.sourceAnchors,anchors:value.anchors,details:value.details,statusRect:value.status.rect,compactStyles:value.compactStyles});
 export const footerLoadingGeometry=value=>({footer:value.footer,publishedFooterHeight:value.publishedFooterHeight,statusRect:value.status.rect,ui:value.ui.filter(item=>item.kind!=='map-preload-status'),targets:value.targets});
-/** Keep independent geometry cases observable after an assertion, but never
- * swallow browser transport, fixture execution, mount or capture failures. */
+export const attributionLinkHrefs=(satellite=true,source='eox-s2')=>['https://www.openstreetmap.org/copyright','https://openmaptiles.org/',...(satellite?(source==='eox-s2'?['https://cloudless.eox.at','https://eox.at']:['https://science.nasa.gov/earth/earth-observatory/','https://maps.eox.at/#data']):[]),'/sources'];
+/** Independent assertion failures are retained; transport and capture errors remain fatal. */
 export async function collectAttributionGeometryCase(run,recordFailure){
  try{await run();return true;}catch(error){
   if(error?.name!=='AssertionError'||error?.code!=='ERR_ASSERTION')throw error;
   await recordFailure(error);return false;
  }
 }
-
 export function expectedMapAttributionSources(root=repoRoot){
  const web=join(root,'web'),require=createRequire(join(web,'package.json')),layout=readFileSync(join(web,'app/layout.tsx'),'utf8');
  const cssFiles=[...layout.matchAll(/^import ["']([^"']+\.css)["'];/gm)].map(match=>match[1].startsWith('./')?'app/'+match[1].slice(2):match[1]);
- const files=['components/MapAttribution.tsx','components/MapIcon.tsx','components/TropnikIcons.tsx','lib/map-attribution.ts','lib/map-satellite.ts','lib/russia-map.ts'];
+ const files=['components/MapAttribution.tsx','components/MapIcon.tsx','components/TropnikIcons.tsx','lib/map-satellite.ts','lib/russia-map.ts'];
  return{layoutSHA256:sha(layout),fixtureSHA256:sha(readFileSync(join(root,'tools/pages-preview/tests/browser-map-attribution.browser.mjs'))),cssFiles:cssFiles.map(path=>({path,sha256:sha(readFileSync(path.startsWith('@')?require.resolve(path):join(web,path)))})),uiFiles:['components/CustomAtlas.tsx','components/PlaceStories.tsx'].map(path=>({path,sha256:sha(readFileSync(join(web,path)))})),files:files.map(path=>({path,sha256:sha(readFileSync(join(web,path)))}))};
 }
 function validRect(rect){
  assert.ok(rect&&['left','top','right','bottom','width','height'].every(key=>Number.isFinite(rect[key])),'Missing actual geometry');
- assert.ok(rect.width>0&&rect.height>0,'Empty measured geometry');assert.ok(Math.abs(rect.right-rect.left-rect.width)<.001&&Math.abs(rect.bottom-rect.top-rect.height)<.001,'Inconsistent measured geometry');
+ assert.ok(rect.width>0&&rect.height>0,'Empty measured geometry');
+ assert.ok(Math.abs(rect.right-rect.left-rect.width)<.001&&Math.abs(rect.bottom-rect.top-rect.height)<.001,'Inconsistent measured geometry');
 }
 export function assertAttributionFooterLayout(value,scenario,loading){
- const {profile,satellite,expanded,sheetOpen}=scenario;
+ const {profile,satellite,sheetOpen}=scenario;
  assert.equal(value.width,profile.width);assert.equal(value.height,profile.height);assert.equal(value.sheetOpen,sheetOpen);
- validRect(value.available);validRect(value.footer);validRect(value.status.rect);assert.equal(value.status.visible,loading);assert.equal(value.status.ariaHidden,String(!loading));assert.equal(value.status.text,'Подгружаем детали текущего ракурса');
- assert.equal(value.publishedFooterHeight,Math.ceil(value.footer.height),'The actions must consume the actual observed footer height');
+ validRect(value.available);validRect(value.footer);validRect(value.status.rect);
+ assert.equal(value.status.visible,loading);assert.equal(value.status.ariaHidden,String(!loading));assert.equal(value.status.text,'Подгружаем детали текущего ракурса');
+ assert.equal(value.publishedFooterHeight,Math.ceil(value.footer.height),'Actions must consume the observed footer height');
  const count=kind=>value.ui.filter(item=>item.kind===kind).length;
- for(const kind of ['map-context','map-style-switch','map-controls','layer-button','fact-closed','map-attribution-toggle'])assert.equal(count(kind),1,'Missing real fixture control: '+kind);
- assert.equal(count('map-satellite-credit'),Number(satellite));assert.equal(count('map-attribution-content'),Number(expanded));assert.equal(count('map-preload-status'),Number(loading));
+ for(const kind of ['map-context','map-style-switch','map-controls','layer-button','fact-closed','map-attribution-link','map-source-credit'])assert.equal(count(kind),1,'Missing real fixture control: '+kind);
+ assert.equal(count('map-satellite-credit'),Number(satellite));assert.equal(count('map-preload-status'),Number(loading));
+ assert.equal(value.panelCount,0,'An automatic or expandable licence panel must not return');
+ assert.equal(value.toggleCount,0,'The source-page link must not become a popup toggle');
  assert.equal(count('map-legend'),Number(!profile.mobile),'The desktop scale and legend must remain visible');
  for(const item of value.ui)validRect(item.rect);
- assert.equal(value.targets.length,10,'The five map actions, two modes, layer, story and licence controls must all remain reachable');
- assertMapUIBounds(value,scenario.name+(loading?' loading':' ready'));
- return value;
+ assert.equal(value.targets.length,10,'Five map actions, two modes, layer, story and Sources must remain reachable');
+ assertMapUIBounds(value,scenario.name+(loading?' loading':' ready'));return value;
 }
 export function assertAttributionSheetCycle(cycle,scenario,baseline){
  const {profile}=scenario,portrait=profile.mobile&&profile.height>profile.width;
@@ -59,39 +61,56 @@ export function assertAttributionSheetCycle(cycle,scenario,baseline){
  for(const value of cycle.states){
   assertAttributionFooterLayout(value,{...scenario,sheetOpen:value.sheetOpen},false);
   assert.ok(Number.isFinite(value.panelHeight)&&value.panelHeight>0);assert.equal(value.panelTransition,'transform');
+  if(profile.name==='compact-android'){
+   assert.ok(Number.isFinite(value.sheetPeek)&&value.sheetPeek>0);
+   assert.ok(value.panelHeight-value.sheetPeek>60,'The compact catalogue must retain usable native drag travel');
+  }
  }
  const heights=cycle.states.map(value=>value.panelHeight);
- assert.ok(Math.max(...heights)-Math.min(...heights)<1.1,'Portrait sheet state must not change the physical panel height');
- // A long expanded legal notice is a temporary source panel. The ordinary
- // compact catalogue must retain the unchanged native drag travel contract.
- if(profile.name==='compact-android'&&!scenario.expanded)for(const value of cycle.states){
-  assert.ok(Number.isFinite(value.sheetPeek)&&value.sheetPeek>0);
-  assert.ok(value.panelHeight-value.sheetPeek>60,'Compact catalogue must retain usable native drag travel');
- }
- assert.deepEqual(cycle.states.map(value=>value.footer.height),Array(3).fill(cycle.states[0].footer.height),'Opening the sheet must not reflow the footer');
- assert.deepEqual(footerLoadingGeometry(cycle.states[2]),footerLoadingGeometry(cycle.states[0]),'Closing the sheet must restore the same footer and controls');
- assert.deepEqual(footerLoadingGeometry(cycle.states[scenario.sheetOpen?1:0]),footerLoadingGeometry(baseline),'The sheet cycle must use the same case and legal state');
+ assert.ok(Math.max(...heights)-Math.min(...heights)<1.1,'Sheet state must not change physical panel height');
+ assert.deepEqual(cycle.states.map(value=>value.footer.height),Array(3).fill(cycle.states[0].footer.height),'The sheet must not reflow source text');
+ assert.deepEqual(footerLoadingGeometry(cycle.states[2]),footerLoadingGeometry(cycle.states[0]));
+ assert.deepEqual(footerLoadingGeometry(cycle.states[scenario.sheetOpen?1:0]),footerLoadingGeometry(baseline));
 }
-function snapshot(value,profile,scenario,expanded,loading){
- for(const key of ['rect','atlas','credit','toggle'])validRect(value[key]);validRect(value.status.rect);
- if(expanded){validRect(value.content);assert.ok(value.content.left>=value.atlas.left&&value.content.right<=value.atlas.right&&value.content.top>=value.atlas.top&&value.content.bottom<=value.atlas.bottom,'The licence panel is clipped by its map viewport');}else assert.equal(value.content,null);
- assert.equal(value.source,scenario.source);assert.equal(value.expanded,expanded);assert.equal(value.blocked,false);
- assert.ok(value.toggle.width>=44&&value.toggle.height>=44);assert.ok(value.credit.left>=0&&value.credit.right<=profile.width&&value.credit.top>=0&&value.credit.bottom<=profile.height);
- assert.equal(value.viewportWidth,profile.width);assert.ok(value.documentWidth<=profile.width);assert.match(value.fontFamily,/Manrope/);assert.equal(value.fontSize,'12px');assert.equal(value.lineHeight,'16px');
+function compactStyle(value){
+ assert.equal(value.backgroundColor,'rgba(0, 0, 0, 0)');assert.equal(value.boxShadow,'none');
+ assert.deepEqual(value.borders,['0px','0px','0px','0px']);
+ assert.ok(typeof value.textShadow==='string'&&value.textShadow!=='none','Credits require legible text over imagery');
+}
+export function assertCompactAttributionSnapshot(value,profile,scenario,loading){
+ for(const key of ['rect','atlas','credit','sourceCredit','sourceLink'])validRect(value[key]);validRect(value.status.rect);
+ assert.equal(value.panelCount,0);assert.equal(value.toggleCount,0);assert.equal(value.source,scenario.source);assert.equal(value.blocked,false);
+ assert.equal(value.sourceLinkHref,'/sources');assert.equal(value.sourceLinkLabel,'Источники данных карты и лицензии');
+ assert.ok(value.sourceLink.width>=44&&value.sourceLink.height>=44);
+ for(const key of ['rect','credit','sourceCredit','sourceLink'])assert.ok(value[key].left>=0&&value[key].right<=profile.width&&value[key].top>=0&&value[key].bottom<=profile.height,'Compact sources must remain inside the viewport');
+ assert.equal(value.viewportWidth,profile.width);assert.ok(value.documentWidth<=profile.width);
+ assert.match(value.fontFamily,/Manrope/);assert.equal(value.fontSize,'12px');assert.equal(value.lineHeight,'16px');
+ assert.equal(value.compactStyles.length,3);value.compactStyles.forEach(compactStyle);
+ assert.deepEqual(value.sourceAnchors.map(item=>item.value),['© участники OpenStreetMap','OpenMapTiles']);
+ assert.deepEqual(value.sourceAnchors.map(item=>item.href),['https://www.openstreetmap.org/copyright','https://openmaptiles.org/']);
  assert.deepEqual(value.anchors.map(item=>item.value),[scenario.source==='eox-s2'?'EOxCloudless':'NASA Blue Marble','EOX']);
  assert.deepEqual(value.anchors.map(item=>item.href),scenario.source==='eox-s2'?['https://cloudless.eox.at/','https://eox.at/']:['https://science.nasa.gov/earth/earth-observatory/','https://maps.eox.at/#data']);
  const details=scenario.source==='eox-s2'?(scenario.zoom>14?['Достигнута детализация снимка']:[]):['Обзорный снимок · детализация ниже',...(scenario.zoom>8?['Увеличен обзорный снимок']:[])];
  assert.deepEqual(value.details.map(item=>item.value),details);
- for(const text of [...value.anchors,...value.details,...(loading?[value.status]:[])]){validRect(text.rect);assert.equal(text.visible,true);assert.equal(text.visibleUnblocked,true);assert.ok(text.rect.left>=value.credit.left&&text.rect.right<=value.credit.right&&text.rect.top>=value.credit.top&&text.rect.bottom<=value.credit.bottom,'Source text lies outside its card');}
+ for(const [texts,bounds]of [[value.sourceAnchors,value.sourceCredit],[[...value.anchors,...value.details,...(loading?[value.status]:[])].flat(),value.credit]]){
+  for(const text of texts){validRect(text.rect);assert.equal(text.visible,true);assert.equal(text.visibleUnblocked,true);assert.ok(text.rect.left>=bounds.left&&text.rect.right<=bounds.right&&text.rect.top>=bounds.top&&text.rect.bottom<=bounds.bottom,'Visible source text lies outside its measured bounds');}
+ }
  assert.equal(value.status.value,'Загружаем снимки…');assert.equal(value.status.visible,loading);assert.equal(value.status.ariaHidden,String(!loading));assert.equal(value.status.focusableChildren,0);
- if(expanded){assert.match(value.contentText,/OpenStreetMap contributors/);assert.match(value.contentText,/Данные и лицензии/);assert.match(value.contentText,scenario.source==='eox-s2'?/CC BY 4\.0/:/NASA Earth Observatory/);}else assert.equal(value.contentText,null);
 }
-
-/** Validate the retained proof against this checkout, not only its success bit. */
+function linkInteraction(interaction,hrefs){
+ assert.equal(interaction?.input,'native-cdp-tab-and-enter');assert.equal(interaction.navigation,'intercepted-to-retain-fixture');
+ assert.match(interaction.before.url,/^http:\/\/127\.0\.0\.1:\d+\/$/,'Source activation must start on the live fixture origin');
+ assert.deepEqual(interaction.before.hrefs,hrefs);assert.deepEqual(interaction.links.map(link=>link.href),hrefs);
+ assert.ok(interaction.links.every(link=>link.focused&&link.visibleUnblocked&&link.text.length>0));
+ assert.equal(interaction.observedInputs.tabs.length,hrefs.length-1);assert.ok(interaction.observedInputs.tabs.every(event=>event.key==='Tab'&&event.trusted));
+ assert.deepEqual(interaction.observedInputs.activations,[{href:'/sources',trusted:true}]);
+ assert.equal(interaction.afterURL,interaction.before.url,'Native activation must not abandon the matrix fixture');
+}
+/** A schema-1 expandable-panel receipt cannot certify the compact-credit UI. */
 export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,previewRoot=join(root,'web/pages-preview'),environment}={}){
- assert.match(sourceCommit||'',/^[a-f0-9]{40}$/,'An exact source commit is required');
- assert.equal(report?.schemaVersion,1);assert.equal(report.verified,true);assert.equal(report.phase,'complete');assert.equal(report.sourceCommit,sourceCommit);assert.equal(report.evidence,'production-react-and-compiled-css-browser-geometry');
- assert.deepEqual(report.caseFailures,[],'A collected geometry failure cannot become a successful receipt');
+ assert.match(sourceCommit||'',/^[a-f0-9]{40}$/);
+ assert.equal(report?.schemaVersion,2);assert.equal(report.verified,true);assert.equal(report.phase,'complete');assert.equal(report.sourceCommit,sourceCommit);
+ assert.equal(report.evidence,'production-react-compact-credit-and-css-browser-geometry');assert.deepEqual(report.caseFailures,[]);
  for(const [key,value]of Object.entries(expectedMapAttributionSources(root)))assert.deepEqual(report.sources?.[key],value,'Attribution source binding differs: '+key);
  for(const key of ['compiledCssSHA256','bundleSHA256'])assert.match(report.sources[key],/^[a-f0-9]{64}$/);
  assertBrowserEnvironment(report.environment,sourceCommit);assertNativeSurfaceCoverage(report.environment.nativeSurface);
@@ -99,70 +118,44 @@ export function assertMapAttributionReceipt(report,{sourceCommit,root=repoRoot,p
  assert.deepEqual(report.profiles,MAP_ATTRIBUTION_PROFILES);
  assert.deepEqual(report.negativeControls.map(item=>item.profile),MAP_ATTRIBUTION_PROFILES.map(item=>item.name));
  for(const control of report.negativeControls){
-  validRect(control.loading.credit);validRect(control.ready.credit);assert.notDeepEqual(control.loading.credit,control.ready.credit,'Missing demonstrated old reflow');
+  validRect(control.loading.credit);validRect(control.ready.credit);assert.notDeepEqual(control.loading.credit,control.ready.credit,'Missing demonstrated loading reflow');
+  assert.equal(control.legacyPanelCount,1,'Missing detection of a deliberately restored legal panel');
+  assert.deepEqual(control.notReady,{hidden:true,display:'none',visibleLinks:0},'Not-yet-ready source links must stay hidden');
   assert.equal(control.fonts.length,8);assert.deepEqual(control.fonts.map(face=>String(face.weight)).sort(),['400','400','500','500','600','600','700','700']);
   assert.ok(control.fonts.every(face=>face.family.replace(/['"]/g,'')==='Manrope'&&face.status==='loaded'));
  }
- const expected=MAP_ATTRIBUTION_PROFILES.flatMap(profile=>MAP_ATTRIBUTION_SCENARIOS.flatMap(scenario=>[false,true].map(expanded=>({profile,scenario,expanded,name:`${profile.name}-${scenario.name}-${expanded?'expanded':'collapsed'}`}))));
+ const expected=MAP_ATTRIBUTION_PROFILES.flatMap(profile=>MAP_ATTRIBUTION_SCENARIOS.flatMap(scenario=>[false,true].map(returning=>({profile,scenario,returning,name:profile.name+'-'+scenario.name+'-'+(returning?'returning':'fresh')}))));
  assert.deepEqual(report.cases.map(item=>item.name),expected.map(item=>item.name));let cycles=0,pictures=0;
  const picture=(capture,file,profile)=>{
-  assert.equal(capture?.path,file);const png=readFileSync(join(previewRoot,file));assert.equal(png.length,capture.bytes);assert.equal(sha(png),capture.sha256);assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
-  assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)],[profile.width*profile.dpr,profile.height*profile.dpr]);pictures++;
+  assert.equal(capture?.path,file);const png=readFileSync(join(previewRoot,file));assert.equal(png.length,capture.bytes);assert.equal(sha(png),capture.sha256);
+  assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)],[profile.width*profile.dpr,profile.height*profile.dpr]);pictures++;
  };
- for(const [index,{profile,scenario,expanded,name}]of expected.entries()){
-  const item=report.cases[index],count=profile.name==='android-portrait'&&scenario.name==='detail'&&!expanded?14:3;
-  assert.equal(item.profile,profile.name);assert.equal(item.source,scenario.source);assert.equal(item.zoom,scenario.zoom);assert.equal(item.expanded,expanded);assert.equal(item.cycles,count);assert.equal(item.comparisons.length,count);
-  snapshot(item.loading,profile,scenario,expanded,true);snapshot(item.ready,profile,scenario,expanded,false);
-  assertAttributionFooterLayout(item.layout,{name,profile,satellite:true,expanded,sheetOpen:false},false);
-  assertAttributionSheetCycle(item.sheetCycle,{name,profile,satellite:true,expanded,sheetOpen:false},item.layout);
-  const baseline=attributionGeometry(item.loading);assert.deepEqual(attributionGeometry(item.ready),baseline,'Loading changed the measured source footprint');
+ for(const [index,{profile,scenario,returning,name}]of expected.entries()){
+  const item=report.cases[index],long=profile.name==='android-portrait'&&scenario.name==='detail'&&!returning,count=long?14:3;
+  assert.equal(item.profile,profile.name);assert.equal(item.source,scenario.source);assert.equal(item.zoom,scenario.zoom);assert.equal(item.returning,returning);assert.equal(item.visitObserved,returning?'1':null);assert.equal(item.cycles,count);assert.equal(item.comparisons.length,count);
+  assertCompactAttributionSnapshot(item.loading,profile,scenario,true);assertCompactAttributionSnapshot(item.ready,profile,scenario,false);
+  assertAttributionFooterLayout(item.layout,{name,profile,satellite:true,returning,sheetOpen:false},false);
+  assertAttributionSheetCycle(item.sheetCycle,{name,profile,satellite:true,returning,sheetOpen:false},item.layout);
+  const baseline=attributionGeometry(item.loading);assert.deepEqual(attributionGeometry(item.ready),baseline,'A tile request changed the source footprint');
   for(const [cycle,comparison]of item.comparisons.entries()){assert.equal(comparison.cycle,cycle+1);assert.deepEqual(comparison.loading,baseline);assert.deepEqual(comparison.ready,baseline);cycles++;}
-  if(expanded){
-   const interaction=item.licenseInteraction,hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources',...(scenario.source==='eox-s2'?['https://cloudless.eox.at','https://eox.at','https://creativecommons.org/licenses/by/4.0/']:[]),'/sources#satellite-attribution'];
-   assert.equal(interaction?.input,'native-cdp-wheel-and-tab');assert.deepEqual(interaction.before.hrefs,hrefs);assert.deepEqual(interaction.links.map(link=>link.href),hrefs);assert.ok(interaction.links.every(link=>link.focused&&link.visibleUnblocked&&link.text.length>0));
-   assert.equal(interaction.observedInputs.tabs.length,hrefs.length-1);assert.ok(interaction.observedInputs.tabs.every(event=>event.key==='Tab'&&event.trusted));
-   const {scrollHeight,clientHeight,overflowY,center,devicePixelRatio}=interaction.before,maxScroll=scrollHeight-clientHeight;assert.ok(Number.isFinite(scrollHeight)&&clientHeight>0&&clientHeight<=item.ready.content.height&&maxScroll>=0);assert.equal(interaction.before.scrollTop,0);assert.equal(devicePixelRatio,profile.dpr);
-   assert.ok(center.x>item.ready.content.left&&center.x<item.ready.content.right&&center.y>item.ready.content.top&&center.y<item.ready.content.bottom);
-   const scrollable=maxScroll>1;assert.equal(interaction.scrollable,scrollable);
-   if(scrollable)assert.ok(['auto','scroll'].includes(overflowY),'Overflowing licence text must retain native scrolling');
-   // Compact portrait and the central landscape column can wrap either EOX
-   // notice. Validate measured overflow and native input, not the old width.
-   // The existing long Blue Marble scroll witnesses remain mandatory.
-   if(['compact-android','phone-landscape'].includes(profile.name)&&scenario.source==='eox-bluemarble')assert.equal(scrollable,true);
-   else if(!['compact-android','phone-landscape'].includes(profile.name))assert.equal(scrollable,false);
-   assert.equal(interaction.wheelTransitions.length,scrollable?3:0);assert.equal(interaction.observedInputs.wheels.length,scrollable?3:0);
-   if(scrollable){
-    assert.deepEqual(interaction.wheelTransitions.map(step=>step.deltaY),[-scrollHeight,scrollHeight,-scrollHeight]);assert.deepEqual(interaction.wheelTransitions.map(step=>step.expected),[0,maxScroll,0]);
-    for(const [index,step]of interaction.wheelTransitions.entries()){
-     assert.ok(Math.abs(step.after-step.expected)<=1);assert.ok(step.before>=0&&step.before<=maxScroll);if(index)assert.ok(Math.abs(step.before-interaction.wheelTransitions[index-1].after)<=1);
-     assert.equal(step.nativeDeltaY,step.deltaY*devicePixelRatio,'Native wheel payload must preserve the requested CSS delta at actual DPR');
-     assert.equal(interaction.observedInputs.wheels[index].deltaY,step.deltaY);assert.equal(interaction.observedInputs.wheels[index].trusted,true);
-    }
-   }
-   if(scrollable&&scenario.name==='overview-limit')picture(interaction.bottomScreenshot,'design-qa/map-attribution/'+name+'-license-bottom.png',profile);else assert.equal(interaction.bottomScreenshot,undefined);
-  }else assert.equal(item.licenseInteraction,undefined);
-  if(scenario.name===(expanded?'overview-limit':'detail')){
-   picture(item.screenshot,'design-qa/map-attribution/'+name+'.png',profile);
-  }else assert.equal(item.screenshot,undefined);
+  linkInteraction(item.linkInteraction,attributionLinkHrefs(true,scenario.source));
+  if(long){assert.equal(item.idlePersistence.delayMs,6000);assertCompactAttributionSnapshot(item.idlePersistence.after,profile,scenario,false);assert.deepEqual(attributionGeometry(item.idlePersistence.after),attributionGeometry(item.ready));}else assert.equal(item.idlePersistence,undefined);
+  const focused=returning&&scenario.name==='overview-limit'&&['compact-android','phone-landscape'].includes(profile.name);
+  if(focused)picture(item.linkInteraction.focusScreenshot,'design-qa/map-attribution/'+name+'-sources-focus.png',profile);else assert.equal(item.linkInteraction.focusScreenshot,undefined);
+  if(scenario.name===(returning?'overview-limit':'detail'))picture(item.screenshot,'design-qa/map-attribution/'+name+'.png',profile);else assert.equal(item.screenshot,undefined);
  }
  assert.equal(cycles,131);assert.equal(pictures,12);
  assert.deepEqual(report.footerCases?.map(item=>item.name),MAP_ATTRIBUTION_LAYOUT_CASES.map(item=>item.name));
  for(const [index,scenario]of MAP_ATTRIBUTION_LAYOUT_CASES.entries()){
-  const entry=report.footerCases[index];for(const key of ['name','profile','satellite','expanded','sheetOpen'])assert.deepEqual(entry[key],scenario[key]);
-  assertAttributionFooterLayout(entry.loading,scenario,true);assertAttributionFooterLayout(entry.ready,scenario,false);
-  assertAttributionSheetCycle(entry.sheetCycle,scenario,entry.ready);
-  assert.deepEqual(footerLoadingGeometry(entry.ready),footerLoadingGeometry(entry.loading),'A loading cycle moved the footer or an adjacent action');
-  if(scenario.expanded){
-   const interaction=entry.licenseInteraction,hrefs=['https://www.openstreetmap.org/copyright','https://openmaptiles.org/','/sources','/sources#satellite-attribution'];
-   assert.equal(interaction?.input,'native-cdp-wheel-and-tab');assert.deepEqual(interaction.before.hrefs,hrefs);assert.deepEqual(interaction.links.map(link=>link.href),hrefs);assert.ok(interaction.links.every(link=>link.focused&&link.visibleUnblocked&&link.text.length>0));
-   assert.equal(interaction.scrollable,false);assert.equal(interaction.before.devicePixelRatio,scenario.profile.dpr);assert.equal(interaction.wheelTransitions.length,0);assert.equal(interaction.observedInputs.wheels.length,0);
-   assert.equal(interaction.observedInputs.tabs.length,hrefs.length-1);assert.ok(interaction.observedInputs.tabs.every(event=>event.key==='Tab'&&event.trusted));
-  }else assert.equal(entry.licenseInteraction,undefined);
+  const entry=report.footerCases[index];for(const key of ['name','profile','satellite','returning','sheetOpen'])assert.deepEqual(entry[key],scenario[key]);
+  assert.equal(entry.visitObserved,scenario.returning?'1':null);
+  assertAttributionFooterLayout(entry.loading,scenario,true);assertAttributionFooterLayout(entry.ready,scenario,false);assertAttributionSheetCycle(entry.sheetCycle,scenario,entry.ready);
+  assert.deepEqual(footerLoadingGeometry(entry.ready),footerLoadingGeometry(entry.loading),'Loading moved the footer or an adjacent action');
+  linkInteraction(entry.linkInteraction,attributionLinkHrefs(scenario.satellite,'eox-bluemarble'));
   picture(entry.screenshot,'design-qa/map-attribution/footer-'+scenario.name+'.png',scenario.profile);
  }
  assert.equal(pictures,36);return report;
 }
-
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const report=JSON.parse(readFileSync(join(repoRoot,'web/pages-preview/dist/browser-map-attribution-verification.json'),'utf8'));
  assertMapAttributionReceipt(report,{sourceCommit:process.env.GITHUB_SHA});

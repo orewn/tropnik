@@ -32,7 +32,7 @@ export function satelliteFixture(profile,engine){
   {requestId:'eox-s2',source:'eox-s2',url:'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/4/3/14.jpg',tile:{z:4,x:14,y:3},status:200,mimeType:'image/jpeg',finished:true,bytes:10000},
  ]};
  resources.requests.forEach((item,index)=>Object.assign(item,{firstSequence:index*3+1,requestedSequence:index*3+1,responseSequence:index*3+2,finishedSequence:index*3+3,phase:index===2?'west-eox':'enable-satellite',responsePhase:index===2?'west-eox':'enable-satellite'}));
- const result={schemaVersion:5,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
+ const result={schemaVersion:6,profile,engine,input,region:SATELLITE_REGION,passed:true,visualReviewRequired:true,steps,
   setupZooms:initialZoom>4?[{direction:1,click:click(),before:frame(180,4,''),after:frame(180,initialZoom,'')}]:[],
   pans:[pan('dateline-overview',[180,67.5]),pan('west-eox',[140,67.5]),pan('dateline-return',[180,67.5])],zooms,
   toggles:[{label:'Спутник',select:{...click(),selector:'.map-style-switch button[aria-label="Спутник"]'},before:frame(180,initialZoom,''),after:frame(),canvasRetained:true,modeState:mapModeFixture({camera:{longitude:180,latitude:67.5,zoom:initialZoom},mode:'satellite',routeId:''})},{label:'Рельеф',select:{...click(),selector:'.map-style-switch button[aria-label="Рельеф"]'},before:frame(),after:frame(180,initialZoom,''),canvasRetained:true,modeState:mapModeFixture({camera:{longitude:180,latitude:67.5,zoom:initialZoom},routeId:''})}],
@@ -43,5 +43,34 @@ export function satelliteFixture(profile,engine){
  const released={...structuredClone(held),pending:0,reason:'capture',closed:true};released.records[0].resumedAt=200;
  result.preload={kind:'held-real-imagery-requests',before:structuredClone(result.toggles[0].before),pending,after:structuredClone(result.toggles[0].after),held,released,
   screenshots:['preload-before','preload-pending','preload-committed'].map(stage=>({stage,file:`${profile}-satellite-${stage}.png`,bytes:10000,sha256:'c'.repeat(64)}))};
+ // Synthetic validator fixtures use a deliberately broad one-cell halo. The
+ // actual production request planner is neither imported nor called here.
+ const frames=[],visited=new Set(),visit=value=>{
+  if(!value||typeof value!=='object'||visited.has(value))return;visited.add(value);
+  if(value.customMap&&value.camera?.longitude!==undefined&&value.rect)frames.push(value);
+  for(const child of Object.values(value))visit(child);
+ };visit(result);
+ const resourcesByCell=new Map(resources.requests.map(item=>[item.source+'/'+item.tile.z+'/'+item.tile.x+'/'+item.tile.y,item]));
+ for(const item of frames){
+  const {width,height}=item.rect;item.customMap.viewport={width,height,padding:{left:0,right:0,top:0,bottom:0}};
+  Object.assign(item.customMap.canvas,{width:Math.round(width*viewport.dpr),height:Math.round(height*viewport.dpr),cssWidth:width,cssHeight:height});
+  if(!['eox-s2','eox-bluemarble'].includes(item.source))continue;
+  const z=Math.min(item.source==='eox-bluemarble'?8:14,Math.floor(item.camera.zoom)),n=2**z,tilePixels=256*2**(item.camera.zoom-z);
+  const cx=Math.floor((item.camera.longitude+180)/360*n),cy=Math.floor((1-Math.asinh(Math.tan(item.camera.latitude*Math.PI/180))/Math.PI)/2*n);
+  const across=Math.ceil(width/tilePixels/2)+1,down=Math.ceil(height/tilePixels/2)+1,tiles=[];
+  for(let y=Math.max(0,cy-down);y<=Math.min(n-1,cy+down);y++)for(let x=cx-across;x<=cx+across;x++){
+   tiles.push({key:`${item.source}:${z}/${x}/${y}`,kind:item.source,z,x,y,local:false,width:512,height:512,transparent:false,bounds:[x/n*360-180,Math.atan(Math.sinh(Math.PI*(1-2*(y+1)/n)))*180/Math.PI,(x+1)/n*360-180,Math.atan(Math.sinh(Math.PI*(1-2*y/n)))*180/Math.PI]});
+   const wrapped=((x%n)+n)%n,key=item.source+'/'+z+'/'+wrapped+'/'+y;
+   if(!resourcesByCell.has(key)){
+    const sequence=resources.sequence+1,layer=item.source==='eox-bluemarble'?'bluemarble_3857':'s2cloudless_3857',phase=item.source==='eox-bluemarble'?'enable-satellite':'west-eox';
+    const resource={requestId:key,source:item.source,url:`https://tiles.maps.eox.at/wmts/1.0.0/${layer}/default/g/${z}/${y}/${wrapped}.jpg`,tile:{z,x:wrapped,y},status:200,mimeType:'image/jpeg',finished:true,bytes:10000,firstSequence:sequence,requestedSequence:sequence,responseSequence:sequence+1,finishedSequence:sequence+2,phase,responsePhase:phase};
+    resources.requests.push(resource);resourcesByCell.set(key,resource);resources.sequence+=3;resources.observedRequests++;
+   }
+  }
+  item.customMap.tiles.imagery=tiles;
+ }
+ for(const item of frames)if(item.successfulRequestIds){
+  item.successfulRequestIds=resources.requests.filter(resource=>resource.source===item.source).map(resource=>resource.requestId);item.resourceSequence=resources.sequence;
+ }
  return result;
 }

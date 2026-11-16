@@ -86,7 +86,7 @@ test('registration UI remains local-first and links to the official MChS form', 
   assert.match(component, /MCHS_REGISTRATION_URL/);
   assert.match(component, /saveLocalSafetyPassports\(localStorage, list\)/);
   assert.equal(SAFETY_STORAGE_KEY, LOCAL_SAFETY_KEY);
-  assert.match(component, /Не удалось записать данные в браузер/);
+  assert.match(component, /setNotice\(userErrorText\(error, 'storage'\)\)/);
   assert.match(component, /aria-live="polite"/);
   assert.match(component, /href="tel:112"/);
   assert.match(component, /Переход по ссылке сам по себе не является регистрацией/);

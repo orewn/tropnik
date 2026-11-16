@@ -11,6 +11,7 @@ import {loadPublicJSON} from '@/lib/map-preload';
 import connectionData from '@/lib/trail-connections.generated.json';
 import {getTrailConnections, getTrailEndpoints, normalizeTrailGeometry, planTrailSequence, preparePlanGeometry, resolvePreparedPlanGeometry, type CompositePlanOptions, type TrailConnection, type TrailConnectionIndex, type TrailEndpoint} from '@/lib/trail-connections';
 import {createHikeDraft, validateHikeDraft, serializeHikeDraft, exportHikeGpx, getHikeGpxExportState, hikeDraftPathKey, safeHikeFilename, type HikeDraft} from '@/lib/hike-draft';
+import {UserFacingError, userErrorText, type UserErrorContext} from '@/lib/user-facing-errors';
 import styles from './HikePlanner.module.css';
 
 const PlannerAtlas = lazy(() => import('./CustomAtlas').then(module => ({default: module.CustomAtlas})));
@@ -44,7 +45,7 @@ function endpointOptions(points: readonly TrailEndpoint[], selected: string | un
   const current = selected && endpointById(selected);
   return current && !points.some(point => point.id === current.id) ? [...points, current] : points;
 }
-const message = (error: unknown) => error instanceof Error ? error.message : 'Не удалось выполнить действие. Попробуйте ещё раз.';
+const message = (error: unknown, context: UserErrorContext = 'action') => userErrorText(error, context);
 function connectionLabel(connection: TrailConnection) {
   if (connection.kind === 'nearby') return `Рядом · ${Math.max(1, Math.round(connection.gapM))} м по прямой`;
   if (connection.kind === 'shared') return `Общий участок · ${Math.round(connection.sharedLengthM ?? 0)} м`;
@@ -100,7 +101,7 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
     if (!ids.length) return;
     Promise.all(ids.map(async id => {const route = index.routes[id]; return [id, await loadPublicJSON(`${route.geometryUrl}?sha256=${route.sha256}${retry ? `&attempt=${retry}` : ''}`)] as const;}))
       .then(entries => {if (!cancelled) setGeometryResult({key: loadKey, values: Object.fromEntries(entries), error: ''});})
-      .catch(error => {if (!cancelled) setGeometryResult({key: loadKey, values: emptyGeometry, error: `Не удалось загрузить линии этапов. ${message(error)}`});});
+      .catch(error => {if (!cancelled) setGeometryResult({key: loadKey, values: emptyGeometry, error: message(error, 'route_geometry')});});
     return () => {cancelled = true;};
   }, [geometryKey, loadKey, retry]);
 
@@ -174,30 +175,30 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
   function save() {
     try {
       const validated = validateHikeDraft(draft, index);
-      if (saved.length >= 20 && !saved.some(item => item.id === validated.id)) throw new Error('На устройстве уже 20 планов. Этот поход можно сохранить в JSON. Существующие планы сохранены.');
+      if (saved.length >= 20 && !saved.some(item => item.id === validated.id)) throw new UserFacingError('На устройстве уже 20 планов. Этот поход можно сохранить в JSON. Существующие планы сохранены.');
       const next = [validated, ...saved.filter(item => item.id !== validated.id)];
       localStorage.setItem(storageKey, JSON.stringify(next)); window.dispatchEvent(new Event(storageEvent));
       setNotice('План сохранён в этом браузере. Для переноса на другое устройство скачайте JSON.');
-    } catch (error) {setNotice(message(error));}
+    } catch (error) {setNotice(message(error, 'storage'));}
   }
   function removeSaved(item: HikeDraft) {
     try {localStorage.setItem(storageKey, JSON.stringify(saved.filter(plan => plan.id !== item.id))); window.dispatchEvent(new Event(storageEvent)); setRemovedPlan(item); setNotice('План убран из сохранённых. Его можно вернуть.');}
-    catch (error) {setNotice(message(error));}
+    catch (error) {setNotice(message(error, 'storage'));}
   }
   function restoreSaved() {
     if (!removedPlan) return;
     try {
-      if (saved.length >= 20) throw new Error('Для восстановления освободите место среди сохранённых планов.');
+      if (saved.length >= 20) throw new UserFacingError('Для восстановления освободите место среди сохранённых планов.');
       localStorage.setItem(storageKey, JSON.stringify([removedPlan, ...saved.filter(item => item.id !== removedPlan.id)])); window.dispatchEvent(new Event(storageEvent)); setRemovedPlan(null); setNotice('План восстановлен.');
-    } catch (error) {setNotice(message(error));}
+    } catch (error) {setNotice(message(error, 'storage'));}
   }
   async function importPlan(file: File | undefined) {
     if (!file) return;
     try {
-      if (file.size > 2 * 1024 * 1024) throw new Error('Файл плана должен быть меньше 2 МБ.');
+      if (file.size > 2 * 1024 * 1024) throw new UserFacingError('Файл плана должен быть меньше 2 МБ.');
       setDraft(validateHikeDraft(JSON.parse(await file.text()), index)); setPicker(null);
       setNotice('План открыт из файла. Сохраните его, чтобы оставить в этом браузере.');
-    } catch (error) {setNotice(message(error));}
+    } catch (error) {setNotice(message(error, 'plan_import'));}
     if (fileInput.current) fileInput.current.value = '';
   }
   function exportFile(format: 'gpx' | 'json') {
@@ -205,7 +206,7 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
       const content = format === 'gpx' ? exportHikeGpx(draft, plan, resolved) : serializeHikeDraft(draft);
       download(content, `${safeHikeFilename(draft.name)}.${format}`, format === 'gpx' ? 'application/gpx+xml;charset=utf-8' : 'application/json;charset=utf-8');
       setNotice(format === 'gpx' ? 'GPX содержит выбранные участки. Отсутствующие переходы остаются разрывами между сегментами.' : 'Файл плана подготовлен. Его можно открыть в конструкторе на другом устройстве.');
-    } catch (error) {setNotice(message(error));}
+    } catch (error) {setNotice(message(error, 'plan_export'));}
   }
 
   const mapPoints = useMemo<PlannerMapPoint[]>(() => {
@@ -254,7 +255,7 @@ export function HikePlanner({initialTrailId}: {initialTrailId?: string}) {
             <button type="button" onClick={() => exportFile('json')} disabled={!draft.stages.length}>Скачать план JSON</button>
             <button type="button" onClick={() => fileInput.current?.click()}>Открыть файл плана</button>
             <button type="button" onClick={event => {event.currentTarget.closest('details')?.removeAttribute('open'); setDraft(createHikeDraft(index)); setPicker(null); setNotice('Новый план. Сохранённые походы доступны ниже.');}}>Новый план</button>
-            {saved.length > 0 && <><strong>Сохранено на устройстве</strong>{saved.map(item => <div className={styles.savedRow} key={item.id}><button type="button" onClick={event => {event.currentTarget.closest('details')?.removeAttribute('open'); try {setDraft(validateHikeDraft(item, index)); setPicker(null); setNotice('Открыт сохранённый план.');} catch (error) {setNotice(message(error));}}}>{item.name || 'Поход без названия'}</button><button type="button" aria-label={`Скачать сохранённый план ${item.name}`} onClick={() => download(JSON.stringify(item, null, 2), `${safeHikeFilename(item.name)}.json`, 'application/json;charset=utf-8')}><DownloadSimple size={17}/></button><button type="button" aria-label={`Убрать сохранённый план ${item.name}`} onClick={() => removeSaved(item)}><Trash size={17}/></button></div>)}</>}
+            {saved.length > 0 && <><strong>Сохранено на устройстве</strong>{saved.map(item => <div className={styles.savedRow} key={item.id}><button type="button" onClick={event => {event.currentTarget.closest('details')?.removeAttribute('open'); try {setDraft(validateHikeDraft(item, index)); setPicker(null); setNotice('Открыт сохранённый план.');} catch (error) {setNotice(message(error, 'action'));}}}>{item.name || 'Поход без названия'}</button><button type="button" aria-label={`Скачать сохранённый план ${item.name}`} onClick={() => download(JSON.stringify(item, null, 2), `${safeHikeFilename(item.name)}.json`, 'application/json;charset=utf-8')}><DownloadSimple size={17}/></button><button type="button" aria-label={`Убрать сохранённый план ${item.name}`} onClick={() => removeSaved(item)}><Trash size={17}/></button></div>)}</>}
           </div></details>
           <input ref={fileInput} type="file" accept=".json,application/json" hidden aria-label="Файл плана похода" onChange={event => void importPlan(event.target.files?.[0])}/>
         </div>
