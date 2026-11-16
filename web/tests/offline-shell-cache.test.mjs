@@ -38,10 +38,10 @@ function worker(base) {
     },
   });
   async function get(path, cacheMode = 'default', options = {}) {
-    let result;
+    let result, done;
     handlers.fetch({request: new Request(new URL(path, origin + base), {cache: cacheMode, ...options}),
-      respondWith(value) {result = value;}});
-    return result;
+      respondWith(value) {result = value;}, waitUntil(value) {done = value;}});
+    const response = await result; await done; return response;
   }
   return {get, stored, requests, reads, writes,
     network(value, body = '', responseStatus = 200) {online = value; payload = body; status = responseStatus;},

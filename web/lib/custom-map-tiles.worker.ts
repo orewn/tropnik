@@ -1,5 +1,5 @@
 import {decodeVectorTile,type VectorTile} from './custom-map-vector';
-import {decodeTerrarium,elevationBorder,paintContours,paintVectorTile,reliefPixels,type TilePaintBounds,type ReliefCoverage,type ReliefHalo,type ReliefHaloKey,type ReliefHaloOffset,type ReliefHaloPayload,type ReliefHaloSource} from './custom-map-painter';
+import {decodeTerrarium,elevationBorder,paintContours,paintVectorTile,reliefPixels,type TilePaintBounds,type ReliefCoverage,type ReliefHalo,type ReliefHaloKey,type ReliefHaloOffset,type ReliefHaloPayload,type ReliefHaloSource,type ReliefPixelRegion} from './custom-map-painter';
 
 type TileJob={id:number;kind:'vector'|'relief'|'raster';bytes:ArrayBuffer;z:number;x?:number;y:number;paintZoom?:number;sourceZ?:number;sourceKey?:string;paths:boolean;transparent?:boolean;boundaries?:boolean;softwareRaster?:boolean;mime?:string;halo?:ReliefHaloPayload};
 type RenderWindow={factor:number;childX:number;childY:number;sourceX:number;sourceY:number;sourceZ:number;paintSize:number;bounds:TilePaintBounds};
@@ -109,7 +109,7 @@ async function prepareRelief(parent:ReliefParent,job:TileJob,view:RenderWindow):
     needed.push({dx,dy});
   }
   const required=new Set(needed.map(haloKey)),missing=new Map((job.halo?.missing??[]).map(item=>[haloKey(item),item.reason]));
-  const groups=new Map<string,ReliefHaloSource[]>();let changed=false;
+  const groups=new Map<string,ReliefHaloSource[]>(),changed:ReliefHaloOffset[]=[];
   for(const item of job.halo?.tiles??[]){
     const key=haloKey(item),signature=`${item.sourceKey}:${item.reduceToArchive?1:0}`;
     if(!required.has(key)||parent.haloSources[key]?.key===signature)continue;
@@ -136,16 +136,26 @@ async function prepareRelief(parent:ReliefParent,job:TileJob,view:RenderWindow):
       }
       for(const item of items){
         const key=haloKey(item);parent.halo[key]=border.values[key];
-        parent.haloSources[key]={key:signature,resampled:border.resampled};missing.delete(key);changed=true;
+        parent.haloSources[key]={key:signature,resampled:border.resampled};missing.delete(key);changed.push({dx:item.dx,dy:item.dy});
       }
     }catch{for(const item of items)missing.set(haloKey(item),'invalid');}
   }
-  if(changed||!parent.shaded){
+  if(changed.length||!parent.shaded){
     const context=parent.shade.getContext('2d',{alpha:true,willReadFrequently:!!job.softwareRaster});if(!context)throw new Error('Relief painter unavailable');
     // Physical spacing and latitude belong to the measured parent. Unknown
     // outside derivatives stay transparent; no edge-clamped terrain is made.
-    context.putImageData(new ImageData(new Uint8ClampedArray(reliefPixels(parent.heights,parent.size,view.sourceY,view.sourceZ,parent.halo)),parent.size,parent.size),0,0);
-    parent.shaded=true;
+    try{
+      if(!parent.shaded)context.putImageData(new ImageData(reliefPixels(parent.heights,parent.size,view.sourceY,view.sourceZ,parent.halo),parent.size,parent.size),0,0);
+      else for(const {dx,dy} of changed){
+        // Horn's 3x3 derivative reads a neighbour only in the outermost source
+        // pixel. Later overzoom children can add sides/corners independently;
+        // update those exact pixels without recomputing the unchanged interior
+        // or retaining another full-sized CPU image beside the cached shade.
+        const region:ReliefPixelRegion={x:dx>0?parent.size-1:0,y:dy>0?parent.size-1:0,width:dx?1:parent.size,height:dy?1:parent.size};
+        context.putImageData(new ImageData(reliefPixels(parent.heights,parent.size,view.sourceY,view.sourceZ,parent.halo,region),region.width,region.height),region.x,region.y);
+      }
+      parent.shaded=true;
+    }catch(error){parent.shaded=false;throw error;}
   }
   const unavailable:ReliefCoverage['missing']=[],resampled:ReliefHaloOffset[]=[];let available=0;
   for(const offset of needed){

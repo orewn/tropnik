@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 import {gzipSync} from 'node:zlib';
+import {createHash} from 'node:crypto';
 import ts from 'typescript';
 import * as painter from '../lib/custom-map-painter.ts';
 import {decodeVectorTile} from '../lib/custom-map-vector.ts';
+import {reliefPixelsReference} from './fixtures/relief-pixels-204614c.mjs';
 
 // Execute the actual worker protocol with controlled image/Canvas APIs. Numeric
 // painting is real; recorded commands do not claim to measure GPU output.
@@ -19,8 +21,8 @@ const bytes=()=>new Uint8Array([1,2,3]).buffer;
 const job=(id,overrides={})=>({id,kind:'vector',bytes:bytes(),z:18,x:1605,y:3207,sourceZ:14,sourceKey:'https://tiles.example/14/100/200.pbf',paths:true,...overrides});
 const scalarPixel=height=>{const value=height+32768;return[Math.floor(value/256),Math.floor(value)%256,Math.round(value%1*256),255];};
 
-function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vectorTile=vector,vectorDecoder}={}){
-  const messages=[],canvases=[],outputs=[],decoded=[],shadeSources=[],contourViews=[],vectorViews=[];let vectorDecodes=0,imageDecodes=0,failedTransfer=false;
+function fixture({failTransfer=false,failShadePatchOnce=false,unavailablePixel=false,images=new Map(),vectorTile=vector,vectorDecoder}={}){
+  const messages=[],canvases=[],outputs=[],decoded=[],shadeSources=[],contourViews=[],vectorViews=[];let vectorDecodes=0,imageDecodes=0,failedTransfer=false,failedShadePatch=false,copiedPixelBytes=0;
   const rgba=new Uint8ClampedArray(Array.from({length:16},(_,i)=>scalarPixel((i%4)*25+Math.floor(i/4))).flat());
   if(unavailablePixel)rgba[3]=0;
   class Bitmap{
@@ -42,7 +44,15 @@ function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vec
     stroke(){this.strokes.push({path:this.path,width:this.lineWidth,dash:[...this.dash]});}
     drawImage(image,...args){this.draws.push({image,args});}
     getImageData(){return{data:this.draws.at(-1).image.rgba};}
-    putImageData(image){this.imageData=image;}
+    imageWrites=[];
+    putImageData(image,x=0,y=0){
+      this.imageWrites.push({x,y,width:image.width,height:image.height,pixels:image.data.length/4});
+      if(x===0&&y===0&&image.width===this.canvas.width&&image.height===this.canvas.height){this.imageData=image;return;}
+      if(failShadePatchOnce&&!failedShadePatch){failedShadePatch=true;throw new Error('Shade patch upload failed');}
+      assert.ok(this.imageData,'a border patch requires the previously painted full shade');
+      assert.equal(image.data.length,image.width*image.height*4);
+      for(let row=0;row<image.height;row++)this.imageData.data.set(image.data.subarray(row*image.width*4,(row+1)*image.width*4),((y+row)*this.canvas.width+x)*4);
+    }
   }
   class OffscreenCanvas{
     constructor(width,height){this.width=width;this.height=height;this.context=new Context(this);canvases.push(this);}
@@ -51,13 +61,14 @@ function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vec
     transferToImageBitmap(){const bitmap=new Bitmap(this.width,this.height);bitmap.context=this.context;outputs.push(bitmap);return bitmap;}
   }
   class ImageData{constructor(data,width,height){this.data=data;this.width=width;this.height=height;}}
-  const scope={exports:{},Error,Blob,DecompressionStream,Uint8Array,Uint8ClampedArray,Float32Array,ArrayBuffer,OffscreenCanvas,ImageData,
+  class TrackedPixels extends Uint8ClampedArray {constructor(value){super(value);if(ArrayBuffer.isView(value))copiedPixelBytes+=this.byteLength;}}
+  const scope={exports:{},Error,Blob,DecompressionStream,Uint8Array,Uint8ClampedArray:TrackedPixels,Float32Array,ArrayBuffer,OffscreenCanvas,ImageData,
     createImageBitmap:async blob=>{imageDecodes++;const input=new Uint8Array(await blob.arrayBuffer()),image=images.get(input[0]);const bitmap=blob.type==='image/jpeg'?new Bitmap(512,512):new Bitmap(image?.size??4,image?.size??4,image?.rgba??rgba);decoded.push(bitmap);return bitmap;},
     require:name=>{
       if(name==='./custom-map-vector')return{decodeVectorTile:input=>{vectorDecodes++;return vectorDecoder?vectorDecoder(input):vectorTile;}};
       assert.equal(name,'./custom-map-painter');return{...painter,
         paintVectorTile:(...args)=>{vectorViews.push({z:args[2],size:args[3],options:args[6]});return painter.paintVectorTile(...args);},
-        reliefPixels:(heights,size,y,z,halo)=>{shadeSources.push({y,z,heights:[...heights],halo:copy(halo)});return painter.reliefPixels(heights,size,y,z,halo);},
+        reliefPixels:(heights,size,y,z,halo,region)=>{shadeSources.push({y,z,heights:[...heights],halo:copy(halo),pixels:(region?.width??size)*(region?.height??size),...(region?{region:copy(region)}:{})});return painter.reliefPixels(heights,size,y,z,halo,region);},
         paintContours:(...args)=>{contourViews.push({z:args[3],size:args[4],options:args[5]});return painter.paintContours(...args);}};
     },
     self:{postMessage(message,options){
@@ -68,7 +79,7 @@ function fixture({failTransfer=false,unavailablePixel=false,images=new Map(),vec
   };
   vm.runInNewContext(compiled,scope);
   return{messages,canvases,outputs,decoded,shadeSources,contourViews,vectorViews,
-    counts:()=>({vectorDecodes,imageDecodes}),window:scope.exports.tileRenderWindow,
+    counts:()=>({vectorDecodes,imageDecodes}),allocations:()=>({copiedPixelBytes}),window:scope.exports.tileRenderWindow,
     send:async data=>{await scope.self.onmessage({data});return messages.find(message=>message.id===data.id);}};
 }
 
@@ -255,6 +266,61 @@ test('an overlapping worker request is rejected rather than creating an unbounde
 
 const haloSource=(dx,dy,tag=2,extra={})=>({dx,dy,sourceKey:`https://tiles.example/12/${25+dx}/${50+dy}.webp`,mime:'image/webp',bytes:new Uint8Array([tag]).buffer,...extra});
 const sourceImage=(size,fn)=>{const rgba=new Uint8ClampedArray(size*size*4);for(let y=0;y<size;y++)for(let x=0;x<size;x++)rgba.set(scalarPixel(fn(x,y)),(y*size+x)*4);return{size,rgba};};
+
+test('late measured halo strips update only affected shade pixels and remain byte-identical to the full production formula',async t=>{
+  const size=512,height=(x,y)=>1200+x*x/512-y*y/1024+((x*17+y*13)%31)/8;
+  const images=new Map([[1,sourceImage(size,height)]]),sources=new Map();let tag=1;
+  for(const dy of [-1,0,1])for(const dx of [-1,0,1])if(dx||dy){
+    images.set(++tag,sourceImage(size,(x,y)=>height(dx*size+x,dy*size+y)));sources.set(`${dx},${dy}`,haloSource(dx,dy,tag));
+  }
+  const env=fixture({images}),primary={kind:'relief',z:14,sourceZ:12,sourceKey:'https://tiles.example/12/25/50.webp',x:101,y:201};
+  const stages=[{x:101,y:201,offsets:[]},{x:100,y:201,offsets:[[-1,0]]},{x:103,y:201,offsets:[[1,0]]},
+    {x:101,y:200,offsets:[[0,-1]]},{x:101,y:203,offsets:[[0,1]]},
+    {x:100,y:200,offsets:[[-1,0],[0,-1],[-1,-1]]},{x:103,y:200,offsets:[[1,0],[0,-1],[1,-1]]},
+    {x:100,y:203,offsets:[[-1,0],[0,1],[-1,1]]},{x:103,y:203,offsets:[[1,0],[0,1],[1,1]]}];
+  const hash=value=>createHash('sha256').update(value).digest('hex');
+  for(let index=0;index<stages.length;index++){
+    const {x,y,offsets}=stages[index],result=await env.send(job(index+1,{...primary,x,y,halo:{tiles:offsets.map(([dx,dy])=>sources.get(`${dx},${dy}`)),missing:[]}}));
+    assert.equal(result.error,undefined);assert.equal(result.reliefCoverage.available,offsets.length);assert.equal(result.reliefCoverage.missing.length,0);
+    const shade=env.canvases.find(canvas=>canvas.context.imageData),last=env.shadeSources.at(-1);
+    const halo=Object.fromEntries(Object.entries(last.halo).map(([key,value])=>[key,Float32Array.from(Object.values(value))]));
+    const expected=reliefPixelsReference(Float32Array.from(last.heights),size,50,12,halo);
+    assert.equal(hash(shade.context.imageData.data),hash(expected),`every shade byte, including unchanged interior and corners, matches the original full formula at stage ${index}`);
+    assert.equal(result.bitmap.width,512);assert.equal(result.bitmap.height,512);assert.equal(result.reliefCoverage.missingDataFilled,false);
+  }
+  assert.equal(env.counts().imageDecodes,9,'all eight measured neighbours still decode exactly once');
+  const shade=env.canvases.find(canvas=>canvas.context.imageData),processed=env.shadeSources.reduce((total,item)=>total+item.pixels,0);
+  t.diagnostic(JSON.stringify({stages:stages.length,sourceSize:size,processedShadePixels:processed,uploadedShadePixels:shade.context.imageWrites.reduce((total,item)=>total+item.pixels,0),fullReferencePixels:stages.length*size*size,...env.allocations()}));
+  assert.equal(processed,size*size+4*size+4,'later measured sides and diagonals must not recompute all source pixels');
+  assert.equal(shade.context.imageWrites.reduce((total,item)=>total+item.pixels,0),processed);
+  assert.equal(env.allocations().copiedPixelBytes,0,'ImageData accepts the fresh numeric output directly without another full pixel-array copy');
+  assert.ok(env.decoded.every(image=>image.closed===1));
+});
+
+test('a failed shade patch forces a complete repair on the next child without losing the measured border',async()=>{
+  const env=fixture({failShadePatchOnce:true}),sourceKey='https://tiles.example/12/25/50.webp';
+  const primary={kind:'relief',z:14,sourceZ:12,sourceKey,x:101,y:201};
+  const first=await env.send(job(1,primary));assert.ok(first.bitmap);
+  const edge={...primary,x:100,halo:{tiles:[haloSource(-1,0)],missing:[]}};
+  const failed=await env.send(job(2,edge));assert.match(failed.error,/patch upload failed/);assert.equal(failed.bitmap,undefined);
+  const repaired=await env.send(job(3,edge));assert.ok(repaired.bitmap);assert.equal(repaired.reliefCoverage.available,1);assert.equal(repaired.reliefCoverage.missing.length,0);
+  assert.equal(env.counts().imageDecodes,2,'the repaired shade keeps its checked primary and neighbour samples');
+  const shade=env.canvases.find(canvas=>canvas.context.imageData),last=env.shadeSources.at(-1);
+  const halo=Object.fromEntries(Object.entries(last.halo).map(([key,value])=>[key,Float32Array.from(Object.values(value))]));
+  assert.deepEqual(shade.context.imageData.data,reliefPixelsReference(Float32Array.from(last.heights),4,50,12,halo));
+  assert.deepEqual(shade.context.imageWrites.map(write=>write.pixels),[16,4,16]);
+});
+
+test('a later wrapped world-edge child patches measured own-source pixels without decoding a duplicate neighbour',async()=>{
+  const env=fixture(),sourceKey='https://tiles.example/0/0/0.webp',primary={kind:'relief',z:2,sourceZ:0,sourceKey,x:1,y:1};
+  const first=await env.send(job(1,primary));assert.equal(first.reliefCoverage.required,0);
+  const edge=await env.send(job(2,{...primary,x:-4,halo:{tiles:[haloSource(-1,0,1,{sourceKey})],missing:[]}}));
+  assert.equal(edge.error,undefined);assert.equal(edge.reliefCoverage.required,1);assert.equal(edge.reliefCoverage.available,1);assert.equal(env.counts().imageDecodes,1);
+  const shade=env.canvases.find(canvas=>canvas.context.imageData),last=env.shadeSources.at(-1);
+  const halo=Object.fromEntries(Object.entries(last.halo).map(([key,value])=>[key,Float32Array.from(Object.values(value))]));
+  assert.deepEqual(shade.context.imageData.data,reliefPixelsReference(Float32Array.from(last.heights),4,0,0,halo));
+  assert.deepEqual(shade.context.imageWrites.map(write=>write.pixels),[16,4]);
+});
 
 test('an interior or failed first child never poisons later real halo data in the decoded parent cache',async()=>{
   const images=new Map([[1,sourceImage(4,(x,y)=>x*25+y)],[2,sourceImage(4,(x,y)=>(x-4)*25+y)]]),env=fixture({images});

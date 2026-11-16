@@ -636,49 +636,92 @@ class LocalExperienceTest {
     private fun tapMapTrail(map: CustomMapWebView, snapshot: JSONObject, routeId: String): JSONObject {
         val deadline = SystemClock.uptimeMillis() + 10_000
         val receipt = JSONObject().put("routeId", routeId)
-        awaitMapDraw(map, deadline, receipt)
-        val snapshotBudget = deadline - SystemClock.uptimeMillis()
-        assertTrue("No time remains for the completed trail frame", snapshotBudget > 0)
-        val current = mapSnapshot(map, minOf(5_000L, snapshotBudget))
-        assertTrue("Trail hit coordinates must belong to the completed frame", mapInputReady(current) && sameMapView(snapshot, current))
-        assertEquals(routeId, current.getString("centerTrailHit"))
-        val viewport = nativeMapViewport(map)
-        val x = viewport.x + viewport.width / 2f
-        val y = viewport.y + viewport.height / 2f
-        assertTrue("Trail target is outside the visible native map", viewport.visible.contains(x.toInt(), y.toInt()))
-        receipt.put("coordinateSnapshot", current).put("screenX", x.toDouble()).put("screenY", y.toDouble())
-        val lastInput = current.getJSONArray("trustedInput").let { values -> (0 until values.length()).maxOfOrNull { values.getJSONObject(it).optLong("sequence") } ?: 0L }
-        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
-        val downTime = SystemClock.uptimeMillis()
-        var upTime = downTime
-        for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
-            if (action == MotionEvent.ACTION_UP) {
-                val remaining = downTime + 80 - SystemClock.uptimeMillis()
-                if (remaining > 0) SystemClock.sleep(remaining)
-            }
-            val eventTime = SystemClock.uptimeMillis()
-            if (action == MotionEvent.ACTION_UP) upTime = eventTime
-            val event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0)
-            event.source = InputDevice.SOURCE_TOUCHSCREEN
-            try { assertTrue("Native trail touch was rejected", automation.injectInputEvent(event, false)) }
-            finally { event.recycle() }
+        val evidence = JSONObject().put("routeId", routeId).put("deadline", deadline).put("receipt", receipt)
+        val selections = JSONArray()
+        var previousTrailHandler: ((String) -> Unit)? = null
+        var completed = false
+        // Observe native selection without delaying it or changing acceptance.
+        // A pointerup may select a route before a later browser click arrives;
+        // retain that lifetime evidence even when the original assertion fails.
+        val observedTrailHandler: (String) -> Unit = { id ->
+            selections.put(JSONObject().put("id", id).put("receivedAt", SystemClock.uptimeMillis()))
+            previousTrailHandler?.invoke(id)
         }
-        assertTrue("Trail tap became a long press", upTime - downTime < ViewConfiguration.getLongPressTimeout())
-        assertTrue("Trail touch exceeded its original deadline", upTime < deadline)
-        val clickBudget = deadline - SystemClock.uptimeMillis()
-        assertTrue("No time remains for the trusted trail click", clickBudget > 0)
-        app.waitUntil(timeoutMillis = clickBudget) {
-            var diagnostics = JSONObject()
-            app.runOnUiThread { diagnostics = map.debugDiagnostics() }
-            val events = diagnostics.getJSONArray("receipts")
-            val clicks = (0 until events.length()).map { events.getJSONObject(it) }.filter {
-                it.optString("phase") == "trusted-input" && it.optString("type") == "click" &&
-                    it.optBoolean("trusted") && it.optLong("sequence") > lastInput && it.optLong("nativeReceivedAt") >= downTime
+        try {
+            app.runOnUiThread { previousTrailHandler = map.onTrail;map.onTrail = observedTrailHandler }
+            awaitMapDraw(map, deadline, receipt)
+            val snapshotBudget = deadline - SystemClock.uptimeMillis()
+            assertTrue("No time remains for the completed trail frame", snapshotBudget > 0)
+            val current = mapSnapshot(map, minOf(5_000L, snapshotBudget))
+            assertTrue("Trail hit coordinates must belong to the completed frame", mapInputReady(current) && sameMapView(snapshot, current))
+            assertEquals(routeId, current.getString("centerTrailHit"))
+            val viewport = nativeMapViewport(map)
+            val x = viewport.x + viewport.width / 2f
+            val y = viewport.y + viewport.height / 2f
+            assertTrue("Trail target is outside the visible native map", viewport.visible.contains(x.toInt(), y.toInt()))
+            receipt.put("coordinateSnapshot", current).put("screenX", x.toDouble()).put("screenY", y.toDouble())
+            val lastInput = current.getJSONArray("trustedInput").let { values -> (0 until values.length()).maxOfOrNull { values.getJSONObject(it).optLong("sequence") } ?: 0L }
+            val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+            val downTime = SystemClock.uptimeMillis()
+            var upTime = downTime
+            val injected = JSONArray()
+            evidence.put("injected", injected).put("downTime", downTime).put("afterInputSequence", lastInput)
+            for (action in listOf(MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP)) {
+                if (action == MotionEvent.ACTION_UP) {
+                    val remaining = downTime + 80 - SystemClock.uptimeMillis()
+                    if (remaining > 0) SystemClock.sleep(remaining)
+                }
+                val eventTime = SystemClock.uptimeMillis()
+                if (action == MotionEvent.ACTION_UP) upTime = eventTime
+                val event = MotionEvent.obtain(downTime, eventTime, action, x, y, 0)
+                event.source = InputDevice.SOURCE_TOUCHSCREEN
+                try {
+                    val accepted = automation.injectInputEvent(event, false)
+                    injected.put(JSONObject().put("action", action).put("eventTime", eventTime)
+                        .put("returnedAt", SystemClock.uptimeMillis()).put("accepted", accepted))
+                    assertTrue("Native trail touch was rejected", accepted)
+                } finally { event.recycle() }
             }
-            receipt.put("trustedClicks", JSONArray(clicks)).put("nativeTouchEvents", diagnostics.getJSONArray("nativeTouchEvents"))
-            clicks.isNotEmpty()
+            evidence.put("actualPressMs", upTime - downTime)
+            assertTrue("Trail tap became a long press", upTime - downTime < ViewConfiguration.getLongPressTimeout())
+            assertTrue("Trail touch exceeded its original deadline", upTime < deadline)
+            val clickBudget = deadline - SystemClock.uptimeMillis()
+            assertTrue("No time remains for the trusted trail click", clickBudget > 0)
+            app.waitUntil(timeoutMillis = clickBudget) {
+                var diagnostics = JSONObject()
+                app.runOnUiThread { diagnostics = map.debugDiagnostics() }
+                val events = diagnostics.getJSONArray("receipts")
+                val clicks = (0 until events.length()).map { events.getJSONObject(it) }.filter {
+                    it.optString("phase") == "trusted-input" && it.optString("type") == "click" &&
+                        it.optBoolean("trusted") && it.optLong("sequence") > lastInput && it.optLong("nativeReceivedAt") >= downTime
+                }
+                receipt.put("trustedClicks", JSONArray(clicks)).put("nativeTouchEvents", diagnostics.getJSONArray("nativeTouchEvents"))
+                clicks.isNotEmpty()
+            }
+            completed = true
+            return receipt.put("actualPressMs", upTime - downTime)
+        } finally {
+            // Evidence collection cannot replace the original failure, extend
+            // the input deadline or turn a selection without a click into PASS.
+            evidence.put("completed", completed)
+            runCatching {
+                app.runOnUiThread {
+                    if (map.onTrail === observedTrailHandler) map.onTrail = previousTrailHandler
+                    evidence.put("selectionReceipts", JSONArray(selections.toString()))
+                        .put("diagnostics", map.debugDiagnostics()).put("capturedAt", SystemClock.uptimeMillis())
+                        .put("viewAttached", map.isAttachedToWindow).put("viewShown", map.isShown)
+                }
+            }.onFailure { evidence.put("diagnosticError", it.toString()) }
+            if (!completed) {
+                runCatching { evidence.put("routeDetailPresent", app.onAllNodesWithTag("route_detail").fetchSemanticsNodes().isNotEmpty()) }
+                    .onFailure { evidence.put("screenStateError", it.toString()) }
+                runCatching { screenshot("map-native-trail-touch-failed") }
+                    .onFailure { evidence.put("screenshotError", it.toString()) }
+            }
+            runCatching {
+                File(app.activity.filesDir, "qa/map-native-trail-touch.json").apply { parentFile!!.mkdirs() }.writeText(evidence.toString(2))
+            }.onFailure { android.util.Log.w("MapTrailTouchDiagnostics", "Could not save trail touch diagnostics", it) }
         }
-        return receipt.put("actualPressMs", upTime - downTime)
     }
 
     private fun mapSnapshot(view: CustomMapWebView, timeoutMillis: Long = 5_000): JSONObject {

@@ -25,6 +25,10 @@ const collection={type:'FeatureCollection',features:[]};
 // camera and the rest of the production engine remain the same real modules.
 const originalLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels-9110c5b.txt'),'utf8');
 assert.equal(createHash('sha256').update(originalLabels).digest('hex'),'39a5b7a5ca753f6ca893764b8ee7f7a3fd3acd87686d944f5ca7da5cab7ed8c9');
+// The later baseline includes progressive ready-cell labels, which did not
+// exist in the original typography oracle above. Pin both preparation and draw.
+const streamingLabels=readFileSync(resolve(root,'tests/fixtures/custom-map-labels-204614c.txt'),'utf8');
+assert.equal(createHash('sha256').update(streamingLabels).digest('hex'),'ecf564675019ec86e816fc10794794190e3eb1ff465726f2da3495a17481efb7');
 
 function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCoverage=false,coverageFailures=0,coverageLoader,baselineLabels=false,groundCache=false,pixelRatio=1,beforeZoom,onGesture,onClick,onMarker}={}){
  let now=0,serial=0,coverageResolve,coverageAttempts=0,readyCalls=0,gestures=0,layoutReads=0;const frames=new Map(),timers=new Map(),calls=[],stores=[],observers=[],states=[],paths=[],rasters=[],grounds=[];
@@ -154,10 +158,10 @@ function fixture({view=camera,width=800,height=600,coverageArea=area,delayedCove
  function load(filename){
   if(modules.has(filename))return modules.get(filename).exports;
   const testModule={exports:{}};modules.set(filename,testModule);
-  const engineModule=filename===resolve(root,'lib/custom-map-engine.ts'),compiledKey=engineModule&&baselineLabels?filename+':original-labels-9110c5b':filename;
+  const engineModule=filename===resolve(root,'lib/custom-map-engine.ts'),compiledKey=engineModule&&baselineLabels?filename+':original-labels-'+baselineLabels:filename;
   if(!compiled.has(compiledKey)){
    let source=readFileSync(filename,'utf8');
-   if(engineModule&&baselineLabels){const start=source.indexOf('  private drawLabels(){\n'),end=source.indexOf('  destroy(){\n',start);assert.ok(start>0&&end>start);source=source.slice(0,start)+originalLabels+source.slice(end);}
+   if(engineModule&&baselineLabels){const streaming=baselineLabels==='204614c',start=source.indexOf(streaming?'  private prepareLabelCandidates(':'  private drawLabels(){\n'),end=source.indexOf('  destroy(){\n',start);assert.ok(start>0&&end>start);source=source.slice(0,start)+(streaming?streamingLabels:originalLabels)+source.slice(end);}
    // Preserve module-relative worker URLs in the CommonJS browser-surface fixture.
    source=source.replaceAll('import.meta.url',JSON.stringify(new URL(filename.slice(root.length+1),'https://preview.test/').href));
    compiled.set(compiledKey,ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true},fileName:filename}).outputText);
@@ -818,6 +822,82 @@ function labelSnapshot(env){
   hidden:env.host.querySelector('.tropnik-map-labels').hidden,paint:plain(env.lastDraw().filter(call=>call.surface==='tropnik-map-labels'))};
 }
 
+test('streaming measured pairs prepare each source label once while preserving the pinned paint and decisions',async t=>{
+ const view={center:[56.4372266,57.9741523],zoom:11,bearingDegrees:0},coverageArea={type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[[54,56],[58,56],[58,60],[54,60],[54,56]]]}};
+ const options={view,width:1435,height:824,pixelRatio:2,coverageArea},current=fixture(options),original=fixture({...options,baselineLabels:'204614c'}),pair=[current,original];
+ t.after(()=>pair.forEach(env=>env.engine.destroy()));
+ const jobs=new Map(),equivalent=phase=>assert.deepEqual(labelSnapshot(current),labelSnapshot(original),phase);
+ for(const env of pair){
+  await turn();env.engine.setLabels([{id:'additional',coordinate:[...view.center],label:'Внешняя подпись',kind:'path',rank:0}]);
+  env.complete(job=>job.request.kind==='overview');await env.settle();
+  const vectors=env.pending('vector');assert.equal(vectors.length,24);jobs.set(env,vectors.map(vector=>[vector,env.pending('relief').find(relief=>relief.request.z===vector.request.z&&relief.request.x===vector.request.x&&relief.request.y===vector.request.y)]));
+ }
+ equivalent('The empty cold view keeps the same external label');
+ const before=plain(current.labelWork),beforeOriginal=plain(original.labelWork);
+ for(let cell=0;cell<24;cell++){
+  for(const env of pair){
+   for(const job of jobs.get(env)[cell]){
+    assert.ok(job);const contour=job.request.kind==='relief';
+    env.store.resolve(job,{labels:Array.from({length:contour?4:8},(_,index)=>({x:.2+(index%3)*.3,y:.2+Math.floor(index/3)*.3,text:contour?'1000 м':index%3===0?'Общая тропа':`Участок ${cell}:${index}`,kind:contour?'contour':['place','peak','water','path','poi','place','path','poi'][index],rank:index%3,elevation:contour?1000:index===1?3210.4:undefined,symbol:index===4?'camp':undefined}))});
+   }
+   await env.settle();
+  }
+  equivalent(`Ready pair ${cell+1} keeps exact stable order, mask, collisions, typography and DPR`);
+ }
+ const work=Object.fromEntries(Object.keys(before).map(key=>[key,current.labelWork[key]-before[key]])),reference=Object.fromEntries(Object.keys(beforeOriginal).map(key=>[key,original.labelWork[key]-beforeOriginal[key]]));
+ t.diagnostic(JSON.stringify({streamedPairs:24,labelsPerPair:12,current:work,pinnedOriginal:reference}));
+ assert.equal(current.engine.getState().loading,false);assert.equal(current.engine.inspect().loadingGround,null);
+ assert.equal(work.sourceCoordinates,24*12,'A new ready pair and the final batch commit must reuse metadata for every unchanged tile');
+ assert.equal(work.priorityCalls,24*12,'Streaming must not repeatedly rank the previous tiles or the unchanged external labels');
+ const prepared=current.labelWork.sourceCoordinates;
+ for(const env of pair){env.engine.setCamera({...view,bearingDegrees:17.3},false);env.engine.setPitch(30);env.flush();}
+ equivalent('Bearing and pitch preserve current projected anchors with cached source metadata');
+ assert.equal(current.labelWork.sourceCoordinates,prepared);
+ for(const env of pair){env.coverage.area={type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[[54,56],[view.center[0],56],[view.center[0],60],[54,60],[54,56]]]}};notifyCoverage(env,{revision:1});env.flush();}
+ equivalent('A replacement area must invalidate true source admission without reprojecting the tile labels');
+ assert.equal(current.labelWork.sourceCoordinates,prepared);
+ for(const env of pair){env.coverage.area=coverageArea;notifyCoverage(env,{revision:2});env.flush();}
+ equivalent('Returning to an earlier area must also invalidate cached false admission');
+ assert.equal(current.labelWork.sourceCoordinates,prepared);
+ for(const env of pair){env.engine.setPitch(0);env.engine.setCamera({...view,zoom:12},false);env.flush();}
+ equivalent('A replacement view initially retains the same old source labels');
+ for(const env of pair){
+  const retained=env.engine.getLabelDiagnostics().filter(label=>label.id!=='additional'),vector=env.pending('vector').find(job=>retained.some(label=>{const point=env.labelFor(job,label.coordinate,label.label);return point.x>=0&&point.x<1&&point.y>=0&&point.y<1;}));assert.ok(vector);
+  const covered=retained.filter(label=>{const point=env.labelFor(vector,label.coordinate,label.label);return point.x>=0&&point.x<1&&point.y>=0&&point.y<1;}).map(label=>JSON.stringify([label.id,label.coordinate]));
+  const relief=env.pending('relief').find(job=>job.request.z===vector.request.z&&job.request.x===vector.request.x&&job.request.y===vector.request.y);assert.ok(relief);
+  env.store.resolve(vector,{labels:[{x:.5,y:.5,text:'Новая готовая клетка',kind:'place',rank:2}]});env.store.resolve(relief);await env.settle();
+  assert.ok(env.engine.getLabelDiagnostics().some(label=>label.label==='Новая готовая клетка'));
+  assert.ok(env.engine.getLabelDiagnostics().some(label=>label.id!=='additional'&&label.label!=='Новая готовая клетка'),'Uncovered retained ground keeps its labels');
+  assert.equal(env.engine.getLabelDiagnostics().some(label=>covered.includes(JSON.stringify([label.id,label.coordinate]))),false,'An opaque ready cell must hide only the old labels under its actual footprint');
+ }
+ equivalent('Cached old candidates obey the changing opaque ready-cell mask');
+ for(const env of pair){env.complete();await env.settle();}
+ equivalent('The final replacement commit drops the retained cohort with no stale labels');
+});
+
+test('tile label metadata rejects replaced or edited sources at cohort invalidation',async t=>{
+ const options={view:{...camera,zoom:12},pixelRatio:2},current=fixture(options),original=fixture({...options,baselineLabels:'204614c'}),pair=[current,original],tiles=new Map();
+ t.after(()=>pair.forEach(env=>env.engine.destroy()));
+ for(const env of pair){
+  await turn();const job=env.pending('vector').find(job=>{const p=env.labelFor(job,camera.center,'');return p.x>=0&&p.x<1&&p.y>=0&&p.y<1;});assert.ok(job);
+  env.complete(other=>other!==job);tiles.set(env,env.store.resolve(job,{labels:[{x:.25,y:.35,text:'Вершина',kind:'peak',rank:9,elevation:2000,priorityCity:false,placeClass:'village'},{x:.75,y:.65,text:'Станица',kind:'place',rank:3,placeClass:'town'}]}));await env.settle();
+ }
+ const equivalent=phase=>assert.deepEqual(labelSnapshot(current),labelSnapshot(original),phase);
+ equivalent('Initial source metadata matches the pinned baseline');
+ const change=(edit,phase)=>{for(const env of pair){edit(tiles.get(env));env.engine.setLabels([]);env.flush();}equivalent(phase);};
+ // In-place mutations are intentionally checked at an existing invalidation
+ // boundary. Immutable warm source batches must keep their O(1) cohort hit.
+ for(const [field,value]of [['x',.3],['y',.45],['text','Обновлённая вершина'],['elevation',3210.4],['symbol','water'],['kind','place'],['priorityCity',true],['priorityCity',false],['placeClass','city'],['rank',0]])change(tile=>{tile.labels[0][field]=value;},`Edited ${field} invalidates coordinates, sort, repeat key and display metadata together`);
+ change(tile=>{tile.labels=tile.labels.map(label=>({...label,text:label.text+' копия'}));},'A replacement labels array cannot inherit stale names or identity');
+ change(tile=>{tile.labels[0]={...tile.labels[0],text:'Новый объект'};},'A replacement element in the same array invalidates the source record');
+ change(tile=>{tile.labels.reverse();},'Reordered equal-priority source labels keep their original stable order');
+ change(tile=>{tile.labels.push({x:.5,y:.5,text:'Добавленная подпись',kind:'path',rank:0});},'An append invalidates the stored source length');
+ change(tile=>{tile.labels.splice(0,1);},'Removed source labels cannot survive in the cohort');
+ for(const [field,edit]of [['key',value=>value+':replacement'],['x',value=>value+1],['y',value=>value+1],['z',value=>value+1]])change(tile=>{tile[field]=edit(tile[field]);},`Changed tile ${field} invalidates label IDs or world coordinates`);
+ const before=current.labelWork.sourceCoordinates;for(const env of pair){env.engine.setLabels([]);env.flush();}
+ equivalent('A later cohort rebuild reuses the now-unchanged tile');assert.equal(current.labelWork.sourceCoordinates,before);
+});
+
 test('static label preparation preserves the pinned original decisions and paint through camera, input, coverage and layer changes',async t=>{
  const current=fixture({view:{...camera,zoom:12}}),original=fixture({view:{...camera,zoom:12},baselineLabels:true}),pair=[current,original],inputs=new Map();
  t.after(()=>pair.forEach(env=>env.engine.destroy()));
@@ -861,7 +941,7 @@ test('static label preparation preserves the pinned original decisions and paint
  const beforeReplace=current.labelWork.sourceCoordinates;
  for(const env of pair){env.engine.setLabels(inputs.get(env));env.flush();}
  equivalent('A later setLabels call must install the mutated input as a new snapshot');
- assert.equal(current.engine.getLabelDiagnostics().find(label=>label.id==='external').label,'Changed caller');assert.ok(current.labelWork.sourceCoordinates>beforeReplace);
+ assert.equal(current.engine.getLabelDiagnostics().find(label=>label.id==='external').label,'Changed caller');assert.equal(current.labelWork.sourceCoordinates,beforeReplace,'Replacing external labels must reuse the unchanged source tiles');
 
  for(const env of pair){env.engine.setObstacles([{left:200,right:520,top:140,bottom:340}]);env.flush();}
  equivalent('Obstacle changes recompute collisions without reusing admitted rectangles');

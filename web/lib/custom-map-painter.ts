@@ -20,6 +20,7 @@ export type VectorPaintOptions = {symbolScale?:number;labelBounds?:TilePaintBoun
 export type ReliefHaloOffset={dx:-1|0|1;dy:-1|0|1};
 export type ReliefHaloKey='-1,-1'|'0,-1'|'1,-1'|'-1,0'|'1,0'|'-1,1'|'0,1'|'1,1';
 export type ReliefHalo=Partial<Record<ReliefHaloKey,Float32Array>>;
+export type ReliefPixelRegion={x:number;y:number;width:number;height:number};
 export type ReliefHaloMissing=ReliefHaloOffset&{reason:'coverage'|'unavailable'|'budget'|'invalid'|'resolution'};
 export type ReliefHaloSource=ReliefHaloOffset&{sourceKey:string;mime:string;bytes:ArrayBuffer;reduceToArchive?:boolean};
 export type ReliefHaloPayload={tiles:ReliefHaloSource[];missing:ReliefHaloMissing[]};
@@ -270,15 +271,17 @@ function elevationAt(heights:Float32Array,size:number,x:number,y:number,halo:Rel
   if(border&&border.length!==(dx&&dy?1:size))throw new Error('Invalid elevation halo');
   return border?.[dx&&dy?0:dx?y:x];
 }
-export function reliefPixels(heights:Float32Array,size:number,tileY:number,z:number,halo:ReliefHalo={}):Uint8ClampedArray {
+export function reliefPixels(heights:Float32Array,size:number,tileY:number,z:number,halo:ReliefHalo={},region?:ReliefPixelRegion):Uint8ClampedArray<ArrayBuffer> {
   if(heights.length!==size*size)throw new Error('Invalid elevation samples');
-  const pixels=new Uint8ClampedArray(size*size*4);
+  const {x:startX=0,y:startY=0,width=size,height=size}=region??{};
+  if(region&&(![startX,startY,width,height].every(Number.isSafeInteger)||startX<0||startY<0||width<1||height<1||startX+width>size||startY+height>size))throw new Error('Invalid relief pixel region');
+  const pixels=new Uint8ClampedArray(width*height*4);
   const flat=Math.SQRT1_2;
-  for(let y=0;y<size;y++){
+  for(let y=startY;y<startY+height;y++){
     const latitude=Math.atan(Math.sinh(Math.PI*(1-2*(tileY+(y+.5)/size)/2**z)));
     const metres=40075016.68557849*Math.cos(latitude)/(2**z*size);
     const row=y*size,innerRow=y>0&&y<size-1;
-    for(let x=0;x<size;x++){
+    for(let x=startX;x<startX+width;x++){
       const at=row+x,centre=heights[at];
       let left:number|undefined,right:number|undefined,top:number|undefined,bottom:number|undefined,northWest:number|undefined,northEast:number|undefined,southWest:number|undefined,southEast:number|undefined;
       if(innerRow&&x>0&&x<size-1){
@@ -309,7 +312,7 @@ export function reliefPixels(heights:Float32Array,size:number,tileY:number,z:num
       const curvature=(4*centre-left-right-top-bottom)/(4*metres);
       const delta=illumination-flat+Math.max(-.035,Math.min(.035,curvature*.35));
       if(delta===0)continue;
-      const pixel=at*4,dark=delta<0;
+      const pixel=((y-startY)*width+x-startX)*4,dark=delta<0;
       pixels[pixel]=dark?45:255;pixels[pixel+1]=dark?60:251;pixels[pixel+2]=dark?54:231;pixels[pixel+3]=Math.min(dark?148:108,Math.abs(delta)*(dark?300:360));
     }
   }

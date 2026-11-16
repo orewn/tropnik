@@ -33,7 +33,8 @@ type GroundContext=CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D;
 type GroundRect={left:number;top:number;right:number;bottom:number};
 type GroundPixelGeometry={scale:number;ratio:number;center:MapPoint;width:number;height:number;centerX:number;centerY:number};
 type GroundPatch={rect:GroundRect;geometry:GroundPixelGeometry};
-type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;value?:string;repeatDistance?:number;repeatKey?:string};
+type LabelCandidate={id:string;coordinate:[number,number];label:MapTileLabel;color?:string;priority:number;sourceAnchor:string;insideCoverage?:boolean;coverageEpoch?:number;value?:string;repeatDistance?:number;repeatKey?:string};
+type TileLabelMetadata=Pick<CustomMapTile,'key'|'z'|'x'|'y'|'labels'>&{records:Array<{point:MapPoint;source:MapTileLabel;candidate:LabelCandidate}>};
 type FeatureGeometry=GeoJSON.GeoJSON|undefined;
 type PathCollection={path:Path2D;bounds:[number,number,number,number]};
 const COUNTRY_BOUNDS=[19.6389282,41.1858711,191.0026658,81.858721] as const;
@@ -43,6 +44,13 @@ const MAX_VISIBLE_TILES=64;
 // replay on the UI thread even when their JavaScript paths are already cached.
 const DIRECT_TRAIL_COMPLEXITY=4096;
 const GROUND_SNAPSHOT_BYTES=32*1024*1024;
+
+function labelCandidate(id:string,coordinate:[number,number],label:MapTileLabel,color?:string):LabelCandidate{
+  return{id,coordinate,label,color,priority:mapLabelPriority(label),sourceAnchor:`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`};
+}
+function sameLabelSource(a:MapTileLabel,b:MapTileLabel):boolean{
+  return a.x===b.x&&a.y===b.y&&a.text===b.text&&a.kind===b.kind&&a.rank===b.rank&&a.elevation===b.elevation&&a.priorityCity===b.priorityCity&&a.placeClass===b.placeClass&&a.symbol===b.symbol;
+}
 
 function geometryPath(geometry:FeatureGeometry):PathCollection{
   const path=new Path2D(),bounds:[number,number,number,number]=[Infinity,Infinity,-Infinity,-Infinity];
@@ -172,6 +180,10 @@ export class CustomMapEngine {
   private eco=false;
   private additionalLabels:CustomMapLabel[]=[];
   private labelCandidateCache?:{detail?:TileBatch;relief?:TileBatch;loading?:LoadingGround;loadingRelief?:TileBatch;additional:CustomMapLabel[];area:MapCoverage['area'];candidates:LabelCandidate[]};
+  private tileLabelMetadata=new WeakMap<CustomMapTile,TileLabelMetadata>();
+  private additionalLabelMetadata?:{labels:CustomMapLabel[];candidates:LabelCandidate[]};
+  private labelCoverageArea?:MapCoverage['area'];
+  private labelCoverageEpoch=0;
   private labelDiagnostics:CustomMapLabelDiagnostic[]=[];
   private labelDiagnosticTotal=0;
   private drawRevision=0;
@@ -987,6 +999,18 @@ export class CustomMapEngine {
     });
     this.markerObstacles=obstacles;return changed;
   }
+  private prepareTileLabelMetadata(tile:CustomMapTile):TileLabelMetadata{
+    const previous=this.tileLabelMetadata.get(tile),{key,z,x,y,labels}=tile;
+    // Production source batches are immutable. At cohort invalidation also
+    // reject replaced arrays, reordering or edited sources without imposing a
+    // scan on every unchanged camera frame.
+    if(previous&&previous.key===key&&previous.z===z&&previous.x===x&&previous.y===y&&previous.labels===labels&&previous.records.length===labels.length&&previous.records.every((record,index)=>record.candidate.label===labels[index]&&sameLabelSource(record.source,labels[index])))return previous;
+    const n=2**z,records=labels.map(label=>{
+      const point={x:(x+label.x)/n,y:(y+label.y)/n};
+      return{point,source:{...label},candidate:labelCandidate(`${key}:${label.text}`,mercatorUnproject(point),label)};
+    });
+    const metadata={key,z,x,y,labels,records};this.tileLabelMetadata.set(tile,metadata);return metadata;
+  }
   private prepareLabelCandidates(area:MapCoverage['area']):LabelCandidate[]{
     const includeDetail=this.mode!=='overview'&&this.camera.zoom>=5,detail=includeDetail?this.displayDetail():undefined;
     // Height annotations belong to the committed measured relief. They follow
@@ -994,19 +1018,21 @@ export class CustomMapEngine {
     const relief=includeDetail&&!this.displayingSatellite()&&(this.mode==='detail'||this.state.committedMode==='detail')&&this.reliefVisible&&this.camera.zoom>=10?this.relief:undefined;
     const loading=includeDetail&&this.mode==='detail'&&!this.displayingSatellite()?this.loadingGround:undefined;
     const loadingRelief=this.reliefVisible&&this.camera.zoom>=10?loading?.relief:undefined;
+    // A candidate keeps only an epoch, not a historical coverage polygon. The
+    // engine retains one current area even when tile metadata survives a view.
+    if(this.labelCoverageArea!==area){this.labelCoverageArea=area;this.labelCoverageEpoch++;}
     const previous=this.labelCandidateCache;
     if(previous&&previous.detail===detail&&previous.relief===relief&&previous.loading===loading&&previous.loadingRelief===loadingRelief&&previous.additional===this.additionalLabels&&previous.area===area)return previous.candidates;
-    // Source batches and committed coverage are immutable; setLabels owns a
-    // defensive copy. Keep only this view's candidates, never a visited-tile
-    // history. Screen projection, typography and collisions still run per frame.
-    const candidate=(id:string,coordinate:[number,number],label:MapTileLabel,color?:string):LabelCandidate=>({id,coordinate,label,color,priority:mapLabelPriority(label),sourceAnchor:`${label.kind}:${label.symbol||''}:${label.text}:${coordinate[0].toFixed(6)},${coordinate[1].toFixed(6)}`});
-    const candidates=this.additionalLabels.map(label=>candidate(label.id,label.coordinate,{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},label.color));
-    const add=(batch:TileBatch|undefined,retained:boolean)=>{if(batch)for(const tile of batch.tiles)for(const label of tile.labels){
-      const n=2**tile.z,point={x:(tile.x+label.x)/n,y:(tile.y+label.y)/n};
+    // Reuse each live tile's source work as ready pairs arrive. The WeakMap
+    // cannot retain evicted tiles; the sorted cohort still belongs to this view.
+    // Screen projection, typography and collisions continue on every frame.
+    if(this.additionalLabelMetadata?.labels!==this.additionalLabels)this.additionalLabelMetadata={labels:this.additionalLabels,candidates:this.additionalLabels.map(label=>labelCandidate(label.id,label.coordinate,{x:0,y:0,text:label.label,kind:label.kind??'place',rank:label.rank??0},label.color))};
+    const candidates=this.additionalLabelMetadata.candidates.slice();
+    const add=(batch:TileBatch|undefined,retained:boolean)=>{if(batch)for(const tile of batch.tiles)for(const {point,candidate}of this.prepareTileLabelMetadata(tile).records){
       // A newly opaque cell owns its labels too. Keep previous labels only
       // where their actual old ground is still visible beneath the loading view.
       if(retained&&loading&&loading.cells.has(`${Math.floor(point.x*2**loading.z)}/${Math.floor(point.y*2**loading.z)}`))continue;
-      candidates.push(candidate(`${tile.key}:${label.text}`,mercatorUnproject(point),label));
+      candidates.push(candidate);
     }};
     add(detail,true);add(relief,true);add(loading?.detail,false);add(loadingRelief,false);
     candidates.sort((a,b)=>a.priority-b.priority||a.label.rank-b.label.rank);
@@ -1029,7 +1055,8 @@ export class CustomMapEngine {
       if(seen.has(sourceAnchor)){diagnostic.reason='duplicate';continue;}
       // A cache miss must not eagerly query coverage for candidates which the
       // existing budget/duplicate gates never reach. False is cached as well.
-      if(!(candidate.insideCoverage??=inRussiaCoverage(coordinate[0],coordinate[1],this.coverage.area))){diagnostic.reason='outside-coverage';continue;}
+      if(candidate.coverageEpoch!==this.labelCoverageEpoch){candidate.insideCoverage=inRussiaCoverage(coordinate[0],coordinate[1],this.coverage.area);candidate.coverageEpoch=this.labelCoverageEpoch;}
+      if(!candidate.insideCoverage){diagnostic.reason='outside-coverage';continue;}
       const p=this.project(coordinate),style=mapLabelStyle(label,this.camera.zoom,color);
       if(p.x<24||p.x>this.size.width-24||p.y<32||p.y>this.size.height-20){diagnostic.reason='outside-viewport';continue;}
       const value=candidate.value??=(label.kind==='peak'&&label.elevation!==undefined?`${label.text?label.text+' · ':''}${Math.round(label.elevation)} м`:label.text);
@@ -1057,7 +1084,7 @@ export class CustomMapEngine {
     this.trailOverlay=[];this.trailOverlayPaths=new WeakMap();this.trailOverlayBatch=undefined;this.trailOverlayWindow=undefined;
     this.routeHit=undefined;
     this.reviewedCoastalRoute=undefined;this.reviewedCoastalPaths=new WeakMap();this.reviewedCoastalOverlayBatch=undefined;this.reviewedCoastalOverlaySources=0;
-    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;this.labelCandidateCache=undefined;this.markerObstacles=[];
+    this.labelDiagnostics=[];this.labelDiagnosticTotal=0;this.labelCandidateCache=undefined;this.tileLabelMetadata=new WeakMap();this.additionalLabelMetadata=undefined;this.labelCoverageArea=undefined;this.markerObstacles=[];
   }
 }
 export {COUNTRY_BOUNDS,geometryPath,tileRequests};
