@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "requestId": "android-0-4-33-preview-source-archive-20261113",
-  "version": "0.4.33-preview",
-  "versionCode": 16,
-  "notesFile": "tools/android-build/release-notes/0.4.33-preview.md"
+  "requestId": "android-0-4-34-preview-map-loading-20261116",
+  "version": "0.4.34-preview",
+  "versionCode": 17,
+  "notesFile": "tools/android-build/release-notes/0.4.34-preview.md"
 }
