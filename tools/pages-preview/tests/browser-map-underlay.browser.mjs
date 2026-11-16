@@ -26,10 +26,10 @@ const matrix=[
  {name:'rotated',bearing:17.3,cover:false},
  {name:'pitched',pitch:25,cover:false},
  {name:'satellite',mode:'satellite',transparent:true,cover:false},
- {name:'satellite-opaque-jpeg',mode:'satellite',transparent:true,opaqueImagery:true,cover:true},
- {name:'satellite-jpeg-fractional',mode:'satellite',transparent:true,opaqueImagery:true,zoom:8.25,frames:[{x:0,y:0,cover:true},{x:.375,y:.625,cover:true}]},
- {name:'satellite-jpeg-country',mode:'satellite',transparent:true,opaqueImagery:true,zoom:2,cover:true},
- {name:'satellite-jpeg-world-copy',mode:'satellite',transparent:true,opaqueImagery:true,unwrapped:true,cover:true},
+ {name:'satellite-opaque-jpeg',mode:'satellite',transparent:true,opaqueImagery:true,cover:false},
+ {name:'satellite-jpeg-fractional',mode:'satellite',transparent:true,opaqueImagery:true,zoom:8.25,frames:[{x:0,y:0,cover:false},{x:.375,y:.625,cover:false}]},
+ {name:'satellite-jpeg-country',mode:'satellite',transparent:true,opaqueImagery:true,zoom:2,cover:false},
+ {name:'satellite-jpeg-world-copy',mode:'satellite',transparent:true,opaqueImagery:true,unwrapped:true,cover:false},
  {name:'satellite-jpeg-missing',mode:'satellite',transparent:true,opaqueImagery:true,missingImagery:true,cover:false},
  {name:'satellite-jpeg-rotated',mode:'satellite',transparent:true,opaqueImagery:true,bearing:17.3,cover:false},
  {name:'satellite-transparent-source',mode:'satellite',transparent:true,alphaImagery:true,cover:false},
@@ -65,7 +65,7 @@ const streamingPhases=name=>name==='trace-grid'?['cold','stroke-history',...Arra
 async function productionBundle(){
  const source=await readFile(enginePath,'utf8');
  assert.match(source,/private detailCoversViewport\(batch:TileBatch\|undefined\):boolean/);
- assert.match(source,/const covered=satellite\?this\.imageryCoversViewport\(\):this\.detailCoversViewport\(detail\)/);
+ assert.match(source,/const covered=this\.detailCoversViewport\(detail\)/);
  assert.match(source,/if\(!covered\)\{ctx\.fillStyle=MAP_OUTSIDE_COLOR;ctx\.fillRect\(0,0,this\.canvas\.width,this\.canvas\.height\);\}/);
  const result=await build({absWorkingDir:web,bundle:true,write:false,format:'iife',platform:'browser',target:'chrome107',minify:false,metafile:true,logLevel:'silent',
   // This IIFE invokes production paint methods without constructing engine workers.
@@ -168,8 +168,6 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    const proof=CustomMapEngine.prototype.detailCoversViewport;
    engine.detailCoversViewport=function(value){count.proofCalls++;return baseline&&!options.cacheProof?false:proof.call(this,value);};
    engine.state.imagerySource=options.mode==='satellite'?'eox-s2':undefined;
-   const imageryProof=CustomMapEngine.prototype.imageryCoversViewport;
-   engine.imageryCoversViewport=function(){count.proofCalls++;return baseline&&!options.cacheProof?false:imageryProof.call(this);};
    const restore=CustomMapEngine.prototype.restoreGround;
    engine.restoreGround=function(signature){const restored=baseline&&options.cacheProof?false:restore.call(this,signature);if(restored)count.groundRestore++;return restored;};
    if(baseline&&options.cacheProof)engine.retainGround=()=>{};
@@ -218,7 +216,7 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
   for(let index=0;index<movement.length;index++){
    const move=movement[index],next=mercatorUnproject({x:center.x+move.x/scale,y:center.y+move.y/scale});
    baseline.engine.camera.center=next;optimized.engine.camera.center=next;
-   const actualCoverage=options.mode==='satellite'?CustomMapEngine.prototype.imageryCoversViewport.call(optimized.engine):CustomMapEngine.prototype.detailCoversViewport.call(optimized.engine,optimized.engine.displayDetail());
+   const actualCoverage=CustomMapEngine.prototype.detailCoversViewport.call(optimized.engine,optimized.engine.displayDetail());
    check(actualCoverage===move.cover,`${options.name}/${index}: coverage guard was ${actualCoverage}, expected ${move.cover}`);
    const old=baseline.render(),current=optimized.render(),comparison=diff(old.pixels,current.pixels);
    const frame={index,offset:{x:move.x,y:move.y},expectedCoverage:move.cover,actualCoverage,comparison,operations:{baseline:old.operations,optimized:current.operations},baselinePixelSHA256:await hash(old.pixels),optimizedPixelSHA256:await hash(current.pixels),width:optimized.canvas.width,height:optimized.canvas.height,
@@ -267,8 +265,15 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
     const result=diff(old.pixels,wrong.pixels);check(result.differentPixels>0,'The pixel comparison must detect an unsafe unconditional underlay skip');negativeControls.push({name:'force-unsafe-cover',...result});
    }
    if(options.missingImagery||options.alphaImagery){
-    const control=make();control.engine.imageryCoversViewport=()=>true;const wrong=control.render();
+    const control=make();control.engine.detailCoversViewport=()=>true;const wrong=control.render();
     const result=diff(old.pixels,wrong.pixels);check(result.differentPixels>0,'The native comparison must detect an unsafe missing/transparent satellite underlay skip');negativeControls.push({name:'force-unsafe-satellite-cover',...result});
+   }
+   if(options.name==='satellite-opaque-jpeg'&&dpr===1){
+    // This exact source/scale exposed four interior pixel differences in the
+    // original native gate despite every decoded JPEG alpha being 255.
+    // Re-enable that rejected shortcut only as a regression negative control.
+    const control=make();control.engine.detailCoversViewport=()=>true;const wrong=control.render();
+    const result=diff(old.pixels,wrong.pixels);check(result.differentPixels>0,'The native comparison must detect destination-sensitive opaque JPEG interpolation');negativeControls.push({name:'force-unsafe-opaque-jpeg-cover',...result});
    }
   }
   return{verified:true,name:options.name,dpr,policy,contextAttributes:optimized.context.getContextAttributes(),tileDeviceSpan:scale*dpr/n,bitmapDimensions:[512,512],imageryDecodeProof:options.alphaImagery?undefined:imageryDecodeProof,separateLabelsAndDOMMarkersExcluded:true,priorFrame,frames,negativeControls};

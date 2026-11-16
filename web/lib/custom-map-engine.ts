@@ -822,14 +822,12 @@ export class CustomMapEngine {
     }ctx.globalAlpha=1;
   }
   private detailCoversViewport(batch:TileBatch|undefined):boolean{
-    if(this.mode!=='detail'||this.pitch!==0||(this.camera.bearingDegrees??0)!==0||this.camera.zoom<4.7||this.camera.zoom>12||batch?.kind!=='vector'||!batch.tiles.length||batch.tiles.length>MAX_VISIBLE_TILES)return false;
-    return this.opaqueTilesCoverViewport(batch);
-  }
-  private imageryCoversViewport():boolean{
-    const batch=this.imagery;
-    if(!this.displayingSatellite()||this.pitch!==0||(this.camera.bearingDegrees??0)!==0||this.camera.zoom<1||this.camera.zoom>12||!batch||batch.kind!==this.state.imagerySource||(batch.kind!=='eox-s2'&&batch.kind!=='eox-bluemarble')||!batch.tiles.length||batch.tiles.length>MAX_VISIBLE_TILES)return false;
-    // Only the retained cohort proves coverage. Ready refinements cannot fill
-    // holes in this proof, and a mixed-zoom fallback always keeps the underlay.
+    // Opaque JPEG source pixels do not prove destination-independent native
+    // high-quality interpolation. The real Canvas gate found interior colour
+    // differences when their underlays were skipped. Keep the deterministic
+    // base for every displayed photograph, including a pending mode change;
+    // only the separately verified opaque vector path may omit that work.
+    if(this.displayingSatellite()||this.mode!=='detail'||this.pitch!==0||(this.camera.bearingDegrees??0)!==0||this.camera.zoom<4.7||this.camera.zoom>12||batch?.kind!=='vector'||!batch.tiles.length||batch.tiles.length>MAX_VISIBLE_TILES)return false;
     return this.opaqueTilesCoverViewport(batch);
   }
   private opaqueTilesCoverViewport(batch:TileBatch):boolean{
@@ -847,10 +845,9 @@ export class CustomMapEngine {
     if(![x0,x1,y0,y1].every(Number.isSafeInteger)||x1<x0||y1<y0||y0<0||y1>=n||(x1-x0+1)*(y1-y0+1)>MAX_VISIBLE_TILES)return false;
     const cells=new Set<string>();
     for(const tile of batch.tiles){
-      // The vector worker fills opaque paper; imagery needs the tile loader's
-      // successful JPEG proof. Closed/missing bitmaps, mixed grids and a
-      // transparent cartographic overlay can never hide the base.
-      const opaque=batch.kind==='vector'?tile.kind==='vector'&&tile.transparent===false:tile.kind===batch.kind&&tile.opaque===true;
+      // The vector worker fills opaque paper. Closed/missing bitmaps, mixed
+      // grids and a transparent cartographic overlay can never hide the base.
+      const opaque=tile.kind==='vector'&&tile.transparent===false;
       if(!opaque||tile.z!==z||!Number.isSafeInteger(tile.x)||!Number.isInteger(tile.y)||tile.y<0||tile.y>=n||tile.bitmap.width!==512||tile.bitmap.height!==512)return false;
       cells.add(`${tile.x}/${tile.y}`);
     }
@@ -1010,7 +1007,7 @@ export class CustomMapEngine {
   private draw(){
     if(this.disposed||!this.active)return;const ctx=this.context;
     const detail=this.displayDetail(),satellite=this.displayingSatellite();
-    const covered=satellite?this.imageryCoversViewport():this.detailCoversViewport(detail),signature=this.groundSignature(detail,satellite,covered);let scale:number;
+    const covered=this.detailCoversViewport(detail),signature=this.groundSignature(detail,satellite,covered);let scale:number;
     if(this.restoreGround(signature)||this.updateLoadingGround(signature,detail,satellite,covered))scale=this.worldTransform();
     else{scale=this.drawGround(detail,satellite,covered);this.retainGround(signature);}
     // Restrict the product's route/catalogue ink, never the satellite photo.

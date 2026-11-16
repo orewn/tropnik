@@ -1815,23 +1815,25 @@ function underlayPaint(env){
  const draw=env.lastDraw();return{draw,paper:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='fillRect'),area:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='fill'&&call.color==='#dce5cf'),overview:draw.filter(call=>call.surface==='tropnik-map-canvas'&&call.op==='drawImage'&&call.alpha===.95)};
 }
 
-test('a complete proven opaque JPEG cohort omits only the hidden paper, country fill and overview',async t=>{
+test('a complete proven opaque JPEG cohort retains deterministic underlays and the unchanged photographic draw',async t=>{
  for(const zoom of [2,8,8.25,12])await t.test(`zoom ${zoom}`,async t=>{
   const env=fixture({view:{...camera,zoom},width:800,height:600,pixelRatio:2});t.after(()=>env.engine.destroy());await env.ready();
   env.engine.setMode('satellite');env.complete(()=>true,job=>({opaque:job.request.kind.startsWith('eox-')?true:undefined}));await env.settle();
-  const map=env.engine,proof=map.imageryCoversViewport;assert.equal(proof.call(map),true);
-  map.imageryCoversViewport=()=>false;map.schedule();env.flush();const baseline=underlayPaint(env);
-  map.imageryCoversViewport=proof;map.schedule();env.flush();const optimized=underlayPaint(env);
-  assert.equal(baseline.paper.length,1);assert.equal(baseline.area.length,1);assert.ok(baseline.overview.length>0);
-  assert.equal(optimized.paper.length,0);assert.equal(optimized.area.length,0);assert.equal(optimized.overview.length,0);
-  const retained=baseline.draw.filter(call=>!baseline.paper.includes(call)&&!baseline.area.includes(call)&&!baseline.overview.includes(call));
-  assert.deepEqual(optimized.draw,retained,'The actual photograph, country clips, borders, routes and labels keep their original draw order and parameters');
+  const map=env.engine,proof=map.detailCoversViewport;assert.equal(proof.call(map,map.displayDetail()),false);
+  map.schedule();env.flush();const safe=underlayPaint(env);
+  // Force the old unsafe branch only to compare the untouched photo/ink
+  // operations. Native pixel tests independently reject its actual pixels.
+  map.detailCoversViewport=()=>true;map.schedule();env.flush();const unsafe=underlayPaint(env);map.detailCoversViewport=proof;
+  assert.equal(safe.paper.length,1);assert.equal(safe.area.length,1);assert.ok(safe.overview.length>0);
+  assert.equal(unsafe.paper.length,0);assert.equal(unsafe.area.length,0);assert.equal(unsafe.overview.length,0);
+  const photoAndInk=safe.draw.filter(call=>!safe.paper.includes(call)&&!safe.area.includes(call)&&!safe.overview.includes(call));
+  assert.deepEqual(unsafe.draw,photoAndInk,'Only the deterministic underlays are restored; photographic sampling and overlay parameters are unchanged');
   assert.ok(map.inspect().tiles.imagery.every(tile=>tile.width===512&&tile.height===512&&tile.opaque));
   assert.deepEqual([map.canvas.width,map.canvas.height],[1600,1200]);
  });
 });
 
-test('uncertain satellite opacity, incomplete coverage and incompatible transforms keep every safety underlay',async t=>{
+test('satellite opacity, incomplete coverage and incompatible transforms never remove the deterministic underlays',async t=>{
  const cases=[
   ['unknown JPEG proof',map=>{map.imagery.tiles[0].opaque=undefined;}],
   ['missing centre cell',map=>{map.imagery={...map.imagery,tiles:map.imagery.tiles.slice(1)};}],
@@ -1847,9 +1849,23 @@ test('uncertain satellite opacity, incomplete coverage and incompatible transfor
  ];
  for(const [name,change]of cases)await t.test(name,async t=>{
   const env=fixture();t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');env.complete(()=>true,job=>({opaque:job.request.kind.startsWith('eox-')?true:undefined}));await env.settle();
-  assert.equal(env.engine.imageryCoversViewport(),true);change(env.engine);assert.equal(env.engine.imageryCoversViewport(),false);
+  assert.equal(env.engine.detailCoversViewport(env.engine.displayDetail()),false);change(env.engine);assert.equal(env.engine.detailCoversViewport(env.engine.displayDetail()),false);
   env.engine.schedule();env.flush();const painted=underlayPaint(env);assert.equal(painted.paper.length,1);assert.equal(painted.area.length,1);assert.ok(painted.overview.length>0);
  });
+});
+
+test('a retained photograph keeps its underlays while the requested detail mode waits for vector and relief',async t=>{
+ const env=fixture();t.after(()=>env.engine.destroy());await env.ready();env.engine.setMode('satellite');env.complete(()=>true,job=>({opaque:job.request.kind.startsWith('eox-')?true:undefined}));await env.settle();
+ // A new satellite-only view has no cached opaque vector/relief replacement.
+ env.engine.setCamera({...camera,zoom:9});env.complete(()=>true,job=>({opaque:job.request.kind.startsWith('eox-')?true:undefined}));await env.settle();
+ env.engine.setMode('detail');await env.settle();
+ assert.equal(env.engine.getState().mode,'detail');assert.equal(env.engine.getState().committedMode,'satellite');
+ assert.equal(env.engine.detailCoversViewport(env.engine.displayDetail()),false);
+ const retained=underlayPaint(env);assert.equal(retained.paper.length,1);assert.equal(retained.area.length,1);assert.ok(retained.overview.length>0);
+ assert.ok(retained.draw.some(call=>call.op==='drawImage'&&call.key?.startsWith('eox-')));
+ env.complete();await env.settle();assert.equal(env.engine.getState().committedMode,'detail');
+ assert.equal(env.engine.detailCoversViewport(env.engine.displayDetail()),true,'A complete opaque vector cohort keeps its independently verified omission');
+ const detail=underlayPaint(env);assert.equal(detail.paper.length,0);assert.equal(detail.area.length,0);assert.equal(detail.overview.length,0);
 });
 
 test('fully covered opaque detail skips only the occluded underlays and preserves mask, route, selected border and labels',async t=>{

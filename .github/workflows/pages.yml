@@ -319,8 +319,8 @@ jobs:
           const covers = {
             opaque:[true], 'fractional-zoom':[true], 'pan-sequence':[true,true,true,false,true],
             missing:[false], transparent:[false], rotated:[false], pitched:[false], satellite:[false],
-            'satellite-opaque-jpeg':[true], 'satellite-jpeg-fractional':[true,true], 'satellite-jpeg-country':[true],
-            'satellite-jpeg-world-copy':[true], 'satellite-jpeg-missing':[false], 'satellite-jpeg-rotated':[false],
+            'satellite-opaque-jpeg':[false], 'satellite-jpeg-fractional':[false,false], 'satellite-jpeg-country':[false],
+            'satellite-jpeg-world-copy':[false], 'satellite-jpeg-missing':[false], 'satellite-jpeg-rotated':[false],
             'satellite-transparent-source':[false], overview:[false], zoom12:[true,true,true,false,true],
             zoom13:[false], zoom18:[false], 'tiny-tile':[false], 'unwrapped-world':[true], 'boundaries-hidden':[true],
           };
@@ -354,7 +354,7 @@ jobs:
             assert.deepEqual(item.frames.map(frame => frame.actualCoverage), covers[item.name]);
             assert.deepEqual(item.frames.map(frame => frame.expectedCoverage), covers[item.name]);
             if (item.name === 'tiny-tile') assert.ok(item.tileDeviceSpan <= 1);
-            const negatives = item.name === 'opaque' ? ['remove-route','remove-selectedBoundary','remove-mask'] : ['missing','transparent'].includes(item.name) ? ['force-unsafe-cover'] : ['satellite-jpeg-missing','satellite-transparent-source'].includes(item.name) ? ['force-unsafe-satellite-cover'] : [];
+            const negatives = item.name === 'opaque' ? ['remove-route','remove-selectedBoundary','remove-mask'] : ['missing','transparent'].includes(item.name) ? ['force-unsafe-cover'] : ['satellite-jpeg-missing','satellite-transparent-source'].includes(item.name) ? ['force-unsafe-satellite-cover'] : item.name === 'satellite-opaque-jpeg' && item.dpr === 1 ? ['force-unsafe-opaque-jpeg-cover'] : [];
             assert.deepEqual(item.negativeControls.map(control => control.name), negatives);
             for (const control of item.negativeControls) assert.ok(control.differentPixels > 0);
             for (const [frameIndex,frame] of item.frames.entries()) {

@@ -4000,11 +4000,7 @@ var tr = class {
 		}
 	}
 	detailCoversViewport(e) {
-		return this.mode !== "detail" || this.pitch !== 0 || (this.camera.bearingDegrees ?? 0) !== 0 || this.camera.zoom < 4.7 || this.camera.zoom > 12 || e?.kind !== "vector" || !e.tiles.length || e.tiles.length > Z ? !1 : this.opaqueTilesCoverViewport(e);
-	}
-	imageryCoversViewport() {
-		let e = this.imagery;
-		return !this.displayingSatellite() || this.pitch !== 0 || (this.camera.bearingDegrees ?? 0) !== 0 || this.camera.zoom < 1 || this.camera.zoom > 12 || !e || e.kind !== this.state.imagerySource || e.kind !== "eox-s2" && e.kind !== "eox-bluemarble" || !e.tiles.length || e.tiles.length > Z ? !1 : this.opaqueTilesCoverViewport(e);
+		return this.displayingSatellite() || this.mode !== "detail" || this.pitch !== 0 || (this.camera.bearingDegrees ?? 0) !== 0 || this.camera.zoom < 4.7 || this.camera.zoom > 12 || e?.kind !== "vector" || !e.tiles.length || e.tiles.length > Z ? !1 : this.opaqueTilesCoverViewport(e);
 	}
 	opaqueTilesCoverViewport(e) {
 		let t = this.pixelRatio, n = this.canvas.width, r = this.canvas.height, i = 256 * 2 ** this.camera.zoom, a = d(this.camera.center), o = e.tiles[0].z;
@@ -4029,7 +4025,7 @@ var tr = class {
 		].every(Number.isSafeInteger) || m < p || g < h || h < 0 || g >= s || (m - p + 1) * (g - h + 1) > Z) return !1;
 		let _ = /* @__PURE__ */ new Set();
 		for (let t of e.tiles) {
-			if (!(e.kind === "vector" ? t.kind === "vector" && t.transparent === !1 : t.kind === e.kind && t.opaque === !0) || t.z !== o || !Number.isSafeInteger(t.x) || !Number.isInteger(t.y) || t.y < 0 || t.y >= s || t.bitmap.width !== 512 || t.bitmap.height !== 512) return !1;
+			if (!(t.kind === "vector" && t.transparent === !1) || t.z !== o || !Number.isSafeInteger(t.x) || !Number.isInteger(t.y) || t.y < 0 || t.y >= s || t.bitmap.width !== 512 || t.bitmap.height !== 512) return !1;
 			_.add(`${t.x}/${t.y}`);
 		}
 		for (let e = h; e <= g; e++) for (let t = p; t <= m; t++) if (!_.has(`${t}/${e}`)) return !1;
@@ -4213,7 +4209,7 @@ var tr = class {
 	}
 	draw() {
 		if (this.disposed || !this.active) return;
-		let e = this.context, t = this.displayDetail(), n = this.displayingSatellite(), r = n ? this.imageryCoversViewport() : this.detailCoversViewport(t), i = this.groundSignature(t, n, r), a;
+		let e = this.context, t = this.displayDetail(), n = this.displayingSatellite(), r = this.detailCoversViewport(t), i = this.groundSignature(t, n, r), a;
 		this.restoreGround(i) || this.updateLoadingGround(i, t, n, r) ? a = this.worldTransform() : (a = this.drawGround(t, n, r), this.retainGround(i));
 		let o = n && !!this.area && (this.paths || !!this.route && !this.reviewedCoastalRoute);
 		if (o && (e.save(), e.clip(this.area, "evenodd")), this.paths && this.drawTrailOverlay(a, n), this.route && !this.reviewedCoastalRoute && (e.lineCap = "round", e.lineJoin = "round", e.strokeStyle = "#fffef5", e.lineWidth = (V(this.camera.zoom) + 3) / a, e.stroke(this.route.path), e.strokeStyle = "#244d3c", e.lineWidth = V(this.camera.zoom) / a, e.stroke(this.route.path)), o && e.restore(), !n && this.mask && (e.fillStyle = _e, e.fill(this.mask, "evenodd")), this.paths && this.reviewedCoastalOverlayBatch) {
