@@ -28,6 +28,7 @@ export class MapResourcePool {
   private active = 0;
   private bytes = 0;
   private reloads = new Set<string>();
+  private foreground = new Set<symbol>();
   private options: Required<Options>;
   constructor(options: Options = {}) {
     this.options = {...MAP_RESOURCE_LIMITS, fetcher: (...args) => fetch(...args), ...options};
@@ -35,6 +36,13 @@ export class MapResourcePool {
       if (!Number.isSafeInteger(this.options[key]) || this.options[key] <= 0) throw new RangeError(`Invalid map resource limit: ${key}`);
     }
     if (this.options.prefetchConcurrency > this.options.concurrency) throw new RangeError('Map prefetch concurrency exceeds the shared HTTP limit');
+  }
+  /** Hold the visible map's demand across source discovery, halo assembly and
+   * decoding. Per-read priority alone leaves gaps where another preview can
+   * take a physical slot before the next required neighbour is submitted. */
+  holdForeground(): () => void {
+    const lease = Symbol(); this.foreground.add(lease); this.pump();
+    return () => {if (this.foreground.delete(lease)) this.pump();};
   }
   get(url: string, priority = 1, signal?: AbortSignal): Promise<ArrayBuffer> {
     if (signal?.aborted) return Promise.reject(signal.reason ?? new DOMException('Map request cancelled', 'AbortError'));
@@ -111,11 +119,14 @@ export class MapResourcePool {
       // Several previews can be adopted then abandoned in quick succession.
       // Their original speculative owners keep the shared promises alive,
       // but no longer justify occupying every foreground slot. Park only
-      // excess background GETs and resume them after the visible demand.
+      // excess background GETs and resume them after the visible demand. A
+      // map-wide demand lease also lets the last preview yield when a real
+      // foreground read needs its slot; source/decoder gaps admit no new ones.
       const speculative = [...this.entries.values()].filter(entry => entry.controller && !entry.controller.signal.aborted && !entry.settled && !entry.parked && entry.priority >= 2);
       const draining = [...this.entries.values()].filter(entry => entry.controller && entry.parked).length;
       let needed = this.queue.filter(url => (this.entries.get(url)?.priority ?? 9) < 2).length - draining;
-      while (needed-- > 0 && speculative.length > this.options.prefetchConcurrency) {
+      const backgroundLimit = this.foreground.size ? 0 : this.options.prefetchConcurrency;
+      while (needed-- > 0 && speculative.length > backgroundLimit) {
         const entry = speculative.pop()!; entry.parked = true; entry.controller!.abort();
       }
     }
@@ -125,7 +136,7 @@ export class MapResourcePool {
       // requested. Reserve capacity without cancelling shared consumers or raising
       // the global limit; real vector/DEM demand (0/1) still uses all slots.
       const next = this.entries.get(this.queue[0]);
-      if (next && next.priority >= 2 && [...this.entries.values()].filter(candidate => candidate.controller && !candidate.settled && !candidate.parked && candidate.priority >= 2).length >= this.options.prefetchConcurrency) break;
+      if (next && next.priority >= 2 && (this.foreground.size || [...this.entries.values()].filter(candidate => candidate.controller && !candidate.settled && !candidate.parked && candidate.priority >= 2).length >= this.options.prefetchConcurrency)) break;
       const url = this.queue.shift()!, entry = this.entries.get(url); if (!entry) continue; this.active++;
       const controller = new AbortController(); entry.controller = controller;
       this.read(url, controller, entry.reload).then(bytes => {

@@ -12,7 +12,7 @@ const source=readFileSync(new URL('../lib/custom-map-tiles.ts',import.meta.url),
 const compiled=ts.transpileModule(source.replaceAll('import.meta.url',JSON.stringify('https://preview.test/lib/custom-map-tiles.ts')),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
 const poolSource=readFileSync(new URL('../lib/map-resource-pool.ts',import.meta.url),'utf8');
 const poolCompiled=ts.transpileModule(poolSource,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
-function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManifest}={}){
+function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManifest,onDownload}={}){
   const downloads=[],workers=[],bitmaps=[],manifestReads=[];
   let pool;
   if(sourcePool){
@@ -21,7 +21,7 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
       require(name){if(name==='./map-config.ts')return{MAP_RESOURCE_LIMITS};throw new Error(`Unexpected pool dependency ${name}`);}});
     pool=new poolModule.exports.MapResourcePool({fetcher:(url,{signal})=>new Promise((resolve,reject)=>{
       const request={url,signal,resolve:(bytes,options)=>{request.done=true;resolve(new Response(bytes,options));},reject:error=>{request.done=true;reject(error);}};
-      downloads.push(request);signal.addEventListener('abort',()=>{if(request.done)return;request.done=true;request.aborted=true;reject(signal.reason);},{once:true});
+      downloads.push(request);onDownload?.(request);signal.addEventListener('abort',()=>{if(request.done)return;request.done=true;request.aborted=true;reject(signal.reason);},{once:true});
     })});
   }
   class Worker {
@@ -32,9 +32,9 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
   }
   const testModule={exports:{}};
   const navigator={onLine:online};
-  vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,Error,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,console,
+  vm.runInNewContext(compiled,{module:testModule,exports:testModule.exports,Error,URL,Worker,AbortController,navigator,location:{href:'https://preview.test/app/'},setTimeout,clearTimeout,queueMicrotask,console,
     require(name){
-      if(name==='./map-preload')return {loadPublicBytes:(url,priority,signal)=>pool?pool.get(url,priority,signal):new Promise((resolve,reject)=>{const request={url,resolve,reject,signal,priority};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>{
+      if(name==='./map-preload')return {holdPublicMapForeground:()=>pool?pool.holdForeground():()=>{},loadPublicBytes:(url,priority,signal)=>pool?pool.get(url,priority,signal):new Promise((resolve,reject)=>{const request={url,resolve,reject,signal,priority};downloads.push(request);signal?.addEventListener('abort',()=>{request.done=true;request.aborted=true;reject(signal.reason);},{once:true});}),loadPublicJSON:async url=>{
         if(url.includes('manifest')){manifestReads.push(url);return readManifest?readManifest():{files:files.map(path=>({path}))};}
         return{tiles:['https://tiles.openfreemap.org/snapshot/{z}/{x}/{y}.pbf']};
       }};
@@ -46,6 +46,96 @@ function fixture({files=[],online=true,softwareRaster,sourcePool=false,readManif
   return{store,downloads,workers,bitmaps,manifestReads,navigator,resolveDownloads,pool,createStore:()=>new testModule.exports.CustomMapTiles(softwareRaster),key:testModule.exports.customTileKey};
 }
 const request=(x=0)=>({kind:'overview',z:4,x,y:5});
+
+async function releaseDemandFixture(env,promises,stores=[env.store]){
+  for(const store of stores)store.destroy();
+  for(let step=0;step<100&&(env.pool.stats().active||env.pool.stats().queued);step++){env.resolveDownloads();await turn();}
+  await Promise.allSettled(promises);
+}
+
+test('visible tile demand spans asynchronous source discovery and the final decoder response',async t=>{
+  let resolveManifest;const env=fixture({sourcePool:true,readManifest:()=>new Promise(resolve=>{resolveManifest=resolve;})}),promises=[];
+  t.after(()=>releaseDemandFixture(env,promises));
+  const tile={kind:'vector',z:7,x:95,y:43};env.store.pin([env.key(tile)]);
+  const visible=env.store.load(tile);promises.push(visible);
+  const preview=env.pool.get('/preview/next-route',2);promises.push(preview);await turn();
+  assert.equal(env.downloads.length,0,'an unresolved package index does not surrender visible demand to speculative traffic');
+  resolveManifest({files:[]});await turn();assert.equal(env.downloads.length,1);assert.match(env.downloads[0].url,/\/7\/95\/43\.pbf$/);
+  env.resolveDownloads();await turn();assert.equal(env.store.snapshot().decoding,true);assert.equal(env.pool.stats().active,0);
+  assert.equal(env.downloads.length,1,'a ready decoder still owns the map demand even without an HTTP read');
+  env.workers[0].complete();await visible;await turn();
+  assert.equal(env.downloads.at(-1).url,'/preview/next-route','the last completed tile releases background work');
+  env.resolveDownloads();await preview;
+});
+
+test('two maps retain demand independently and a terminal decoder failure releases the final owner',async t=>{
+  const env=fixture({sourcePool:true}),other=env.createStore(),promises=[];t.after(()=>releaseDemandFixture(env,promises,[env.store,other]));
+  const first=env.store.load(request(1)),second=other.load(request(2)).catch(error=>error),preview=env.pool.get('/preview/after-both-maps',2);promises.push(first,second,preview);
+  await turn();env.resolveDownloads();await turn();assert.equal(env.workers.length,2);
+  env.workers[0].complete();await first;await turn();assert.equal(env.downloads.some(read=>read.url.startsWith('/preview/')),false);
+  const worker=env.workers[1],message=worker.messages.shift();worker.onmessage({data:{id:message.id,error:'Unusable tile source'}});
+  assert.match((await second).message,/Unusable tile source/);await turn();
+  assert.equal(env.downloads.at(-1).url,'/preview/after-both-maps');env.resolveDownloads();await preview;
+});
+
+test('an inactive map releases demand and reactivation parks its original preview until a source failure settles',async t=>{
+  const env=fixture({sourcePool:true}),promises=[];t.after(()=>releaseDemandFixture(env,promises));env.store.setActive(false);
+  const visible=[1,2,3,4].map(x=>env.store.load(request(x)).catch(error=>error)),preview=env.pool.get('/preview/while-inactive',2);promises.push(...visible,preview);await turn();
+  assert.equal(env.downloads.length,1);assert.equal(env.downloads[0].url,'/preview/while-inactive');
+  env.store.setActive(true);await turn();assert.equal(env.downloads[0].aborted,true);
+  const source=env.downloads.find(read=>read.url.startsWith('/maps/'));assert.ok(source&&!source.done);
+  env.store.setActive(false);await turn();source.resolve(new Uint8Array([1,2,3,4]).buffer);await turn();
+  assert.equal(env.downloads.filter(read=>read.url.startsWith('/preview/')).length,2,'deactivation returns the held preview its shared request');
+  env.store.setActive(true);await turn();assert.equal(env.downloads.filter(read=>read.url.startsWith('/preview/')&&!read.done).length,0);
+  env.workers[0].complete();
+  for(const read of env.downloads.filter(read=>read.url.startsWith('/maps/')&&!read.done))read.resolve(new ArrayBuffer(0),{status:503});
+  const outcomes=await Promise.all(visible);assert.equal(outcomes.filter(value=>/503/.test(value.message||'')).length,3);await turn();
+  assert.equal(env.store.pending,0);const resumed=env.downloads.filter(read=>read.url.startsWith('/preview/')&&!read.done);assert.equal(resumed.length,1);
+  resumed[0].resolve(new Uint8Array([7,8]).buffer);assert.deepEqual(new Uint8Array(await preview),new Uint8Array([7,8]));
+});
+
+test('synchronous view replacement keeps demand and destruction releases a pending decoder',async t=>{
+  const env=fixture({sourcePool:true}),promises=[];t.after(()=>releaseDemandFixture(env,promises));
+  const old=request(1),next=request(2);env.store.pin([env.key(old)]);
+  const stale=env.store.load(old).catch(error=>error),preview=env.pool.get('/preview/after-destroy',2);promises.push(stale,preview);await turn();
+  env.store.pin([env.key(next)]);const current=env.store.load(next).catch(error=>error);promises.push(current);await turn();
+  assert.match((await stale).message,/view changed/);assert.equal(env.downloads.some(read=>read.url.startsWith('/preview/')),false,'pin followed by load cannot open a background admission gap');
+  env.resolveDownloads();await turn();assert.equal(env.store.snapshot().decoding,true);
+  env.store.destroy();assert.match((await current).message,/released/);await turn();
+  assert.equal(env.workers[0].terminated,true);assert.equal(env.downloads.at(-1).url,'/preview/after-destroy');env.resolveDownloads();await preview;
+});
+
+test('a visible 8 by 8 grid keeps all three reads and every measured halo while route previews wait',async t=>{
+  async function replay(previews){
+    let now=0,physicalPeak=0,payloadPeak=0;const pairCounts=new Map(),completeTimes=[],promises=[],jobs=[];
+    const env=fixture({sourcePool:true,onDownload:read=>{read.due=now+(read.url.endsWith('.pbf')?250:450);physicalPeak=Math.max(physicalPeak,env.downloads.filter(value=>!value.done).length);}});
+    t.after(()=>releaseDemandFixture(env,promises));
+    for(let index=0;index<previews;index++)promises.push(env.pool.get(index%2?`https://tiles.mapterhorn.com/10/${750+Math.floor(index/2)}/342.webp`:`https://tiles.openfreemap.org/snapshot/10/${750+Math.floor(index/2)}/342.pbf`,2).catch(error=>error));
+    const cx=(87.29202911663077+180)/360*128,cy=(1-Math.asinh(Math.tan(50.5*Math.PI/180))/Math.PI)/2*128;
+    const cells=Array.from({length:64},(_,index)=>({z:7,x:91+index%8,y:39+Math.floor(index/8)})).sort((a,b)=>(a.x+.5-cx)**2+(a.y+.5-cy)**2-((b.x+.5-cx)**2+(b.y+.5-cy)**2));
+    const requests=['vector','relief'].flatMap(kind=>cells.map(cell=>({...cell,kind})));env.store.pin(requests.map(env.key));
+    const visible=requests.map(tile=>env.store.load(tile).then(value=>{const key=`${tile.x}/${tile.y}`,count=(pairCounts.get(key)||0)+1;pairCounts.set(key,count);if(count===2)completeTimes.push(now);return value;}));promises.push(...visible);await turn();
+    for(let step=0;env.store.pending;step++){
+      assert.ok(step<1000,'the finite visible workload must complete');
+      while(env.workers.some(worker=>worker.messages.length)){
+        for(const worker of env.workers)if(worker.messages.length)jobs.push(worker.complete());await turn();
+      }
+      payloadPeak=Math.max(payloadPeak,preparedPayloads(env.store.snapshot()));if(!env.store.pending)break;
+      const active=env.downloads.filter(read=>!read.done);assert.ok(active.length,'pending sources cannot stall without physical work');
+      now=Math.min(...active.map(read=>read.due));for(const read of active.filter(read=>read.due===now))read.resolve(new Uint8Array([1,2,3,4]).buffer);await turn();
+    }
+    await Promise.all(visible);
+    const result={completedAt:now,firstPairAt:completeTimes[0],pairs:completeTimes.length,physicalPeak,payloadPeak,visibleReads:env.downloads.filter(read=>read.url.includes('/7/')).map(read=>read.url).sort(),previewCompletions:env.downloads.filter(read=>read.url.includes('/10/')&&read.done&&!read.aborted).length,decoded:jobs.length,halos:jobs.filter(job=>job.kind==='relief').map(job=>job.halo.tiles.length)};
+    await releaseDemandFixture(env,promises);return result;
+  }
+  const withPreviews=await replay(72),withoutPreviews=await replay(0);
+  const timing=result=>({completedAtControlledMs:result.completedAt,firstPairAtControlledMs:result.firstPairAt,previewCompletions:result.previewCompletions,visibleSources:new Set(result.visibleReads).size,decoded:result.decoded,haloItems:result.halos.reduce((sum,count)=>sum+count,0),physicalPeak:result.physicalPeak,payloadPeak:result.payloadPeak});
+  t.diagnostic(JSON.stringify({scenario:'250ms vectors/450ms DEM; immediate decoder isolates network admission',withPreviews:timing(withPreviews),withoutPreviews:timing(withoutPreviews)}));
+  assert.equal(withPreviews.completedAt,withoutPreviews.completedAt,'queued route previews cannot delay the visible grid even between successive halo reads');
+  assert.equal(withPreviews.firstPairAt,withoutPreviews.firstPairAt);assert.equal(withPreviews.previewCompletions,0);
+  assert.deepEqual(withPreviews.visibleReads,withoutPreviews.visibleReads);assert.equal(new Set(withPreviews.visibleReads).size,164);
+  for(const result of [withPreviews,withoutPreviews]){assert.equal(result.pairs,64);assert.equal(result.decoded,128);assert.equal(result.physicalPeak,3);assert.ok(result.payloadPeak<=6);assert.deepEqual(result.halos,Array(64).fill(8));}
+});
 
 test('successful empty OpenFreeMap MVT is decoded and cached for both satellite and opaque detail',async t=>{
   const env=fixture({sourcePool:true});t.after(()=>env.store.destroy());

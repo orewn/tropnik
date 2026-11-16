@@ -1,4 +1,4 @@
-import {loadPublicBytes,loadPublicJSON} from './map-preload';
+import {holdPublicMapForeground,loadPublicBytes,loadPublicJSON} from './map-preload';
 import {SATELLITE_PROVIDERS,type SatelliteSourceId} from './map-satellite';
 import type {MapTileLabel,ReliefCoverage,ReliefHaloOffset,ReliefHaloPayload,ReliefHaloSource} from './custom-map-painter';
 
@@ -46,6 +46,8 @@ export class CustomMapTiles {
   private serial=0;
   private disposed=false;
   private enabled=true;
+  private releaseForeground?:()=>void;
+  private foregroundReleaseQueued=false;
   private template?:Promise<string>;
   private localFiles?:Promise<Set<string>>;
   private errors:Array<{key:string;message:string}>=[];
@@ -53,7 +55,21 @@ export class CustomMapTiles {
   snapshot(){return{resident:this.cache.size,pending:this.jobs.size,fetching:this.fetching,decoding:!!this.active,enabled:this.enabled,failedSources:this.failedSources.size,stages:[...this.jobs.values()].reduce<Record<string,number>>((counts,{work})=>{counts[work.stage]=(counts[work.stage]||0)+1;return counts;},{}),errors:this.errors.map(error=>({...error}))};}
   get pending(){return this.jobs.size;}
   get resident(){return this.cache.size;}
-  setActive(active:boolean){this.enabled=active;if(active)this.pump();}
+  setActive(active:boolean){this.enabled=active;this.updateForeground();if(active)this.pump();}
+  private updateForeground(){
+    if(!this.disposed&&this.enabled&&this.jobs.size){
+      this.releaseForeground??=holdPublicMapForeground();return;
+    }
+    if(!this.releaseForeground||this.foregroundReleaseQueued)return;
+    this.foregroundReleaseQueued=true;
+    // A view replacement cancels the old jobs, then synchronously queues its
+    // new cells. Do not admit background work in that temporary empty gap.
+    queueMicrotask(()=>{
+      this.foregroundReleaseQueued=false;
+      if(!this.disposed&&this.enabled&&this.jobs.size)return;
+      const release=this.releaseForeground;this.releaseForeground=undefined;release?.();
+    });
+  }
   pin(keys:Iterable<string>){
     // A failed neighbour is shared only within this view attempt. Replacing
     // the map also keeps a late read from poisoning the next view or retry.
@@ -61,6 +77,7 @@ export class CustomMapTiles {
     this.pinned=new Set(keys);
     for(const [key,{work}] of this.jobs)if(!this.pinned.has(key)&&work.stage!=='decoding'){this.jobs.delete(key);work.controller.abort();work.bytes=undefined;work.halo=undefined;work.haloPlan=undefined;work.reject(new Error('Map view changed'));}
     this.evict(true);
+    this.updateForeground();
   }
   peek(key:string){return this.cache.get(key);}
   load(request:CustomTileRequest):Promise<CustomMapTile>{
@@ -73,7 +90,7 @@ export class CustomMapTiles {
     let resolve!:(tile:CustomMapTile)=>void,reject!:(error:Error)=>void;
     const promise=new Promise<CustomMapTile>((yes,no)=>{resolve=yes;reject=no;});
     const work:Work={id:++this.serial,request,key,resolve,reject,controller:new AbortController(),stage:'queued'};
-    this.jobs.set(key,{work,promise});this.pump();return promise;
+    this.jobs.set(key,{work,promise});this.updateForeground();this.pump();return promise;
   }
   private files(){
     return this.localFiles??=loadPublicJSON<{files:Array<{path:string}>}>('/offline-map/manifest.json').then(m=>new Set(m.files.map(f=>f.path))).catch(()=>{
@@ -174,7 +191,7 @@ export class CustomMapTiles {
     this.jobs.delete(work.key);
     if(tile&&!this.disposed&&this.cache.size<MAX_BITMAPS){this.cache.set(work.key,tile);work.resolve(tile);this.evict();}
     else{tile?.bitmap.close();const failure=error||new Error('Map tile unavailable');this.errors.push({key:work.key,message:failure.message});if(this.errors.length>6)this.errors.shift();work.reject(failure);}
-    this.pump();
+    this.updateForeground();this.pump();
   }
   private evict(discardPartial=false){
     for(const [key,tile] of this.cache){
@@ -249,6 +266,6 @@ export class CustomMapTiles {
   destroy(){
     if(this.disposed)return;this.disposed=true;clearTimeout(this.timer);this.worker?.terminate();this.worker=undefined;
     for(const {work} of this.jobs.values()){work.controller.abort();work.bytes=undefined;work.halo=undefined;work.haloPlan=undefined;work.reject(new Error('Map resources released'));}
-    this.jobs.clear();for(const tile of this.cache.values())tile.bitmap.close();this.cache.clear();this.pinned.clear();this.failedSources.clear();this.active=undefined;
+    this.jobs.clear();for(const tile of this.cache.values())tile.bitmap.close();this.cache.clear();this.pinned.clear();this.failedSources.clear();this.active=undefined;this.updateForeground();
   }
 }

@@ -149,8 +149,8 @@
     },
     {
       "path": "web/lib/custom-map-tiles.ts",
-      "sizeBytes": 18631,
-      "sha256": "7aef6b4ac114bc3605ae3209f29352f1cc5e59e78fe729d7f95764ebe15e962f"
+      "sizeBytes": 19507,
+      "sha256": "107c889dc2bdaf6b35ecdb2d582d59ddf5df33d1d25c98a95ecb5442a1c60093"
     },
     {
       "path": "web/lib/custom-map-tiles.worker.ts",
@@ -209,13 +209,13 @@
     },
     {
       "path": "web/lib/map-preload.ts",
-      "sizeBytes": 6470,
-      "sha256": "b210510c1c8b674b8a67cef9972b9f3b2dc7f35d23cd3bc4279433395fec3f80"
+      "sizeBytes": 6552,
+      "sha256": "257ac752be97f6f916ab777c0a637eb4dd0318bde0ba91baba1de42f796df045"
     },
     {
       "path": "web/lib/map-resource-pool.ts",
-      "sizeBytes": 14920,
-      "sha256": "97367edac47cc6b2640ac9d12b25dac7898ddc5f8e9086e70366ba60227ae949"
+      "sizeBytes": 15628,
+      "sha256": "63ca52f123a0d2b96c04c67b2141decef985f83dfc968aedc4f1bcc4e98ff7d0"
     },
     {
       "path": "web/lib/map-route-presentation.ts",
@@ -318,12 +318,12 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "24b2b3cf242a2c7cefd1143655eb34bcaf4d39ff35d08606441d37916a3e68a6",
+  "sourceInputsSha256": "7b5f337cc10d4bafb38e8d28b2941aa33157baded38b52b5dd66c2715e2a1add",
   "files": [
     {
       "path": "android-bootstrap.js",
       "sizeBytes": 22086,
-      "sha256": "849205616ed2432e64f038bcc14979afb86f8611e98fbbc1fe74d74b15109d9d"
+      "sha256": "a804585029cef501a9e12ef52a74a55e9c4fb2e984a59de52ab0f4ce58a93113"
     },
     {
       "path": "catalogue.json",
@@ -331,9 +331,9 @@
       "sha256": "bad517373c27101ea8fe93423083f3636c11cf65824c2202f69cc2c2bf414aa3"
     },
     {
-      "path": "chunks/custom-map-entry-D6Fy6B4S.js",
-      "sizeBytes": 157810,
-      "sha256": "cbd57d47df242cbacc04d287f3f826ce26e5c9e1d5f346fb43baecbe5e12b5d7"
+      "path": "chunks/custom-map-entry-Dz70oLSD.js",
+      "sizeBytes": 158708,
+      "sha256": "072241c72b99243d2c4352bf99a9f62aef83468036fea42a9fabc96e0d452d17"
     },
     {
       "path": "index.html",
@@ -348,7 +348,7 @@
     {
       "path": "map-runtime.js",
       "sizeBytes": 224,
-      "sha256": "f6fac7acd36db0dabea56dfcee4717575c5d93c9156b41caa4d651927ed2a91e"
+      "sha256": "9120a0402b2a04c2bb98a3dea95407a8b1633af9b021a052f29f23830f2c5dad"
     },
     {
       "path": "map.css",

@@ -45,6 +45,7 @@ export function loadPublicBytes(url:string,priority=1,signal?:AbortSignal):Promi
   const key=allowed(url);if(!key)return Promise.reject(new Error('Unknown public map resource'));
   return pool.get(key,priority,signal);
 }
+export function holdPublicMapForeground():()=>void{return pool.holdForeground();}
 export function invalidatePublicMapResource(url:string,options:{reload?:boolean}={reload:true}):void{
   const key=allowed(url);if(key)pool.invalidate(key,options);
 }
