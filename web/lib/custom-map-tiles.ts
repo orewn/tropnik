@@ -42,7 +42,6 @@ export class CustomMapTiles {
   private reading=new Set<string>();
   private failedSources=new Map<string,unknown>();
   private lastFetchKind?:CustomTileKind;
-  private lastHaloWork=0;
   private lastDecodeKind?:CustomTileKind;
   private serial=0;
   private disposed=false;
@@ -219,15 +218,18 @@ export class CustomMapTiles {
     }
   }
   private nextHalo(){
-    let first:Work|undefined,after:Work|undefined;
+    let first:Work|undefined;
     for(const {work} of this.jobs.values()){
       if(work.stage!=='halo')continue;
       const plan=work.haloPlan!,offset=plan.offsets[plan.index],dependency=offset?this.haloDependency(work,offset):undefined;
       if(dependency&&'item' in dependency&&!plan.copies.has(dependency.item.sourceKey)&&plan.bytes<MAX_TILE_BYTES&&this.reading.has(dependency.item.sourceKey))continue;
       if(!first||work.id<first.id)first=work;
-      if(work.id>this.lastHaloWork&&(!after||work.id<after.id))after=work;
     }
-    return after??first;
+    // View requests already arrive centre first. Finish an admitted cell's
+    // real border before spreading the same work over six partial cells.
+    // In-flight/shared sources above are skipped, so a stalled central edge
+    // still leaves the other physical slots available to complete neighbours.
+    return first;
   }
   private pump(){
     if(this.disposed||!this.enabled)return;
@@ -238,7 +240,7 @@ export class CustomMapTiles {
       const prepared=[...this.jobs.values()].filter(({work})=>work.stage==='fetching'||work.stage==='halo'||work.stage==='ready').length;
       const primary=prepared<MAX_READY?this.next('queued',this.lastFetchKind):undefined;
       const work=primary??this.nextHalo();if(!work)break;
-      const halo=work.stage==='halo';if(halo)this.lastHaloWork=work.id;
+      const halo=work.stage==='halo';
       this.lastFetchKind=work.request.kind;work.stage='fetching';this.fetching++;
       void (halo?this.fetchHalo(work):this.fetchPrimary(work)).catch(error=>this.finish(work,undefined,error instanceof Error?error:new Error('Tile download failed')))
         .finally(()=>{this.fetching--;this.pump();});

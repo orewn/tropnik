@@ -25,6 +25,7 @@ export function directionExpansionZoom(currentZoom: number, fittedZoom: number):
 
 export const MAP_RESOURCE_LIMITS = Object.freeze({
   concurrency: 3,
+  prefetchConcurrency: 1,
   maxBytes: 24 * 1024 * 1024,
   maxResourceBytes: 8 * 1024 * 1024,
   maxQueued: 72,

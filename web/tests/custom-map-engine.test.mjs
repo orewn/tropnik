@@ -535,6 +535,23 @@ test('loading ground cannot cross a camera generation, cover a retained satellit
  const pending=env.pending();env.engine.destroy();for(const job of pending)env.store.resolve(job);await env.settle();assert.equal(env.engine.inspect().loadingGround,null);assert.equal(env.host.children.length,0);
 });
 
+test('micro-pans preserve the active tile generation and completed pairs when only request priority order changes',async t=>{
+ const env=fixture({view:{center:[40.46,43.4],zoom:8,bearingDegrees:0}});t.after(()=>env.engine.destroy());await turn();
+ const vector=env.pending('vector')[0],relief=env.pending('relief').find(job=>job.request.z===vector.request.z&&job.request.x===vector.request.x&&job.request.y===vector.request.y);
+ assert.ok(relief);env.complete(job=>job.request.kind==='overview');env.store.resolve(vector);env.store.resolve(relief);await env.settle();
+ assert.equal(env.engine.inspect().loadingGround?.readyCells,1,'The cold view has useful progress to preserve');
+ const generation=env.engine.generation,progress=env.engine.loadingGround,requests=env.store.requests.length,pins=env.store.pins.length,pending=env.pending().length;
+ env.engine.setCamera({center:[40.47,43.4],zoom:8,bearingDegrees:0});env.flush();
+ assert.deepEqual(plain(env.engine.getCamera().center),[40.47,43.4]);
+ assert.equal(env.engine.generation,generation,'A permutation of the same source cells is not a new source generation');
+ assert.equal(env.engine.loadingGround,progress,'A micro-pan must not clear and recreate the already measured pairs');
+ assert.equal(env.store.requests.length,requests);assert.equal(env.store.pins.length,pins,'Unchanged source identity cannot reset leases or failures');assert.equal(env.pending().length,pending);
+ env.engine.setCamera({center:[41,44],zoom:9,bearingDegrees:0});env.flush();
+ assert.ok(env.engine.generation>generation);assert.ok(env.store.requests.length>requests,'A genuinely different source footprint still loads');
+ assert.equal(env.engine.inspect().loadingGround,null,'Old-scale pairs cannot leak into the new source generation');
+ env.complete();await env.settle();assert.equal(env.engine.getState().loading,false);assert.ok(env.engine.inspect().tiles.detail.every(tile=>tile.z===9));
+});
+
 test('late source batches cannot replace a newer camera or resurrect state after destroy',async()=>{
  const env=fixture();await turn();const old=env.pending();assert.ok(old.length>0);
  env.engine.setCamera({center:[100,55],zoom:8});const latest=env.pending().filter(job=>!old.includes(job));assert.ok(latest.length>0);
@@ -688,6 +705,33 @@ test('a failed satellite cartographic overlay retains complete imagery without c
  assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().imageryLoading,false);assert.match(env.engine.getState().error,/Подписи и тропы/);
  assert.equal(env.engine.inspect().tiles.detail.length,0);assert.equal(env.engine.inspect().tiles.relief.length,0);assert.ok(env.engine.inspect().tiles.imagery.length>0);assert.ok(before.detail.length>0);
  env.engine.setMode('satellite');env.complete();await env.settle();assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().error,'');
+});
+
+test('complete satellite imagery is visible while its cartographic overlay is still pending',async t=>{
+ for(const previous of [false,true])for(const outcome of ['complete','failure'])await t.test(`${previous?'retained overlay':'first satellite view'}: ${outcome}`,async t=>{
+  const env=fixture();t.after(()=>env.engine.destroy());await env.ready();
+  if(previous){env.engine.setMode('satellite');env.complete();await env.settle();}
+  const retained=previous?plain(env.engine.inspect().tiles.detail):[];
+  if(previous)env.engine.setCamera({center:[41,44],zoom:9});else env.engine.setMode('satellite');
+  const vectors=env.pending('vector');assert.ok(vectors.length>1,'The independent overlay must actually be waiting');
+  env.complete(job=>job.request.kind!=='vector');await env.settle();
+  const state=env.engine.getState(),imagery=plain(env.engine.inspect().tiles.imagery);
+  assert.equal(state.committedMode,'satellite','A complete photograph cannot be held behind the independent object source');
+  assert.equal(state.imageryLoading,false);assert.equal(state.loading,true,'Pending objects retain a truthful overall loading state');
+  assert.ok(imagery.length>0);assert.ok(env.lastDraw().some(call=>call.op==='drawImage'&&call.key?.startsWith('eox-')),'The committed image is actually painted');
+  assert.deepEqual(plain(env.engine.inspect().tiles.detail),retained,'Only a prior complete object layer may accompany the photograph');
+  if(outcome==='failure')env.store.reject(vectors[0]);
+  env.complete();await env.settle();
+  assert.equal(env.engine.getState().committedMode,'satellite');assert.equal(env.engine.getState().imageryLoading,false);assert.equal(env.engine.getState().loading,false);
+  assert.deepEqual(plain(env.engine.inspect().tiles.imagery),imagery,'Finishing or rejecting the overlay cannot discard the usable image');
+  if(outcome==='failure'){
+   assert.match(env.engine.getState().error,/Подписи и тропы/);
+   assert.deepEqual(plain(env.engine.inspect().tiles.detail),retained,'A partial new overlay cannot replace the last complete one');
+  }else{
+   assert.equal(env.engine.getState().error,'');
+   assert.deepEqual(plain(env.engine.inspect().tiles.detail.map(tile=>tile.key).sort()),vectors.map(job=>job.key).sort());
+  }
+ });
 });
 
 test('startup coverage recovers through retry or online without duplicate loads or losing the selected camera',async t=>{
@@ -1086,6 +1130,28 @@ test('public inspection publishes fresh scene insets without refitting and toler
  map.setPadding({left:24,right:80,top:40,bottom:64});published=JSON.parse(env.host.dataset.mapInspection);
  assert.equal(published.viewport.height,200);assert.ok(published.visibleBounds?.every(Number.isFinite));assert.deepEqual(published.visibleBounds,plain(map.getVisibleBounds()));
  assert.deepEqual(plain(map.getCamera()),camera,'Publishing geometry must not change the manually selected view');
+});
+
+test('wheel bursts avoid full backing-store captures and diagnostic serialization until the final settled frame',async t=>{
+ const env=fixture({groundCache:true,width:1440,height:1000,pixelRatio:2});t.after(()=>env.engine.destroy());await env.ready();
+ const copies=()=>env.calls.filter(call=>String(call.surface).startsWith('retained-ground:')&&call.op==='drawImage'&&call.bitmap===env.engine.canvas&&call.args.length===2).length;
+ const before=copies(),draws=env.engine.inspect().drawRevision,initialCamera=plain(env.engine.getCamera());let inspections=0;
+ env.host.dataset=new Proxy(env.host.dataset,{set(target,key,value){if(key==='mapInspection')inspections++;target[key]=value;return true;}});
+ for(let index=0;index<20;index++){
+  env.host.dispatch('wheel',{clientX:720,clientY:500,deltaY:-1,deltaMode:0});env.tick(16);
+ }
+ assert.equal(env.host.dataset.mapMoving,'true');assert.notDeepEqual(plain(env.engine.getCamera()),initialCamera);
+ assert.equal(env.engine.inspect().drawRevision,draws+20,'Input still paints every requested animation frame');
+ assert.equal(copies()-before,0,'Wheel motion must not copy a full 5.76-megapixel backing store on every frame');
+ assert.equal(inspections,0,'Intermediate wheel frames must not serialize the full map inspection into the DOM');
+ assert.equal(env.timers.size,1,'The burst keeps one final settle deadline');
+ for(const [id,timer]of env.timers){env.timers.delete(id);timer.callback();}
+ env.flush();
+ assert.equal(env.host.dataset.mapMoving,'false');assert.equal(copies()-before,1,'The final camera retains exactly one usable ground snapshot');
+ assert.ok(inspections>0);
+ const published=JSON.parse(env.host.dataset.mapInspection);
+ assert.deepEqual(published.camera,plain(env.engine.getCamera()));assert.equal(published.drawRevision,env.engine.inspect().drawRevision);
+ const settled=copies(),idleInspections=inspections;env.flush();assert.equal(copies(),settled);assert.equal(inspections,idleInspections,'A settled map has no recurring capture or diagnostics loop');
 });
 
 test('wheel bursts keep their geographic anchor and consume input across Canvas, direction and point descendants',async t=>{

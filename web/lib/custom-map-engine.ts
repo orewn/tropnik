@@ -168,6 +168,7 @@ export class CustomMapEngine {
   private currentKeys='';
   private disposed=false;
   private active=true;
+  private moving=false;
   private eco=false;
   private additionalLabels:CustomMapLabel[]=[];
   private labelCandidateCache?:{detail?:TileBatch;relief?:TileBatch;loading?:LoadingGround;loadingRelief?:TileBatch;additional:CustomMapLabel[];area:MapCoverage['area'];candidates:LabelCandidate[]};
@@ -251,8 +252,14 @@ export class CustomMapEngine {
     const visible=Object.values(padding).every(value=>Number.isFinite(value)&&value>=0)&&padding.left+padding.right<this.size.width&&padding.top+padding.bottom<this.size.height;
     return{engine:'tropnik-canvas',rasterPolicy:this.rasterPolicy,contextAttributes:this.context.getContextAttributes?.()??null,camera:this.getCamera(),pitch:this.pitch,viewport:{...this.size,padding},visibleBounds:visible?this.getVisibleBounds(padding):null,state:this.getState(),coverage:this.coverage?.status,routeId:this.routeId||'',drawnRoute:this.element.dataset.mapDrawnRoute||'',catalogueOverlay:{sources:this.trailOverlay.length,preparedSources:this.paths?this.trailOverlaySources:0,preparedParts:this.paths?this.trailOverlayParts:0,exactSources:this.paths?this.trailOverlayDetails:0,currentViewportReady:!this.paths||this.trailOverlayViewportReady,pending:!!(this.paths&&this.trailRasterParts?.length&&this.trailRaster?.getState().pending),error:this.paths?this.trailRasterError:''},reviewedCoastal:{selected:!!this.reviewedCoastalRoute,overlaySources:this.paths?this.reviewedCoastalOverlaySources:0},drawRevision:this.drawRevision,labelRevision:this.labelRevision,tiles:{overview:describe(this.overview),detail:describe(this.displayDetail()),relief:describe(this.relief),imagery:describe(this.imagery)},loadingGround:this.loadingGround?{generation:this.loadingGround.generation,requestedCells:this.loadingGround.requestedCells,readyCells:this.loadingGround.detail.tiles.length,detail:describe(this.loadingGround.detail),relief:describe(this.loadingGround.relief)}:null,labels:this.getLabelDiagnostics(),resources:this.tiles.snapshot()};
   }
-  private publishInspection(){if(this.disposed)return;this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';this.element.dataset.mapInspection=JSON.stringify(this.inspect());}
-  private setMoving(moving:boolean){this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
+  private publishInspection(){
+    if(this.disposed)return;
+    this.element.dataset.mapTilesState=this.state.loading?'loading':this.state.error?'error':'ready';
+    // Wheel, pointer and animated movement share one lifecycle. Serializing
+    // tile bounds and labels is useful after settling, never on every input frame.
+    if(!this.moving)this.element.dataset.mapInspection=JSON.stringify(this.inspect());
+  }
+  private setMoving(moving:boolean){this.moving=moving;this.element.dataset.mapMoving=String(moving);if(moving)this.element.dataset.mapCamera='moving';else delete this.element.dataset.mapCamera;}
   setActive(active:boolean){if(this.active===active)return;this.active=active;this.tiles.setActive(active);if(!active){this.markerPointer=undefined;this.pointer.cancel();this.stopAnimation();cancelAnimationFrame(this.frame);this.frame=0;clearTimeout(this.settleTimer);this.setMoving(false);}else{this.schedule();this.settled();}}
   setEco(enabled:boolean){if(this.eco===enabled)return;this.eco=enabled;this.canvas.width=1;this.resizeCanvas();}
   setLabels(labels:readonly CustomMapLabel[]){this.additionalLabels=labels.slice(0,256).map(label=>({...label,coordinate:[...label.coordinate]}));this.scheduleLabels();}
@@ -656,7 +663,10 @@ export class CustomMapEngine {
     const reliefRequests=this.mode==='detail'&&this.reliefVisible&&z>=5?tileRequests(this.camera,view,detailLevel,'relief'):[];
     const b=this.getBounds(),source=satelliteSourceForBounds({west:b[0],south:b[1],east:b[2],north:b[3]});
     const imageryRequests=this.mode==='satellite'?tileRequests(this.camera,view,Math.min(source==='eox-s2'?14:8,z),source):[];
-    const requests=[...overviewRequests,...detailRequests,...reliefRequests,...imageryRequests],keys=requests.map(customTileKey).join('|');
+    // Camera movement can change centre-first priority without changing any
+    // demanded cell. Keep that execution order, but identify a view by its set
+    // so a small pan cannot restart progress and discard already paired cells.
+    const requests=[...overviewRequests,...detailRequests,...reliefRequests,...imageryRequests],keys=requests.map(customTileKey).sort().join('|');
     if(keys===this.currentKeys)return;this.currentKeys=keys;const generation=++this.generation;this.loadingGround=undefined;
     const retainedKeys=()=>[this.overview,this.detail,this.relief,this.imagery,this.imageryOverlay].flatMap(batch=>batch?.tiles.map(t=>t.key)||[]);
     this.tiles.pin([...requests.map(customTileKey),...retainedKeys()]);
@@ -698,25 +708,46 @@ export class CustomMapEngine {
         this.updateState({committedMode:'overview',reliefReady:false,localDetail:false,imagerySource:undefined,...(navigator.onLine?{error:''}:{})});this.schedule();
       }
     });
-    const ground=Promise.all([batch(detailRequests,'vector'),batch(reliefRequests,'relief'),batch(imageryRequests,source)]).then(([detail,relief,imagery])=>{
+    const detailTask=batch(detailRequests,'vector'),reliefTask=batch(reliefRequests,'relief'),imageryTask=batch(imageryRequests,source);
+    const overlayError='Подписи и тропы на спутниковой карте загрузились не полностью. Повторите загрузку.';
+    let satelliteDetail:Awaited<typeof detailTask>|undefined,imageryCommitted=false;
+    const ground=imageryRequests.length?Promise.all([
+      detailTask.then(detail=>{
+        satelliteDetail=detail;
+        if(!current()||!imageryCommitted)return;
+        // A late complete overlay can refine the already complete photograph.
+        // A failed replacement leaves the prior complete overlay in place.
+        const failed=!this.batchCoversMask(detail.value);
+        if(!failed)this.imageryOverlay=detail.value;
+        const overlay=this.imageryOverlay;
+        this.updateState({localDetail:!!overlay?.tiles.length&&overlay.tiles.every(t=>t.local),...(failed?{error:overlayError}:navigator.onLine?{error:''}:{})});this.schedule();
+      }),
+      imageryTask.then(imagery=>{
+        if(!current())return;
+        checkedCoverageRevision=this.coverageRevision;
+        if(!this.batchCoversMask(imagery.value)){
+          this.updateState({imageryLoading:false,error:'Спутниковая карта загрузилась не полностью. Повторите загрузку.'});return;
+        }
+        // Only the photograph's own visible cells gate its atomic handoff.
+        // Independent object/label downloads keep their loading state without
+        // holding an otherwise complete image behind their network deadline.
+        const detailFailed=!!satelliteDetail&&!this.batchCoversMask(satelliteDetail.value);
+        if(satelliteDetail&&!detailFailed)this.imageryOverlay=satelliteDetail.value;
+        this.loadingGround=undefined;this.imagery=imagery.value;this.detail=undefined;this.relief=undefined;imageryCommitted=true;
+        const overlay=this.imageryOverlay;
+        this.updateState({committedMode:'satellite',imageryLoading:false,imagerySource:source,reliefReady:false,localDetail:!!overlay?.tiles.length&&overlay.tiles.every(t=>t.local),...(detailFailed?{error:overlayError}:navigator.onLine?{error:''}:{})});this.schedule();
+      }),
+      reliefTask,
+    ]):Promise.all([detailTask,reliefTask]).then(([detail,relief])=>{
       if(!current()||!detailRequests.length&&!imageryRequests.length)return;
       checkedCoverageRevision=this.coverageRevision;
-      const detailFailed=!this.batchCoversMask(detail.value),reliefFailed=!this.batchCoversMask(relief.value),imageryFailed=!this.batchCoversMask(imagery.value);
-      if(imageryFailed||!imageryRequests.length&&(detailFailed||reliefFailed)){
-        this.updateState({imageryLoading:false,error:imageryRequests.length?'Спутниковая карта загрузилась не полностью. Повторите загрузку.':'Подробная карта загрузилась не полностью. Повторите загрузку.'});return;
+      const detailFailed=!this.batchCoversMask(detail.value),reliefFailed=!this.batchCoversMask(relief.value);
+      if(detailFailed||reliefFailed){
+        this.updateState({imageryLoading:false,error:'Подробная карта загрузилась не полностью. Повторите загрузку.'});return;
       }
       this.loadingGround=undefined;
-      if(imageryRequests.length){
-        // A complete photograph is useful even if the independent map-object
-        // service failed. Keep a prior complete overlay, never a partial one,
-        // and report missing objects instead of discarding available imagery.
-        this.imagery=imagery.value;if(!detailFailed)this.imageryOverlay=detail.value;this.detail=undefined;this.relief=undefined;
-        const overlay=this.imageryOverlay;
-        this.updateState({committedMode:'satellite',imageryLoading:false,imagerySource:source,reliefReady:false,localDetail:!!overlay?.tiles.length&&overlay.tiles.every(t=>t.local),...(detailFailed?{error:'Подписи и тропы на спутниковой карте загрузились не полностью. Повторите загрузку.'}:navigator.onLine?{error:''}:{})});
-      }else{
-        this.detail=detail.value;this.relief=reliefRequests.length?relief.value:undefined;this.imagery=undefined;this.imageryOverlay=undefined;
-        this.updateState({committedMode:'detail',imagerySource:undefined,imageryTarget:undefined,reliefReady:relief.value.tiles.length>0,localDetail:detail.value.tiles.length>0&&detail.value.tiles.every(t=>t.local),...(navigator.onLine?{error:''}:{})});
-      }
+      this.detail=detail.value;this.relief=reliefRequests.length?relief.value:undefined;this.imagery=undefined;this.imageryOverlay=undefined;
+      this.updateState({committedMode:'detail',imagerySource:undefined,imageryTarget:undefined,reliefReady:relief.value.tiles.length>0,localDetail:detail.value.tiles.length>0&&detail.value.tiles.every(t=>t.local),...(navigator.onLine?{error:''}:{})});
       this.schedule();
     });
     void Promise.all([overview,ground]).finally(()=>{if(current()){
@@ -818,7 +849,7 @@ export class CustomMapEngine {
   }
   private updateLoadingGround(signature:readonly unknown[],detail:TileBatch|undefined,satellite:boolean,covered:boolean):boolean{
     const retained=this.groundSnapshot,loading=this.loadingGround,geometry=this.groundPixelGeometry();
-    if(!retained||!loading||satellite||!geometry||this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable||!this.sameGroundSignature(signature)||!this.validLoadingGround(loading)||retained.surface.width!==this.canvas.width||retained.surface.height!==this.canvas.height)return false;
+    if(!retained||!loading||satellite||!geometry||this.moving||this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable||!this.sameGroundSignature(signature)||!this.validLoadingGround(loading)||retained.surface.width!==this.canvas.width||retained.surface.height!==this.canvas.height)return false;
     const previous=retained.loading;
     if(previous&&(previous.generation!==loading.generation||previous.z!==loading.z||previous.requestedCells!==loading.requestedCells||!!previous.relief!==!!loading.relief))return false;
     // The source cohorts are immutable. Earlier pairs must remain identical
@@ -863,7 +894,7 @@ export class CustomMapEngine {
     // Source filters do not change the map beneath their lines. Retain one
     // exact opaque ground after a settled paint, before any route or mask is
     // added. Moving frames keep their original painter without extra copies.
-    if(this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable)return;
+    if(this.moving||this.pointer.activePointers||this.animation||this.groundSnapshotUnavailable)return;
     // A compatible streaming surface is patched before reaching this method.
     // Seed an incompatible view once; unsupported geometry keeps the original
     // direct renderer without capturing a transient full canvas per pair.

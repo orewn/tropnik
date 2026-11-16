@@ -67,7 +67,7 @@ export function hasTerrainPreview(trail?: Trail, regionId?: string) {
   return !!c && c[0] >= TERRAIN_BOUNDS[0] && c[0] <= TERRAIN_BOUNDS[2] && c[1] >= TERRAIN_BOUNDS[1] && c[1] <= TERRAIN_BOUNDS[3];
 }
 function template() {
-  if (!tileTemplate) tileTemplate = loadPublicJSON<{tiles?: string[]}>('https://tiles.openfreemap.org/planet/latest', 1).then(j => {
+  if (!tileTemplate) tileTemplate = loadPublicJSON<{tiles?: string[]}>('https://tiles.openfreemap.org/planet/latest', 2).then(j => {
     const url = j.tiles?.[0];
     if (!url || !url.startsWith('https://tiles.openfreemap.org/') || !allowed(url)) throw new Error('Unknown tile source');
     return url;
@@ -84,7 +84,7 @@ export function preloadTrail(trail: Trail): Promise<PreviewResult> {
     // consumer verifies these bytes; prefetch must not retain a second,
     // unversioned copy of the same source or parse geometry prematurely.
     if (trail.geometryUrl?.startsWith('/data/')) resources.push(Promise.resolve().then(() =>
-      loadPublicBytes(versionedRouteSource(trail.geometryUrl!, trailOverlayMetadata.sourceHashes).url, 1)));
+      loadPublicBytes(versionedRouteSource(trail.geometryUrl!, trailOverlayMetadata.sourceHashes).url, 2)));
     // A centre warms surroundings only; it never becomes invented route geometry.
     const b = trail.bbox || (trail.center ? [trail.center[0] - .01, trail.center[1] - .01, trail.center[0] + .01, trail.center[1] + .01] : null);
     if (b && typeof navigator !== 'undefined' && navigator.onLine) {

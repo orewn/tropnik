@@ -1,8 +1,8 @@
 import {MAP_RESOURCE_LIMITS} from './map-config.ts';
 
 /** One bounded pool shared by every preview. It never marks an offline pack complete. */
-type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown; persistent: boolean; consumers: number; controller?: AbortController; reload: boolean};
-type Options = {concurrency?: number; maxBytes?: number; maxResourceBytes?: number; maxQueued?: number; timeoutMs?: number; fetcher?: typeof fetch};
+type Entry = {promise: Promise<ArrayBuffer>; priority: number; bytes: number; settled: boolean; resolve: (value: ArrayBuffer) => void; reject: (error: unknown) => void; json?: unknown; persistent: boolean; persistentPriority: number; leases: Map<symbol, number>; consumers: number; controller?: AbortController; parked: boolean; reload: boolean};
+type Options = {concurrency?: number; prefetchConcurrency?: number; maxBytes?: number; maxResourceBytes?: number; maxQueued?: number; timeoutMs?: number; fetcher?: typeof fetch};
 
 const REMOTE_TILE_GET = /^https:\/\/(?:tiles\.openfreemap\.org\/(?:[^/?#]+\/)+\d+\/\d+\/\d+\.pbf|tiles\.mapterhorn\.com\/\d+\/\d+\/\d+\.webp|tiles\.maps\.eox\.at\/wmts\/1\.0\.0\/(?:s2cloudless_3857|bluemarble_3857)\/default\/g\/\d+\/\d+\/\d+\.jpg)$/;
 function waitForTileRetry(signal: AbortSignal) {
@@ -31,14 +31,21 @@ export class MapResourcePool {
   private options: Required<Options>;
   constructor(options: Options = {}) {
     this.options = {...MAP_RESOURCE_LIMITS, fetcher: (...args) => fetch(...args), ...options};
-    for (const key of ['concurrency', 'maxBytes', 'maxResourceBytes', 'maxQueued', 'timeoutMs'] as const) {
+    for (const key of ['concurrency', 'prefetchConcurrency', 'maxBytes', 'maxResourceBytes', 'maxQueued', 'timeoutMs'] as const) {
       if (!Number.isSafeInteger(this.options[key]) || this.options[key] <= 0) throw new RangeError(`Invalid map resource limit: ${key}`);
     }
+    if (this.options.prefetchConcurrency > this.options.concurrency) throw new RangeError('Map prefetch concurrency exceeds the shared HTTP limit');
   }
   get(url: string, priority = 1, signal?: AbortSignal): Promise<ArrayBuffer> {
     if (signal?.aborted) return Promise.reject(signal.reason ?? new DOMException('Map request cancelled', 'AbortError'));
     const existing = this.entries.get(url);
-    if (existing) {existing.priority = Math.min(existing.priority, priority); this.entries.delete(url); this.entries.set(url, existing); return this.consume(url, existing, signal);}
+    if (existing) {
+      this.entries.delete(url); this.entries.set(url, existing);
+      const consumed = this.consume(url, existing, priority, signal);
+      // Selecting a prefetched source promotes the original lease immediately,
+      // even when every speculative slot is waiting on a slow response.
+      this.pump(); return consumed;
+    }
     if (this.queue.length >= this.options.maxQueued) {
       // An opened map takes precedence over speculative cards still in the queue.
       const victim = this.queue.findLast(key => (this.entries.get(key)?.priority ?? 0) > priority);
@@ -49,21 +56,26 @@ export class MapResourcePool {
     }
     let resolve!: Entry['resolve'], reject!: Entry['reject'];
     const promise = new Promise<ArrayBuffer>((yes, no) => {resolve = yes; reject = no;});
-    const entry: Entry = {promise, resolve, reject, priority, bytes: 0, settled: false, persistent: false, consumers: 0, reload: this.reloads.has(url)};
+    const entry: Entry = {promise, resolve, reject, priority, bytes: 0, settled: false, persistent: false, persistentPriority: Infinity, leases: new Map(), consumers: 0, parked: false, reload: this.reloads.has(url)};
     this.entries.set(url, entry);
-    const consumed = this.consume(url, entry, signal);
+    const consumed = this.consume(url, entry, priority, signal);
     this.queue.push(url); this.pump(); return consumed;
   }
-  /** Each map view leases a shared read. Cancelling one view cannot abort the
-   * same source still used by another map or a non-cancellable prefetch. */
-  private consume(url: string, entry: Entry, signal?: AbortSignal): Promise<ArrayBuffer> {
-    if (!signal) {entry.persistent = true; return entry.promise;}
-    entry.consumers++;
+  private updatePriority(entry: Entry) {
+    let priority = entry.persistentPriority;
+    for (const value of entry.leases.values()) priority = Math.min(priority, value);
+    entry.priority = priority;
+  }
+  /** Each map view leases a shared read. Cancelling one view cannot reject
+   * another consumer; a remaining preview keeps its original shared promise. */
+  private consume(url: string, entry: Entry, priority: number, signal?: AbortSignal): Promise<ArrayBuffer> {
+    if (!signal) {entry.persistent = true; entry.persistentPriority = Math.min(entry.persistentPriority, priority); this.updatePriority(entry); return entry.promise;}
+    const lease = Symbol(); entry.leases.set(lease, priority); entry.consumers++; this.updatePriority(entry);
     return new Promise((resolve, reject) => {
       let finished = false;
       const release = () => {
         if (finished) return false;
-        finished = true; signal.removeEventListener('abort', cancel); entry.consumers--; return true;
+        finished = true; signal.removeEventListener('abort', cancel); entry.consumers--; entry.leases.delete(lease); this.updatePriority(entry); return true;
       };
       const cancel = () => {
         if (!release()) return;
@@ -72,7 +84,7 @@ export class MapResourcePool {
         if (!entry.settled && !entry.persistent && !entry.consumers && this.entries.get(url) === entry) {
           this.queue = this.queue.filter(key => key !== url);
           this.remove(url); entry.controller?.abort(); entry.reject(error);
-        }
+        } else if (!entry.settled && this.entries.get(url) === entry) this.pump();
       };
       signal.addEventListener('abort', cancel, {once: true});
       entry.promise.then(value => {if (release()) resolve(value);}, error => {if (release()) reject(error);});
@@ -95,15 +107,56 @@ export class MapResourcePool {
   private remove(url: string) {const entry = this.entries.get(url); if (entry) {this.bytes -= entry.bytes; this.entries.delete(url);}}
   private pump() {
     this.queue.sort((a, b) => (this.entries.get(a)?.priority ?? 9) - (this.entries.get(b)?.priority ?? 9));
+    if (this.active >= this.options.concurrency && (this.entries.get(this.queue[0])?.priority ?? 9) < 2) {
+      // Several previews can be adopted then abandoned in quick succession.
+      // Their original speculative owners keep the shared promises alive,
+      // but no longer justify occupying every foreground slot. Park only
+      // excess background GETs and resume them after the visible demand.
+      const speculative = [...this.entries.values()].filter(entry => entry.controller && !entry.controller.signal.aborted && !entry.settled && !entry.parked && entry.priority >= 2);
+      const draining = [...this.entries.values()].filter(entry => entry.controller && entry.parked).length;
+      let needed = this.queue.filter(url => (this.entries.get(url)?.priority ?? 9) < 2).length - draining;
+      while (needed-- > 0 && speculative.length > this.options.prefetchConcurrency) {
+        const entry = speculative.pop()!; entry.parked = true; entry.controller!.abort();
+      }
+    }
     while (this.active < this.options.concurrency && this.queue.length) {
+      // Card intersection/hover can enqueue entire distant route bounds. One
+      // slow preview must not occupy every HTTP slot before visible tiles are
+      // requested. Reserve capacity without cancelling shared consumers or raising
+      // the global limit; real vector/DEM demand (0/1) still uses all slots.
+      const next = this.entries.get(this.queue[0]);
+      if (next && next.priority >= 2 && [...this.entries.values()].filter(candidate => candidate.controller && !candidate.settled && !candidate.parked && candidate.priority >= 2).length >= this.options.prefetchConcurrency) break;
       const url = this.queue.shift()!, entry = this.entries.get(url); if (!entry) continue; this.active++;
       const controller = new AbortController(); entry.controller = controller;
       this.read(url, controller, entry.reload).then(bytes => {
-        if (this.entries.get(url) !== entry) return;
+        if (this.entries.get(url) !== entry || entry.parked) return;
         entry.bytes = bytes.byteLength; entry.settled = true; this.bytes += entry.bytes; this.reloads.delete(url);
         for (const [key, candidate] of this.entries) {if (this.bytes <= this.options.maxBytes) break; if (candidate.settled && key !== url) this.remove(key);}
         entry.resolve(bytes);
-      }, error => {if (this.entries.get(url) === entry) this.remove(url); entry.reject(error);}).finally(() => {entry.controller = undefined; this.active--; this.pump();});
+      }, error => {
+        if (entry.parked && this.entries.get(url) === entry) return;
+        if (this.entries.get(url) === entry) this.remove(url); entry.reject(error);
+      }).finally(() => {
+        entry.controller = undefined; this.active--;
+        if (entry.parked) {
+          entry.parked = false;
+          // First give the reclaimed physical slot to already queued demand.
+          // If that demand was cancelled during abort cleanup, bounded
+          // readmission can displace a later speculative request instead.
+          this.pump();
+          if (this.entries.get(url) === entry && !entry.settled) {
+            if (this.queue.length >= this.options.maxQueued) {
+              const victim = this.queue.findLast(key => (this.entries.get(key)?.priority ?? 0) >= Math.max(2, entry.priority));
+              if (victim) {
+                this.queue.splice(this.queue.indexOf(victim), 1);
+                this.entries.get(victim)?.reject(new Error('Preview superseded by an opened map')); this.remove(victim);
+              } else {this.remove(url); entry.reject(new Error('Preview queue is full'));}
+            }
+            if (this.entries.get(url) === entry) this.queue.push(url);
+          }
+        }
+        this.pump();
+      });
     }
   }
   private async read(url: string, controller: AbortController, reload: boolean) {

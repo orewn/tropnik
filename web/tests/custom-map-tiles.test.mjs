@@ -154,6 +154,57 @@ test('a cold mixed viewport starts measured relief alongside vectors within the 
   env.store.destroy();await Promise.all(outcomes);
 });
 
+test('completing admitted central DEMs first reveals a measured cell before all six cold cells finish',async t=>{
+  for(const adjacent of [false,true])await t.test(adjacent?'shared viewport neighbours':'independent source parents',async t=>{
+    const env=fixture({sourcePool:true});t.after(()=>env.store.destroy());env.store.setActive(false);
+    const cells=adjacent?[[100,200],[101,200],[100,201],[101,201],[99,200],[100,199]]:Array.from({length:6},(_,index)=>[100+index*4,200]);
+    const requests=cells.map(([x,y])=>({kind:'relief',z:12,x,y}));env.store.pin(requests.map(env.key));
+    const results=requests.map(tile=>env.store.load(tile).catch(error=>error)),completed=[];
+    env.store.setActive(true);await turn();let waves=0,firstReadyWave;
+    for(;env.store.pending&&waves<100;){
+      waves++;env.resolveDownloads();await turn();
+      const worker=env.workers[0];
+      while(worker?.messages.length){
+        firstReadyWave??=waves;completed.push(worker.complete());
+      }
+      assert.ok(env.pool.stats().active<=3);assert.ok(preparedPayloads(env.store.snapshot())<=6);
+    }
+    const tiles=await Promise.all(results);
+    t.diagnostic(JSON.stringify({firstReadyWave,totalWaves:waves,uniqueSources:env.downloads.length,completed:completed.length}));
+    assert.equal(completed.length,6);assert.ok(tiles.every(tile=>tile.bitmap));
+    assert.ok(completed.every(payload=>payload.halo.tiles.length===8&&payload.halo.missing.length===0),
+      'earlier presentation still waits for all eight real measured neighbours of each cell');
+    assert.equal(new Set(env.downloads.map(read=>read.url)).size,env.downloads.length,'overlapping halo sources still share one physical read');
+    const sources=env.downloads.length;env.store.pin([]);env.store.pin(requests.map(env.key));
+    assert.deepEqual(await Promise.all(requests.map(tile=>env.store.load(tile))),tiles);
+    assert.equal(env.downloads.length,sources,'the warm viewport must return the same cached bitmaps without a new source read');
+    assert.ok(firstReadyWave<=10,'one completed centre cell must not wait for six round-robin halo assemblies');
+    if(!adjacent){assert.equal(env.downloads.length,54);assert.ok(waves<=18,'completion priority cannot reduce aggregate throughput or starve the other admitted cells');}
+  });
+});
+
+test('a stalled central DEM border does not block the other complete measured cells',async t=>{
+  const env=fixture({sourcePool:true}),results=[];t.after(async()=>{env.store.destroy();await Promise.all(results);});
+  env.store.setActive(false);const requests=Array.from({length:6},(_,index)=>({kind:'relief',z:12,x:100+index*4,y:200}));
+  env.store.pin(requests.map(env.key));for(const tile of requests)results.push(env.store.load(tile).catch(error=>error));
+  const stalledURL='https://tiles.mapterhorn.com/12/99/200.webp',completed=[];
+  env.store.setActive(true);await turn();
+  for(let wave=0;completed.length<5&&wave<100;wave++){
+    for(const read of env.downloads.filter(item=>!item.done&&item.url!==stalledURL))read.resolve(new Uint8Array([1,2,3,4]).buffer);
+    await turn();const worker=env.workers[0];while(worker?.messages.length)completed.push(worker.complete());
+    assert.ok(env.pool.stats().active<=3);assert.ok(preparedPayloads(env.store.snapshot())<=6);
+  }
+  const stalled=env.downloads.find(read=>read.url===stalledURL);
+  assert.ok(stalled&&!stalled.done);assert.equal(completed.length,5);assert.ok(completed.every(payload=>payload.x!==100));
+  env.resolveDownloads();await turn();
+  for(let wave=0;env.store.pending&&wave<20;wave++){
+    env.resolveDownloads();await turn();const worker=env.workers[0];while(worker?.messages.length)completed.push(worker.complete());
+  }
+  assert.equal((await Promise.all(results)).filter(tile=>tile.bitmap).length,6);
+  assert.ok(completed.every(payload=>payload.halo.tiles.length===8&&payload.halo.missing.length===0));
+  assert.equal(env.downloads.filter(read=>read.url===stalledURL).length,1);
+});
+
 test('a stalled DEM halo releases logical capacity for a queued primary while physical reads remain capped at three',async t=>{
   const env=fixture({sourcePool:true}),outcomes=[];
   t.after(async()=>{env.store.destroy();await Promise.all(outcomes);});

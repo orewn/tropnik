@@ -21,9 +21,10 @@ function preloadModule(dependencies,environment={}){
 }
 
 test('route previews warm actual 2D geometry and relief tiles without preparing a separate 3D scene', async () => {
-  const reads=[],geometry={type:'LineString',coordinates:[[40.35,43.7],[40.4,43.75]]},source=sourceFixture(geometry);let coverageReads=0,coverageDisposals=0,workers=0,coordinators=0;
+  const reads=[],priorities=[],geometry={type:'LineString',coordinates:[[40.35,43.7],[40.4,43.75]]},source=sourceFixture(geometry);let coverageReads=0,coverageDisposals=0,workers=0,coordinators=0;
   class PreviewPreparation extends TerrainPreparation {constructor(options){super(options);coordinators++;}}
   class PreviewPool extends MapResourcePool {
+    get(url,priority,...rest){priorities.push({url,priority});return super.get(url,priority,...rest);}
     constructor(){super({fetcher:async url=>{
       reads.push(url);
       if(url===source.versioned)return new Response(source.body);
@@ -42,6 +43,7 @@ test('route previews warm actual 2D geometry and relief tiles without preparing 
   assert.equal(api.hasTerrainPreview(trail),true,'The regression exercises the former implicit 3D coverage branch');
   const preview=api.preloadTrail(trail);assert.equal(api.preloadTrail(trail),preview,'Two cards still share the same bounded preview');
   assert.deepEqual({...await preview},{state:'ready',completed:2,total:2});
+  assert.ok(priorities.length>2&&priorities.every(read=>read.priority===2),'Every hover/intersection read, including geometry and source metadata, remains speculative until selected');
   assert.deepEqual(await api.loadPublicJSON(source.versioned),geometry);
   assert.equal(reads.filter(url=>url===source.versioned).length,1);assert.equal(reads.includes(source.url),false);
   assert.ok(reads.some(url=>url.endsWith('.pbf')));assert.ok(reads.some(url=>url.endsWith('.webp')));
