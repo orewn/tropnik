@@ -186,6 +186,11 @@ async function runProductionPixels({CustomMapEngine,geometryPath,mercatorUnproje
    baseline.engine.setTrailOverlay([first]);optimized.engine.setTrailOverlay([first]);let previous;
    for(let index=0;index<phases.length;index++){
     const phase=phases[index];
+    // Exercise a real inherited stroke-state change in every mode. Satellite
+    // ink is correctly scoped by save/clip/restore and no longer leaks these
+    // attributes; relying on that leak would skip the intended invalidation.
+    // Both direct and retained painters receive the same native context state.
+    if(phase==='stroke-history')for(const item of [baseline,optimized]){item.context.lineCap='round';item.context.lineJoin='round';}
     if(phase==='overlay-changed')for(const item of [baseline,optimized])item.engine.setTrailOverlay([second]);
     if(phase==='overlay-empty')for(const item of [baseline,optimized])item.engine.setTrailOverlay([]);
     if(phase==='route-changed')for(const item of [baseline,optimized])item.engine.route=geometryPath({type:'LineString',coordinates:[[-180,-75],[-100,-20],[-130,80]].map(coordinate)});
