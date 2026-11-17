@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "evidence": "final-manifest-only-pages-release",
+  "workflow": {
+    "runId": 43986060430,
+    "sourceCommit": "aa3315b54e3b2b9061c6d3073b47763db21329ee",
+    "url": "https://github.com/orewn/tropnik/actions/runs/43986060430",
+    "conclusion": "success",
+    "buildJobId": 133714382638,
+    "deployJobId": 133727974292,
+    "completedAt": "2026-11-17T00:44:48Z",
+    "artifactId": 14287880531,
+    "artifactBytes": 67702989,
+    "artifactSHA256": "8e73a37bd0e6f6c3a526866acac26785ec09619f5e532e4795c35b1d3ea9cd20"
+  },
+  "published": {
+    "verified": true,
+    "url": "https://orewn.github.io/tropnik/",
+    "buildId": "3219b2463df08be3",
+    "sourceCommit": "aa3315b54e3b2b9061c6d3073b47763db21329ee",
+    "publicHttpChecks": 29,
+    "apkDelivery": "github-release",
+    "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.34-preview/tropnik-preview.apk",
+    "apkBytes": 69240138,
+    "apkSha256": "6b9e748f69574878adf237c79bc5202e629b4849600446a305d00f7b72557c54",
+    "browserRenderingTested": true,
+    "browserProfiles": 4,
+    "serviceWorkerUpdateTested": true,
+    "serviceWorkerTimeoutMs": 15000.900146484375,
+    "mapLoadingTested": true,
+    "tileOpacityTested": true,
+    "tileOpacityComparisons": 144
+  },
+  "site": {
+    "buildId": "3219b2463df08be3",
+    "sourceCommit": "aa3315b54e3b2b9061c6d3073b47763db21329ee",
+    "pages": 719,
+    "apiConnected": false,
+    "apk": {
+      "delivery": "github-release",
+      "sourcePath": "/downloads/tropnik-preview.apk",
+      "downloadHref": "https://github.com/orewn/tropnik/releases/download/v0.4.34-preview/tropnik-preview.apk",
+      "bytes": 69240138,
+      "sha256": "6b9e748f69574878adf237c79bc5202e629b4849600446a305d00f7b72557c54",
+      "version": "0.4.34-preview",
+      "architecture": "universal",
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86_64"
+      ],
+      "signature": "development / debug",
+      "signingCertificateSha256": "76d6da19843c582ea464e636720383a30ba7cc3a908742d6686821ef63d4fbbe",
+      "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+      "workflowRunId": 43983041614,
+      "testedArchitecture": "x86_64",
+      "deviceExecutionVerified": true,
+      "physicalDeviceVerified": false
+    }
+  },
+  "browser": {
+    "verified": true,
+    "sourceCommit": "aa3315b54e3b2b9061c6d3073b47763db21329ee",
+    "profiles": [
+      {
+        "name": "compact-android",
+        "width": 320,
+        "height": 640,
+        "interactionTested": true,
+        "sheetTested": true,
+        "sheetHeightDelta": 0,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "iphone-portrait",
+        "width": 390,
+        "height": 844,
+        "interactionTested": true,
+        "sheetTested": true,
+        "sheetHeightDelta": 0,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "android-portrait",
+        "width": 412,
+        "height": 915,
+        "interactionTested": true,
+        "sheetTested": true,
+        "sheetHeightDelta": 0,
+        "longestTaskMs": 54
+      },
+      {
+        "name": "phone-landscape",
+        "width": 844,
+        "height": 390,
+        "interactionTested": true,
+        "sheetTested": true,
+        "sheetHeightDelta": 0,
+        "longestTaskMs": 0
+      }
+    ],
+    "desktopProfiles": [
+      {
+        "name": "desktop-webgl",
+        "width": 1440,
+        "height": 1000,
+        "engine": "tropnik-canvas",
+        "coarse": false,
+        "mapInteractionTested": true
+      }
+    ],
+    "mapInteractions": [
+      {
+        "profile": "android-portrait",
+        "passed": true,
+        "longestTaskMs": 54,
+        "layoutShift": 0.009980416515551985,
+        "durationMs": 69454
+      },
+      {
+        "profile": "desktop-webgl",
+        "passed": true,
+        "longestTaskMs": 174,
+        "layoutShift": 0.0067598140350877195,
+        "durationMs": 70184
+      }
+    ],
+    "zoom": [
+      {
+        "profile": "android-portrait",
+        "geometryPassed": true,
+        "performance": {
+          "layoutShift": 0.012475577131253357,
+          "longestTaskMs": 63
+        }
+      },
+      {
+        "profile": "desktop-webgl",
+        "geometryPassed": true,
+        "performance": {
+          "layoutShift": 0.011484051854416743,
+          "longestTaskMs": 112
+        }
+      }
+    ],
+    "satellite": [
+      {
+        "profile": "android-portrait",
+        "steps": 6,
+        "pans": 14,
+        "zooms": 14,
+        "toggles": 2,
+        "performance": {
+          "layoutShift": 0.012475577131253357,
+          "longestTaskMs": 57
+        },
+        "passed": true
+      },
+      {
+        "profile": "desktop-webgl",
+        "steps": 6,
+        "pans": 11,
+        "zooms": 10,
+        "toggles": 2,
+        "performance": {
+          "layoutShift": 0.011484051854416743,
+          "longestTaskMs": 112
+        },
+        "passed": true
+      }
+    ],
+    "smoothness": [
+      {
+        "profile": "android-portrait",
+        "passed": true,
+        "performanceIssues": [],
+        "physicalDevice": false,
+        "scenarios": 8,
+        "scenarioNames": [
+          "panel",
+          "explore-search",
+          "explore-filters",
+          "catalog-scroll",
+          "map-pan",
+          "map-zoom",
+          "layer-switch",
+          "site-search"
+        ],
+        "maxFrameCallbackGapMs": 42.199999999953434,
+        "maxEventToNextFrameMs": 81.59999999997672,
+        "maxEventTimingDurationMs": 104,
+        "longTasks": {
+          "count": 0,
+          "maxMs": 0
+        },
+        "notPresentedFPS": true,
+        "notFieldINP": true
+      },
+      {
+        "profile": "desktop-webgl",
+        "passed": true,
+        "performanceIssues": [],
+        "physicalDevice": false,
+        "scenarios": 8,
+        "scenarioNames": [
+          "panel",
+          "explore-search",
+          "explore-filters",
+          "catalog-scroll",
+          "map-pan",
+          "map-zoom",
+          "layer-switch",
+          "site-search"
+        ],
+        "maxFrameCallbackGapMs": 55,
+        "maxEventToNextFrameMs": 60.200000000186265,
+        "maxEventTimingDurationMs": 72,
+        "longTasks": {
+          "count": 1,
+          "maxMs": 55
+        },
+        "notPresentedFPS": true,
+        "notFieldINP": true
+      }
+    ]
+  },
+  "nativeUnderlay": {
+    "verified": true,
+    "sourceCommit": "aa3315b54e3b2b9061c6d3073b47763db21329ee",
+    "groups": {
+      "underlay": {
+        "cases": 44,
+        "frames": 62,
+        "allZeroRGBA": true,
+        "negativeControls": 15
+      },
+      "groundCache": {
+        "cases": 18,
+        "frames": 126,
+        "allZeroRGBA": true,
+        "negativeControls": 0
+      },
+      "streamingGround": {
+        "cases": 6,
+        "frames": 198,
+        "allZeroRGBA": true,
+        "negativeControls": 3
+      }
+    }
+  },
+  "attribution": {
+    "verified": true,
+    "cases": 40,
+    "footerCases": 24,
+    "caseFailures": []
+  },
+  "tileOpacity": {
+    "verified": true,
+    "cases": 48,
+    "totals": {
+      "cases": 48,
+      "comparisons": 144,
+      "pngs": 288,
+      "workers": 96
+    }
+  },
+  "static": {
+    "verified": true,
+    "pages": 719,
+    "publicAssetChecks": 666,
+    "httpChecks": 77
+  },
+  "originalFiles": {
+    "build-info.json": {
+      "bytes": 420066,
+      "sha256": "9835c39560140c9b9171d362338d4fb0b0c60952b32117a864940ae67eb82833"
+    },
+    "browser-verification.json": {
+      "bytes": 17732910,
+      "sha256": "10493d2317dec6e9a89b5ab1228915d378b66445f44b4cac20ab36937e5f3389"
+    },
+    "browser-map-underlay-verification.json": {
+      "bytes": 1992119,
+      "sha256": "184328e9abfa50426f28e818dc0164f1906e82b17d8c06908a8b9ddfb94096a9"
+    },
+    "browser-map-attribution-verification.json": {
+      "bytes": 3435613,
+      "sha256": "d98a0b5cd740fd46b3bfdb55e0d6e3121fe4abb2f7beaf2e07a2353c37d14af6"
+    },
+    "browser-map-tile-opacity-verification.json": {
+      "bytes": 599684,
+      "sha256": "bb78e55870e6a4f8f405073e80062646c0f562c982b7d03b7083f3396d862703"
+    },
+    "public-deploy-verification.json": {
+      "bytes": 666,
+      "sha256": "d2a5fb982cd8e8efdca664c14d6e672d49b6c69f8dbe983e4f89d5df8f09fe89"
+    },
+    "android-manifest.json": {
+      "bytes": 3174,
+      "sha256": "9dc79a97c72f90929814fb5f950c7e0059f2f30032572784215ab41c58cf2e17"
+    }
+  },
+  "limits": [
+    "CI Chromium results are not physical-phone FPS or field INP.",
+    "Smoothness windows contain one desktop long task; full interaction/zoom windows have additional tasks.",
+    "API is disconnected; no VPS deployment is implied.",
+    "This summary is derived from source-bound artifacts; original JSON retained beside it."
+  ]
+}

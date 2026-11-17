@@ -1,0 +1,18 @@
+{
+  "verified": true,
+  "url": "https://orewn.github.io/tropnik/",
+  "buildId": "3219b2463df08be3",
+  "sourceCommit": "aa3315b54e3b2b9061c6d3073b47763db21329ee",
+  "publicHttpChecks": 29,
+  "apkDelivery": "github-release",
+  "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.34-preview/tropnik-preview.apk",
+  "apkBytes": 69240138,
+  "apkSha256": "6b9e748f69574878adf237c79bc5202e629b4849600446a305d00f7b72557c54",
+  "browserRenderingTested": true,
+  "browserProfiles": 4,
+  "serviceWorkerUpdateTested": true,
+  "serviceWorkerTimeoutMs": 15000.900146484375,
+  "mapLoadingTested": true,
+  "tileOpacityTested": true,
+  "tileOpacityComparisons": 144
+}

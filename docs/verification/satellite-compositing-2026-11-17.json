@@ -1,0 +1,326 @@
+{
+  "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+  "phase": "complete",
+  "verified": true,
+  "archiveSHA256": "0ff5980f9975fb2fad4b4242d729a24cf5a6ee44ef0510cb3fadb78c9a5e5097",
+  "sourcesMatchedLocal": 33,
+  "groups": {
+    "cases": {
+      "cases": 44,
+      "frames": 62,
+      "zeroRGBA": true
+    },
+    "groundCache": {
+      "cases": 18,
+      "frames": 126,
+      "zeroRGBA": true
+    },
+    "streamingGround": {
+      "cases": 6,
+      "frames": 198,
+      "zeroRGBA": true
+    }
+  },
+  "pngVerified": 772,
+  "photoWitnesses": 360,
+  "negativeControls": [
+    {
+      "group": "cases",
+      "case": "opaque",
+      "dpr": 1,
+      "name": "remove-route",
+      "differentPixels": 2602,
+      "maxChannelDelta": 215,
+      "totalPixels": 196608
+    },
+    {
+      "group": "cases",
+      "case": "opaque",
+      "dpr": 1,
+      "name": "remove-selectedBoundary",
+      "differentPixels": 230,
+      "maxChannelDelta": 60,
+      "totalPixels": 196608
+    },
+    {
+      "group": "cases",
+      "case": "opaque",
+      "dpr": 1,
+      "name": "remove-mask",
+      "differentPixels": 64772,
+      "maxChannelDelta": 195,
+      "totalPixels": 196608
+    },
+    {
+      "group": "cases",
+      "case": "missing",
+      "dpr": 1,
+      "name": "force-unsafe-cover",
+      "differentPixels": 55276,
+      "maxChannelDelta": 253,
+      "totalPixels": 196608
+    },
+    {
+      "group": "cases",
+      "case": "transparent",
+      "dpr": 1,
+      "name": "force-unsafe-cover",
+      "differentPixels": 131591,
+      "maxChannelDelta": 253,
+      "totalPixels": 196608
+    },
+    {
+      "group": "cases",
+      "case": "satellite-opaque-jpeg",
+      "dpr": 1,
+      "name": "force-unsafe-opaque-jpeg-cover",
+      "differentPixels": 4,
+      "maxChannelDelta": 1,
+      "totalPixels": 196608
+    },
+    {
+      "group": "cases",
+      "case": "satellite-jpeg-missing",
+      "dpr": 1,
+      "name": "force-unsafe-satellite-cover",
+      "differentPixels": 121587,
+      "maxChannelDelta": 253,
+      "totalPixels": 196608
+    },
+    {
+      "group": "cases",
+      "case": "satellite-transparent-source",
+      "dpr": 1,
+      "name": "force-unsafe-satellite-cover",
+      "differentPixels": 194470,
+      "maxChannelDelta": 217,
+      "totalPixels": 196608
+    },
+    {
+      "group": "cases",
+      "case": "opaque",
+      "dpr": 2,
+      "name": "remove-route",
+      "differentPixels": 9691,
+      "maxChannelDelta": 214,
+      "totalPixels": 786432
+    },
+    {
+      "group": "cases",
+      "case": "opaque",
+      "dpr": 2,
+      "name": "remove-selectedBoundary",
+      "differentPixels": 920,
+      "maxChannelDelta": 80,
+      "totalPixels": 786432
+    },
+    {
+      "group": "cases",
+      "case": "opaque",
+      "dpr": 2,
+      "name": "remove-mask",
+      "differentPixels": 257618,
+      "maxChannelDelta": 195,
+      "totalPixels": 786432
+    },
+    {
+      "group": "cases",
+      "case": "missing",
+      "dpr": 2,
+      "name": "force-unsafe-cover",
+      "differentPixels": 220620,
+      "maxChannelDelta": 253,
+      "totalPixels": 786432
+    },
+    {
+      "group": "cases",
+      "case": "transparent",
+      "dpr": 2,
+      "name": "force-unsafe-cover",
+      "differentPixels": 521267,
+      "maxChannelDelta": 253,
+      "totalPixels": 786432
+    },
+    {
+      "group": "cases",
+      "case": "satellite-jpeg-missing",
+      "dpr": 2,
+      "name": "force-unsafe-satellite-cover",
+      "differentPixels": 484165,
+      "maxChannelDelta": 253,
+      "totalPixels": 786432
+    },
+    {
+      "group": "cases",
+      "case": "satellite-transparent-source",
+      "dpr": 2,
+      "name": "force-unsafe-satellite-cover",
+      "differentPixels": 774455,
+      "maxChannelDelta": 218,
+      "totalPixels": 786432
+    },
+    {
+      "group": "streamingGround",
+      "case": "trace-grid",
+      "dpr": 1,
+      "name": "omit-second-loading-pair",
+      "differentPixels": 59980,
+      "maxChannelDelta": 154,
+      "totalPixels": 966048
+    },
+    {
+      "group": "streamingGround",
+      "case": "trace-grid",
+      "dpr": 1.5,
+      "name": "omit-second-loading-pair",
+      "differentPixels": 134952,
+      "maxChannelDelta": 154,
+      "totalPixels": 2174304
+    },
+    {
+      "group": "streamingGround",
+      "case": "trace-grid",
+      "dpr": 2,
+      "name": "omit-second-loading-pair",
+      "differentPixels": 239824,
+      "maxChannelDelta": 154,
+      "totalPixels": 3864192
+    }
+  ],
+  "JPEGUnsafeRegression": {
+    "group": "cases",
+    "case": "satellite-opaque-jpeg",
+    "dpr": 1,
+    "name": "force-unsafe-opaque-jpeg-cover",
+    "differentPixels": 4,
+    "maxChannelDelta": 1,
+    "totalPixels": 196608
+  },
+  "schemaVersion": 1,
+  "evidence": "independent-summary-of-native-canvas-artifact",
+  "workflowRunId": 43978364335,
+  "workflowURL": "https://github.com/orewn/tropnik/actions/runs/43978364335",
+  "receiptSHA256": "c5c239a731e87dc69ce87364c7efb2d0b084c87bf46dd229f678310b33a2e8ec",
+  "rendererSHA256": "bb7f6b59765dfded1e75b9d2cc90af3794ea3dbff67e6f11b28e286ca367bec7",
+  "environment": {
+    "schemaVersion": 1,
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "collection": "browser-target-cdp-before-measurement",
+    "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+    "capturedAt": "2026-11-16T23:21:01.280Z",
+    "requestedFlags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-default-apps",
+      "--disable-extensions",
+      "--disable-features=Translate,MediaRouter",
+      "--mute-audio",
+      "--no-first-run",
+      "--use-gl=angle",
+      "--use-angle=swiftshader-webgl",
+      "--enable-unsafe-swiftshader",
+      "--window-size=1920,1920",
+      "--ozone-override-screen-size=1920,1920"
+    ],
+    "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=37749 --user-data-dir=/tmp/tropnik-map-underlay-pCIKO9 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      }
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1014-aws",
+        "version": "#14~24.04.1-Ubuntu SMP PREEMPT Fri Sep 18 21:24:59 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "Intel(R) Xeon(R) 6975P-C"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16464306176,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.127.1"
+      }
+    },
+    "nativeSurface": {
+      "schemaVersion": 1,
+      "collection": "blank-target-before-emulation",
+      "window": {
+        "left": 10,
+        "top": 10,
+        "width": 1920,
+        "height": 1920,
+        "windowState": "normal"
+      },
+      "viewport": {
+        "url": "about:blank",
+        "visibilityState": "visible",
+        "innerWidth": 1920,
+        "innerHeight": 1833,
+        "outerWidth": 1920,
+        "outerHeight": 1920,
+        "devicePixelRatio": 1,
+        "screen": {
+          "width": 1920,
+          "height": 1920,
+          "availWidth": 1920,
+          "availHeight": 1920
+        }
+      }
+    }
+  },
+  "allFrameRGBAHashesMatch": true,
+  "totalFrames": 386,
+  "maxChannelDelta": 0,
+  "differentPixels": 0,
+  "scope": "Native production Canvas fixture; CI browser, not a physical-device FPS benchmark."
+}

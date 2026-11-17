@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-16T23:59:38.554526+00:00",
+  "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+  "pagesRunId": 43978868875,
+  "designArtifactId": 14282134604,
+  "designArtifactSHA256": "f506e4884f9384aa0bd7470e6626dc36f56242a9532d58930584b46edf087e52",
+  "method": "Direct visual inspection of all original PNG captures with image viewing tools; exact filenames, byte counts and SHA-256 values matched the published browser receipt before inspection. No image transformations, browser reruns, or source edits.",
+  "scope": {
+    "captures": 12,
+    "activeSatelliteCaptures": 10,
+    "restoredReliefCaptures": 2,
+    "profiles": [
+      "android-portrait",
+      "desktop-webgl"
+    ],
+    "stages": [
+      "dateline-overview",
+      "dateline-native8",
+      "dateline-overzoom",
+      "west-eox",
+      "dateline-return",
+      "detail-restored"
+    ]
+  },
+  "assessment": "No blocking visual regression established within this satellite and source-credit scope.",
+  "sharedFindings": [
+    "Photo coverage is present across land and water without the former country cutout or selected-area tint.",
+    "The compact credits are readable on dark ocean, dark land and pale terrain; no clipping or collision with controls, sheet or viewport edge was observed.",
+    "EOX and Blue Marble credit/status changes agree with the imagery shown.",
+    "Mobile and desktop controls and Russian labels remain readable."
+  ],
+  "visibleLimitations": [
+    {
+      "files": [
+        "android-portrait-satellite-dateline-native8.png",
+        "android-portrait-satellite-dateline-overzoom.png",
+        "desktop-webgl-satellite-dateline-native8.png",
+        "desktop-webgl-satellite-dateline-overzoom.png"
+      ],
+      "observation": "Coarse enlarged Blue Marble imagery and a narrow vertical tonal join at the dateline are visible.",
+      "classification": "Visible limitation, with no before/after evidence here to establish a new regression or its source/rendering cause.",
+      "uiDisclosure": "Overview and enlarged overview notices are present.",
+      "reportedToRootBeforeRelease": true,
+      "visibleSourceLabel": "NASA Blue Marble · EOX",
+      "visibleStatusLabels": [
+        "Обзорный снимок · детализация ниже",
+        "Увеличен обзорный снимок"
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "profile": "android-portrait",
+      "stage": "dateline-overview",
+      "file": "android-portrait-satellite-dateline-overview.png",
+      "sha256": "2ffd10ecd33451cb34c67454b70918c24fcb7276e1489ba720253414a86596ab",
+      "dimensions": [
+        824,
+        1830
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "Photographic land and water fill the map viewport, including beyond the selected region; no paper cutout or selected-region fill is visible.",
+        "Coastal outlines, controls, and Russian region labels remain readable.",
+        "NASA Blue Marble and EOX source credits plus the overview-detail notice are fully visible."
+      ]
+    },
+    {
+      "profile": "android-portrait",
+      "stage": "dateline-native8",
+      "file": "android-portrait-satellite-dateline-native8.png",
+      "sha256": "4e4be48a07b0499c7c74b0835ee842912bf1daed20aa68cdad91efb9cac020b8",
+      "dimensions": [
+        824,
+        1830
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "Enlarged Blue Marble imagery remains visible across the viewport with river and place overlays.",
+        "A narrow vertical tonal join is visible at the dateline; this one-run screenshot set does not establish its cause or whether it is new.",
+        "The overview imagery and enlarged overview notices are visible and readable; the filename native8 is not a claim of high-resolution source imagery."
+      ]
+    },
+    {
+      "profile": "android-portrait",
+      "stage": "dateline-overzoom",
+      "file": "android-portrait-satellite-dateline-overzoom.png",
+      "sha256": "bc3c630b6c8bf30096f7d591297413022ac48eb1080a9f1e3c5af33c15f53303",
+      "dimensions": [
+        824,
+        1830
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "The photograph remains continuous in coverage at close zoom; it is visibly coarse and enlarged, with a narrow dateline tonal join.",
+        "The enlarged overview notice accurately signals the visible resolution limitation.",
+        "Controls and source credits remain legible and do not overlap the sheet or viewport edge."
+      ]
+    },
+    {
+      "profile": "android-portrait",
+      "stage": "west-eox",
+      "file": "android-portrait-satellite-west-eox.png",
+      "sha256": "fe6efe8344712db20ee087f9a55cd86c96b86abb513c42341d08ad02c06d9095",
+      "dimensions": [
+        824,
+        1830
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "EOX coastal land and water cover the viewport without blank gaps, country-shaped cutouts, or a selected-region fill.",
+        "EOXCloudless and EOX credits are legible; NASA/enlarged overview notices are absent in this EOX view.",
+        "Boundary lines, labels, and controls remain visually distinct from the photograph."
+      ]
+    },
+    {
+      "profile": "android-portrait",
+      "stage": "dateline-return",
+      "file": "android-portrait-satellite-dateline-return.png",
+      "sha256": "8b9f6d9cac5adef7e2688b0c8f05ba719bddc2705273a5bda6626c9d1a835854",
+      "dimensions": [
+        824,
+        1830
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "The same complete photographic overview is restored after the source-region round trip.",
+        "NASA Blue Marble overview credits and the overview-detail notice return without clipping."
+      ]
+    },
+    {
+      "profile": "android-portrait",
+      "stage": "detail-restored",
+      "file": "android-portrait-satellite-detail-restored.png",
+      "sha256": "1b39245f699eb6e4378dc0b27f1b93cb9da456640adebdefa389da44528098f0",
+      "dimensions": [
+        824,
+        1830
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "The relief mode is selected and the geographic vector/relief presentation is restored.",
+        "Satellite imagery and satellite-only notices are removed; the remaining source credits are readable."
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "stage": "dateline-overview",
+      "file": "desktop-webgl-satellite-dateline-overview.png",
+      "sha256": "7f2d69bac09693e6974b62781636c5900a310cc56a3f9b32ab4def24baa1f595",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "Photographic land and water fill the map viewport, including beyond the selected region; no paper cutout or selected-region fill is visible.",
+        "Coastal outlines, controls, and Russian region labels remain readable.",
+        "NASA Blue Marble and EOX source credits plus the overview-detail notice are fully visible."
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "stage": "dateline-native8",
+      "file": "desktop-webgl-satellite-dateline-native8.png",
+      "sha256": "c12e10ecd9e804b91e8146b1d9763f055162a726406df76a9b3c8599d60f509f",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "Enlarged Blue Marble imagery remains visible across the viewport with river and place overlays.",
+        "A narrow vertical tonal join is visible at the dateline; this one-run screenshot set does not establish its cause or whether it is new.",
+        "The overview imagery and enlarged overview notices are visible and readable; the filename native8 is not a claim of high-resolution source imagery."
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "stage": "dateline-overzoom",
+      "file": "desktop-webgl-satellite-dateline-overzoom.png",
+      "sha256": "ab4f3fd9f9b6f9963469678f152f8ed24ba031ea94a7e612631c9b01410d9ca8",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "The photograph remains continuous in coverage at close zoom; it is visibly coarse and enlarged, with a narrow dateline tonal join.",
+        "The enlarged overview notice accurately signals the visible resolution limitation.",
+        "Controls and source credits remain legible and do not overlap the sheet or viewport edge."
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "stage": "west-eox",
+      "file": "desktop-webgl-satellite-west-eox.png",
+      "sha256": "4548201d59a212fe4b9885a78625c91da79e0bb0823a08276fd5c47d69c01232",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "EOX coastal land and water cover the viewport without blank gaps, country-shaped cutouts, or a selected-region fill.",
+        "EOXCloudless and EOX credits are legible; NASA/enlarged overview notices are absent in this EOX view.",
+        "Boundary lines, labels, and controls remain visually distinct from the photograph."
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "stage": "dateline-return",
+      "file": "desktop-webgl-satellite-dateline-return.png",
+      "sha256": "7f2d69bac09693e6974b62781636c5900a310cc56a3f9b32ab4def24baa1f595",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "The same complete photographic overview is restored after the source-region round trip.",
+        "NASA Blue Marble overview credits and the overview-detail notice return without clipping."
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "stage": "detail-restored",
+      "file": "desktop-webgl-satellite-detail-restored.png",
+      "sha256": "527ccfe4e1bed0b01dd9cbfecca914b3edf117ceb2eb1dd4a509c8d110a9a074",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "originalImageVisuallyInspected": true,
+      "sourceCreditsReadable": true,
+      "creditClippingObserved": false,
+      "findings": [
+        "The relief mode is selected and the geographic vector/relief presentation is restored.",
+        "Satellite imagery and satellite-only notices are removed; the remaining source credits are readable."
+      ]
+    }
+  ],
+  "excludedFromClaim": [
+    "Physical-device visual inspection",
+    "A visual before/after comparison with the preceding published build",
+    "Absence of source mosaic or dateline tonal joins",
+    "A broader visual review outside these twelve captures"
+  ]
+}

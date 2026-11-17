@@ -1,0 +1,380 @@
+{
+  "schemaVersion": 1,
+  "evidence": "summary-of-successful-main-pages-artifact-and-public-deploy-verification",
+  "workflow": {
+    "runId": 43978868875,
+    "url": "https://github.com/orewn/tropnik/actions/runs/43978868875",
+    "observedCompletedAt": "2026-11-16T23:51:44.044Z",
+    "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+    "jobs": [
+      {
+        "id": 133689820026,
+        "name": "build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 133703174594,
+        "name": "deploy",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "published": {
+    "verified": true,
+    "url": "https://orewn.github.io/tropnik/",
+    "buildId": "fd42ba65b761b0c9",
+    "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+    "publicHttpChecks": 29,
+    "apkDelivery": "github-release",
+    "apkUrl": "https://github.com/orewn/tropnik/releases/download/v0.4.33-preview/tropnik-preview.apk",
+    "apkBytes": 69231946,
+    "apkSha256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408",
+    "browserRenderingTested": true,
+    "browserProfiles": 4,
+    "serviceWorkerUpdateTested": true,
+    "serviceWorkerTimeoutMs": 15000.900146484375,
+    "mapLoadingTested": true,
+    "tileOpacityTested": true,
+    "tileOpacityComparisons": 144
+  },
+  "site": {
+    "buildId": "fd42ba65b761b0c9",
+    "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+    "base": "/tropnik/",
+    "origin": "https://orewn.github.io",
+    "pages": 719,
+    "regions": 15,
+    "referenceRoutes": 685,
+    "apiConnected": false
+  },
+  "browser": {
+    "verified": true,
+    "browser": "system Chromium via CDP",
+    "mobileProfiles": [
+      {
+        "name": "compact-android",
+        "width": 320,
+        "height": 640,
+        "interactionTested": true,
+        "sheetTested": true,
+        "sheetHeightDelta": 0,
+        "layoutShift": 0,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "iphone-portrait",
+        "width": 390,
+        "height": 844,
+        "interactionTested": true,
+        "sheetTested": true,
+        "sheetHeightDelta": 0,
+        "layoutShift": 0,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "android-portrait",
+        "width": 412,
+        "height": 915,
+        "interactionTested": true,
+        "sheetTested": true,
+        "sheetHeightDelta": 0,
+        "layoutShift": 0,
+        "longestTaskMs": 0
+      },
+      {
+        "name": "phone-landscape",
+        "width": 844,
+        "height": 390,
+        "interactionTested": true,
+        "sheetTested": true,
+        "sheetHeightDelta": 0,
+        "layoutShift": 0,
+        "longestTaskMs": 0
+      }
+    ],
+    "desktopProfiles": [
+      {
+        "name": "desktop-webgl",
+        "width": 1440,
+        "height": 1000,
+        "engine": "tropnik-canvas",
+        "coarse": false,
+        "mapInteractionTested": true
+      }
+    ],
+    "mapInteractions": [
+      {
+        "profile": "android-portrait",
+        "passed": true,
+        "longestTaskMs": 0,
+        "layoutShift": 0.009980416515551985,
+        "durationMs": 54205
+      },
+      {
+        "profile": "desktop-webgl",
+        "passed": true,
+        "longestTaskMs": 146,
+        "layoutShift": 0.0067598140350877195,
+        "durationMs": 67169
+      }
+    ],
+    "smoothness": [
+      {
+        "profile": "android-portrait",
+        "passed": true,
+        "performancePassed": true,
+        "performanceIssues": [],
+        "physicalDevice": false,
+        "cpuSlowdownRate": 1,
+        "scenarios": [
+          "panel",
+          "explore-search",
+          "explore-filters",
+          "catalog-scroll",
+          "map-pan",
+          "map-zoom",
+          "layer-switch",
+          "site-search"
+        ],
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "maxCallbackGapMs": 34.5,
+        "maxInputToNextFrameMs": 87.69999999995343,
+        "maxScenarioSessionCLS": 0.0070930410927570195
+      },
+      {
+        "profile": "desktop-webgl",
+        "passed": true,
+        "performancePassed": true,
+        "performanceIssues": [],
+        "physicalDevice": false,
+        "cpuSlowdownRate": 1,
+        "scenarios": [
+          "panel",
+          "explore-search",
+          "explore-filters",
+          "catalog-scroll",
+          "map-pan",
+          "map-zoom",
+          "layer-switch",
+          "site-search"
+        ],
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "maxCallbackGapMs": 44,
+        "maxInputToNextFrameMs": 49.5,
+        "maxScenarioSessionCLS": 0.004273143490304709
+      }
+    ],
+    "zoomDesigns": [
+      {
+        "profile": "android-portrait",
+        "geometryPassed": true,
+        "visualReviewRequired": true,
+        "detailSteps": 18,
+        "minimumZoom": 1.337721595206259,
+        "maximumZoom": 18,
+        "performance": {
+          "layoutShift": 0.014864809434600609,
+          "longestTaskMs": 54
+        },
+        "performanceIntervals": {
+          "modes": {
+            "layoutShift": 0.014864809434600609,
+            "longestTaskMs": 54
+          },
+          "sourceEnds": {
+            "layoutShift": 0,
+            "longestTaskMs": 0
+          },
+          "satellite": {
+            "layoutShift": 0.012475577131253357,
+            "longestTaskMs": 0
+          }
+        },
+        "satellite": {
+          "passed": true,
+          "steps": 6,
+          "pans": 14,
+          "zooms": 14,
+          "toggles": 2,
+          "screenshots": 6,
+          "durationMs": 102357,
+          "performance": {
+            "layoutShift": 0.012475577131253357,
+            "longestTaskMs": 0
+          }
+        },
+        "coast": {
+          "passed": true,
+          "steps": 6,
+          "pans": 24,
+          "screenshots": 6
+        },
+        "sourceEnds": {
+          "passed": true,
+          "frames": 3,
+          "nativeInputs": 9
+        }
+      },
+      {
+        "profile": "desktop-webgl",
+        "geometryPassed": true,
+        "visualReviewRequired": true,
+        "detailSteps": 17,
+        "minimumZoom": 2.90540610449558,
+        "maximumZoom": 18,
+        "performance": {
+          "layoutShift": 0.011484051854416743,
+          "longestTaskMs": 85
+        },
+        "performanceIntervals": {
+          "modes": {
+            "layoutShift": 0.00689032883964297,
+            "longestTaskMs": 57
+          },
+          "sourceEnds": {
+            "layoutShift": 1.3615512465373957e-05,
+            "longestTaskMs": 0
+          },
+          "satellite": {
+            "layoutShift": 0.011484051854416743,
+            "longestTaskMs": 85
+          }
+        },
+        "satellite": {
+          "passed": true,
+          "steps": 6,
+          "pans": 11,
+          "zooms": 10,
+          "toggles": 2,
+          "screenshots": 6,
+          "durationMs": 93704,
+          "performance": {
+            "layoutShift": 0.011484051854416743,
+            "longestTaskMs": 85
+          }
+        },
+        "coast": {
+          "passed": true,
+          "steps": 6,
+          "pans": 18,
+          "screenshots": 6
+        },
+        "sourceEnds": {
+          "passed": true,
+          "frames": 3,
+          "nativeInputs": 9
+        }
+      }
+    ],
+    "offlineSafety": {
+      "passed": true,
+      "workerControlled": true,
+      "savedThroughUI": true,
+      "privateApiNotCached": true
+    }
+  },
+  "nativeUnderlay": {
+    "underlay": {
+      "cases": 44,
+      "frames": 62,
+      "differentPixels": 0,
+      "maxChannelDelta": 0,
+      "pixelHashesMatch": true
+    },
+    "groundCache": {
+      "cases": 18,
+      "frames": 126,
+      "differentPixels": 0,
+      "maxChannelDelta": 0,
+      "pixelHashesMatch": true
+    },
+    "streamingGround": {
+      "cases": 6,
+      "frames": 198,
+      "differentPixels": 0,
+      "maxChannelDelta": 0,
+      "pixelHashesMatch": true
+    },
+    "negativeControls": {
+      "count": 18,
+      "allDetectDifferences": true,
+      "unsafeOpaqueJPEG": {
+        "case": "satellite-opaque-jpeg",
+        "dpr": 1,
+        "name": "force-unsafe-opaque-jpeg-cover",
+        "differentPixels": 4,
+        "maxChannelDelta": 1,
+        "totalPixels": 196608
+      }
+    },
+    "photoWitnesses": 360,
+    "photoWitnessesMatch": true
+  },
+  "attribution": {
+    "verified": true,
+    "cases": 40,
+    "footerCases": 24,
+    "negativeControls": 5,
+    "caseFailures": []
+  },
+  "tileOpacity": {
+    "verified": true,
+    "cases": 48,
+    "comparisons": 144,
+    "pngs": 288,
+    "workers": 96
+  },
+  "mapLoading": {
+    "verified": true,
+    "pageErrors": [],
+    "localHttpErrors": [],
+    "eligibleCells": [
+      "11/1343/615",
+      "11/1343/616",
+      "11/1343/617",
+      "11/1344/615",
+      "11/1345/615",
+      "11/1345/618",
+      "11/1346/615"
+    ],
+    "differentEligiblePixels": 0,
+    "progressCssPixels": 510583.06628534413,
+    "expandedCssPixels": 173061.29995920445,
+    "scope": "Actual built route, native mouse zoom and real map fetch/decoder/painter. One external halo fetch is delayed. Pending pixels outside old ground must exactly match textured complete pixels at the same camera. ROI eligibility never uses image agreement. This is not a provider-speed benchmark."
+  },
+  "artifact": {
+    "id": 14282394647,
+    "bytes": 67669245,
+    "sha256": "ddb7bd03b46ceaa52187e2b764b725e9407b7edd08c2ceace5eb89cafcac2f25"
+  },
+  "evidenceFiles": {
+    "browser-verification.json": {
+      "bytes": 17719117,
+      "sha256": "ca9bb637a45294abaceb62812c8fc74af76531e423246f885b90597edc4fecd3"
+    },
+    "build-info.json": {
+      "bytes": 420066,
+      "sha256": "c9ee4424888add039d23ac4fee86a9d5e10774ec38e19ab60d1d18b8dd734a4a"
+    },
+    "browser-map-underlay-verification.json": {
+      "bytes": 1992110,
+      "sha256": "a8b6e545b5dd4dc71ee58d58340bb23b155ec5a64e8629a047e7428459d2c9cd"
+    },
+    "workflow-provenance.json": {
+      "bytes": 10848,
+      "sha256": "ccdfcc210f16f6708724337707c18f97244bb838ad71ebd64153cc11b449571b"
+    }
+  },
+  "interpretation": {
+    "physicalDevicePerformanceMeasured": false,
+    "providerSpeedBenchmark": false,
+    "callbackGapsArePresentedFPS": false,
+    "inputToNextFrameIsFieldINP": false,
+    "visualReviewCoveredByTheseAutomatedCounts": false,
+    "note": "These are CI Chromium measurements and exact native raster checks from one successful run. Zero observed long tasks applies only to the named measurement interval. Human visual review is separate."
+  }
+}

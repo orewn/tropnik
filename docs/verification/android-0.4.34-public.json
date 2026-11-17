@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "scope": "published-universal-android-promotion",
+  "verified": true,
+  "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+  "workflowRunId": 43983041614,
+  "buildArtifactId": 14283329571,
+  "deviceArtifactId": 14285386780,
+  "tag": "v0.4.34-preview",
+  "releaseUrl": "https://github.com/orewn/tropnik/releases/tag/v0.4.34-preview",
+  "anonymousAssetsVerified": 6,
+  "assets": [
+    {
+      "name": "tropnik-arm64-preview.apk",
+      "bytes": 69231771,
+      "sha256": "f5bd69b3f7cdda6d363b1d8d173bb62148174f98b81ac5232cc312eea9aa6c06",
+      "anonymous": true
+    },
+    {
+      "name": "tropnik-preview.apk",
+      "bytes": 69240138,
+      "sha256": "6b9e748f69574878adf237c79bc5202e629b4849600446a305d00f7b72557c54",
+      "anonymous": true
+    },
+    {
+      "name": "android-manifest.json",
+      "bytes": 2395,
+      "sha256": "8cddcc9656864d4df7f1eff5ae5dfc12123d183956ef95f9db46c4850a4c15a7",
+      "anonymous": true
+    },
+    {
+      "name": "verification-reports.zip",
+      "bytes": 64589,
+      "sha256": "f80ae170657b64b60822a720851b16d5607fcaa23b54421173a7c45a4b43f392",
+      "anonymous": true
+    },
+    {
+      "name": "tropnik-0.4.34-preview-source.tar.gz",
+      "bytes": 151016379,
+      "sha256": "393349ce650fada4e17543a73b0edb7bf326ed9f1ad47274a5f77b515f5fafd7",
+      "anonymous": true
+    },
+    {
+      "name": "checksums.sha256",
+      "bytes": 460,
+      "sha256": "bdd95360ba4a75239eeb7664d31b9ffbde2c7d6bcc494a4f4c9c2c8c1abec038",
+      "anonymous": true
+    }
+  ],
+  "sourceArchiveRecreatedFromExactCommit": true,
+  "releaseReportsRecreatedFromExactReceipts": true,
+  "buildReceipt": {
+    "bytes": 3440,
+    "sha256": "907bd5d0f0c3889f200779f5bd221c010c3da71e6a051d5c0b2bc577f0106360"
+  },
+  "deviceEvidence": {
+    "device-result.json": {
+      "bytes": 4419,
+      "sha256": "2de5db9a77412c0646cf3e9b7c1b2b85cab35e4584cd7fbfb7e329f5a4fef21b"
+    },
+    "installed-apks.json": {
+      "bytes": 581,
+      "sha256": "f36aa6cee6c6aa695f36cef8f70d211626cce521a9b69587a43063e9d280b309"
+    },
+    "raw-instrumentation.log": {
+      "bytes": 7402,
+      "sha256": "d3342c20ce052a0f47cf1df1d02ae333f7f2ec8f7e12902d95381fe940b089eb"
+    },
+    "graphics-driver.txt": {
+      "bytes": 24775,
+      "sha256": "825e98ec94404bb62c50b7d1d4e8f4cda085c17ea0ca6342397512d8c8f7df1f"
+    }
+  },
+  "actualDeviceTests": 11,
+  "physicalDeviceVerified": false,
+  "arm64DeviceExecutionVerified": false,
+  "sdkSignaturesReverified": true,
+  "productionSigned": false,
+  "previousPreview": {
+    "manifestPath": "web/public/downloads/android-manifest.json",
+    "manifestSha256": "aa01366bcd1917b5353c81a5bbad2a585d745dc757aeecdf57067feb570634c4",
+    "version": "0.4.33-preview",
+    "versionCode": 16,
+    "applicationId": "ru.tropa.app.preview",
+    "sourceCommit": "79b5c5edd0c88f7c54e182181c3e8db6791ad706",
+    "apkSha256": "1e121dd05d8aba6eeb92640101ea30fdd2764b514c96d6d4924f5b0c34220408"
+  },
+  "previousSigningCertificateSha256": "7be125719a8a4fb70d9d0b901f95326a03a7c9f3f8b93b96761eb175d02f6d26",
+  "signingCertificateSha256": "76d6da19843c582ea464e636720383a30ba7cc3a908742d6686821ef63d4fbbe",
+  "sameApplicationIdAsPreviousPreview": true,
+  "sameCertificateAsPreviousPreview": false,
+  "versionCodeIncreases": true,
+  "updateIdentityRequirementsMet": false,
+  "updateCompatibilityAssessment": "signing-certificate-mismatch",
+  "updateInstallCompatibilityVerified": false,
+  "pagesGateStillRequired": true,
+  "recordedAt": "2026-11-17T00:10:33.644330+00:00"
+}

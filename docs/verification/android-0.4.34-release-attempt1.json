@@ -1,0 +1,23 @@
+{
+  "sourceCommit": "a1c3fa2f2545a343f59941e19266660ec53ff938",
+  "workflowRunId": 43983041614,
+  "jobId": 133706901765,
+  "artifactId": 14283564300,
+  "zipSha256": "c845b7db1503b898f670de7a201a2ab504fa1cd584cb191c5d706ad9451ae9ab",
+  "files": [
+    "acceleration.txt",
+    "emulator.log",
+    "emulator-version.txt",
+    "final-screen.png",
+    "graphics-driver.txt",
+    "logcat.txt",
+    "system-image.properties",
+    "test-screenshots.tar",
+    "webview-version.txt"
+  ],
+  "deviceScenariosExecuted": 0,
+  "installedArtifactBytesVerified": false,
+  "failureStage": "capture_installed adb pull",
+  "publicationSkipped": true,
+  "evidence": "preview_artifacts.py:257 raises CalledProcessError before installed-apks.json and instrumentation invocation"
+}
