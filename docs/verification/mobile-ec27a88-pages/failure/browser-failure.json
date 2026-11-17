@@ -1,0 +1,5014 @@
+{
+  "environment": {
+    "schemaVersion": 1,
+    "profile": "chromium-headless-software-swiftshader-webgl-v1",
+    "collection": "browser-target-cdp-before-measurement",
+    "sourceCommit": "ec27a88a5d6574404fd90120e6fbb6a11229e3d5",
+    "capturedAt": "2026-11-17T11:32:04.752Z",
+    "requestedFlags": [
+      "--headless=new",
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+      "--disable-component-update",
+      "--disable-default-apps",
+      "--disable-extensions",
+      "--disable-features=Translate,MediaRouter",
+      "--mute-audio",
+      "--no-first-run",
+      "--use-gl=angle",
+      "--use-angle=swiftshader-webgl",
+      "--enable-unsafe-swiftshader",
+      "--window-size=1920,1920",
+      "--ozone-override-screen-size=1920,1920"
+    ],
+    "commandLine": "/usr/bin/google-chrome --headless=new --no-sandbox --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-features=Translate,MediaRouter --mute-audio --no-first-run --use-gl=angle --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --window-size=1920,1920 --ozone-override-screen-size=1920,1920 --remote-debugging-port=33113 --user-data-dir=/tmp/tropnik-chrome-7359 --noerrdialogs --ozone-platform=headless --flag-switches-begin --flag-switches-end --enable-unsafe-swiftshader about:blank",
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "vulkan": "disabled_off",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webgpu_on_vk_via_gl_interop": "disabled_off",
+        "webnn": "unavailable_software"
+      }
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 9V45 96-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    },
+    "nativeSurface": {
+      "schemaVersion": 1,
+      "collection": "blank-target-before-emulation",
+      "window": {
+        "left": 10,
+        "top": 10,
+        "width": 1920,
+        "height": 1920,
+        "windowState": "normal"
+      },
+      "viewport": {
+        "url": "about:blank",
+        "visibilityState": "visible",
+        "innerWidth": 1920,
+        "innerHeight": 1833,
+        "outerWidth": 1920,
+        "outerHeight": 1920,
+        "devicePixelRatio": 1,
+        "screen": {
+          "width": 1920,
+          "height": 1920,
+          "availWidth": 1920,
+          "availHeight": 1920
+        }
+      }
+    }
+  },
+  "profile": "compact-android",
+  "error": "AssertionError [ERR_ASSERTION]: compact-android/layers/closed/open: delivered click differs from its target\n    at assertExperienceClick (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-report.mjs:417:41)\n    at assertLayerMenuAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-report.mjs:480:3)\n    at checkPortraitLayerMenus (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:567:70)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:1021:51",
+  "errorDetails": {
+    "name": "AssertionError",
+    "message": "compact-android/layers/closed/open: delivered click differs from its target",
+    "stack": "AssertionError [ERR_ASSERTION]: compact-android/layers/closed/open: delivered click differs from its target\n    at assertExperienceClick (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-report.mjs:417:41)\n    at assertLayerMenuAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-report.mjs:480:3)\n    at checkPortraitLayerMenus (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:567:70)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:1021:51",
+    "code": "ERR_ASSERTION"
+  },
+  "browserStartup": {
+    "schemaVersion": 1,
+    "binary": "google-chrome",
+    "pid": 7372,
+    "detached": true,
+    "startedAtEpochMs": 1794915124509,
+    "limits": {
+      "readyMs": 60000,
+      "probeMs": 1000,
+      "pollMs": 100,
+      "stderrBytes": 32768,
+      "termMs": 1500,
+      "killMs": 1000
+    },
+    "status": "ready",
+    "probes": 2,
+    "exitCode": 0,
+    "signalCode": null,
+    "spawnError": null,
+    "startupError": null,
+    "lastProbeError": "TypeError: fetch failed",
+    "lastProbeFailure": {
+      "name": "TypeError",
+      "message": "fetch failed",
+      "stack": "TypeError: fetch failed",
+      "cause": {
+        "name": "Error",
+        "message": "connect ECONNREFUSED 127.0.0.1:33113",
+        "stack": "Error: connect ECONNREFUSED 127.0.0.1:33113\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:2083:16)",
+        "code": "ECONNREFUSED",
+        "errno": -111,
+        "syscall": "connect",
+        "address": "127.0.0.1",
+        "port": 33113
+      }
+    },
+    "readyAfterMs": 179.724857,
+    "version": {
+      "browser": "Chrome/157.0.8103.50",
+      "protocol": "1.3"
+    },
+    "cleanup": {
+      "status": "stopped",
+      "signals": [
+        "SIGTERM"
+      ],
+      "errors": [],
+      "elapsedMs": 103.37282699999923
+    },
+    "elapsedMs": 21755.498714999998,
+    "stderrTail": "[7372:7395:1117/113204.555643:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7395:1117/113204.556067:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7395:1117/113204.556084:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7398:1117/113204.557077:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7398:1117/113204.557095:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7398:1117/113204.557101:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7395:1117/113204.568798:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7395:1117/113204.594189:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n\nDevTools listening on ws://127.0.0.1:33113/devtools/browser/18039e03-0a28-4d4f-a808-10e8dd9c68ba\n[7372:7372:1117/113204.667645:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7395:1117/113204.667756:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7372:1117/113204.668462:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7395:1117/113204.668510:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7372:1117/113204.671284:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7372:1117/113204.672180:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7395:1117/113204.672389:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7372:1117/113204.694232:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7372:1117/113204.696232:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7395:1117/113204.696577:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7372:1117/113204.700673:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7372:1117/113204.708930:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files\n[7372:7372:1117/113204.714697:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7395:1117/113204.714766:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7372:1117/113204.731353:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \n[7372:7395:1117/113204.731826:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7372:7372:1117/113204.746773:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: \nCreated TensorFlow Lite XNNPACK delegate for CPU.\n",
+    "stderrBytesCaptured": 4891,
+    "stderrBytesTotal": 4891,
+    "stderrTruncated": false
+  },
+  "performanceIssues": [],
+  "profilePerformance": [],
+  "completedMapInteractions": [],
+  "completedZoomDesigns": [],
+  "completedDesktopProfiles": [],
+  "completedProfiles": [],
+  "network": {
+    "schemaVersion": 1,
+    "source": "CDP Network events",
+    "readOnly": true,
+    "status": "recording",
+    "enableError": null,
+    "disposed": false,
+    "startedAtEpochMs": 1794915124908,
+    "capturedAtEpochMs": 1794915146054,
+    "elapsedMs": 21145.381639,
+    "scope": "public map sources and local static assets; URL queries and bodies excluded",
+    "ageClock": "observer monotonic milliseconds",
+    "limits": {
+      "active": 128,
+      "completed": 32,
+      "failed": 32,
+      "urlLength": 2048
+    },
+    "counts": {
+      "started": 73,
+      "completed": 70,
+      "failed": 0,
+      "canceled": 0,
+      "redirected": 0,
+      "ignored": 8,
+      "activeOverflow": 0,
+      "completedDiscarded": 38,
+      "failedDiscarded": 0
+    },
+    "active": [
+      {
+        "requestId": "7466.56",
+        "url": "http://127.0.0.1:34137/tropnik/data/map-coverage/manifest.json",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Other",
+        "priority": "High",
+        "stage": "response",
+        "startedAtEpochMs": 1794915125179.6191,
+        "startedAtMonotonicSeconds": 500.889136,
+        "lastEventAtMonotonicSeconds": 500.918545,
+        "decodedBytes": 0,
+        "encodedBytes": 0,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "application/json",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 500.890077,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.439,
+          "sendEnd": 0.996,
+          "receiveHeadersStart": 2.669,
+          "receiveHeadersEnd": 2.722,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "ageMs": 20848.482311,
+        "idleMs": 20839.802467
+      },
+      {
+        "requestId": "B2D14A2574BA7336DD527734EB277ED0",
+        "url": "http://127.0.0.1:34137/tropnik/assets/custom-map-tiles.worker-BLWklajS.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "VeryLow",
+        "stage": "request",
+        "startedAtEpochMs": 1794915125704.999,
+        "startedAtMonotonicSeconds": 501.415127,
+        "lastEventAtMonotonicSeconds": 501.415127,
+        "decodedBytes": 0,
+        "encodedBytes": 0,
+        "ageMs": 20341.752525,
+        "idleMs": 20341.752525
+      },
+      {
+        "requestId": "71D05800FE636F89341141AC08142F13",
+        "url": "http://127.0.0.1:34137/tropnik/assets/custom-map-trail-raster.worker-CZZMbu81.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "VeryLow",
+        "stage": "request",
+        "startedAtEpochMs": 1794915125791.18,
+        "startedAtMonotonicSeconds": 501.501308,
+        "lastEventAtMonotonicSeconds": 501.501308,
+        "decodedBytes": 0,
+        "encodedBytes": 0,
+        "ageMs": 20262.328567,
+        "idleMs": 20262.328567
+      }
+    ],
+    "completed": [
+      {
+        "requestId": "7466.77",
+        "url": "http://127.0.0.1:34137/tropnik/assets/page-CrnP4D6z2.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125319.453,
+        "startedAtMonotonicSeconds": 501.029573,
+        "lastEventAtMonotonicSeconds": 501.048779,
+        "decodedBytes": 7401,
+        "encodedBytes": 7616,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.029903,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 4.347,
+          "sendEnd": 4.384,
+          "receiveHeadersStart": 16.867,
+          "receiveHeadersEnd": 17.212,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125393,
+        "durationMs": 19.205999999996948,
+        "ageMs": 16.701041000000032,
+        "idleMs": 0.000990999999999076
+      },
+      {
+        "requestId": "7466.79",
+        "url": "http://127.0.0.1:34137/tropnik/assets/api-EF4hUWqN.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125319.887,
+        "startedAtMonotonicSeconds": 501.029995,
+        "lastEventAtMonotonicSeconds": 501.054685,
+        "decodedBytes": 10462,
+        "encodedBytes": 10677,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.033452,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 5.166,
+          "sendEnd": 5.198,
+          "receiveHeadersStart": 15.758,
+          "receiveHeadersEnd": 15.789,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125394,
+        "durationMs": 24.690000000020973,
+        "ageMs": 16.779029000000037,
+        "idleMs": 0.0017319999999472202
+      },
+      {
+        "requestId": "7466.81",
+        "url": "http://127.0.0.1:34137/tropnik/assets/seo-metadata-CPQdN90J.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125320.222,
+        "startedAtMonotonicSeconds": 501.030354,
+        "lastEventAtMonotonicSeconds": 501.054852,
+        "decodedBytes": 11842,
+        "encodedBytes": 12057,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.033681,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 5.11,
+          "sendEnd": 5.135,
+          "receiveHeadersStart": 15.776,
+          "receiveHeadersEnd": 15.803,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125394,
+        "durationMs": 24.497999999994136,
+        "ageMs": 15.45954699999993,
+        "idleMs": 0.0005909999999857973
+      },
+      {
+        "requestId": "7466.78",
+        "url": "http://127.0.0.1:34137/tropnik/assets/Footer-Hg3zfKXo.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125319.709,
+        "startedAtMonotonicSeconds": 501.029835,
+        "lastEventAtMonotonicSeconds": 501.05534,
+        "decodedBytes": 88990,
+        "encodedBytes": 89206,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.03328,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 4.382,
+          "sendEnd": 4.45,
+          "receiveHeadersStart": 15.666,
+          "receiveHeadersEnd": 15.706,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125394,
+        "durationMs": 25.50500000000966,
+        "ageMs": 17.34406100000001,
+        "idleMs": 0.0005700000000388172
+      },
+      {
+        "requestId": "7466.83",
+        "url": "http://127.0.0.1:34137/tropnik/assets/Explore-ClNJa_Q0.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125320.491,
+        "startedAtMonotonicSeconds": 501.030625,
+        "lastEventAtMonotonicSeconds": 501.05723,
+        "decodedBytes": 104549,
+        "encodedBytes": 104765,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.034059,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 19.917,
+          "sendEnd": 19.991,
+          "receiveHeadersStart": 22.654,
+          "receiveHeadersEnd": 22.702,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125394,
+        "durationMs": 26.605000000017753,
+        "ageMs": 11.677110000000084,
+        "idleMs": 0.0005100000000766158
+      },
+      {
+        "requestId": "7466.86",
+        "url": "http://127.0.0.1:34137/tropnik/assets/published-route-DHVUFyC7.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125320.931,
+        "startedAtMonotonicSeconds": 501.031064,
+        "lastEventAtMonotonicSeconds": 501.065421,
+        "decodedBytes": 3752,
+        "encodedBytes": 3966,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.034478,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 21.929,
+          "sendEnd": 21.948,
+          "receiveHeadersStart": 29.099,
+          "receiveHeadersEnd": 29.131,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125394,
+        "durationMs": 34.35699999999997,
+        "ageMs": 10.100952000000007,
+        "idleMs": 0.0005909999999857973
+      },
+      {
+        "requestId": "7466.87",
+        "url": "http://127.0.0.1:34137/tropnik/assets/api-transport-DmvgGf7_.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125320.985,
+        "startedAtMonotonicSeconds": 501.031117,
+        "lastEventAtMonotonicSeconds": 501.065593,
+        "decodedBytes": 1949,
+        "encodedBytes": 2163,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.034574,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 21.871,
+          "sendEnd": 21.893,
+          "receiveHeadersStart": 29.604,
+          "receiveHeadersEnd": 29.711,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125395,
+        "durationMs": 34.47599999998374,
+        "ageMs": 10.109654999999975,
+        "idleMs": 0.0005009999999856518
+      },
+      {
+        "requestId": "7466.84",
+        "url": "http://127.0.0.1:34137/tropnik/assets/EventCategoryIcon-fkQ2McVT.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125320.622,
+        "startedAtMonotonicSeconds": 501.030754,
+        "lastEventAtMonotonicSeconds": 501.067138,
+        "decodedBytes": 5937,
+        "encodedBytes": 6152,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.034172,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 22.012,
+          "sendEnd": 22.054,
+          "receiveHeadersStart": 28.408,
+          "receiveHeadersEnd": 28.471,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125395,
+        "durationMs": 36.383999999998196,
+        "ageMs": 11.935721000000058,
+        "idleMs": 0.00041100000009919313
+      },
+      {
+        "requestId": "7466.88",
+        "url": "http://127.0.0.1:34137/tropnik/assets/Offline-ClgHmOAu.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.024,
+        "startedAtMonotonicSeconds": 501.031159,
+        "lastEventAtMonotonicSeconds": 501.069579,
+        "decodedBytes": 17404,
+        "encodedBytes": 17619,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.034702,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 22.871,
+          "sendEnd": 22.897,
+          "receiveHeadersStart": 29.816,
+          "receiveHeadersEnd": 29.891,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125395,
+        "durationMs": 38.4199999999737,
+        "ageMs": 10.498041000000057,
+        "idleMs": 0.0004200000000764703
+      },
+      {
+        "requestId": "7466.85",
+        "url": "http://127.0.0.1:34137/tropnik/assets/trail-overlay.generated-B2X2IcF7.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125320.78,
+        "startedAtMonotonicSeconds": 501.030914,
+        "lastEventAtMonotonicSeconds": 501.070084,
+        "decodedBytes": 70320,
+        "encodedBytes": 70536,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.034364,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 22,
+          "sendEnd": 22.021,
+          "receiveHeadersStart": 30.529,
+          "receiveHeadersEnd": 30.6,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125395,
+        "durationMs": 39.170000000012806,
+        "ageMs": 11.369105999999988,
+        "idleMs": 0.0005909999999857973
+      },
+      {
+        "requestId": "7466.90",
+        "url": "http://127.0.0.1:34137/tropnik/assets/custom-map-camera-BmDsIFiE.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.107,
+        "startedAtMonotonicSeconds": 501.031241,
+        "lastEventAtMonotonicSeconds": 501.074738,
+        "decodedBytes": 7636,
+        "encodedBytes": 7851,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.034931,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 34.954,
+          "sendEnd": 35.023,
+          "receiveHeadersStart": 37.116,
+          "receiveHeadersEnd": 37.169,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125396,
+        "durationMs": 43.49700000000212,
+        "ageMs": 10.699254999999994,
+        "idleMs": 0.0003909999999223146
+      },
+      {
+        "requestId": "7466.89",
+        "url": "http://127.0.0.1:34137/tropnik/assets/CustomAtlas-Cj9-adoE.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.065,
+        "startedAtMonotonicSeconds": 501.031199,
+        "lastEventAtMonotonicSeconds": 501.070373,
+        "decodedBytes": 142263,
+        "encodedBytes": 142479,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.034815,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 23.988,
+          "sendEnd": 24.013,
+          "receiveHeadersStart": 30.343,
+          "receiveHeadersEnd": 30.411,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125396,
+        "durationMs": 39.17400000000271,
+        "ageMs": 11.279679999999985,
+        "idleMs": 0.0005200000000513683
+      },
+      {
+        "requestId": "7466.92",
+        "url": "http://127.0.0.1:34137/tropnik/assets/map-policy-COUhrNue.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.5261,
+        "startedAtMonotonicSeconds": 501.03166,
+        "lastEventAtMonotonicSeconds": 501.073742,
+        "decodedBytes": 1074,
+        "encodedBytes": 1288,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.038051,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 32.213,
+          "sendEnd": 32.245,
+          "receiveHeadersStart": 34.83,
+          "receiveHeadersEnd": 34.856,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125396,
+        "durationMs": 42.08199999999351,
+        "ageMs": 9.573365999999965,
+        "idleMs": 0.0006409999999732463
+      },
+      {
+        "requestId": "7466.93",
+        "url": "http://127.0.0.1:34137/tropnik/assets/territories-D58r8KRx.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.589,
+        "startedAtMonotonicSeconds": 501.031721,
+        "lastEventAtMonotonicSeconds": 501.073931,
+        "decodedBytes": 2622,
+        "encodedBytes": 2836,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.038198,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 32.125,
+          "sendEnd": 32.147,
+          "receiveHeadersStart": 35.294,
+          "receiveHeadersEnd": 35.321,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125396,
+        "durationMs": 42.210000000011405,
+        "ageMs": 9.670642999999927,
+        "idleMs": 0.00040100000001075387
+      },
+      {
+        "requestId": "7466.95",
+        "url": "http://127.0.0.1:34137/tropnik/assets/route-search-BnD9TNUC.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.856,
+        "startedAtMonotonicSeconds": 501.03199,
+        "lastEventAtMonotonicSeconds": 501.078397,
+        "decodedBytes": 7790,
+        "encodedBytes": 8005,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.038441,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 32.168,
+          "sendEnd": 32.19,
+          "receiveHeadersStart": 37.072,
+          "receiveHeadersEnd": 37.101,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125397,
+        "durationMs": 46.406999999987875,
+        "ageMs": 9.81892700000003,
+        "idleMs": 0.0015630000000328437
+      },
+      {
+        "requestId": "7466.91",
+        "url": "http://127.0.0.1:34137/tropnik/assets/map-preload-lxco_zAK.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.395,
+        "startedAtMonotonicSeconds": 501.031527,
+        "lastEventAtMonotonicSeconds": 501.075893,
+        "decodedBytes": 20034,
+        "encodedBytes": 20249,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.037877,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 32.114,
+          "sendEnd": 32.161,
+          "receiveHeadersStart": 34.476,
+          "receiveHeadersEnd": 34.505,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125397,
+        "durationMs": 44.366000000025,
+        "ageMs": 10.700647000000004,
+        "idleMs": 0.0010109999999485808
+      },
+      {
+        "requestId": "7466.96",
+        "url": "http://127.0.0.1:34137/tropnik/assets/server-data-CjYajENZ.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.995,
+        "startedAtMonotonicSeconds": 501.032128,
+        "lastEventAtMonotonicSeconds": 501.078558,
+        "decodedBytes": 66,
+        "encodedBytes": 279,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.038541,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 37.914,
+          "sendEnd": 39.06,
+          "receiveHeadersStart": 39.067,
+          "receiveHeadersEnd": 39.094,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125398,
+        "durationMs": 46.42999999998665,
+        "ageMs": 10.852725999999961,
+        "idleMs": 0.0049869999999145875
+      },
+      {
+        "requestId": "7466.94",
+        "url": "http://127.0.0.1:34137/tropnik/assets/facts-B5_fR8ji.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125321.726,
+        "startedAtMonotonicSeconds": 501.031859,
+        "lastEventAtMonotonicSeconds": 501.078043,
+        "decodedBytes": 31998,
+        "encodedBytes": 32213,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.038329,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 32.224,
+          "sendEnd": 32.252,
+          "receiveHeadersStart": 36.117,
+          "receiveHeadersEnd": 36.147,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125398,
+        "durationMs": 46.18399999998246,
+        "ageMs": 11.459521999999993,
+        "idleMs": 0.013731000000007043
+      },
+      {
+        "requestId": "7466.82",
+        "url": "http://127.0.0.1:34137/tropnik/assets/content-BoARJgU2.js",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Script",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125320.376,
+        "startedAtMonotonicSeconds": 501.030506,
+        "lastEventAtMonotonicSeconds": 501.058526,
+        "decodedBytes": 1695787,
+        "encodedBytes": 1696004,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "text/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.033924,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 4.914,
+          "sendEnd": 4.93,
+          "receiveHeadersStart": 16.542,
+          "receiveHeadersEnd": 17.8,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125399,
+        "durationMs": 28.019999999969514,
+        "ageMs": 17.23096099999998,
+        "idleMs": 0.0025439999999434804
+      },
+      {
+        "requestId": "7466.112",
+        "url": "http://127.0.0.1:34137/tropnik/assets/manrope-latin-700-normal-BZp_XxE4.woff2",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Font",
+        "priority": "VeryHigh",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125331.938,
+        "startedAtMonotonicSeconds": 501.042036,
+        "lastEventAtMonotonicSeconds": 501.093968,
+        "decodedBytes": 14212,
+        "encodedBytes": 14407,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "font/woff2",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.086233,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 1.531,
+          "sendEnd": 1.62,
+          "receiveHeadersStart": 6.11,
+          "receiveHeadersEnd": 6.181,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125406,
+        "durationMs": 51.93200000002207,
+        "ageMs": 13.303218000000015,
+        "idleMs": 0.007410999999933665
+      },
+      {
+        "requestId": "7466.108",
+        "url": "http://127.0.0.1:34137/tropnik/assets/manrope-latin-500-normal-BYYD-dBL.woff2",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Font",
+        "priority": "VeryHigh",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125341.2659,
+        "startedAtMonotonicSeconds": 501.051371,
+        "lastEventAtMonotonicSeconds": 501.094219,
+        "decodedBytes": 14044,
+        "encodedBytes": 14239,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "font/woff2",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.086615,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 1.326,
+          "sendEnd": 1.349,
+          "receiveHeadersStart": 6.183,
+          "receiveHeadersEnd": 6.365,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125406,
+        "durationMs": 42.847999999992226,
+        "ageMs": 13.688990999999987,
+        "idleMs": 0.005227999999988242
+      },
+      {
+        "requestId": "7466.110",
+        "url": "http://127.0.0.1:34137/tropnik/assets/manrope-latin-600-normal-4f0koTD-.woff2",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Font",
+        "priority": "VeryHigh",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125336.664,
+        "startedAtMonotonicSeconds": 501.046767,
+        "lastEventAtMonotonicSeconds": 501.094124,
+        "decodedBytes": 14172,
+        "encodedBytes": 14367,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "font/woff2",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.086482,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 1.413,
+          "sendEnd": 1.437,
+          "receiveHeadersStart": 6.175,
+          "receiveHeadersEnd": 6.203,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125406,
+        "durationMs": 47.35700000003362,
+        "ageMs": 14.13988100000006,
+        "idleMs": 0.0021430000000464133
+      },
+      {
+        "requestId": "7466.106",
+        "url": "http://127.0.0.1:34137/tropnik/assets/manrope-latin-400-normal-PaqtzbVb.woff2",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Font",
+        "priority": "VeryHigh",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125343.714,
+        "startedAtMonotonicSeconds": 501.053825,
+        "lastEventAtMonotonicSeconds": 501.094319,
+        "decodedBytes": 14108,
+        "encodedBytes": 14303,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "font/woff2",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.086937,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 1.047,
+          "sendEnd": 1.103,
+          "receiveHeadersStart": 6.377,
+          "receiveHeadersEnd": 6.769,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125413,
+        "durationMs": 40.493999999966945,
+        "ageMs": 20.337879000000044,
+        "idleMs": 0.008382999999980711
+      },
+      {
+        "requestId": "7466.104",
+        "url": "http://127.0.0.1:34137/tropnik/assets/manrope-cyrillic-700-normal-Dw_fZAg2.woff2",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Font",
+        "priority": "VeryHigh",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125404.9348,
+        "startedAtMonotonicSeconds": 501.115054,
+        "lastEventAtMonotonicSeconds": 501.124672,
+        "decodedBytes": 7852,
+        "encodedBytes": 8047,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "font/woff2",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.11908,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 1.507,
+          "sendEnd": 1.565,
+          "receiveHeadersStart": 4.028,
+          "receiveHeadersEnd": 4.138,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125483,
+        "durationMs": 9.617999999989024,
+        "ageMs": 69.091947,
+        "idleMs": 0.008894000000054803
+      },
+      {
+        "requestId": "7466.102",
+        "url": "http://127.0.0.1:34137/tropnik/assets/manrope-cyrillic-600-normal-DvRl3Mj-.woff2",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Font",
+        "priority": "VeryHigh",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125405.15,
+        "startedAtMonotonicSeconds": 501.115274,
+        "lastEventAtMonotonicSeconds": 501.125923,
+        "decodedBytes": 7872,
+        "encodedBytes": 8067,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "font/woff2",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.120744,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 1.684,
+          "sendEnd": 1.731,
+          "receiveHeadersStart": 2.818,
+          "receiveHeadersEnd": 3.39,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125484,
+        "durationMs": 10.649000000000797,
+        "ageMs": 69.80493300000012,
+        "idleMs": 0.0045070000001032895
+      },
+      {
+        "requestId": "7466.100",
+        "url": "http://127.0.0.1:34137/tropnik/assets/manrope-cyrillic-500-normal-B1OEZity.woff2",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Font",
+        "priority": "VeryHigh",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125405.623,
+        "startedAtMonotonicSeconds": 501.115748,
+        "lastEventAtMonotonicSeconds": 501.128524,
+        "decodedBytes": 7872,
+        "encodedBytes": 8067,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "font/woff2",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.121875,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.664,
+          "sendEnd": 0.689,
+          "receiveHeadersStart": 3.152,
+          "receiveHeadersEnd": 3.262,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125484,
+        "durationMs": 12.776000000030763,
+        "ageMs": 65.36246999999992,
+        "idleMs": 0.0015029999999569554
+      },
+      {
+        "requestId": "7466.98",
+        "url": "http://127.0.0.1:34137/tropnik/assets/manrope-cyrillic-400-normal-BMzJvInZ.woff2",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Font",
+        "priority": "VeryHigh",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125406.043,
+        "startedAtMonotonicSeconds": 501.116167,
+        "lastEventAtMonotonicSeconds": 501.12865,
+        "decodedBytes": 7840,
+        "encodedBytes": 8035,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "font/woff2",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.122211,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.375,
+          "sendEnd": 0.398,
+          "receiveHeadersStart": 3.242,
+          "receiveHeadersEnd": 3.316,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125484,
+        "durationMs": 12.482999999974709,
+        "ageMs": 64.18129699999997,
+        "idleMs": 0.0031850000000304135
+      },
+      {
+        "requestId": "7466.114",
+        "url": "http://127.0.0.1:34137/tropnik/data/map-coverage/manifest.json",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Other",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125455.7742,
+        "startedAtMonotonicSeconds": 501.165798,
+        "lastEventAtMonotonicSeconds": 501.16907,
+        "decodedBytes": 220977,
+        "encodedBytes": 221194,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "application/json",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.166611,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.312,
+          "sendEnd": 0.412,
+          "receiveHeadersStart": 1.387,
+          "receiveHeadersEnd": 1.521,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125551,
+        "durationMs": 3.27199999998129,
+        "ageMs": 71.75483900000017,
+        "idleMs": 0.011878000000024258
+      },
+      {
+        "requestId": "7466.118",
+        "url": "http://127.0.0.1:34137/tropnik/data/map-coverage/base.coverage",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Fetch",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125552.306,
+        "startedAtMonotonicSeconds": 501.262403,
+        "lastEventAtMonotonicSeconds": 501.27854,
+        "decodedBytes": 3019896,
+        "encodedBytes": 3020107,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "application/octet-stream",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.262925,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 1.417,
+          "sendEnd": 1.472,
+          "receiveHeadersStart": 8.853,
+          "receiveHeadersEnd": 8.911,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125661,
+        "durationMs": 16.137000000014723,
+        "ageMs": 104.5282850000001,
+        "idleMs": 0.009675000000015643
+      },
+      {
+        "requestId": "7466.121",
+        "url": "http://127.0.0.1:34137/tropnik/maps/russia-relief/0/0/0.png",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Fetch",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125641.5342,
+        "startedAtMonotonicSeconds": 501.351645,
+        "lastEventAtMonotonicSeconds": 501.355902,
+        "decodedBytes": 9873,
+        "encodedBytes": 10067,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "image/png",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.352032,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.308,
+          "sendEnd": 0.358,
+          "receiveHeadersStart": 2.806,
+          "receiveHeadersEnd": 3.093,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125718,
+        "durationMs": 4.256999999995514,
+        "ageMs": 74.0688419999999,
+        "idleMs": 0.011126999999987675
+      },
+      {
+        "requestId": "7466.120",
+        "url": "http://127.0.0.1:34137/tropnik/data/trail-overlay-b9607512eafb423f.json",
+        "queryOmitted": false,
+        "method": "GET",
+        "resourceType": "Fetch",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125639.386,
+        "startedAtMonotonicSeconds": 501.349469,
+        "lastEventAtMonotonicSeconds": 501.408251,
+        "decodedBytes": 2634057,
+        "encodedBytes": 2634275,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "application/json",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.349857,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.238,
+          "sendEnd": 0.297,
+          "receiveHeadersStart": 3.8,
+          "receiveHeadersEnd": 3.846,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125742,
+        "durationMs": 58.78200000000788,
+        "ageMs": 98.25704000000019,
+        "idleMs": 0.008943000000044776
+      },
+      {
+        "requestId": "7466.124",
+        "url": "http://127.0.0.1:34137/tropnik/data/routes/kolyma-black-creek.geojson",
+        "queryOmitted": true,
+        "method": "GET",
+        "resourceType": "Fetch",
+        "priority": "High",
+        "stage": "finished",
+        "startedAtEpochMs": 1794915125924.132,
+        "startedAtMonotonicSeconds": 501.634231,
+        "lastEventAtMonotonicSeconds": 501.6378,
+        "decodedBytes": 18596,
+        "encodedBytes": 18801,
+        "status": 200,
+        "protocol": "http/1.1",
+        "mimeType": "application/geo+json",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "timing": {
+          "requestTime": 501.634714,
+          "dnsStart": -1,
+          "dnsEnd": -1,
+          "connectStart": -1,
+          "connectEnd": -1,
+          "sslStart": -1,
+          "sslEnd": -1,
+          "sendStart": 0.226,
+          "sendEnd": 0.331,
+          "receiveHeadersStart": 2.401,
+          "receiveHeadersEnd": 2.455,
+          "workerStart": -1,
+          "workerReady": -1,
+          "workerFetchStart": -1,
+          "workerRespondWithSettled": -1
+        },
+        "finishedAtEpochMs": 1794915125935,
+        "durationMs": 3.569000000027245,
+        "ageMs": 9.226803000000018,
+        "idleMs": 0.009084000000029846
+      }
+    ],
+    "failed": [],
+    "truncated": false
+  },
+  "layerMenuAudit": {
+    "profile": "compact-android",
+    "states": [
+      {
+        "sheet": "closed",
+        "opened": {
+          "input": "touch",
+          "selector": ".layer-button",
+          "point": {
+            "x": 36,
+            "y": 156,
+            "width": 48,
+            "height": 56,
+            "label": "Настройки карты",
+            "hit": "svg",
+            "unobscured": true,
+            "sampledAt": 13902.200000000012,
+            "animating": false,
+            "animations": [],
+            "selector": ".layer-button"
+          },
+          "events": [
+            {
+              "type": "pointerdown",
+              "time": 13919,
+              "timestamp": 13903,
+              "pointerType": "touch",
+              "pointerId": 17,
+              "x": 36,
+              "y": 156,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            },
+            {
+              "type": "pointerup",
+              "time": 13968.5,
+              "timestamp": 13964.400000000023,
+              "pointerType": "touch",
+              "pointerId": 17,
+              "x": 36,
+              "y": 156,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            },
+            {
+              "type": "click",
+              "time": 13969.099999999977,
+              "timestamp": 13964.400000000023,
+              "pointerType": "touch",
+              "pointerId": 17,
+              "x": 36,
+              "y": 151,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            }
+          ]
+        },
+        "frames": [
+          {
+            "sheet": "closed",
+            "map": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 576,
+              "width": 320,
+              "height": 520
+            },
+            "usable": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 472,
+              "width": 320,
+              "height": 416
+            },
+            "menu": {
+              "left": 68,
+              "right": 308,
+              "top": 64,
+              "bottom": 464,
+              "width": 240,
+              "height": 400
+            },
+            "button": {
+              "left": 12,
+              "right": 60,
+              "top": 128,
+              "bottom": 184,
+              "width": 48,
+              "height": 56
+            },
+            "scrollTop": 0,
+            "scrollHeight": 478,
+            "clientHeight": 398,
+            "scrollY": 0,
+            "controls": [
+              {
+                "index": 0,
+                "tag": "BUTTON",
+                "label": "Закрыть настройки карты",
+                "rect": {
+                  "left": 247,
+                  "right": 295,
+                  "top": 77,
+                  "bottom": 125,
+                  "width": 48,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 271,
+                  "y": 101
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": null,
+                  "label": "×"
+                }
+              },
+              {
+                "index": 1,
+                "tag": "BUTTON",
+                "label": "Север сверху",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 135,
+                  "bottom": 183,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 159
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "map-mobile-action",
+                  "label": "Север сверху"
+                }
+              },
+              {
+                "index": 2,
+                "tag": "BUTTON",
+                "label": "Показать Россию целиком",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 193,
+                  "bottom": 241,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 217
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "map-mobile-action",
+                  "label": "Показать Россию целиком"
+                }
+              },
+              {
+                "index": 3,
+                "tag": "INPUT",
+                "label": "Тропы и грунтовые дороги",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 266,
+                  "bottom": 284,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 275
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Тропы и грунтовые дороги"
+                }
+              },
+              {
+                "index": 4,
+                "tag": "INPUT",
+                "label": "Рельеф и линии высот",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 324,
+                  "bottom": 342,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 333
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Рельеф и линии высот"
+                }
+              },
+              {
+                "index": 5,
+                "tag": "INPUT",
+                "label": "Границы территорий",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 382,
+                  "bottom": 400,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 391
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Границы территорий"
+                }
+              },
+              {
+                "index": 6,
+                "tag": "A",
+                "label": "Подробная офлайн-карта",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 425,
+                  "bottom": 473,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 449
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Подробная офлайн-карта"
+                }
+              },
+              {
+                "index": 7,
+                "tag": "A",
+                "label": "Источники карты",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 483,
+                  "bottom": 531,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": 507
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "mobile-search-launch",
+                  "label": "Найти маршрут"
+                }
+              }
+            ]
+          },
+          {
+            "sheet": "closed",
+            "map": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 576,
+              "width": 320,
+              "height": 520
+            },
+            "usable": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 472,
+              "width": 320,
+              "height": 416
+            },
+            "menu": {
+              "left": 68,
+              "right": 308,
+              "top": 64,
+              "bottom": 464,
+              "width": 240,
+              "height": 400
+            },
+            "button": {
+              "left": 12,
+              "right": 60,
+              "top": 128,
+              "bottom": 184,
+              "width": 48,
+              "height": 56
+            },
+            "scrollTop": 65,
+            "scrollHeight": 478,
+            "clientHeight": 398,
+            "scrollY": 0,
+            "controls": [
+              {
+                "index": 0,
+                "tag": "BUTTON",
+                "label": "Закрыть настройки карты",
+                "rect": {
+                  "left": 247,
+                  "right": 295,
+                  "top": 12,
+                  "bottom": 60,
+                  "width": 48,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 271,
+                  "y": 36
+                },
+                "hit": {
+                  "tag": "HEADER",
+                  "classes": "site-header _header_1155o_1 _workspaceHeader_1155o_110",
+                  "label": ""
+                }
+              },
+              {
+                "index": 1,
+                "tag": "BUTTON",
+                "label": "Север сверху",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 70,
+                  "bottom": 118,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 94
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "map-mobile-action",
+                  "label": "Север сверху"
+                }
+              },
+              {
+                "index": 2,
+                "tag": "BUTTON",
+                "label": "Показать Россию целиком",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 128,
+                  "bottom": 176,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 152
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "map-mobile-action",
+                  "label": "Показать Россию целиком"
+                }
+              },
+              {
+                "index": 3,
+                "tag": "INPUT",
+                "label": "Тропы и грунтовые дороги",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 201,
+                  "bottom": 219,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 210
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Тропы и грунтовые дороги"
+                }
+              },
+              {
+                "index": 4,
+                "tag": "INPUT",
+                "label": "Рельеф и линии высот",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 259,
+                  "bottom": 277,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 268
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Рельеф и линии высот"
+                }
+              },
+              {
+                "index": 5,
+                "tag": "INPUT",
+                "label": "Границы территорий",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 317,
+                  "bottom": 335,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 326
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Границы территорий"
+                }
+              },
+              {
+                "index": 6,
+                "tag": "A",
+                "label": "Подробная офлайн-карта",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 360,
+                  "bottom": 408,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 384
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Подробная офлайн-карта"
+                }
+              },
+              {
+                "index": 7,
+                "tag": "A",
+                "label": "Источники карты",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 418,
+                  "bottom": 466,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 442
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Источники карты"
+                }
+              }
+            ]
+          },
+          {
+            "sheet": "closed",
+            "map": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 576,
+              "width": 320,
+              "height": 520
+            },
+            "usable": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 472,
+              "width": 320,
+              "height": 416
+            },
+            "menu": {
+              "left": 68,
+              "right": 308,
+              "top": 64,
+              "bottom": 464,
+              "width": 240,
+              "height": 400
+            },
+            "button": {
+              "left": 12,
+              "right": 60,
+              "top": 128,
+              "bottom": 184,
+              "width": 48,
+              "height": 56
+            },
+            "scrollTop": 80,
+            "scrollHeight": 478,
+            "clientHeight": 398,
+            "scrollY": 0,
+            "controls": [
+              {
+                "index": 0,
+                "tag": "BUTTON",
+                "label": "Закрыть настройки карты",
+                "rect": {
+                  "left": 247,
+                  "right": 295,
+                  "top": -3,
+                  "bottom": 45,
+                  "width": 48,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 271,
+                  "y": 21
+                },
+                "hit": {
+                  "tag": "HEADER",
+                  "classes": "site-header _header_1155o_1 _workspaceHeader_1155o_110",
+                  "label": ""
+                }
+              },
+              {
+                "index": 1,
+                "tag": "BUTTON",
+                "label": "Север сверху",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 55,
+                  "bottom": 103,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 79
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "map-mobile-action",
+                  "label": "Север сверху"
+                }
+              },
+              {
+                "index": 2,
+                "tag": "BUTTON",
+                "label": "Показать Россию целиком",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 113,
+                  "bottom": 161,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 137
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "map-mobile-action",
+                  "label": "Показать Россию целиком"
+                }
+              },
+              {
+                "index": 3,
+                "tag": "INPUT",
+                "label": "Тропы и грунтовые дороги",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 186,
+                  "bottom": 204,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 195
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Тропы и грунтовые дороги"
+                }
+              },
+              {
+                "index": 4,
+                "tag": "INPUT",
+                "label": "Рельеф и линии высот",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 244,
+                  "bottom": 262,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 253
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Рельеф и линии высот"
+                }
+              },
+              {
+                "index": 5,
+                "tag": "INPUT",
+                "label": "Границы территорий",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 302,
+                  "bottom": 320,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 311
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Границы территорий"
+                }
+              },
+              {
+                "index": 6,
+                "tag": "A",
+                "label": "Подробная офлайн-карта",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 345,
+                  "bottom": 393,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 369
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Подробная офлайн-карта"
+                }
+              },
+              {
+                "index": 7,
+                "tag": "A",
+                "label": "Источники карты",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 403,
+                  "bottom": 451,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 427
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Источники карты"
+                }
+              }
+            ]
+          }
+        ],
+        "scrolls": [
+          {
+            "input": "touch",
+            "selector": ".layer-menu",
+            "direction": 1,
+            "start": {
+              "x": 188,
+              "y": 440
+            },
+            "end": {
+              "x": 188,
+              "y": 360
+            },
+            "distance": 80,
+            "before": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 464,
+                "width": 240,
+                "height": 400
+              },
+              "scrollTop": 0,
+              "scrollHeight": 478,
+              "clientHeight": 398,
+              "scrollY": 0,
+              "sheet": "closed"
+            },
+            "after": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 464,
+                "width": 240,
+                "height": 400
+              },
+              "scrollTop": 65,
+              "scrollHeight": 478,
+              "clientHeight": 398,
+              "scrollY": 0,
+              "sheet": "closed"
+            },
+            "commands": [
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchStart",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchEnd",
+                "status": "fulfilled"
+              }
+            ],
+            "events": [
+              {
+                "type": "touchstart",
+                "time": 13990.099999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 440
+              },
+              {
+                "type": "touchmove",
+                "time": 14051.200000000012,
+                "trusted": true,
+                "x": 188,
+                "y": 420
+              },
+              {
+                "type": "touchmove",
+                "time": 14118.400000000023,
+                "trusted": true,
+                "x": 188,
+                "y": 410
+              },
+              {
+                "type": "touchmove",
+                "time": 14208.200000000012,
+                "trusted": true,
+                "x": 188,
+                "y": 390
+              },
+              {
+                "type": "touchmove",
+                "time": 14308.700000000012,
+                "trusted": true,
+                "x": 188,
+                "y": 370
+              },
+              {
+                "type": "touchmove",
+                "time": 14368.099999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 360
+              },
+              {
+                "type": "touchend",
+                "time": 14491.200000000012,
+                "trusted": true,
+                "x": 188,
+                "y": 360
+              }
+            ]
+          },
+          {
+            "input": "touch",
+            "selector": ".layer-menu",
+            "direction": 1,
+            "start": {
+              "x": 188,
+              "y": 440
+            },
+            "end": {
+              "x": 188,
+              "y": 408
+            },
+            "distance": 32,
+            "before": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 464,
+                "width": 240,
+                "height": 400
+              },
+              "scrollTop": 65,
+              "scrollHeight": 478,
+              "clientHeight": 398,
+              "scrollY": 0,
+              "sheet": "closed"
+            },
+            "after": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 464,
+                "width": 240,
+                "height": 400
+              },
+              "scrollTop": 80,
+              "scrollHeight": 478,
+              "clientHeight": 398,
+              "scrollY": 0,
+              "sheet": "closed"
+            },
+            "commands": [
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchStart",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchEnd",
+                "status": "fulfilled"
+              }
+            ],
+            "events": [
+              {
+                "type": "touchstart",
+                "time": 14802.099999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 440
+              },
+              {
+                "type": "touchmove",
+                "time": 14919,
+                "trusted": true,
+                "x": 188,
+                "y": 424
+              },
+              {
+                "type": "touchmove",
+                "time": 14984.799999999988,
+                "trusted": true,
+                "x": 188,
+                "y": 420
+              },
+              {
+                "type": "touchmove",
+                "time": 15074.099999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 416
+              },
+              {
+                "type": "touchmove",
+                "time": 15124.400000000023,
+                "trusted": true,
+                "x": 188,
+                "y": 408
+              },
+              {
+                "type": "touchend",
+                "time": 15257.900000000023,
+                "trusted": true,
+                "x": 188,
+                "y": 408
+              }
+            ]
+          }
+        ],
+        "closed": {
+          "input": "touch",
+          "selector": ".layer-button",
+          "point": {
+            "x": 36,
+            "y": 156,
+            "width": 48,
+            "height": 56,
+            "label": "Настройки карты",
+            "hit": "svg",
+            "unobscured": true,
+            "sampledAt": 15835.599999999977,
+            "animating": false,
+            "animations": [],
+            "selector": ".layer-button"
+          },
+          "events": [
+            {
+              "type": "pointerdown",
+              "time": 15852.299999999988,
+              "timestamp": 15836.400000000023,
+              "pointerType": "touch",
+              "pointerId": 20,
+              "x": 36,
+              "y": 156,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button active",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            },
+            {
+              "type": "pointerup",
+              "time": 15901.799999999988,
+              "timestamp": 15897.799999999988,
+              "pointerType": "touch",
+              "pointerId": 20,
+              "x": 36,
+              "y": 156,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button active",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            },
+            {
+              "type": "click",
+              "time": 15902.400000000023,
+              "timestamp": 15897.799999999988,
+              "pointerType": "touch",
+              "pointerId": 20,
+              "x": 36,
+              "y": 151,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button active",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "sheet": "open",
+        "opened": {
+          "input": "touch",
+          "selector": ".layer-button",
+          "point": {
+            "x": 36,
+            "y": 156,
+            "width": 48,
+            "height": 56,
+            "label": "Настройки карты",
+            "hit": "svg",
+            "unobscured": true,
+            "sampledAt": 17268.79999999999,
+            "animating": false,
+            "animations": [],
+            "selector": ".layer-button"
+          },
+          "events": [
+            {
+              "type": "pointerdown",
+              "time": 17285.400000000023,
+              "timestamp": 17269.5,
+              "pointerType": "touch",
+              "pointerId": 22,
+              "x": 36,
+              "y": 156,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            },
+            {
+              "type": "pointerup",
+              "time": 17335.099999999977,
+              "timestamp": 17330.900000000023,
+              "pointerType": "touch",
+              "pointerId": 22,
+              "x": 36,
+              "y": 156,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            },
+            {
+              "type": "click",
+              "time": 17335.79999999999,
+              "timestamp": 17330.900000000023,
+              "pointerType": "touch",
+              "pointerId": 22,
+              "x": 36,
+              "y": 151,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            }
+          ]
+        },
+        "frames": [
+          {
+            "sheet": "open",
+            "map": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 576,
+              "width": 320,
+              "height": 520
+            },
+            "usable": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 294,
+              "width": 320,
+              "height": 238
+            },
+            "menu": {
+              "left": 68,
+              "right": 308,
+              "top": 64,
+              "bottom": 286,
+              "width": 240,
+              "height": 222
+            },
+            "button": {
+              "left": 12,
+              "right": 60,
+              "top": 128,
+              "bottom": 184,
+              "width": 48,
+              "height": 56
+            },
+            "scrollTop": 0,
+            "scrollHeight": 478,
+            "clientHeight": 220,
+            "scrollY": 0,
+            "controls": [
+              {
+                "index": 0,
+                "tag": "BUTTON",
+                "label": "Закрыть настройки карты",
+                "rect": {
+                  "left": 247,
+                  "right": 295,
+                  "top": 77,
+                  "bottom": 125,
+                  "width": 48,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 271,
+                  "y": 101
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": null,
+                  "label": "×"
+                }
+              },
+              {
+                "index": 1,
+                "tag": "BUTTON",
+                "label": "Север сверху",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 135,
+                  "bottom": 183,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 159
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "map-mobile-action",
+                  "label": "Север сверху"
+                }
+              },
+              {
+                "index": 2,
+                "tag": "BUTTON",
+                "label": "Показать Россию целиком",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 193,
+                  "bottom": 241,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 217
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "map-mobile-action",
+                  "label": "Показать Россию целиком"
+                }
+              },
+              {
+                "index": 3,
+                "tag": "INPUT",
+                "label": "Тропы и грунтовые дороги",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 266,
+                  "bottom": 284,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 275
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Тропы и грунтовые дороги"
+                }
+              },
+              {
+                "index": 4,
+                "tag": "INPUT",
+                "label": "Рельеф и линии высот",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 324,
+                  "bottom": 342,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 94,
+                  "y": 333
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "mobile-search-launch",
+                  "label": "Найти маршрут"
+                }
+              },
+              {
+                "index": 5,
+                "tag": "INPUT",
+                "label": "Границы территорий",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 382,
+                  "bottom": 400,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 94,
+                  "y": 391
+                },
+                "hit": {
+                  "tag": "H2",
+                  "classes": "title-3",
+                  "label": ""
+                }
+              },
+              {
+                "index": 6,
+                "tag": "A",
+                "label": "Подробная офлайн-карта",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 425,
+                  "bottom": 473,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": 449
+                },
+                "hit": {
+                  "tag": "STRONG",
+                  "classes": "title-3",
+                  "label": "Алтай11 маршрутов · каталог"
+                }
+              },
+              {
+                "index": 7,
+                "tag": "A",
+                "label": "Источники карты",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 483,
+                  "bottom": 531,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": 507
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": "region-option",
+                  "label": "Краснодарский край99 маршрутов · каталог"
+                }
+              }
+            ]
+          },
+          {
+            "sheet": "open",
+            "map": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 576,
+              "width": 320,
+              "height": 520
+            },
+            "usable": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 294,
+              "width": 320,
+              "height": 238
+            },
+            "menu": {
+              "left": 68,
+              "right": 308,
+              "top": 64,
+              "bottom": 286,
+              "width": 240,
+              "height": 222
+            },
+            "button": {
+              "left": 12,
+              "right": 60,
+              "top": 128,
+              "bottom": 184,
+              "width": 48,
+              "height": 56
+            },
+            "scrollTop": 159,
+            "scrollHeight": 478,
+            "clientHeight": 220,
+            "scrollY": 0,
+            "controls": [
+              {
+                "index": 0,
+                "tag": "BUTTON",
+                "label": "Закрыть настройки карты",
+                "rect": {
+                  "left": 247,
+                  "right": 295,
+                  "top": -82,
+                  "bottom": -34,
+                  "width": 48,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 271,
+                  "y": -58
+                },
+                "hit": null
+              },
+              {
+                "index": 1,
+                "tag": "BUTTON",
+                "label": "Север сверху",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": -24,
+                  "bottom": 24,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": 0
+                },
+                "hit": {
+                  "tag": "HEADER",
+                  "classes": "site-header _header_1155o_1 _workspaceHeader_1155o_110",
+                  "label": ""
+                }
+              },
+              {
+                "index": 2,
+                "tag": "BUTTON",
+                "label": "Показать Россию целиком",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 34,
+                  "bottom": 82,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": 58
+                },
+                "hit": {
+                  "tag": "CANVAS",
+                  "classes": "tropnik-map-canvas",
+                  "label": ""
+                }
+              },
+              {
+                "index": 3,
+                "tag": "INPUT",
+                "label": "Тропы и грунтовые дороги",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 107,
+                  "bottom": 125,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 116
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Тропы и грунтовые дороги"
+                }
+              },
+              {
+                "index": 4,
+                "tag": "INPUT",
+                "label": "Рельеф и линии высот",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 165,
+                  "bottom": 183,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 174
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Рельеф и линии высот"
+                }
+              },
+              {
+                "index": 5,
+                "tag": "INPUT",
+                "label": "Границы территорий",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 223,
+                  "bottom": 241,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 232
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Границы территорий"
+                }
+              },
+              {
+                "index": 6,
+                "tag": "A",
+                "label": "Подробная офлайн-карта",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 266,
+                  "bottom": 314,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": 290
+                },
+                "hit": {
+                  "tag": "CANVAS",
+                  "classes": "tropnik-map-canvas",
+                  "label": ""
+                }
+              },
+              {
+                "index": 7,
+                "tag": "A",
+                "label": "Источники карты",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 324,
+                  "bottom": 372,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": 348
+                },
+                "hit": {
+                  "tag": "BUTTON",
+                  "classes": null,
+                  "label": "Все территории 85"
+                }
+              }
+            ]
+          },
+          {
+            "sheet": "open",
+            "map": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 576,
+              "width": 320,
+              "height": 520
+            },
+            "usable": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 294,
+              "width": 320,
+              "height": 238
+            },
+            "menu": {
+              "left": 68,
+              "right": 308,
+              "top": 64,
+              "bottom": 286,
+              "width": 240,
+              "height": 222
+            },
+            "button": {
+              "left": 12,
+              "right": 60,
+              "top": 128,
+              "bottom": 184,
+              "width": 48,
+              "height": 56
+            },
+            "scrollTop": 243,
+            "scrollHeight": 478,
+            "clientHeight": 220,
+            "scrollY": 0,
+            "controls": [
+              {
+                "index": 0,
+                "tag": "BUTTON",
+                "label": "Закрыть настройки карты",
+                "rect": {
+                  "left": 247,
+                  "right": 295,
+                  "top": -166,
+                  "bottom": -118,
+                  "width": 48,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 271,
+                  "y": -142
+                },
+                "hit": null
+              },
+              {
+                "index": 1,
+                "tag": "BUTTON",
+                "label": "Север сверху",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": -108,
+                  "bottom": -60,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": -84
+                },
+                "hit": null
+              },
+              {
+                "index": 2,
+                "tag": "BUTTON",
+                "label": "Показать Россию целиком",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": -50,
+                  "bottom": -2,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": -26
+                },
+                "hit": null
+              },
+              {
+                "index": 3,
+                "tag": "INPUT",
+                "label": "Тропы и грунтовые дороги",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 23,
+                  "bottom": 41,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 94,
+                  "y": 32
+                },
+                "hit": {
+                  "tag": "SPAN",
+                  "classes": null,
+                  "label": "тропиныч"
+                }
+              },
+              {
+                "index": 4,
+                "tag": "INPUT",
+                "label": "Рельеф и линии высот",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 81,
+                  "bottom": 99,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 90
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Рельеф и линии высот"
+                }
+              },
+              {
+                "index": 5,
+                "tag": "INPUT",
+                "label": "Границы территорий",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 139,
+                  "bottom": 157,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 148
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Границы территорий"
+                }
+              },
+              {
+                "index": 6,
+                "tag": "A",
+                "label": "Подробная офлайн-карта",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 182,
+                  "bottom": 230,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 206
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Подробная офлайн-карта"
+                }
+              },
+              {
+                "index": 7,
+                "tag": "A",
+                "label": "Источники карты",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 240,
+                  "bottom": 288,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 264
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Источники карты"
+                }
+              }
+            ]
+          },
+          {
+            "sheet": "open",
+            "map": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 576,
+              "width": 320,
+              "height": 520
+            },
+            "usable": {
+              "left": 0,
+              "right": 320,
+              "top": 56,
+              "bottom": 294,
+              "width": 320,
+              "height": 238
+            },
+            "menu": {
+              "left": 68,
+              "right": 308,
+              "top": 64,
+              "bottom": 286,
+              "width": 240,
+              "height": 222
+            },
+            "button": {
+              "left": 12,
+              "right": 60,
+              "top": 128,
+              "bottom": 184,
+              "width": 48,
+              "height": 56
+            },
+            "scrollTop": 258,
+            "scrollHeight": 478,
+            "clientHeight": 220,
+            "scrollY": 0,
+            "controls": [
+              {
+                "index": 0,
+                "tag": "BUTTON",
+                "label": "Закрыть настройки карты",
+                "rect": {
+                  "left": 247,
+                  "right": 295,
+                  "top": -181,
+                  "bottom": -133,
+                  "width": 48,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 271,
+                  "y": -157
+                },
+                "hit": null
+              },
+              {
+                "index": 1,
+                "tag": "BUTTON",
+                "label": "Север сверху",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": -123,
+                  "bottom": -75,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": -99
+                },
+                "hit": null
+              },
+              {
+                "index": 2,
+                "tag": "BUTTON",
+                "label": "Показать Россию целиком",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": -65,
+                  "bottom": -17,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 188,
+                  "y": -41
+                },
+                "hit": null
+              },
+              {
+                "index": 3,
+                "tag": "INPUT",
+                "label": "Тропы и грунтовые дороги",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 8,
+                  "bottom": 26,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": false,
+                "unobscured": false,
+                "point": {
+                  "x": 94,
+                  "y": 17
+                },
+                "hit": {
+                  "tag": "SPAN",
+                  "classes": null,
+                  "label": "тропиныч"
+                }
+              },
+              {
+                "index": 4,
+                "tag": "INPUT",
+                "label": "Рельеф и линии высот",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 66,
+                  "bottom": 84,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 75
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Рельеф и линии высот"
+                }
+              },
+              {
+                "index": 5,
+                "tag": "INPUT",
+                "label": "Границы территорий",
+                "rect": {
+                  "left": 85,
+                  "right": 103,
+                  "top": 124,
+                  "bottom": 142,
+                  "width": 18,
+                  "height": 18
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 94,
+                  "y": 133
+                },
+                "hit": {
+                  "tag": "INPUT",
+                  "classes": null,
+                  "label": "Границы территорий"
+                }
+              },
+              {
+                "index": 6,
+                "tag": "A",
+                "label": "Подробная офлайн-карта",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 167,
+                  "bottom": 215,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 191
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Подробная офлайн-карта"
+                }
+              },
+              {
+                "index": 7,
+                "tag": "A",
+                "label": "Источники карты",
+                "rect": {
+                  "left": 81,
+                  "right": 295,
+                  "top": 225,
+                  "bottom": 273,
+                  "width": 214,
+                  "height": 48
+                },
+                "inside": true,
+                "unobscured": true,
+                "point": {
+                  "x": 188,
+                  "y": 249
+                },
+                "hit": {
+                  "tag": "A",
+                  "classes": null,
+                  "label": "Источники карты"
+                }
+              }
+            ]
+          }
+        ],
+        "scrolls": [
+          {
+            "input": "touch",
+            "selector": ".layer-menu",
+            "direction": 1,
+            "start": {
+              "x": 188,
+              "y": 262
+            },
+            "end": {
+              "x": 188,
+              "y": 88
+            },
+            "distance": 174,
+            "before": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 286,
+                "width": 240,
+                "height": 222
+              },
+              "scrollTop": 0,
+              "scrollHeight": 478,
+              "clientHeight": 220,
+              "scrollY": 0,
+              "sheet": "open"
+            },
+            "after": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 286,
+                "width": 240,
+                "height": 222
+              },
+              "scrollTop": 159,
+              "scrollHeight": 478,
+              "clientHeight": 220,
+              "scrollY": 0,
+              "sheet": "open"
+            },
+            "commands": [
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchStart",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchEnd",
+                "status": "fulfilled"
+              }
+            ],
+            "events": [
+              {
+                "type": "touchstart",
+                "time": 17357.29999999999,
+                "trusted": true,
+                "x": 188,
+                "y": 262
+              },
+              {
+                "type": "touchmove",
+                "time": 17384.400000000023,
+                "trusted": true,
+                "x": 188,
+                "y": 240.25
+              },
+              {
+                "type": "touchmove",
+                "time": 17451.599999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 218.5
+              },
+              {
+                "type": "touchmove",
+                "time": 17541.599999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 175
+              },
+              {
+                "type": "touchmove",
+                "time": 17641.599999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 131.5
+              },
+              {
+                "type": "touchmove",
+                "time": 17701.599999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 109.75
+              },
+              {
+                "type": "touchmove",
+                "time": 17890.900000000023,
+                "trusted": true,
+                "x": 188,
+                "y": 88
+              },
+              {
+                "type": "touchend",
+                "time": 17890.900000000023,
+                "trusted": true,
+                "x": 188,
+                "y": 88
+              }
+            ]
+          },
+          {
+            "input": "touch",
+            "selector": ".layer-menu",
+            "direction": 1,
+            "start": {
+              "x": 188,
+              "y": 262
+            },
+            "end": {
+              "x": 188,
+              "y": 163
+            },
+            "distance": 99,
+            "before": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 286,
+                "width": 240,
+                "height": 222
+              },
+              "scrollTop": 159,
+              "scrollHeight": 478,
+              "clientHeight": 220,
+              "scrollY": 0,
+              "sheet": "open"
+            },
+            "after": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 286,
+                "width": 240,
+                "height": 222
+              },
+              "scrollTop": 243,
+              "scrollHeight": 478,
+              "clientHeight": 220,
+              "scrollY": 0,
+              "sheet": "open"
+            },
+            "commands": [
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchStart",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchEnd",
+                "status": "fulfilled"
+              }
+            ],
+            "events": [
+              {
+                "type": "touchstart",
+                "time": 18202.099999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 262
+              },
+              {
+                "type": "touchmove",
+                "time": 18284.5,
+                "trusted": true,
+                "x": 188,
+                "y": 237.25
+              },
+              {
+                "type": "touchmove",
+                "time": 18351.5,
+                "trusted": true,
+                "x": 188,
+                "y": 224.875
+              },
+              {
+                "type": "touchmove",
+                "time": 18440.79999999999,
+                "trusted": true,
+                "x": 188,
+                "y": 212.5
+              },
+              {
+                "type": "touchmove",
+                "time": 18490.900000000023,
+                "trusted": true,
+                "x": 188,
+                "y": 187.75
+              },
+              {
+                "type": "touchmove",
+                "time": 18574,
+                "trusted": true,
+                "x": 188,
+                "y": 175.375
+              },
+              {
+                "type": "touchmove",
+                "time": 18740.70000000001,
+                "trusted": true,
+                "x": 188,
+                "y": 163
+              },
+              {
+                "type": "touchend",
+                "time": 18740.79999999999,
+                "trusted": true,
+                "x": 188,
+                "y": 163
+              }
+            ]
+          },
+          {
+            "input": "touch",
+            "selector": ".layer-menu",
+            "direction": 1,
+            "start": {
+              "x": 188,
+              "y": 262
+            },
+            "end": {
+              "x": 188,
+              "y": 230
+            },
+            "distance": 32,
+            "before": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 286,
+                "width": 240,
+                "height": 222
+              },
+              "scrollTop": 243,
+              "scrollHeight": 478,
+              "clientHeight": 220,
+              "scrollY": 0,
+              "sheet": "open"
+            },
+            "after": {
+              "rect": {
+                "left": 68,
+                "right": 308,
+                "top": 64,
+                "bottom": 286,
+                "width": 240,
+                "height": 222
+              },
+              "scrollTop": 258,
+              "scrollHeight": 478,
+              "clientHeight": 220,
+              "scrollY": 0,
+              "sheet": "open"
+            },
+            "commands": [
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchStart",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchMove",
+                "status": "fulfilled"
+              },
+              {
+                "method": "Input.dispatchTouchEvent",
+                "type": "touchEnd",
+                "status": "fulfilled"
+              }
+            ],
+            "events": [
+              {
+                "type": "touchstart",
+                "time": 19052,
+                "trusted": true,
+                "x": 188,
+                "y": 262
+              },
+              {
+                "type": "touchmove",
+                "time": 19168.79999999999,
+                "trusted": true,
+                "x": 188,
+                "y": 246
+              },
+              {
+                "type": "touchmove",
+                "time": 19234.599999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 242
+              },
+              {
+                "type": "touchmove",
+                "time": 19324.20000000001,
+                "trusted": true,
+                "x": 188,
+                "y": 238
+              },
+              {
+                "type": "touchmove",
+                "time": 19373.900000000023,
+                "trusted": true,
+                "x": 188,
+                "y": 234
+              },
+              {
+                "type": "touchmove",
+                "time": 19457.099999999977,
+                "trusted": true,
+                "x": 188,
+                "y": 230
+              },
+              {
+                "type": "touchend",
+                "time": 19507.70000000001,
+                "trusted": true,
+                "x": 188,
+                "y": 230
+              }
+            ]
+          }
+        ],
+        "closed": {
+          "input": "touch",
+          "selector": ".layer-button",
+          "point": {
+            "x": 36,
+            "y": 156,
+            "width": 48,
+            "height": 56,
+            "label": "Настройки карты",
+            "hit": "svg",
+            "unobscured": true,
+            "sampledAt": 20085.20000000001,
+            "animating": false,
+            "animations": [],
+            "selector": ".layer-button"
+          },
+          "events": [
+            {
+              "type": "pointerdown",
+              "time": 20102,
+              "timestamp": 20086.099999999977,
+              "pointerType": "touch",
+              "pointerId": 26,
+              "x": 36,
+              "y": 156,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button active",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            },
+            {
+              "type": "pointerup",
+              "time": 20151.599999999977,
+              "timestamp": 20147.400000000023,
+              "pointerType": "touch",
+              "pointerId": 26,
+              "x": 36,
+              "y": 156,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button active",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            },
+            {
+              "type": "click",
+              "time": 20152.20000000001,
+              "timestamp": 20147.400000000023,
+              "pointerType": "touch",
+              "pointerId": 26,
+              "x": 36,
+              "y": 151,
+              "trusted": true,
+              "target": "svg[map-icon]",
+              "button": {
+                "tag": "BUTTON",
+                "classes": "layer-button active",
+                "label": "Настройки карты",
+                "regionId": null,
+                "groupKey": null,
+                "rect": {
+                  "x": 12,
+                  "y": 128,
+                  "width": 48,
+                  "height": 56
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "current": null,
+    "frame": null
+  },
+  "map": {
+    "rendering": {
+      "painted": true,
+      "drawnRoute": "",
+      "tilesState": "ready",
+      "coverageReady": true
+    },
+    "camera": {
+      "longitude": 127.53461483703703,
+      "latitude": 63.329386696317705,
+      "zoom": 0.8258225566748263,
+      "tileSize": 256,
+      "centerX": 160,
+      "centerY": 260
+    },
+    "engine": "tropnik-canvas",
+    "route": "",
+    "moving": false,
+    "visible": true,
+    "rect": {
+      "left": 0,
+      "top": 56,
+      "width": 320,
+      "height": 520,
+      "right": 320,
+      "bottom": 576
+    },
+    "width": 320,
+    "height": 640,
+    "scrollWidth": 320
+  },
+  "selection": {
+    "region": "",
+    "route": "",
+    "title": "Найдите свою тропу.",
+    "sheet": "closed",
+    "view": "map",
+    "origin": "catalog",
+    "history": {
+      "length": 2
+    },
+    "activeElement": {
+      "tag": "BODY",
+      "classes": null,
+      "label": null
+    }
+  },
+  "sheet": {
+    "available": true,
+    "state": "closed",
+    "height": 282,
+    "top": 472,
+    "transform": "matrix(1, 0, 0, 1, 0, 178)",
+    "animating": false,
+    "summaryVisible": true,
+    "contentVisible": false,
+    "focused": false,
+    "dragging": false,
+    "scrollY": 0,
+    "contentScrollTop": 125,
+    "contentScrollHeight": 1651,
+    "contentClientHeight": 177
+  },
+  "customMap": {
+    "engine": "tropnik-canvas",
+    "rasterPolicy": {
+      "softwareRaster": true,
+      "reason": "software"
+    },
+    "contextAttributes": {
+      "alpha": false,
+      "colorSpace": "srgb",
+      "colorType": "unorm8",
+      "desynchronized": false,
+      "toneMapping": {
+        "mode": "standard"
+      },
+      "willReadFrequently": true
+    },
+    "camera": {
+      "center": [
+        127.53461483703703,
+        63.329386696317705
+      ],
+      "zoom": 0.8258225566748263,
+      "bearingDegrees": 0
+    },
+    "pitch": 0,
+    "viewport": {
+      "width": 320,
+      "height": 520,
+      "padding": {
+        "top": 88,
+        "right": 80,
+        "bottom": 128,
+        "left": 24
+      }
+    },
+    "visibleBounds": [
+      19.63892820000001,
+      -21.70509127188592,
+      191.0026658,
+      87.49051116480416
+    ],
+    "state": {
+      "ready": true,
+      "loading": false,
+      "mode": "detail",
+      "committedMode": "overview",
+      "imageryLoading": false,
+      "reliefReady": false,
+      "localDetail": false,
+      "error": "",
+      "residentTiles": 2,
+      "pendingTiles": 0
+    },
+    "coverage": {
+      "version": "7035c10e633effb2",
+      "lod": "overview",
+      "cells": [],
+      "pending": 0,
+      "error": "",
+      "ready": true,
+      "revision": 0
+    },
+    "routeId": "",
+    "drawnRoute": "",
+    "catalogueOverlay": {
+      "sources": 621,
+      "preparedSources": 621,
+      "preparedParts": 22456,
+      "exactSources": 1,
+      "currentViewportReady": true,
+      "pending": false,
+      "error": ""
+    },
+    "reviewedCoastal": {
+      "selected": false,
+      "overlaySources": 1
+    },
+    "drawRevision": 28,
+    "labelRevision": 43,
+    "tiles": {
+      "overview": [
+        {
+          "key": "overview:0/0/0:1:0:0:1",
+          "kind": "overview",
+          "z": 0,
+          "x": 0,
+          "y": 0,
+          "local": true,
+          "width": 512,
+          "height": 512,
+          "bounds": [
+            -180,
+            -85.0511287798066,
+            180,
+            85.0511287798066
+          ],
+          "transparent": false,
+          "opaque": false
+        },
+        {
+          "key": "overview:0/1/0:1:0:0:1",
+          "kind": "overview",
+          "z": 0,
+          "x": 1,
+          "y": 0,
+          "local": true,
+          "width": 512,
+          "height": 512,
+          "bounds": [
+            180,
+            -85.0511287798066,
+            540,
+            85.0511287798066
+          ],
+          "transparent": false,
+          "opaque": false
+        }
+      ],
+      "detail": [],
+      "relief": [],
+      "imagery": []
+    },
+    "loadingImagery": null,
+    "loadingGround": null,
+    "labels": [],
+    "resources": {
+      "resident": 2,
+      "pending": 0,
+      "fetching": 0,
+      "decoding": false,
+      "enabled": true,
+      "failedSources": 0,
+      "stages": {},
+      "errors": []
+    },
+    "readOnly": true,
+    "canvas": {
+      "connected": true,
+      "width": 480,
+      "height": 780,
+      "cssWidth": 320,
+      "cssHeight": 520
+    }
+  },
+  "navigationHistory": {
+    "currentIndex": 1,
+    "entries": [
+      {
+        "id": 8,
+        "url": "about:blank",
+        "userTypedURL": "about:blank",
+        "title": "",
+        "transitionType": "auto_toplevel"
+      },
+      {
+        "id": 12,
+        "url": "http://127.0.0.1:34137/tropnik/",
+        "userTypedURL": "http://127.0.0.1:34137/tropnik/",
+        "title": "Тропиныч — пешие маршруты и походы по России",
+        "transitionType": "typed"
+      }
+    ]
+  },
+  "performance": {
+    "timeOrigin": 1794915125218.4,
+    "current": {
+      "cls": 0,
+      "longest": 0
+    },
+    "counterStart": 2436.4000000000233,
+    "phase": "layers-before",
+    "phases": [
+      {
+        "name": "profile-ready",
+        "time": 2437,
+        "perf": {
+          "cls": 0,
+          "longest": 0
+        },
+        "fonts": "loaded",
+        "sheet": "closed",
+        "story": null,
+        "storyPhoto": null,
+        "panel": {
+          "x": 0,
+          "y": 472,
+          "width": 320,
+          "height": 282,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 0, 178)"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 56,
+          "width": 320,
+          "height": 520,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "firstDirection": {
+          "x": 86.65496826171875,
+          "y": 323.9851989746094,
+          "width": 44,
+          "height": 44,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 86.655, 267.985)"
+        },
+        "attribution": {
+          "x": 12,
+          "y": 416,
+          "width": 296,
+          "height": 48,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "mapMessage": null
+      },
+      {
+        "name": "sheet-before",
+        "time": 2441.7000000000116,
+        "perf": {
+          "cls": 0,
+          "longest": 0
+        },
+        "fonts": "loaded",
+        "sheet": "closed",
+        "story": null,
+        "storyPhoto": null,
+        "panel": {
+          "x": 0,
+          "y": 472,
+          "width": 320,
+          "height": 282,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 0, 178)"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 56,
+          "width": 320,
+          "height": 520,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "firstDirection": {
+          "x": 86.65496826171875,
+          "y": 323.9851989746094,
+          "width": 44,
+          "height": 44,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 86.655, 267.985)"
+        },
+        "attribution": {
+          "x": 12,
+          "y": 416,
+          "width": 296,
+          "height": 48,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "mapMessage": null
+      },
+      {
+        "name": "sheet-after",
+        "time": 3204.2000000000116,
+        "perf": {
+          "cls": 0,
+          "longest": 0
+        },
+        "fonts": "loaded",
+        "sheet": "closed",
+        "story": null,
+        "storyPhoto": null,
+        "panel": {
+          "x": 0,
+          "y": 472,
+          "width": 320,
+          "height": 282,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 0, 178)"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 56,
+          "width": 320,
+          "height": 520,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "firstDirection": {
+          "x": 86.65496826171875,
+          "y": 323.9851989746094,
+          "width": 44,
+          "height": 44,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 86.655, 267.985)"
+        },
+        "attribution": {
+          "x": 12,
+          "y": 416,
+          "width": 296,
+          "height": 48,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "mapMessage": null
+      },
+      {
+        "name": "sheet-gestures-before",
+        "time": 3204.7999999999884,
+        "perf": {
+          "cls": 0,
+          "longest": 0
+        },
+        "fonts": "loaded",
+        "sheet": "closed",
+        "story": null,
+        "storyPhoto": null,
+        "panel": {
+          "x": 0,
+          "y": 472,
+          "width": 320,
+          "height": 282,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 0, 178)"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 56,
+          "width": 320,
+          "height": 520,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "firstDirection": {
+          "x": 86.65496826171875,
+          "y": 323.9851989746094,
+          "width": 44,
+          "height": 44,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 86.655, 267.985)"
+        },
+        "attribution": {
+          "x": 12,
+          "y": 416,
+          "width": 296,
+          "height": 48,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "mapMessage": null
+      },
+      {
+        "name": "sheet-gestures-after",
+        "time": 13075.5,
+        "perf": {
+          "cls": 0,
+          "longest": 0
+        },
+        "fonts": "loaded",
+        "sheet": "closed",
+        "story": null,
+        "storyPhoto": null,
+        "panel": {
+          "x": 0,
+          "y": 472,
+          "width": 320,
+          "height": 282,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 0, 178)"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 56,
+          "width": 320,
+          "height": 520,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "firstDirection": {
+          "x": 86.65496826171875,
+          "y": 323.9851989746094,
+          "width": 44,
+          "height": 44,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 86.655, 267.985)"
+        },
+        "attribution": {
+          "x": 12,
+          "y": 416,
+          "width": 296,
+          "height": 48,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "mapMessage": null
+      },
+      {
+        "name": "layers-before",
+        "time": 13076.099999999977,
+        "perf": {
+          "cls": 0,
+          "longest": 0
+        },
+        "fonts": "loaded",
+        "sheet": "closed",
+        "story": null,
+        "storyPhoto": null,
+        "panel": {
+          "x": 0,
+          "y": 472,
+          "width": 320,
+          "height": 282,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 0, 178)"
+        },
+        "canvas": {
+          "x": 0,
+          "y": 56,
+          "width": 320,
+          "height": 520,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "firstDirection": {
+          "x": 86.65496826171875,
+          "y": 323.9851989746094,
+          "width": 44,
+          "height": 44,
+          "display": "block",
+          "visibility": "visible",
+          "transform": "matrix(1, 0, 0, 1, 86.655, 267.985)"
+        },
+        "attribution": {
+          "x": 12,
+          "y": 416,
+          "width": 296,
+          "height": 48,
+          "display": "flex",
+          "visibility": "visible",
+          "transform": "none"
+        },
+        "mapMessage": null
+      }
+    ],
+    "layoutShifts": [],
+    "recentLongTasks": [
+      {
+        "startTime": 193.59999999997672,
+        "duration": 67,
+        "name": "self",
+        "observedAt": 263.0999999999767,
+        "phase": "loading"
+      },
+      {
+        "startTime": 351.29999999998836,
+        "duration": 72,
+        "name": "self",
+        "observedAt": 457.0999999999767,
+        "phase": "loading"
+      },
+      {
+        "startTime": 540.2000000000116,
+        "duration": 140,
+        "name": "self",
+        "observedAt": 682.4000000000233,
+        "phase": "loading"
+      }
+    ],
+    "expectedPointer": {
+      "time": 20452.599999999977,
+      "x": 264,
+      "y": 319,
+      "selector": ".sheet-handle",
+      "label": "Показать карту",
+      "sampledAt": 20452,
+      "animating": false,
+      "animations": []
+    },
+    "inputEvents": [
+      {
+        "type": "pointerdown",
+        "time": 20102,
+        "timestamp": 20086.099999999977,
+        "pointerType": "touch",
+        "pointerId": 26,
+        "x": 36,
+        "y": 156,
+        "trusted": true,
+        "target": "svg[map-icon]",
+        "button": {
+          "tag": "BUTTON",
+          "classes": "layer-button active",
+          "label": "Настройки карты",
+          "regionId": null,
+          "groupKey": null,
+          "rect": {
+            "x": 12,
+            "y": 128,
+            "width": 48,
+            "height": 56
+          }
+        }
+      },
+      {
+        "type": "pointerup",
+        "time": 20151.599999999977,
+        "timestamp": 20147.400000000023,
+        "pointerType": "touch",
+        "pointerId": 26,
+        "x": 36,
+        "y": 156,
+        "trusted": true,
+        "target": "svg[map-icon]",
+        "button": {
+          "tag": "BUTTON",
+          "classes": "layer-button active",
+          "label": "Настройки карты",
+          "regionId": null,
+          "groupKey": null,
+          "rect": {
+            "x": 12,
+            "y": 128,
+            "width": 48,
+            "height": 56
+          }
+        }
+      },
+      {
+        "type": "click",
+        "time": 20152.20000000001,
+        "timestamp": 20147.400000000023,
+        "pointerType": "touch",
+        "pointerId": 26,
+        "x": 36,
+        "y": 151,
+        "trusted": true,
+        "target": "svg[map-icon]",
+        "button": {
+          "tag": "BUTTON",
+          "classes": "layer-button active",
+          "label": "Настройки карты",
+          "regionId": null,
+          "groupKey": null,
+          "rect": {
+            "x": 12,
+            "y": 128,
+            "width": 48,
+            "height": 56
+          }
+        }
+      },
+      {
+        "type": "pointerdown",
+        "time": 20469.79999999999,
+        "timestamp": 20453,
+        "pointerType": "touch",
+        "pointerId": 27,
+        "x": 264,
+        "y": 319,
+        "trusted": true,
+        "target": "SPAN[sheet-view-label]",
+        "button": {
+          "tag": "BUTTON",
+          "classes": "sheet-handle",
+          "label": "Показать карту",
+          "regionId": null,
+          "groupKey": null,
+          "rect": {
+            "x": 216,
+            "y": 295,
+            "width": 96,
+            "height": 48
+          }
+        }
+      },
+      {
+        "type": "pointerup",
+        "time": 20518.29999999999,
+        "timestamp": 20515.79999999999,
+        "pointerType": "touch",
+        "pointerId": 27,
+        "x": 264,
+        "y": 319,
+        "trusted": true,
+        "target": "BUTTON[sheet-handle]",
+        "button": {
+          "tag": "BUTTON",
+          "classes": "sheet-handle",
+          "label": "Показать карту",
+          "regionId": null,
+          "groupKey": null,
+          "rect": {
+            "x": 216,
+            "y": 295,
+            "width": 96,
+            "height": 48
+          }
+        }
+      },
+      {
+        "type": "click",
+        "time": 20520.099999999977,
+        "timestamp": 20515.79999999999,
+        "pointerType": "touch",
+        "pointerId": 27,
+        "x": 264,
+        "y": 319,
+        "trusted": true,
+        "target": "SPAN[sheet-view-label]",
+        "button": {
+          "tag": "BUTTON",
+          "classes": "sheet-handle",
+          "label": "Показать карту",
+          "regionId": null,
+          "groupKey": null,
+          "rect": {
+            "x": 216,
+            "y": 295,
+            "width": 96,
+            "height": 48
+          }
+        }
+      }
+    ]
+  }
+}

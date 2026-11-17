@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "ec27a88a5d6574404fd90120e6fbb6a11229e3d5",
+  "workflowRunId": "44073808641",
+  "installedApks": {
+    "tropnik-preview.apk": {
+      "bytes": 69289290,
+      "sha256": "2d0f35cda7b35171b3f3fb83b5309ffe0bf85cbc586d2d9d2b42aa6c4181c989"
+    },
+    "tropnik-instrumentation-tests.apk": {
+      "bytes": 1209041,
+      "sha256": "a4fbcba0e4a70ef37b060dc9bd09088f8644ae1d09bd861f73689044b4d953f3"
+    }
+  },
+  "buildReceiptSha256": "a5af82dfa184056e9aa53f909a4a4ecbfcb8880b8e89539f8737dabe7812521d",
+  "installedArtifactBytesVerified": true
+}

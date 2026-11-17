@@ -1,11 +1,21 @@
 # Приёмка Тропиныча
 
-## Мобильная переработка 0.4.35 · в работе
+## Мобильная переработка 0.4.35 · пауза, полная приёмка не завершена
 
 [Последние результаты и точка продолжения](continuation-mobile-2026-11-17.md):
-`ecf672b` — 89 JVM/R8 PASS, self-host CI PASS; Pages desktop pan 35,1 > 35 мс,
-Android device — 0/13 запущено из-за незавершённой проверки установленных
-байтов. Эти ограничения не подменяются результатами старой поставки.
+точный исходник **`ec27a88a5d6574404fd90120e6fbb6a11229e3d5`**.
+17 ноября пользователь прямо остановил разработку и попросил сохранить
+текущее состояние в GitHub для продолжения в другой сессии. После остановки
+выполняется только docs-only handoff, новые исправления и CI не запускаются.
+
+| Область | Принятое доказательство и ограничение |
+| --- | --- |
+| Android, функциональная приёмка | **89/89 JVM + 13/13 device PASS**, точные собранные/проверенные/установленные APK совпали. [Run 44073808641](https://github.com/orewn/tropnik/actions/runs/44073808641), [receipt](verification/mobile-ec27a88-android/native-findings.json). |
+| Android, визуальная приёмка | **Не завершена**: landscape и обзор с шрифтом 200% содержат чёрный canvas; route portrait PNG всё ещё показывает результаты поиска. Ни постоянный дефект, ни только переходный кадр не установлены. Functional pass не заменяет эти доказательства. [Исходные наблюдения и PNG](verification/mobile-ec27a88-android/native-findings.json). |
+| Pages, ранняя плавность | **PASS**, desktop pan P95 **28,4 мс ≤ 35 мс**; прежний ecf отказ **35,1 > 35 мс** остаётся сохранённым. [Сводка](verification/mobile-ec27a88-pages/pages-verification-summary.json). |
+| Pages, полный browser audit | **FAILED step 30**, `delivered click differs from its target`; deploy skipped. Все восемь menu controls достигнуты за 2/3 нативных прокрутки, затем отклонено различие координат touch click. [Run 44073808644](https://github.com/orewn/tropnik/actions/runs/44073808644), [raw](verification/mobile-ec27a88-pages/failure/browser-failure.json). |
+| Следующий шаг | План passive WeakMap target identity **UNIMPLEMENTED**. Допуски down/up, mouse, selector=false, геометрия и бюджеты сохраняются; CSS `:active` требует отдельного учёта event rect. [Read-only triage](verification/mobile-ec27a88-pages/click-target-triage.json). |
+| Публичная поставка | Не менялась: **0.4.34-preview / code 17**, веб **aa3315b**. Новая 0.4.35 и signed production не опубликованы. |
 
 [Контракт и журнал](mobile-ux-2026-11-17.md) описывают новую навигацию,
 поиск, контекст маршрута, доступность и обязательные сценарии.

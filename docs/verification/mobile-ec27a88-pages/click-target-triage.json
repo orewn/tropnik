@@ -1,0 +1,448 @@
+{
+  "sourceCommit": "ec27a88a5d6574404fd90120e6fbb6a11229e3d5",
+  "workflowRun": 44073808644,
+  "failedOutcomePreserved": true,
+  "rawReceipt": "failure/browser-failure.json",
+  "rawScreenshot": "failure/browser-failure.png",
+  "observations": {
+    "sampledPoint": {
+      "x": 36,
+      "y": 156
+    },
+    "pointerDownAndUp": {
+      "x": 36,
+      "y": 156
+    },
+    "trustedClick": {
+      "x": 36,
+      "y": 151
+    },
+    "semanticOwner": "svg[map-icon] under BUTTON.layer-button labelled Настройки карты",
+    "ownerRect": {
+      "x": 12,
+      "y": 128,
+      "width": 48,
+      "height": 56
+    },
+    "stableInAllFourSequences": true,
+    "pendingOrRunningTargetAnimations": false,
+    "menuOpenedAndClosed": true,
+    "allEightControlsReachedInBothStates": true,
+    "oldRecorderLimitation": "Old receipt observes semantic owner/rect, not passive DOM identity; it does not prove persistent node identity."
+  },
+  "clicks": [
+    {
+      "sheet": "closed",
+      "action": "opened",
+      "selector": ".layer-button",
+      "point": {
+        "x": 36,
+        "y": 156,
+        "width": 48,
+        "height": 56,
+        "label": "Настройки карты",
+        "hit": "svg",
+        "unobscured": true,
+        "sampledAt": 13902.200000000012,
+        "animating": false,
+        "animations": [],
+        "selector": ".layer-button"
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 13919,
+          "timestamp": 13903,
+          "pointerType": "touch",
+          "pointerId": 17,
+          "x": 36,
+          "y": 156,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        },
+        {
+          "type": "pointerup",
+          "time": 13968.5,
+          "timestamp": 13964.400000000023,
+          "pointerType": "touch",
+          "pointerId": 17,
+          "x": 36,
+          "y": 156,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        },
+        {
+          "type": "click",
+          "time": 13969.099999999977,
+          "timestamp": 13964.400000000023,
+          "pointerType": "touch",
+          "pointerId": 17,
+          "x": 36,
+          "y": 151,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        }
+      ],
+      "captureLeadMs": 0.7999999999883585
+    },
+    {
+      "sheet": "closed",
+      "action": "closed",
+      "selector": ".layer-button",
+      "point": {
+        "x": 36,
+        "y": 156,
+        "width": 48,
+        "height": 56,
+        "label": "Настройки карты",
+        "hit": "svg",
+        "unobscured": true,
+        "sampledAt": 15835.599999999977,
+        "animating": false,
+        "animations": [],
+        "selector": ".layer-button"
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 15852.299999999988,
+          "timestamp": 15836.400000000023,
+          "pointerType": "touch",
+          "pointerId": 20,
+          "x": 36,
+          "y": 156,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button active",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        },
+        {
+          "type": "pointerup",
+          "time": 15901.799999999988,
+          "timestamp": 15897.799999999988,
+          "pointerType": "touch",
+          "pointerId": 20,
+          "x": 36,
+          "y": 156,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button active",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        },
+        {
+          "type": "click",
+          "time": 15902.400000000023,
+          "timestamp": 15897.799999999988,
+          "pointerType": "touch",
+          "pointerId": 20,
+          "x": 36,
+          "y": 151,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button active",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        }
+      ],
+      "captureLeadMs": 0.8000000000465661
+    },
+    {
+      "sheet": "open",
+      "action": "opened",
+      "selector": ".layer-button",
+      "point": {
+        "x": 36,
+        "y": 156,
+        "width": 48,
+        "height": 56,
+        "label": "Настройки карты",
+        "hit": "svg",
+        "unobscured": true,
+        "sampledAt": 17268.79999999999,
+        "animating": false,
+        "animations": [],
+        "selector": ".layer-button"
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 17285.400000000023,
+          "timestamp": 17269.5,
+          "pointerType": "touch",
+          "pointerId": 22,
+          "x": 36,
+          "y": 156,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        },
+        {
+          "type": "pointerup",
+          "time": 17335.099999999977,
+          "timestamp": 17330.900000000023,
+          "pointerType": "touch",
+          "pointerId": 22,
+          "x": 36,
+          "y": 156,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        },
+        {
+          "type": "click",
+          "time": 17335.79999999999,
+          "timestamp": 17330.900000000023,
+          "pointerType": "touch",
+          "pointerId": 22,
+          "x": 36,
+          "y": 151,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        }
+      ],
+      "captureLeadMs": 0.7000000000116415
+    },
+    {
+      "sheet": "open",
+      "action": "closed",
+      "selector": ".layer-button",
+      "point": {
+        "x": 36,
+        "y": 156,
+        "width": 48,
+        "height": 56,
+        "label": "Настройки карты",
+        "hit": "svg",
+        "unobscured": true,
+        "sampledAt": 20085.20000000001,
+        "animating": false,
+        "animations": [],
+        "selector": ".layer-button"
+      },
+      "events": [
+        {
+          "type": "pointerdown",
+          "time": 20102,
+          "timestamp": 20086.099999999977,
+          "pointerType": "touch",
+          "pointerId": 26,
+          "x": 36,
+          "y": 156,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button active",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        },
+        {
+          "type": "pointerup",
+          "time": 20151.599999999977,
+          "timestamp": 20147.400000000023,
+          "pointerType": "touch",
+          "pointerId": 26,
+          "x": 36,
+          "y": 156,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button active",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        },
+        {
+          "type": "click",
+          "time": 20152.20000000001,
+          "timestamp": 20147.400000000023,
+          "pointerType": "touch",
+          "pointerId": 26,
+          "x": 36,
+          "y": 151,
+          "trusted": true,
+          "target": "svg[map-icon]",
+          "button": {
+            "tag": "BUTTON",
+            "classes": "layer-button active",
+            "label": "Настройки карты",
+            "regionId": null,
+            "groupKey": null,
+            "rect": {
+              "x": 12,
+              "y": 128,
+              "width": 48,
+              "height": 56
+            }
+          }
+        }
+      ],
+      "captureLeadMs": 0.8999999999650754
+    }
+  ],
+  "assessment": "No observed movement, blockage or wrong semantic owner. The delivered compatibility click differs5px from the physical pointer position but remains inside the measured control. Current verifier assumes every event coordinate stays within1px and rejects this receipt. Preserve this failed result; do not relabel it as a pass.",
+  "nextFixPlan": {
+    "status": "Read-only proposal; not implemented because the user paused the project.",
+    "productCss": "No changes required for this failure.",
+    "files": [
+      "tools/pages-preview/browser-smoke.mjs",
+      "tools/pages-preview/browser-report.mjs",
+      "tools/pages-preview/tests/experience-report.test.mjs",
+      "tools/pages-preview/tests/experience-fixture.mjs"
+    ],
+    "observer": "Use passive WeakMap identity for sampled native interactive element. Carry original ID/tag/full rect in point and expectedPointer. Capture actual interactive owner identity and current selector binding before application handlers. Verify stable sampling identity as well as geometry. No DOM data attributes or application-state mutations.",
+    "validator": "Keep pointerdown/up±1px, trusted order and pointerId unchanged. Keep mouse and selector=false exact checks. Accept a selector-bound touch click adjustment only when sampled ID,current selector ID and captured owner ID agree and original/current rect are stable; click must remain inside the original rect. Native button,a,input,textarea,select callsites need null-safe ownership. Missing evidence is fail-closed, not a wider coordinate tolerance.",
+    "negativeCases": [
+      "Same label and rect but different or replaced DOM identity",
+      "Moved rect",
+      "Click outside original target",
+      "Shifted pointerdown or pointerup",
+      "Mouse click adjusted5px",
+      "selector=false click adjusted5px",
+      "Missing target identity or selector binding"
+    ],
+    "unchangedGates": [
+      "8native menu gestures maximum",
+      "All8menu controls reachable",
+      "Geometry/hit assertions",
+      "Trusted input and event order/pointerId",
+      "Smoothness thresholds and arithmetic",
+      "Pixel/source/offline gates"
+    ],
+    "nextSession": "Review and implement minimally, run focused negative controls, then obtain a new source-bound canonical browser receipt. No rerun was started from this paused task.",
+    "geometryRequirement": "Retain the current pre-input stable-target geometry gate and require adjusted touch click containment in the original intended rect. Before implementing event-rect stability checks, account explicitly for existing legitimate :active transforms; do not blindly reuse the 0.25px pre-input tolerance for every event rect, and do not accept unexplained target movement. Resolve this instrumentation detail in the next session without widening pointer coordinate tolerance."
+  },
+  "independentReview": {
+    "reviewer": "/root/mobile_ux_research",
+    "status": "Read-only; no code changes or CI runs.",
+    "finding": "Independent review agrees that assertExperienceClick currently treats an adjusted trusted touch click as though it must equal the original touch position. All four ec27 sequences have pointer down/up (36,156), click (36,151), the same recorded SVG/BUTTON semantic owner and rect (12,128,48,56). Both menu traversals reached all eight controls in two and three native scrolls. The old observer lacks persistent DOM identity, so that limitation remains explicit.",
+    "previousEvidence": "The reviewer reports the same coordinate adjustment in the retained b8 receipt; no past failed result is reclassified.",
+    "captureTiming": "The passive capture listener records events before React handlers.",
+    "geometryCaveat": "The existing 0.25px tolerance belongs to pre-input stability sampling. It must not become a universal equality requirement between every event bounding rect and the resting rect: source :active rules for .button, .filter-button and .icon-button include 1px translation or scale(.98); coarse Layers/rail controls disable these transforms.",
+    "callsiteCaveat": "Current selector-backed assertExperienceClick callsites use BUTTON/A. The general recordedClick textarea receipt is not passed to this assertion; input/select keyboard flows still require null-safe instrumentation."
+  }
+}

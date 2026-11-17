@@ -1,0 +1,515 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-source-bound-review",
+  "sourceCommit": "ec27a88a5d6574404fd90120e6fbb6a11229e3d5",
+  "sourceTree": "a0c21ab94b45a322a024a8adb5609b35be89b500",
+  "workflowRunId": "44073808641",
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/44073808641",
+  "build": {
+    "status": "success",
+    "jobId": 134006501003,
+    "unitTests": {
+      "tests": 89,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "instrumentationApkCompiled": true
+    }
+  },
+  "device": {
+    "status": "passed",
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "missingTests": [],
+    "parseErrors": [],
+    "deviceExecutionVerified": true,
+    "installedArtifactBytesVerified": true,
+    "releasePayloadDeviceVerified": true,
+    "testedArchitecture": "x86_64",
+    "testedArtifact": "tropnik-preview.apk",
+    "arm64DeviceExecutionVerified": false,
+    "physicalDeviceVerified": false,
+    "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+    "testedApks": {
+      "tropnik-preview.apk": {
+        "bytes": 69289290,
+        "sha256": "2d0f35cda7b35171b3f3fb83b5309ffe0bf85cbc586d2d9d2b42aa6c4181c989"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1209041,
+        "sha256": "a4fbcba0e4a70ef37b060dc9bd09088f8644ae1d09bd861f73689044b4d953f3"
+      }
+    }
+  },
+  "deviceJobId": 134010484377,
+  "cases": [
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "mobileNavigationRetainsMapAndSavedContext",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "mobileSearchAndCompactPanelsKeepActionsReachable",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    }
+  ],
+  "installedBytesProof": {
+    "sourceAndWorkflowMatch": true,
+    "archiveApkHashesMatchBuildReceipt": true,
+    "installedHashesMatchBothBuildAndDeviceReceipts": true,
+    "buildReceiptSha256": "a5af82dfa184056e9aa53f909a4a4ecbfcb8880b8e89539f8737dabe7812521d"
+  },
+  "mobileEvidence": {
+    "geometry": [
+      {
+        "name": "mobile-map-portrait",
+        "controlCount": 10,
+        "minimumTargetDimensionDp": 48.0,
+        "allInsideRoot": true,
+        "targetsDisjoint": true
+      },
+      {
+        "name": "mobile-route-portrait",
+        "controlCount": 6,
+        "minimumTargetDimensionDp": 48.0,
+        "allInsideRoot": true,
+        "targetsDisjoint": true
+      },
+      {
+        "name": "mobile-map-landscape",
+        "controlCount": 11,
+        "minimumTargetDimensionDp": 48.0,
+        "allInsideRoot": true,
+        "targetsDisjoint": true
+      },
+      {
+        "name": "mobile-map-320dp-font200",
+        "controlCount": 11,
+        "minimumTargetDimensionDp": 48.0,
+        "allInsideRoot": true,
+        "targetsDisjoint": true
+      },
+      {
+        "name": "mobile-search-320dp-font200",
+        "controlCount": 5,
+        "minimumTargetDimensionDp": 53.333333333333336,
+        "allInsideRoot": true,
+        "targetsDisjoint": true
+      },
+      {
+        "name": "mobile-map-overview-320dp-font200",
+        "controlCount": 10,
+        "minimumTargetDimensionDp": 48.0,
+        "allInsideRoot": true,
+        "targetsDisjoint": true
+      }
+    ],
+    "geometryNote": "Actual reachable control rectangles; these assertions do not verify that every screenshot captures a fully composed map frame.",
+    "realOrientationChange": true,
+    "renderedContainerDp": [
+      320,
+      568
+    ],
+    "fontScale": 2,
+    "containerNote": "320x568dp is an actual rendered Compose test container with LocalDensity(fontScale=2), not a claim about physical emulator resolution.",
+    "keyboard": [
+      {
+        "query": "Чёрный ключ",
+        "editorAction": "performImeAction",
+        "imeVisibleBefore": true,
+        "imeHeightBeforePx": 883,
+        "imeVisibleAfter": false,
+        "imeHeightAfterPx": 0,
+        "focusReleased": true
+      },
+      {
+        "query": "Алтай",
+        "editorAction": "performImeAction",
+        "imeVisibleBefore": true,
+        "imeHeightBeforePx": 883,
+        "imeVisibleAfter": false,
+        "imeHeightAfterPx": 0,
+        "focusReleased": true
+      }
+    ],
+    "keyboardNote": "Compose performImeAction editor event with observed real IME insets before/after; not claimed as a physical keyboard-key tap.",
+    "destinationLabels": [
+      {
+        "label": "Карта",
+        "boundsPx": [
+          21,
+          1279,
+          259,
+          1365
+        ],
+        "layouts": [
+          {
+            "widthPx": 238,
+            "heightPx": 86,
+            "lines": 1,
+            "paragraphWidthPx": 238,
+            "paragraphHeightPx": 86,
+            "constraintWidthPx": 238,
+            "constraintHeightPx": 170,
+            "density": 2.625,
+            "fontScale": 2,
+            "overflowWidth": false,
+            "overflowHeight": false
+          }
+        ]
+      },
+      {
+        "label": "Сохранено",
+        "boundsPx": [
+          301,
+          1237,
+          539,
+          1407
+        ],
+        "layouts": [
+          {
+            "widthPx": 238,
+            "heightPx": 170,
+            "lines": 2,
+            "paragraphWidthPx": 238,
+            "paragraphHeightPx": 170,
+            "constraintWidthPx": 238,
+            "constraintHeightPx": 170,
+            "density": 2.625,
+            "fontScale": 2,
+            "overflowWidth": false,
+            "overflowHeight": false
+          }
+        ]
+      },
+      {
+        "label": "Ещё",
+        "boundsPx": [
+          581,
+          1279,
+          819,
+          1365
+        ],
+        "layouts": [
+          {
+            "widthPx": 238,
+            "heightPx": 86,
+            "lines": 1,
+            "paragraphWidthPx": 238,
+            "paragraphHeightPx": 86,
+            "constraintWidthPx": 238,
+            "constraintHeightPx": 170,
+            "density": 2.625,
+            "fontScale": 2,
+            "overflowWidth": false,
+            "overflowHeight": false
+          }
+        ]
+      }
+    ],
+    "saveFeedback": {
+      "message": "Карточка сохранена на этом устройстве",
+      "feedbackPx": [
+        0,
+        1937,
+        1080,
+        2127
+      ],
+      "savePx": [
+        32,
+        1790,
+        1048,
+        1916
+      ],
+      "disjoint": true
+    },
+    "navigation": {
+      "query": "Тисо-самшитовая роща",
+      "regionId": "krasnodar",
+      "sameNativeMap": true,
+      "savedListPositionRestored": true,
+      "destinationCamerasAreIndependent": true,
+      "sameTabIsNoOp": true,
+      "savedTabClosesChildAndKeepsScroll": true
+    },
+    "hiddenNativeMapActive": false,
+    "offlineLifecycle": {
+      "regionId": "altai",
+      "routeId": "osm-relation-6040458",
+      "schemaVersion": 2,
+      "runtimeSha256": "34bb0eee219f9def47c0535bc0b3abd4e2ead89b9c11ee31be8a5c8abc0de852",
+      "snapshotSourceBytesVerified": true,
+      "missingGeometryRejectedOnNextOpen": true,
+      "oldRuntimeRequiresUpdate": true,
+      "bookmarkSurvivedRemoval": true,
+      "reinstalledAndVerified": true,
+      "networkState": "OFFLINE"
+    },
+    "offlineRoutePixelsPassed": true,
+    "coastalRoutePixels": {
+      "routeId": "kolyma-black-creek",
+      "passed": true,
+      "actualPixelsPassed": true
+    }
+  },
+  "visualReview": {
+    "selectedLargeTextFrame": "mobile-map-320dp-font200.png shows the actual selected coastal line; all destination labels fit without overflow.",
+    "recommendedOriginalNormalUiScreenshots": [
+      "device/screenshots/qa/map-native-catalogue-coastal.png",
+      "device/screenshots/qa/mobile-save-feedback.png"
+    ],
+    "unresolvedObservations": [
+      {
+        "files": [
+          "device/screenshots/qa/mobile-map-landscape.png",
+          "device/screenshots/qa/mobile-map-overview-320dp-font200.png"
+        ],
+        "observation": "Black map canvas is visible in both saved PNGs while surrounding native controls are present. The case passed semantic geometry checks; it does not prove a fully composed overview/rotated map frame at screenshot time.",
+        "cause": "Unresolved: a transient Surface/WebView composition frame and a persistent rendering issue cannot be distinguished from these retained images.",
+        "nextSession": "Investigate capture/frame readiness and visible map pixels on rotation and return from results. Preserve these original frames. No new run or product fix was attempted after the user stopped development."
+      },
+      {
+        "file": "device/screenshots/qa/mobile-route-portrait.png",
+        "observation": "The PNG still shows search results; later measured semantics correspond to the route actions. Do not use the filename alone as evidence of a fully displayed route-detail frame.",
+        "cause": "Screenshot/native-frame synchronization is a possible explanation, not established by the retained image."
+      }
+    ]
+  },
+  "production": {
+    "kind": "unsigned-production-build-check",
+    "sourceCommit": "ec27a88a5d6574404fd90120e6fbb6a11229e3d5",
+    "applicationId": "ru.tropa.app",
+    "version": "0.4.35",
+    "versionCode": 18,
+    "bytes": 61058573,
+    "sha256": "2ec564389e6dec1fcda547bb53e71d3cb41f4c466ba31aa6f58dd7076e01c73b",
+    "debuggable": false,
+    "signatureVerified": false,
+    "signingCertificateSha256": null,
+    "productionPublished": false,
+    "deviceExecutionVerified": false,
+    "liveApiVerified": false,
+    "upgradeVerified": false
+  },
+  "publicationJobs": "skipped; no release request or publication changed during this audit",
+  "notClaimed": [
+    "13/13 validates the existing functional/assertion suite; it does not settle the explicitly retained black-canvas screenshot observations.",
+    "Only the exact optimized universal preview was device-tested. The separate unsigned production variant was compiled/verified, not signed or device-executed.",
+    "ARM64, a physical GPU/device, GPS, battery, live production API and upgrade behavior remain outside this proof.",
+    "No edits, builds, releases or retries were started after the user requested a stop."
+  ],
+  "artifacts": [
+    {
+      "id": 14324332693,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "path": "device.zip",
+      "sha256": "0f4a7ee4c0c2f5ef478dd3948e1d19d4a465447475a498bebc79ff98d957171b"
+    },
+    {
+      "id": 14323344423,
+      "name": "tropnik-android-preview-1",
+      "path": "preview.zip",
+      "sha256": "9ce99a983efef44300ee805f689c36bb98c835272ca9d1a0cc99e033f808effc"
+    },
+    {
+      "id": 14323728795,
+      "name": "tropnik-production-build-check-1",
+      "path": "production-check.zip",
+      "sha256": "d65e8e05427028beba0dd94c043b891a7aa39e2fb9dc3aff4eac3dec79d6b4d5"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "device/device-result.json",
+      "bytes": 4862,
+      "sha256": "c0f42c8a66c20416ff52cb5297e1a1b34bc42765fdc4628df07db742b4985282"
+    },
+    {
+      "path": "device/installed-apks.json",
+      "bytes": 581,
+      "sha256": "be2d1ef80feb9877eccd4b0d3e890604ac226317350e42a679508aab50fa3d27"
+    },
+    {
+      "path": "device/raw-instrumentation.log",
+      "bytes": 8674,
+      "sha256": "70c9b6c65377552787196eb06adc012ee8c342e304d67e1b12d5b59d67533376"
+    },
+    {
+      "path": "device/tested-apks.sha256",
+      "bytes": 280,
+      "sha256": "b7297ed306d9c7f3f60ed6d1d36e623397998c0298ec52d9ddb51888b3671c05"
+    },
+    {
+      "path": "preview-build.json",
+      "bytes": 3440,
+      "sha256": "a5af82dfa184056e9aa53f909a4a4ecbfcb8880b8e89539f8737dabe7812521d"
+    },
+    {
+      "path": "unit-tests-from-build-log.json",
+      "bytes": 3886,
+      "sha256": "61a0c3930208c91e0740a21059c5505611b5e95d8fa1bf6aa74d531f2ad78a71"
+    },
+    {
+      "path": "production-verification.json",
+      "bytes": 11462,
+      "sha256": "d398cd2770e13eaf57b25de9a4a5f030a1757990abf9721c85a051acb42a2c85"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-compact-layout.json",
+      "bytes": 7516,
+      "sha256": "63c59c054c9fc3d8c0378cdd626026f218db61902293efcb128a4fd543b7eb5e"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-destination-labels.json",
+      "bytes": 1393,
+      "sha256": "8e72d18a935a4d69f1cd35cddc7351c8751649d5bf1a46141d3574d4b7d17bab"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-navigation-context.json",
+      "bytes": 47004,
+      "sha256": "cc364032cd86e3d9f8a95a0f098ebd205b4efbfcf142da80ded6d25dd532b098"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-save-feedback.json",
+      "bytes": 224,
+      "sha256": "e71ad936c4cbe8f5cc66e311c50967bd7ca3d29056821b2a509dd6046ef15921"
+    },
+    {
+      "path": "device/screenshots/qa/offline-pack-lifecycle.json",
+      "bytes": 33727,
+      "sha256": "d1e79270a277a6d07ce03880a596d586f0ea22db033bbf2ba051715882355bfc"
+    },
+    {
+      "path": "device/screenshots/qa/map-native-catalogue-coastal-route-pixels.json",
+      "bytes": 30410,
+      "sha256": "50ccd32cab5fdbd109ef99e91a71e6ec5424da8b3baad6659ac07fffbf125726"
+    },
+    {
+      "path": "device/screenshots/qa/map-native-catalogue-coastal.png",
+      "bytes": 307384,
+      "sha256": "861ccfca7f2476c5ba70cb8e75c449497e0b3e604fa36a765437a997ad5d8d9a"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-save-feedback.png",
+      "bytes": 181060,
+      "sha256": "f9018abd24b4e9a7625541673164984d90f914cc8cea398754b124a47719ed42"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-map-320dp-font200.png",
+      "bytes": 128185,
+      "sha256": "ce79312b7614805833b806372861912e4a20f731c74b90a4e7537c767f4470e7"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-map-overview-320dp-font200.png",
+      "bytes": 73735,
+      "sha256": "bfa5f20a6b1b56c031c72491ad6b7941d29fbf80eef592db88f5221d1f49d8e8"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-map-landscape.png",
+      "bytes": 68038,
+      "sha256": "475ae2ccf6fd0fb78e6dc9114e72026e9abc48d7d9792280f5c409a2996ea4ca"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-route-portrait.png",
+      "bytes": 172522,
+      "sha256": "99db42e92400672645457e448b2897ce8f3e69c4084869dad47e5b35075588dd"
+    }
+  ]
+}

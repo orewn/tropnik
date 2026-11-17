@@ -1,0 +1,384 @@
+{
+  "sourceCommit": "ec27a88a5d6574404fd90120e6fbb6a11229e3d5",
+  "workflowRun": 44073808644,
+  "runAttempt": 1,
+  "result": "failure",
+  "failure": {
+    "step": 30,
+    "name": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+    "profile": "compact-android",
+    "error": "AssertionError [ERR_ASSERTION]: compact-android/layers/closed/open: delivered click differs from its target\n    at assertExperienceClick (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-report.mjs:417:41)\n    at assertLayerMenuAudit (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-report.mjs:480:3)\n    at checkPortraitLayerMenus (file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:567:70)\n    at async file:///home/runner/work/tropnik/tropnik/tools/pages-preview/browser-smoke.mjs:1021:51",
+    "reportedAt": "assertExperienceClick / browser-report.mjs:417"
+  },
+  "passedBeforeFailure": {
+    "uiSmoothness": true,
+    "landscapeControls": true,
+    "sourceCredits": true,
+    "focusedPixelTerrainGates": true
+  },
+  "smoothness": {
+    "scope": "pre-full-browser diagnostic gate; unchanged budgets",
+    "performanceAccepted": true,
+    "profiles": [
+      {
+        "profile": "android-portrait",
+        "acquisitionCompleted": true,
+        "performanceAccepted": true,
+        "issues": [],
+        "scenarios": [
+          {
+            "name": "panel",
+            "samples": 127,
+            "frameP95Ms": 16.899999999965075,
+            "maxGapMs": 37.59999999997672,
+            "longTaskCount": 0
+          },
+          {
+            "name": "explore-search",
+            "samples": 111,
+            "frameP95Ms": 16.800000000046566,
+            "maxGapMs": 18.800000000046566,
+            "longTaskCount": 0
+          },
+          {
+            "name": "explore-filters",
+            "samples": 169,
+            "frameP95Ms": 17,
+            "maxGapMs": 20.899999999965075,
+            "longTaskCount": 0
+          },
+          {
+            "name": "catalog-scroll",
+            "samples": 55,
+            "frameP95Ms": 22.400000000023283,
+            "maxGapMs": 40.79999999998836,
+            "longTaskCount": 0
+          },
+          {
+            "name": "map-pan",
+            "samples": 80,
+            "frameP95Ms": 21.79999999998836,
+            "maxGapMs": 28.79999999998836,
+            "longTaskCount": 0
+          },
+          {
+            "name": "map-zoom",
+            "samples": 387,
+            "frameP95Ms": 20.29999999998836,
+            "maxGapMs": 33.199999999953434,
+            "longTaskCount": 0
+          },
+          {
+            "name": "layer-switch",
+            "samples": 270,
+            "frameP95Ms": 16.800000000046566,
+            "maxGapMs": 33.09999999997672,
+            "longTaskCount": 0
+          },
+          {
+            "name": "site-search",
+            "samples": 97,
+            "frameP95Ms": 17.399999999965075,
+            "maxGapMs": 33.70000000001164,
+            "longTaskCount": 0
+          }
+        ]
+      },
+      {
+        "profile": "desktop-webgl",
+        "acquisitionCompleted": true,
+        "performanceAccepted": true,
+        "issues": [],
+        "scenarios": [
+          {
+            "name": "panel",
+            "samples": 73,
+            "frameP95Ms": 16.899999999965075,
+            "maxGapMs": 17.20000000001164,
+            "longTaskCount": 0
+          },
+          {
+            "name": "explore-search",
+            "samples": 97,
+            "frameP95Ms": 20.100000000034925,
+            "maxGapMs": 29.400000000023283,
+            "longTaskCount": 0
+          },
+          {
+            "name": "explore-filters",
+            "samples": 136,
+            "frameP95Ms": 17,
+            "maxGapMs": 17.699999999953434,
+            "longTaskCount": 0
+          },
+          {
+            "name": "catalog-scroll",
+            "samples": 28,
+            "frameP95Ms": 16.900000000023283,
+            "maxGapMs": 19.100000000034925,
+            "longTaskCount": 0
+          },
+          {
+            "name": "map-pan",
+            "samples": 208,
+            "frameP95Ms": 28.399999999965075,
+            "maxGapMs": 43.29999999998836,
+            "longTaskCount": 0
+          },
+          {
+            "name": "map-zoom",
+            "samples": 577,
+            "frameP95Ms": 21.5,
+            "maxGapMs": 40.29999999998836,
+            "longTaskCount": 0
+          },
+          {
+            "name": "layer-switch",
+            "samples": 222,
+            "frameP95Ms": 16.900000000023283,
+            "maxGapMs": 42.899999999965075,
+            "longTaskCount": 0
+          },
+          {
+            "name": "site-search",
+            "samples": 90,
+            "frameP95Ms": 17.399999999965075,
+            "maxGapMs": 19.20000000001164,
+            "longTaskCount": 0
+          }
+        ]
+      }
+    ]
+  },
+  "environment": {
+    "browser": {
+      "product": "Chrome/157.0.8103.50",
+      "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+      "protocolVersion": "1.3",
+      "jsVersion": "15.7.112.23",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "displayType": "ANGLE_SWIFTSHADER",
+      "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+      "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "glVendor": "Google Inc. (Google)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+      "skiaBackendType": "None",
+      "targetCpuBits": 64
+    },
+    "runner": {
+      "os": {
+        "platform": "linux",
+        "release": "7.0.0-1017-azure",
+        "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+        "arch": "x64"
+      },
+      "cpu": {
+        "models": [
+          "AMD EPYC 9V45 96-Core Processor"
+        ],
+        "logicalCount": 4,
+        "availableParallelism": 4
+      },
+      "totalMemoryBytes": 16760344576,
+      "image": {
+        "os": "ubuntu24",
+        "version": "20261111.370.1"
+      }
+    }
+  },
+  "sourceIdentityToEcf": {
+    "web/lib": {
+      "before": "52e9717567caeaed93841f1a3b17216979220b43",
+      "after": "52e9717567caeaed93841f1a3b17216979220b43",
+      "identical": true
+    },
+    "web/components": {
+      "before": "215f35341d5772006bac95b39c3b63d4b90d1fd7",
+      "after": "215f35341d5772006bac95b39c3b63d4b90d1fd7",
+      "identical": true
+    },
+    "tools/pages-preview": {
+      "before": "8f659282e2eace19f7aa83367eced346cf2dff2c",
+      "after": "8f659282e2eace19f7aa83367eced346cf2dff2c",
+      "identical": true
+    }
+  },
+  "previousFailure": {
+    "sourceCommit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+    "workflowRun": 44071007674,
+    "desktopPanFrameP95Ms": 35.09999999997672,
+    "limitMs": 35,
+    "cpuModel": "AMD EPYC 7763 64-Core Processor",
+    "preserved": true,
+    "notInvalidatedByCurrentSample": true
+  },
+  "layerTraversalObservations": [
+    {
+      "sheet": "closed",
+      "menu": {
+        "left": 68,
+        "right": 308,
+        "top": 64,
+        "bottom": 464,
+        "width": 240,
+        "height": 400
+      },
+      "anchor": {
+        "left": 12,
+        "right": 60,
+        "top": 128,
+        "bottom": 184,
+        "width": 48,
+        "height": 56
+      },
+      "usable": {
+        "left": 0,
+        "right": 320,
+        "top": 56,
+        "bottom": 472,
+        "width": 320,
+        "height": 416
+      },
+      "nativeScrollCount": 2,
+      "reachedControlIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "allEightObservedReachable": true,
+      "frames": [
+        {
+          "scrollTop": 0,
+          "fullyVisibleAndHitIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "scrollTop": 65,
+          "fullyVisibleAndHitIndices": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "scrollTop": 80,
+          "fullyVisibleAndHitIndices": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "open",
+      "menu": {
+        "left": 68,
+        "right": 308,
+        "top": 64,
+        "bottom": 286,
+        "width": 240,
+        "height": 222
+      },
+      "anchor": {
+        "left": 12,
+        "right": 60,
+        "top": 128,
+        "bottom": 184,
+        "width": 48,
+        "height": 56
+      },
+      "usable": {
+        "left": 0,
+        "right": 320,
+        "top": 56,
+        "bottom": 294,
+        "width": 320,
+        "height": 238
+      },
+      "nativeScrollCount": 3,
+      "reachedControlIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "allEightObservedReachable": true,
+      "frames": [
+        {
+          "scrollTop": 0,
+          "fullyVisibleAndHitIndices": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        {
+          "scrollTop": 159,
+          "fullyVisibleAndHitIndices": [
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "scrollTop": 243,
+          "fullyVisibleAndHitIndices": [
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "scrollTop": 258,
+          "fullyVisibleAndHitIndices": [
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      ]
+    }
+  ],
+  "layerAcceptancePassed": false,
+  "pendingEvidence": [
+    "New observer/validator after review and implementation",
+    "Remaining full mobile and desktop profiles",
+    "Search/filter/route/save/context/back browser scenario",
+    "Public deployment"
+  ],
+  "failureScreenshot": {
+    "file": "failure/browser-failure.png",
+    "sha256": "1ec30ee677fec5ec0054758174313d591cffcb1b2f1bf22b51eebf6161fe805e",
+    "observed": "Actual320x640 page after both menus were closed; it is not an open-menu screenshot."
+  },
+  "rawArtifactsUnmodified": true,
+  "thresholdsChanged": false,
+  "codeChangedAfterFailure": false,
+  "projectPaused": true
+}

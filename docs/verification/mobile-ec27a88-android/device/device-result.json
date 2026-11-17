@@ -1,0 +1,150 @@
+{
+  "status": "passed",
+  "processExitCode": 0,
+  "instrumentationResultCodes": [
+    -1
+  ],
+  "deviceExecutionVerified": true,
+  "tests": 13,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "missingTests": [],
+  "parseErrors": [],
+  "cases": [
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "mobileNavigationRetainsMapAndSavedContext",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "mobileSearchAndCompactPanelsKeepActionsReachable",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    }
+  ],
+  "schemaVersion": 2,
+  "recordedAt": "2026-11-17T11:37:58.476338+00:00",
+  "sourceCommit": "ec27a88a5d6574404fd90120e6fbb6a11229e3d5",
+  "workflowRunId": "44073808641",
+  "buildReceiptSha256": "a5af82dfa184056e9aa53f909a4a4ecbfcb8880b8e89539f8737dabe7812521d",
+  "testedApks": {
+    "tropnik-preview.apk": {
+      "bytes": 69289290,
+      "sha256": "2d0f35cda7b35171b3f3fb83b5309ffe0bf85cbc586d2d9d2b42aa6c4181c989"
+    },
+    "tropnik-instrumentation-tests.apk": {
+      "bytes": 1209041,
+      "sha256": "a4fbcba0e4a70ef37b060dc9bd09088f8644ae1d09bd861f73689044b4d953f3"
+    }
+  },
+  "installedArtifactBytesVerified": true,
+  "releasePayloadDeviceVerified": true,
+  "testedArchitecture": "x86_64",
+  "testedArtifact": "tropnik-preview.apk",
+  "arm64DeviceExecutionVerified": false,
+  "physicalDeviceVerified": false,
+  "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+  "graphicsDriver": {
+    "mode": "swangle",
+    "appBackend": "OpenGL ES",
+    "renderer": "GLES: Google (Google Inc. (Google)), Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)), OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.17841 git hash: 5fa2e61da947))",
+    "diagnosticSha256": "0b5ab8019ea79d3c4e29d60175dc40d196e72373c3a7543cde445ec284f0f141",
+    "verified": true
+  },
+  "note": "All 13 actual cases must pass on the exact installed universal preview. ARM64, physical GPU, GPS, battery, online satellite providers and a production API are not device-verified."
+}
