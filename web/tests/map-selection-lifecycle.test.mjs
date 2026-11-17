@@ -20,6 +20,7 @@ import {verifyReviewedCoastalRoute} from '../lib/reviewed-coastal-routes.ts';
 import {loadPublishedRouteGeometry} from '../lib/published-route.ts';
 import {publishedTrail} from '../lib/route-adapter.ts';
 import {mapDirectionCounts} from '../lib/map-catalog.ts';
+import * as mobileNavigation from '../lib/mobile-navigation.ts';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),compiled=new Map();
 const turn=()=>new Promise(done=>setImmediate(done));
@@ -49,10 +50,11 @@ function componentHost(file,name,dependencies={}){
     useState:initial=>{const index=cursor++;if(!hooks[index])hooks[index]={value:typeof initial==='function'?initial():initial};return[hooks[index].value,value=>{if(disposed)return;const next=typeof value==='function'?value(hooks[index].value):value;if(!Object.is(next,hooks[index].value)){hooks[index].value=next;dirty=true;}}];},
     useEffect:(callback,deps)=>effect(effects,callback,deps),useLayoutEffect:(callback,deps)=>effect(layout,callback,deps)};
   const jsx=(type,props,key)=>({type,props:props||{},key});
-  const listeners=new Map();
+  const listeners=new Map(),documentListeners=new Map();
   const environment=vm.createContext({console,AbortController,URL,navigator:{onLine:true},window:{
     addEventListener:(name,listener)=>{if(!listeners.has(name))listeners.set(name,new Set());listeners.get(name).add(listener);},
     removeEventListener:(name,listener)=>listeners.get(name)?.delete(listener),dispatch:name=>{for(const listener of listeners.get(name)||[])listener();}},
+    document:{addEventListener:(name,listener)=>{if(!documentListeners.has(name))documentListeners.set(name,new Set());documentListeners.get(name).add(listener);},removeEventListener:(name,listener)=>documentListeners.get(name)?.delete(listener)},
     ResizeObserver:class{observe(){}disconnect(){}},
     requestAnimationFrame:callback=>{const id=++serial;frames.set(id,callback);return id;},cancelAnimationFrame:id=>frames.delete(id)});
   if(!compiled.has(file))compiled.set(file,ts.transpileModule(readFileSync(resolve(root,file),'utf8'),{fileName:file,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText);
@@ -106,6 +108,7 @@ function atlasFixture({committedMode='detail',ready=true,directions=[]}={}){
     '@/lib/map-route-presentation':{overviewContextCaption:()=>'',ROUTE_PRESENTATION:{closeZoom:12}},'@/lib/map-types':{EMPTY_MAP_TRAILS:[]},
     '@/lib/custom-map-scale':{mapDistanceScale},
     '@/lib/custom-map-relief':{reliefContourIntervals},
+    '@/lib/mobile-navigation':mobileNavigation,
   });
   const select=(trail,visibleTrails=[])=>host.render({region,trail,visibleTrails,onRegion(){},onTrail:value=>chosen.push(value),onMapNote:value=>notes.push(value)});
   return{host,requests,maps,notes,chosen,select,overlayRequests,invalidated,frameControllers};
@@ -390,7 +393,29 @@ test('Relief restores measured hillshade without resetting independent path and 
   env.host.click('Спутник');env.host.click('Рельеф');
   assert.deepEqual(map.layers,{paths:false,boundaries:false,relief:true});assert.equal(inputFor('Рельеф и линии высот').props.checked,true);
   assert.equal(map.state.mode,'detail');assert.equal(map.getCamera(),camera);assert.equal(map.cameras.length,moves);assert.equal(map.fits.length,fits);
-  const menu=env.host.find(node=>node.props.className==='layer-menu');assert.equal(menu.props.children.some(node=>node?.type==='button'),false,'The layer menu does not introduce a third base mode');
+  const menu=env.host.find(node=>node.props.className==='layer-menu'),actions=menu.props.children.filter(node=>node?.type==='button');
+  assert.deepEqual(Array.from(actions,node=>node.props['aria-label']),['Север сверху','Показать Россию целиком'],'Settings exposes only the existing secondary camera actions');
+  assert.equal(actions.some(node=>Object.hasOwn(node.props,'aria-pressed')),false,'Settings must not introduce a third base mode');
+});
+
+test('Map and Saved keep independent cameras without remounting or reloading an unchanged selection',async t=>{
+  const env=atlasFixture();t.after(()=>env.host.unmount());
+  const a={id:'map-a',title:'Маршрут карты',geometry:line()},b={id:'saved-b',title:'Сохранённый маршрут',geometry:line(40.03,40.09)};
+  const render=(workspace,trail)=>env.host.render({workspace,region,trail,visibleTrails:[a,b],onRegion(){}});
+  render('map',a);await env.host.settle();await env.host.settle();
+  const map=env.maps[0],cameraA={center:[40.04,43.06],zoom:13.25,bearingDegrees:24};
+  map.setCamera(cameraA);map.options.onGesture();const changes=map.routeChanges.length;
+  render('saved',a);await env.host.settle();
+  assert.equal(map.routeChanges.length,changes,'opening Saved alone cannot clear or reload the existing map line');
+  assert.deepEqual(map.getCamera(),cameraA);
+  render('saved',b);await env.host.settle();await env.host.settle();
+  const cameraB={center:[40.08,43.04],zoom:12.5,bearingDegrees:-32};map.setCamera(cameraB);map.options.onGesture();
+  const fits=map.fits.length;
+  render('map',a);await env.host.settle();await env.host.settle();
+  assert.equal(map.routeId,a.id);assert.deepEqual(map.getCamera(),cameraA);assert.equal(map.fits.length,fits,'a late restored line cannot replace the retained manual camera');
+  render('saved',b);await env.host.settle();await env.host.settle();
+  assert.equal(map.routeId,b.id);assert.deepEqual(map.getCamera(),cameraB);
+  assert.equal(env.maps.length,1);assert.equal(map.active,true);
 });
 
 test('a main-map route marker replaces the selected line while preserving the Satellite mode',async t=>{

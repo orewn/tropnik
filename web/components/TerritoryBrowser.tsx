@@ -30,7 +30,7 @@ export const TerritoryBrowser = memo(function TerritoryBrowser({query, catalogBy
     <div className={`region-list${all ? ' territory-list' : ''}`}>
       {choices.slice(0, limit).map(item => {
         const count = catalogByRegion.get(item.id)?.length ?? 0;
-        return <button type="button" className="region-option" key={item.id} onClick={() => onSelect(item)}>
+        return <button type="button" className="region-option" data-region-id={item.id} key={item.id} onClick={() => onSelect(item)}>
           <span className={`region-thumbnail region-thumbnail-${item.id}`} style={{backgroundColor: item.tint}}><RegionArtwork regionId={item.id}/></span>
           <span className="region-option-text"><strong className="title-3">{item.name}</strong><small className="caption-4">{normalized ? 'territory' in item && item.territory ? 'Территория · ' : 'Направление · ' : ''}{count ? `${routeCountLabel(count)} · каталог` : 'Карта доступна · маршрутов пока нет'}</small></span>
           <ArrowUpRight size={20}/>

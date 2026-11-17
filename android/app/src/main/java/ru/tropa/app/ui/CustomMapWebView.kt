@@ -302,7 +302,7 @@ internal class CustomMapWebView(context: Context) : WebView(context) {
 
     fun debugDiagnostics(): JSONObject {
         check(BuildConfig.DEBUG && Looper.myLooper() == Looper.getMainLooper())
-        return JSONObject().put("ready", ready).put("disposed", disposed).put("pageReady", pageReady).put("frameReady", frameReady)
+        return JSONObject().put("ready", ready).put("disposed", disposed).put("active", active).put("pageReady", pageReady).put("frameReady", frameReady)
             .put("snapshotRequest", debugSnapshotRequest).put("snapshotSentAt", debugSnapshotSentAt)
             .put("drawCount", debugDrawCount).put("lastDrawAt", debugLastDrawAt)
             .put("fixture", debugFixtureState).put("receipts", JSONArray(debugReceipts.toList()))

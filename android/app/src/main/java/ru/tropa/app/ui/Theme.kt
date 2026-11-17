@@ -42,12 +42,12 @@ private val family = FontFamily(
 )
 
 val TropaTypography = Typography(
-    displayLarge = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 48.sp, lineHeight = 52.sp),
-    displayMedium = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 40.sp, lineHeight = 48.sp),
+    displayLarge = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 48.sp, lineHeight = 48.sp),
+    displayMedium = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 36.sp, lineHeight = 40.sp),
     displaySmall = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 36.sp, lineHeight = 40.sp),
     headlineLarge = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 30.sp, lineHeight = 36.sp),
     headlineMedium = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 24.sp, lineHeight = 32.sp),
-    headlineSmall = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 28.sp),
+    headlineSmall = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 28.sp),
     titleLarge = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 28.sp),
     titleMedium = TextStyle(fontFamily = family, fontWeight = FontWeight.Medium, fontSize = 18.sp, lineHeight = 28.sp),
     titleSmall = TextStyle(fontFamily = family, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 24.sp),
@@ -84,9 +84,9 @@ fun TropaTheme(content: @Composable () -> Unit) {
         ),
         typography = TropaTypography,
         shapes = Shapes(
-            extraSmall = RoundedCornerShape(12.dp), small = RoundedCornerShape(8.dp),
+            extraSmall = RoundedCornerShape(4.dp), small = RoundedCornerShape(8.dp),
             medium = RoundedCornerShape(12.dp), large = RoundedCornerShape(16.dp),
-            extraLarge = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 24.dp, bottomEnd = 8.dp),
+            extraLarge = RoundedCornerShape(24.dp),
         ),
         content = content,
     )

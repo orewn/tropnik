@@ -22,6 +22,7 @@
 .header :global(.top-nav a.active):before,.header :global(.top-nav a.active):after{display:none!important}
 .header :global(.top-nav) .menuOfflineLink,.header :global(.top-nav) .menuSearchLink{display:none}
 .actions{gap:8px!important;flex-shrink:0;margin-left:auto}
+.bottomNavigation,.menuSession{display:none}
 .searchLink,.offlineLink,.sessionButton,.actions :global(.menu-toggle){min-width:44px;min-height:44px;border:1px solid transparent;border-radius:12px!important}
 .searchLink,.offlineLink{height:44px;display:inline-flex;align-items:center;justify-content:center}
 .searchLink{width:44px;background:transparent}
@@ -98,3 +99,25 @@
 @media(forced-colors:active){.header,.header :global(.top-nav),.searchLink,.offlineLink,.actions :global(.menu-toggle){border:1px solid CanvasText!important}.header :global(.top-nav a.active){outline:2px solid Highlight}}
 
 @media(pointer:coarse){.header{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)!important}}
+
+/* Three stable, labelled destinations do not change with login or connection. */
+@media(max-width:1024px){
+  .header{height:56px!important;min-height:56px;padding-inline:max(12px,env(safe-area-inset-left)) max(12px,env(safe-area-inset-right))!important;gap:8px!important;box-shadow:none}
+  .header :global(.brand){min-height:48px;font-size:24px}
+  .header :global(.brand svg){width:32px;height:32px}
+  .actions .offlineLink,.actions .sessionButton,.actions :global(.menu-toggle){display:none!important}
+  .actions .searchLink{display:flex;width:48px;height:48px;min-width:48px;min-height:48px}
+  .workspaceHeader .actions .searchLink{display:none}
+  .header :global(.top-nav.open){inset:56px 0 var(--mobile-nav-height,64px);height:auto;padding:16px max(16px,env(safe-area-inset-right)) 24px max(16px,env(safe-area-inset-left));scroll-padding-block:16px 24px}
+  .header :global(.top-nav.open):before{content:"Ещё";font-size:24px;line-height:32px;letter-spacing:0;text-transform:none;color:var(--ink);padding:8px 16px}
+  .header :global(.top-nav.open) .menuSearchLink,.header :global(.top-nav.open) .menuOfflineLink{display:flex}
+  .header :global(.top-nav.open a){min-height:48px;font-size:18px;line-height:28px;padding:12px 16px}
+  .menuSession{display:block;margin-top:16px;padding:16px 0;border-top:1px solid var(--line)}
+  .menuSession button{min-height:48px;white-space:normal;text-align:center}
+  .bottomNavigation{position:fixed;z-index:2;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:var(--mobile-nav-height,64px);padding:4px max(8px,env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));gap:4px;background:var(--surface);border-top:1px solid var(--line)}
+  .bottomNavigation>a,.bottomNavigation>button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:48px;min-width:0;gap:2px;padding:4px 8px;border:0;border-radius:12px;background:transparent;color:var(--muted);font-size:12px;line-height:16px;font-weight:600;text-decoration:none;touch-action:manipulation}
+  .bottomNavigation [aria-current=page]{background:var(--surface-selected);color:var(--forest)}
+  .bottomNavigation a:focus-visible,.bottomNavigation button:focus-visible{outline:2px solid var(--forest);outline-offset:-2px}
+  .bottomNavigation a:active,.bottomNavigation button:active{background:var(--surface-soft)}
+  :global(html[data-mobile-keyboard=open]) .bottomNavigation{display:none}
+}

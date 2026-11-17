@@ -10,6 +10,7 @@ import {coastFixture} from './coast-fixture.mjs';
 import {satelliteFixture} from './satellite-fixture.mjs';
 import {smoothnessFixture} from './smoothness-fixture.mjs';
 import {browserEnvironmentFixture,terrainMaskReportFixture} from './browser-environment-fixture.mjs';
+import {mobileExperienceFixture,mobileTargetsFixture,mobileBuildFixture} from './mobile-experience-fixture.mjs';
 
 const commit='a'.repeat(40);
 const assertBrowserReport=(report,source)=>verifyBrowserReport(report,source,catalogueFixture);
@@ -60,16 +61,29 @@ function zoomDesign(profile,engine,mobile){
 function evidence(){
  return{verified:true,environment:browserEnvironmentFixture(commit),terrainMask:terrainMaskReportFixture(commit),catalogue:structuredClone(catalogueFixture),sourceCommit:commit,mapInteractionSchemaVersion:6,
   offlineSafety:{schemaVersion:1,passed:true,profile:'android-portrait',savedThroughUI:true,workerControlled:true,coldNavigation:true,offline:true,titleRestored:true,contactRestored:true,draftExplicit:true,privateApiNotCached:true,nativeInputs:4,inputs:['route-title','region','leader-name','leader-phone'].map(id=>({selector:'#'+id,passed:true,focusedBeforeTyping:true,valueLength:10,events:[{type:'input',trusted:true,id,valueLength:10}]})),networkSuccessfulResponses:0,originTransport:{method:'origin-socket-destroy',active:false,startedAt:'2026-11-10T00:00:00Z',restoredAt:'2026-11-10T00:00:01Z',blockedRequests:1,requests:[{path:'/tropnik/_offline-transport-probe',method:'GET'}],probe:{passed:true,errorCode:'ECONNRESET',path:'/tropnik/_offline-transport-probe'}},screenshot:{bytes:10000,sha256:'f'.repeat(64)}},
-  profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'tropnik-canvas',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
+  mobileExperience:mobileExperienceFixture(commit),
+  profiles:['compact-android','iphone-portrait','android-portrait','phone-landscape'].map(name=>({name,engine:'tropnik-canvas',interactionTested:true,sheetTested:true,sheetGestures:sheetGestures(),...(name==='phone-landscape'?{}:{layerMenus:layerMenusFixture()}),mobileTargets:mobileTargetsFixture(),sheetHeightDelta:0,layoutShift:0,longestTaskMs:100})),
   desktopProfiles:[{name:'desktop-webgl',engine:'tropnik-canvas',coarse:false,mapInteractionTested:true}],
   zoomDesigns:[zoomDesign('android-portrait','tropnik-canvas',true),zoomDesign('desktop-webgl','tropnik-canvas',false)],
   siteSmoothness:[smoothnessFixture('android-portrait','tropnik-canvas'),smoothnessFixture('desktop-webgl','tropnik-canvas')],
   mapInteractions:[['android-portrait','tropnik-canvas',true],['desktop-webgl','tropnik-canvas',false]].map(([profile,engine,mobile])=>({profile,engine,mobile,passed:true,directionHitAreas:directionHitAreasFixture(engine,mobile),experience:exploreExperienceFixture(mobile,'route',engine),...(mobile?{}:{styleCameraRoundtrip:styleCameraRoundtripFixture('route',{engine}),wheelOwnership:mapWheelFixture()}),catalogScroll:mobile?{passed:true,input:'touch',deltaPx:100,scrollHeightDelta:0,pageScrollDeltaPx:0,sheetDisplacementPx:0}:null,firstDirection:[{selected:'altai'}],secondDirection:[{selected:'baikal'}],route:{id:'route',offsetPx:14},line:{route:'route',clicked:true,selectionRetained:true,reopened:mobile},returnedToRegion:true,returnedToDirections:true,countryCameraRestored:true,polygon:{id:'territory'},gestures:{zoomInput:mobile?'touch-control':'mouse-wheel',beforeZoom:5,afterZoom:6,dragged:true,selectionPreserved:true,resizedTo:{width:900,height:412},postResizePolygon:'territory'},longestTaskMs:100,layoutShift:0}))};
 }
+test('release verification binds mobile interaction evidence to the actual build inputs',()=>{
+ const report=evidence(),build=mobileBuildFixture(commit);
+ assert.equal(verifyBrowserReport(report,commit,catalogueFixture,build),report);
+ for(const mutate of [value=>value.buildId='e'.repeat(16),value=>value.inputs[0].sha256='e'.repeat(64),value=>value.inputs.pop()]){
+  const wrong=structuredClone(build);mutate(wrong);assert.throws(()=>verifyBrowserReport(report,commit,catalogueFixture,wrong));
+ }
+});
 test('both upload and public verification require real mobile and desktop map interaction evidence',()=>{
  const report=evidence();assert.equal(assertBrowserReport(report,commit),report);
  const changes=[
   value=>delete value.offlineSafety,
+  value=>delete value.mobileExperience,
+  value=>value.mobileExperience.sourceCommit='b'.repeat(40),
+  value=>value.mobileExperience.performance.layoutShift=.12,
+  value=>value.mobileExperience.performance.longestTaskMs=350,
+  value=>delete value.profiles[0].mobileTargets,
   value=>value.offlineSafety.offline=false,
   value=>value.offlineSafety.coldNavigation=false,
   value=>value.offlineSafety.savedThroughUI=false,

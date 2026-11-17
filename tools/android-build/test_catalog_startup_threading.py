@@ -51,12 +51,12 @@ class CatalogStartupThreadingSourceTest(unittest.TestCase):
     def test_all_device_scenarios_wait_for_real_startup_without_relaxing_map_readiness(self):
         before = self.device.split("@Before fun waitForCatalogueStartup() {", 1)[1].split("    @Test ", 1)[0]
         self.assertIn("app.waitUntil(timeoutMillis = 15_000)", before)
-        self.assertIn('app.onAllNodesWithTag("explore_list").fetchSemanticsNodes().size == 1', before)
-        self.assertIn('app.onNodeWithTag("explore_list").assertIsDisplayed()', before)
+        self.assertIn('app.onAllNodesWithTag("map_workspace").fetchSemanticsNodes().size == 1', before)
+        self.assertIn('app.onNodeWithTag("map_workspace").assertIsDisplayed()', before)
         self.assertIn('check(app.onAllNodesWithTag("catalog_startup_error").fetchSemanticsNodes().isEmpty())', before)
         for bypass in ("Thread.sleep", "SystemClock.sleep", "assume", "@Ignore", "mapReady", "mapInputReady"):
             self.assertNotIn(bypass, before)
-        self.assertEqual(self.device.count("@Test fun "), 11)
+        self.assertEqual(self.device.count("@Test fun "), 13)
 
 
 if __name__ == "__main__":

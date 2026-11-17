@@ -11,7 +11,8 @@ test('route discovery stays responsive and browser history restores map state',a
   assert.match(explore,/addEventListener\('popstate'/);
   // History semantics are exercised by explore-navigation.test.mjs and the
   // native browser flow; retain this check only for the component wiring.
-  assert.match(explore,/writeExploreHistory\(window,\{regionId:nextRegion,trailId:nextTrail\},mode\)/);
+  assert.match(explore,/writeExploreHistory\(window,selection,mode\)/);
+  assert.match(explore,/writeExploreContext\(window,/);
   assert.match(explore,/aria-busy=\{searchPending\}/);
   // Exact membership, order and revision isolation are exercised against the
   // full catalogue in map-region-selection.test.mjs; this checks shared wiring.
@@ -28,7 +29,8 @@ test('mobile navigation is focus managed and cannot scroll behind the menu',asyn
   assert.match(header,/navigation\.current\?\.querySelector/);
   assert.match(header,/document\.addEventListener\('pointerdown'/);
   assert.match(header,/document\.body\.style\.overflow = 'hidden'/);
-  assert.match(header,/menuButton\.current\?\.focus/);
+  assert.match(header,/const focusMenuButton = \(\) => \(moreButton\.current\?\.getClientRects\(\)\.length \? moreButton\.current : menuButton\.current\)\?\.focus/);
+  assert.match(header,/requestAnimationFrame\(focusMenuButton\)/);
   assert.match(css,/overscroll-behavior:contain/);
   assert.match(css,/safe-area-inset-bottom/);
 });

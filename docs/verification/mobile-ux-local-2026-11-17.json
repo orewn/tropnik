@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "status": "local-preflight-passed",
+  "releaseEligible": false,
+  "createdAt": "2026-11-17T02:12:18.495430+00:00",
+  "baselineCommit": "13d37c28c1f8c6d0468a3ceae21950dabf20362f",
+  "sourceCommit": null,
+  "sourceState": "uncommitted candidate; exact commit CI still required",
+  "candidate": {
+    "webVersion": "0.4.35",
+    "androidVersion": "0.4.35-preview",
+    "androidVersionCode": 18,
+    "releaseRequestUnchanged": "0.4.34-preview"
+  },
+  "checks": {
+    "webTests": {
+      "passed": 1123,
+      "failed": 0
+    },
+    "pagesTooling": {
+      "passed": 418,
+      "failed": 0
+    },
+    "androidHostPythonTooling": {
+      "passed": 118,
+      "failed": 0
+    },
+    "androidHostNodeTooling": {
+      "passed": 41,
+      "failed": 0
+    },
+    "eslint": "passed",
+    "webTypes": "passed",
+    "staticClientTypes": "passed",
+    "productionFixtureStaticSubset": {
+      "passed": 2
+    },
+    "androidJVM": "not run locally; SDK unavailable",
+    "androidDevice": "not run locally; 13 required scenarios prepared",
+    "browserRendering": "not run locally; Chromium unavailable"
+  },
+  "staticBuild": {
+    "buildId": "ca1be3092957d46f",
+    "sourceCommit": null,
+    "pages": 719,
+    "inputs": 2201,
+    "httpChecks": 77,
+    "apiConnected": false
+  },
+  "sharedRuntime": {
+    "sourceInputsSha256": "26af625349b6cd64e23160b92bbf88ff1fac38992f257d6ec873669603bb41b7",
+    "manifestSha256": "34bb0eee219f9def47c0535bc0b3abd4e2ead89b9c11ee31be8a5c8abc0de852",
+    "reproduced": true,
+    "androidWebManifestsIdentical": true
+  },
+  "changesReviewed": [
+    "Independent Map and Saved contexts, including saved offline region Back",
+    "Single retained map instance; native hidden map paused and inaccessible",
+    "Portrait compact tray and landscape side layout",
+    "Actual status and metrics, reachable Save and On map",
+    "13 device cases retain all prior core renderer and pixel assertions",
+    "Source-bound native-input browser UX receipt; all prior budgets remain"
+  ],
+  "limitations": [
+    "No physical-phone usability study",
+    "No physical ARM64, field GPS or battery measurement",
+    "Local checks do not qualify publication"
+  ],
+  "inputs": [
+    {
+      "path": ".github/workflows/map-interaction-diagnostics.yml",
+      "bytes": 22315,
+      "sha256": "3c330e30c31d6ffb8f8cca1296feb43cb552d4e5f9c30542be0bface83799106"
+    },
+    {
+      "path": ".github/workflows/pages.yml",
+      "bytes": 47636,
+      "sha256": "1a7cbe25f7d5bd43bd27ce877e0108771d487f4d1471aa155483939a0d08a71b"
+    },
+    {
+      "path": "android/app/build.gradle.kts",
+      "bytes": 6178,
+      "sha256": "d6a47b62d78df416c23b485d97111bbb1c959a3e80a3b6b82ebd2d1dfb30a6a6"
+    },
+    {
+      "path": "android/app/src/androidTest/java/ru/tropa/app/LocalExperienceTest.kt",
+      "bytes": 114395,
+      "sha256": "6482a0532536dc641d25fa71b1ef202610ac67011041e19244ec26e4e2dd53ea"
+    },
+    {
+      "path": "android/app/src/main/assets/custom-map/manifest.json",
+      "bytes": 534178,
+      "sha256": "34bb0eee219f9def47c0535bc0b3abd4e2ead89b9c11ee31be8a5c8abc0de852"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/MainViewModel.kt",
+      "bytes": 13544,
+      "sha256": "af6e69661fcd44925fd920b3ff3285b41b3af3df9f94a3f51481f1582e0252d5"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/MobileNavigation.kt",
+      "bytes": 3498,
+      "sha256": "6b642a8abb4ff98bff931814634f998fd4a463e54ba3f031bc385ff6f215bf7f"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/Controls.kt",
+      "bytes": 4407,
+      "sha256": "d3dee61daed7f607360df3524401e4e39d3dfaf2f4dde9dfb816c64d64116e38"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/CustomMapWebView.kt",
+      "bytes": 22881,
+      "sha256": "3dacd02c315d510af0d1584c2f24a02c74ef7162f6e6b176b00efe14bd8b1437"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/Icons.kt",
+      "bytes": 3776,
+      "sha256": "292ecbc4f51f378dba2ce929ee113797db2946f6e0a2946b0a2fd661a0c76a7f"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/MapPresentationState.kt",
+      "bytes": 1042,
+      "sha256": "d520625e4808dc00fe2eafafc5a8874b44617bf6eecbd79ec9489405864946a9"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/MobileDestinationBar.kt",
+      "bytes": 2550,
+      "sha256": "e50e108e73f57eb90563fed0aa9a75c82f38e379ac922292aecddc1855db6e3f"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/MobileWorkspace.kt",
+      "bytes": 17457,
+      "sha256": "68d8e786238b0baf903b0a4b7b3d5ba6db9b7cb1eb9bc1e4f7a58580d1fcab0b"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/Theme.kt",
+      "bytes": 5616,
+      "sha256": "733b33f4e9ff5afba359847380d72c5a06125524b8d5148e76594014d6d58d7e"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/TropaApp.kt",
+      "bytes": 39203,
+      "sha256": "f2634d460d7796b65cbb313840511476d73ab4cc2cb729bc822d69e5e52605ee"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/TropaMap.kt",
+      "bytes": 23756,
+      "sha256": "07566867257759367fc0220d6d18e2ed467a62f5a9977286f0e156e39768047a"
+    },
+    {
+      "path": "android/app/src/test/java/ru/tropa/app/MobileNavigationTest.kt",
+      "bytes": 5497,
+      "sha256": "14ed125bf41d91167b0826593405e75d490fbd9c03e254bc483b62aee49862da"
+    },
+    {
+      "path": "android/app/src/test/java/ru/tropa/app/ui/MapPresentationStateTest.kt",
+      "bytes": 1691,
+      "sha256": "6cce70419b8ef3cb55499c33a56ec78c8bab2d5b96ed7c758aa4ca13670c6f11"
+    },
+    {
+      "path": "tools/android-build/check-instrumentation.py",
+      "bytes": 9441,
+      "sha256": "1559c093ae3bc122d9564de810658f7a12e5be2734f8563d970a7fe8c8574067"
+    },
+    {
+      "path": "tools/android-build/release-notes/0.4.35-preview.md",
+      "bytes": 6093,
+      "sha256": "f0f417b7572c70b7f29e4919b9552958d7257b8ec8d8c2c5ad868c037a462279"
+    },
+    {
+      "path": "tools/android-build/test_catalog_startup_threading.py",
+      "bytes": 4332,
+      "sha256": "35c7e3bd4602818421d3305c473e55f7a3f4cfbd01628538dfc7e092eada36ca"
+    },
+    {
+      "path": "tools/android-build/test_tropa_map_threading.py",
+      "bytes": 5581,
+      "sha256": "d82b519c1ae39cf7555cfff9ddf528e5fa72903bf5d77e4eacadba29a773d57e"
+    },
+    {
+      "path": "tools/pages-preview/browser-mobile-experience.mjs",
+      "bytes": 36369,
+      "sha256": "d9d3dd6ce49c662a556fe352246ffbf62b2653fa6a0c7aeda4336c92f5b27dde"
+    },
+    {
+      "path": "tools/pages-preview/browser-report.mjs",
+      "bytes": 64934,
+      "sha256": "ad817ef65f2e06fda3caa6fcc284a2e67e59e732ef147ca173d721aadc630d09"
+    },
+    {
+      "path": "tools/pages-preview/browser-smoke.mjs",
+      "bytes": 102923,
+      "sha256": "5e42c823d2eb8410713ea2b06cfd8a5e0af16d1c8d0ae36ca0efb6ccffeebb5e"
+    },
+    {
+      "path": "tools/pages-preview/browser-smoothness.mjs",
+      "bytes": 23945,
+      "sha256": "15de4ccaf3ce4872f692f0c98f342ef3ead5a256ff821db19d61cad298d51684"
+    },
+    {
+      "path": "tools/pages-preview/map-attribution-verification.mjs",
+      "bytes": 18100,
+      "sha256": "3950b10ef290df5ff6ab10b8e84823a332f5e6044b19520c459d2d95d6c7bf30"
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-map-attribution.browser.mjs",
+      "bytes": 29069,
+      "sha256": "07888cc7d91a772f5598b29edf5d9213474f42d5d0c6140824cd9b6bbde785df"
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-map-controls.browser.mjs",
+      "bytes": 18241,
+      "sha256": "9dee9ea432057de34a1ab763c73d78fb8e06e0ef8239afb1613cb558cdba0ae6"
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-mobile-experience.test.mjs",
+      "bytes": 7397,
+      "sha256": "ad1f9d3751c590133c6674cd6a6b23b16701b91f8969d2f1f2cfb5cad6bf9daa"
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-profile-routing.test.mjs",
+      "bytes": 15474,
+      "sha256": "98f6d4782a461adbcbbb4a67b693883898520dadb27ba445328f53db7a98c5aa"
+    },
+    {
+      "path": "tools/pages-preview/tests/browser-report.test.mjs",
+      "bytes": 30937,
+      "sha256": "d5ca2b4b088434ad166a70f637764fe7f47d2bae4042e4c8b777b9e10a842599"
+    },
+    {
+      "path": "tools/pages-preview/tests/experience-fixture.mjs",
+      "bytes": 12854,
+      "sha256": "afea768e1620afa32c5774ad617240a85fb8d8067e8e4f00dd1255374db00956"
+    },
+    {
+      "path": "tools/pages-preview/tests/experience-report.test.mjs",
+      "bytes": 18614,
+      "sha256": "7be257f14c500b5c68e0554e197685eb334fe23280d2b4588fd15e5b4bd3ccbc"
+    },
+    {
+      "path": "tools/pages-preview/tests/map-attribution-verification.test.mjs",
+      "bytes": 18007,
+      "sha256": "f8d6a325db09fcdcd2e87fedf815fd0007d6aad06018453425fb01559077a67e"
+    },
+    {
+      "path": "tools/pages-preview/tests/mobile-experience-fixture.mjs",
+      "bytes": 8190,
+      "sha256": "a301c8c5528b3fc37d57e84452c0964cc87351789701f7b9d8e004a0c71f44bf"
+    },
+    {
+      "path": "tools/pages-preview/verify-deployed.mjs",
+      "bytes": 7246,
+      "sha256": "6e2d36c632cef750b03dc79f4f78d10e36dcb12e0974c538e507ca2319964aa2"
+    },
+    {
+      "path": "web/app/layout.tsx",
+      "bytes": 2126,
+      "sha256": "1f27f6229d54e583dfc6ed25f97c6c775a50e69a88bd7f77b3cb00b305c8b2ef"
+    },
+    {
+      "path": "web/app/mobile-workspace.css",
+      "bytes": 16036,
+      "sha256": "b2bf2caa582b16c9a9be7f5ab84dbabd0ce237aff5d9ffa2805d864c92c707e4"
+    },
+    {
+      "path": "web/components/CustomAtlas.tsx",
+      "bytes": 26471,
+      "sha256": "9d52baf96bf33607b2445d963bab7204e0266330c1be7c0a406cc14948881bd6"
+    },
+    {
+      "path": "web/components/Explore.tsx",
+      "bytes": 40521,
+      "sha256": "abf0d7b92a7ae04a139c24ae49e1ac244250d0c4e2d500b3a180b035d6d48b02"
+    },
+    {
+      "path": "web/components/Header.module.css",
+      "bytes": 9608,
+      "sha256": "5462f4efb921c9245ac2fbf66f0503aac84c60a5d4b9dca432e99508a6f1b81c"
+    },
+    {
+      "path": "web/components/Header.tsx",
+      "bytes": 16190,
+      "sha256": "435ffb9246a7496bbd31fb57858c606e2ebafc756fe7bee7861e137f79af5828"
+    },
+    {
+      "path": "web/components/Offline.tsx",
+      "bytes": 10395,
+      "sha256": "7ec6c327fa8d2062224071c84dc542e4b59e2fe670cab31ae075c95fa030fb82"
+    },
+    {
+      "path": "web/components/PlaceStories.tsx",
+      "bytes": 10311,
+      "sha256": "24d7d3ba47977a7e83f29a0646cf8ff9db087e3fe03b884bdd72e721e31ba07f"
+    },
+    {
+      "path": "web/components/TerritoryBrowser.tsx",
+      "bytes": 4126,
+      "sha256": "127f866ee311f7191f10e20b0193af1e6f30372c9db8d965eff3e1cb5d4d9569"
+    },
+    {
+      "path": "web/components/TrailCard.tsx",
+      "bytes": 3058,
+      "sha256": "b1f9f15ac1c6dbd680cc77ddcb004d6f4920f0ae25988403779a53e698eb529f"
+    },
+    {
+      "path": "web/lib/explore-navigation.ts",
+      "bytes": 5401,
+      "sha256": "e07d85ecdbde4dadbda7ec23be90fcb45ae14ba84163bdf044c5b6c1a7083062"
+    },
+    {
+      "path": "web/lib/local.ts",
+      "bytes": 5726,
+      "sha256": "89284b60eccd0ea27af4d35967afcee0d66a5867d7e406f8edae3608b0232e64"
+    },
+    {
+      "path": "web/lib/map-types.ts",
+      "bytes": 1273,
+      "sha256": "32d16574e43ae724ec7d5bac5810f81283e12f810a2146aa1c41a477b5445c87"
+    },
+    {
+      "path": "web/lib/mobile-navigation.ts",
+      "bytes": 893,
+      "sha256": "3beb6b89e7445a9b9c1c47a3bd54ff1a624136463a06ea4fce63dc38ca82b62e"
+    },
+    {
+      "path": "web/lib/saved-route.ts",
+      "bytes": 675,
+      "sha256": "e8541b29cc950f2ee1e6b7950aff18ed20ecfc7204628ad8581303534a7c9d57"
+    },
+    {
+      "path": "web/package.json",
+      "bytes": 1896,
+      "sha256": "a2669612a5645ce9af3d317540b03c13f0a821a66afa4050d53c9b14bcb63f7c"
+    },
+    {
+      "path": "web/public/custom-map/manifest.json",
+      "bytes": 534178,
+      "sha256": "34bb0eee219f9def47c0535bc0b3abd4e2ead89b9c11ee31be8a5c8abc0de852"
+    },
+    {
+      "path": "web/public/sw.js",
+      "bytes": 17792,
+      "sha256": "25dd62e5b9db8412f3f58659c3d0f3ad6d5f3b51f89584606aef1518120cf84d"
+    },
+    {
+      "path": "web/tests/explore-navigation.test.mjs",
+      "bytes": 9683,
+      "sha256": "31403d4f391eafed708b263a128686ab4a6d099c7999d213b6d72fbd1f66eb47"
+    },
+    {
+      "path": "web/tests/map-selection-lifecycle.test.mjs",
+      "bytes": 62322,
+      "sha256": "abb694c778ba6f9761445a941029a73fe5889fcc4233a3e73d7b32959bdd9452"
+    },
+    {
+      "path": "web/tests/place-stories.test.mjs",
+      "bytes": 10574,
+      "sha256": "cb1b5a93e7ad45af3d0c840931386b97b0864aebf2cb5318a2e788ccaf4153a6"
+    },
+    {
+      "path": "web/tests/saved-route.test.mjs",
+      "bytes": 1990,
+      "sha256": "2cda70b50547a34cd6c37230c07d7bb9af27a8b72d41b36ba90ae18b842a8b5a"
+    },
+    {
+      "path": "web/tests/service-polish.test.mjs",
+      "bytes": 3971,
+      "sha256": "c52f63dabf21b5da9e95ae40e10ef9294d31684f7e45f29c3175056bf14db5ae"
+    }
+  ]
+}

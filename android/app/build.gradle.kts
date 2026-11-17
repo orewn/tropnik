@@ -41,8 +41,8 @@ android {
         applicationId = "ru.tropa.app.preview"
         minSdk = 26
         targetSdk = 36
-        versionCode = 17
-        versionName = "0.4.34-preview"
+        versionCode = 18
+        versionName = "0.4.35-preview"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Both physical ARM phones and an x86_64 emulator are covered by this APK.

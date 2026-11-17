@@ -50,7 +50,10 @@ export function assertAttributionFooterLayout(value,scenario,loading){
  assert.equal(value.toggleCount,0,'The source-page link must not become a popup toggle');
  assert.equal(count('map-legend'),Number(!profile.mobile),'The desktop scale and legend must remain visible');
  for(const item of value.ui)validRect(item.rect);
- assert.equal(value.targets.length,10,'Five map actions, two modes, layer, story and Sources must remain reachable');
+ const primary=['Рельеф','Спутник','Увеличить масштаб','Уменьшить масштаб','Моё местоположение','Настройки карты','Истории мест','Источники данных карты и лицензии'];
+ const expected=profile.mobile?primary:[...primary,'Север сверху','Показать Россию целиком'];
+ assert.deepEqual(value.targets.map(target=>target.label).sort(),expected.sort(),'Every named primary action must remain reachable; mobile secondary camera actions are verified in Settings');
+ if(profile.mobile)for(const target of value.targets)assert.ok(target.minimumSize>=48,'Mobile source and map actions retain a 48px touch minimum');
  assertMapUIBounds(value,scenario.name+(loading?' loading':' ready'));return value;
 }
 export function assertAttributionSheetCycle(cycle,scenario,baseline){

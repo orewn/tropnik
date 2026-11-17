@@ -14,6 +14,7 @@ import {assertBrowserEnvironment} from './browser-environment.mjs';
 import {assertNativeSurfaceCoverage} from './browser-native-surface.mjs';
 import {assertTerrainMaskReport} from './terrain-mask-report.mjs';
 import {assertMapWheelAudit} from './browser-map-wheel.mjs';
+import {MOBILE_EXPERIENCE_SOURCES,assertMobileExperience,assertMobileTargets} from './browser-mobile-experience.mjs';
 
 const MOBILE_PROFILES=['compact-android','iphone-portrait','android-portrait','phone-landscape'];
 
@@ -404,7 +405,7 @@ function assertExperienceRect(rect,context){
  assert.ok(rect&&['left','right','top','bottom','width','height'].every(key=>Number.isFinite(rect[key])),`${context}: missing measured rectangle`);
  assert.ok(rect.width>0&&rect.height>0&&Math.abs(rect.right-rect.left-rect.width)<.01&&Math.abs(rect.bottom-rect.top-rect.height)<.01,`${context}: inconsistent measured rectangle`);
 }
-function assertExperienceClick(click,input,context,selector){
+export function assertExperienceClick(click,input,context,selector){
  assert.equal(click?.input,input,`${context}: wrong native input`);
  assert.ok(Number.isFinite(click.point?.x)&&Number.isFinite(click.point?.y),`${context}: missing click coordinates`);
  if(selector!==false){
@@ -444,7 +445,7 @@ function assertExperienceScroll(scroll,input,context,selector){
  }else assert.deepEqual(scroll.events.map(event=>event.type),['wheel']);
  assert.ok(Math.hypot(scroll.events[0].x-scroll.start.x,scroll.events[0].y-scroll.start.y)<=3,`${context}: native scroll started elsewhere`);
 }
-function assertExperienceScrolls(scrolls,input,context,selector='.explore-panel-content'){
+export function assertExperienceScrolls(scrolls,input,context,selector='.explore-panel-content'){
  assert.ok(Array.isArray(scrolls)&&scrolls.length<=12,`${context}: missing or unbounded native scroll history`);
  for(const [index,scroll] of scrolls.entries())assertExperienceScroll(scroll,input,`${context}/${index}`,selector);
 }
@@ -473,7 +474,7 @@ function assertExperienceBack(back,expected,context,from){
 export function assertLayerMenuAudit(receipt,name){
  assert.equal(receipt?.schemaVersion,2);assert.equal(receipt.passed,true);assert.equal(receipt.input,'touch');
  assert.deepEqual(receipt.states?.map(state=>state.sheet),['closed','open'],`${name}: both portrait sheet states need Layers coverage`);
- const controls=[['INPUT','Тропы и грунтовые дороги'],['INPUT','Рельеф и линии высот'],['INPUT','Границы территорий'],['A','Подробная офлайн-карта'],['A','Источники карты']];
+ const controls=[['BUTTON','Закрыть настройки карты'],['BUTTON','Север сверху'],['BUTTON','Показать Россию целиком'],['INPUT','Тропы и грунтовые дороги'],['INPUT','Рельеф и линии высот'],['INPUT','Границы территорий'],['A','Подробная офлайн-карта'],['A','Источники карты']];
  for(const state of receipt.states){
   const context=`${name}/layers/${state.sheet}`;
   assertExperienceClick(state.opened,'touch',`${context}/open`,'.layer-button');assertExperienceClick(state.closed,'touch',`${context}/close`,'.layer-button');
@@ -585,10 +586,11 @@ export function assertExploreExperience(receipt,name,engine,mobile,expectedCatal
  const input=mobile?'touch':'mouse',context=`${name}/explore`;
  assert.equal(engine,'tropnik-canvas');assert.equal(receipt?.schemaVersion,1);assert.equal(receipt.passed,true);assert.equal(receipt.input,input);
  const filter=receipt.filterReset;assert.ok(filter,`${context}: filter-reset evidence is missing`);
+ assert.equal(filter.semantics,'explicit-all-directions-reset',`${context}: filter reset needs its explicit parent-navigation meaning`);
  for(const state of [filter.baseline,filter.restored]){assert.equal(state?.pressed,'false');assert.ok(Number.isInteger(state.count)&&state.count>0);assert.equal(state.expanded,'false');assert.equal(state.empty,false);}
  assert.equal(filter.filtered?.pressed,'true');assert.equal(filter.filtered.count,0);assert.equal(filter.filtered.empty,true);
  assert.equal(filter.restored.count,filter.baseline.count);
- assertExperienceClick(filter.enabled,input,`${context}/saved`,'.filter-row button[aria-pressed]');
+ assertExperienceClick(filter.enabled,input,`${context}/saved`,'[data-filter-action="saved"]');
  assertExperienceClick(filter.parent,input,`${context}/filter-parent`,'.explore-panel .back-link');
  const before=assertOverviewCounts(filter.overviewBefore,`${context}/before-filter`,expectedCatalogue),after=assertOverviewCounts(filter.overviewAfter,`${context}/after-filter`,expectedCatalogue);
  assert.deepEqual(after,before,`${context}: a hidden filter changed overview catalogue counts`);assert.equal(filter.overviewAfter.total,filter.overviewBefore.total);
@@ -599,7 +601,7 @@ export function assertExploreExperience(receipt,name,engine,mobile,expectedCatal
 
  const request=receipt.requestOwnership;assert.ok(request&&typeof request.route?.id==='string'&&request.route.id&&typeof request.route.title==='string'&&request.route.title);
  if(!mobile)assertRequestMapLayout(request.mapLayout,`${context}/request-layout`);
- const action='.route-actions button.primary',close='[role="dialog"] button[aria-label="Закрыть"]';
+ const action='[data-route-action="request"]',close='[role="dialog"] button[aria-label="Закрыть"]';
  assertExperienceScrolls(request.scrolls,input,`${context}/request-scroll`);assertExperienceScrolls(request.returnScrolls,input,`${context}/request-return-scroll`);
  assertExperienceClick(request.opened,input,`${context}/request-open`,action);assertExperienceClick(request.closedSame,input,`${context}/request-close`,close);assertExperienceClick(request.reopened,input,`${context}/request-reopen`,action);
  assertRequestDialog(request.first,`${context}/request-first`,{open:true,title:request.route.title});
@@ -615,7 +617,7 @@ export function assertExploreExperience(receipt,name,engine,mobile,expectedCatal
  assertRequestDialog(next.before,`${context}/before-next-request`,{open:false});
  assertRequestDialog(next.dialog,`${context}/next-request`,{open:true,title:next.selection.title});
  assertExperienceScrolls(next.scrolls,input,`${context}/next-route-scroll`);assertExperienceScrolls(next.actionScrolls,input,`${context}/next-action-scroll`);
- assertExperienceClick(next.selected,input,`${context}/next-route-select`);assert.match(next.selected.selector,/^\.trail-list \.trail-card:nth-child\([1-9]\d*\) \.trail-card-main$/);
+ assertExperienceClick(next.selected,input,`${context}/next-route-select`,`.trail-card[data-route-id=${JSON.stringify(next.selection.route)}] .trail-card-main`);
  assertExperienceClick(next.opened,input,`${context}/next-request-open`,action);assertExperienceClick(next.closed,input,`${context}/next-request-close`,close);
 
  const sibling=receipt.siblingParent;assert.ok(sibling,`${context}: sibling-parent evidence is missing`);
@@ -675,7 +677,7 @@ export function assertStyleCameraRoundtrip(receipt,name){
 }
 
 /** The same evidence gate runs before upload and against the public artifact. */
-export function assertBrowserReport(browser,expectedCommit,expectedCatalogue){
+export function assertBrowserReport(browser,expectedCommit,expectedCatalogue,buildInfo){
  assert.equal(browser.verified,true);
  assert.match(expectedCommit||'',/^[a-f0-9]{40}$/,'Publication requires an exact source commit');
  assertBrowserEnvironment(browser.environment,expectedCommit);
@@ -685,6 +687,10 @@ export function assertBrowserReport(browser,expectedCommit,expectedCatalogue){
  assert.equal(browser.offlineSafety.originTransport.active,false,'Offline transport was not restored after the audit');
  assert.ok(Number.isFinite(Date.parse(browser.offlineSafety.originTransport.restoredAt)),'Offline transport cleanup is not recorded');
  assert.equal(browser.sourceCommit,expectedCommit);
+ if(buildInfo){assert.equal(buildInfo.sourceCommit,expectedCommit);assert.match(buildInfo.buildId||'',/^[a-f0-9]{16}$/);assert.ok(Array.isArray(buildInfo.inputs),'Mobile UX verification needs the built source inputs');}
+ const mobileBinding={sourceCommit:expectedCommit,...(buildInfo?{buildId:buildInfo.buildId,sources:Object.fromEntries(MOBILE_EXPERIENCE_SOURCES.map(path=>[path,buildInfo.inputs.find(input=>input.path===path)?.sha256]))}:{})};
+ assertMobileExperience(browser.mobileExperience,mobileBinding);
+ assert.deepEqual(performanceBudgetIssues(browser.mobileExperience.performance,{name:'android-portrait',mobile:true},'mobile-experience'),[],'Mobile UX exceeded the unchanged mobile performance budget');
  assertCatalogueExpectations(expectedCatalogue);
  assert.deepEqual(browser.catalogue,expectedCatalogue,'The browser report belongs to another catalogue snapshot');
  assert.equal(browser.mapInteractionSchemaVersion,6,'The browser report predates native map wheel ownership coverage');
@@ -695,6 +701,7 @@ export function assertBrowserReport(browser,expectedCommit,expectedCatalogue){
   assert.equal(profile.engine,'tropnik-canvas',`${name}: the custom mobile renderer was not verified`);
   assert.equal(profile.interactionTested,true,`${name}: story touch was not tested`);
   assert.equal(profile.sheetTested,true,`${name}: mobile sheet was not tested`);
+  assertMobileTargets(profile.mobileTargets,'initial');
   assertSheetGestures(profile.sheetGestures,name);
   if(name!=='phone-landscape')assertLayerMenuAudit(profile.layerMenus,name);
   assert.ok(profile.sheetHeightDelta<1.1,`${name}: mobile sheet changed layout height`);

@@ -24,10 +24,12 @@ import {runSatelliteContinuityAudit,satellitePerformanceIssues} from './browser-
 import {installSmoothnessRecorder,runSmoothnessAudit,performanceBudgetIssues} from './browser-smoothness.mjs';
 import {inspectCustomMapDOM} from './browser-custom-map.mjs';
 import {runMapWheelAudit} from './browser-map-wheel.mjs';
+import {MOBILE_EXPERIENCE_SOURCES,runMobileExperience,mobileTargetSelectors,inspectMobileTargets,assertMobileTargets} from './browser-mobile-experience.mjs';
 import {assertDirectionHitGrid,assertDirectionHitAreas,assertNativeBurstEventOrder,assertLayerMenuAudit,assertOverviewCounts,assertExploreExperience,assertStyleCameraRoundtrip} from './browser-report.mjs';
 
 const ROOT = new URL('../../web/pages-preview/dist/', import.meta.url);
-const catalogue=JSON.parse(await readFile(new URL('build-info.json',ROOT),'utf8')).catalogue;
+const buildInfo=JSON.parse(await readFile(new URL('build-info.json',ROOT),'utf8'));
+const catalogue=buildInfo.catalogue;
 const runPolicy=browserAuditRunPolicy(process.env.TROPNIK_BROWSER_DIAGNOSTIC);
 const traceEnabled=browserTraceEnabled(process.env.TROPNIK_BROWSER_TRACE,runPolicy.diagnostic);
 const REPORT = new URL(runPolicy.reportFile, ROOT);
@@ -169,6 +171,22 @@ async function loadProfile(cdp,url,profile){
       card:card?{left:card.left,right:card.right,top:card.top,bottom:card.bottom}:null,
     };
   })()`);
+}
+async function mobileExperienceBinding(){
+  const sources={};
+  for(const path of MOBILE_EXPERIENCE_SOURCES){
+    const bytes=await readFile(new URL(`../../${path}`,import.meta.url)),sha256=createHash('sha256').update(bytes).digest('hex');
+    assert.equal(buildInfo.inputs.find(input=>input.path===path)?.sha256,sha256,`Mobile UX source differs from the built input: ${path}`);
+    sources[path]=sha256;
+  }
+  assert.equal(buildInfo.sourceCommit,process.env.GITHUB_SHA||null,'Mobile UX build belongs to another commit');
+  return{sourceCommit:buildInfo.sourceCommit,buildId:buildInfo.buildId,sources};
+}
+async function checkMobilePrimaryTargets(cdp,profile){
+  const targets=await evaluate(cdp,`(${inspectMobileTargets.toString()})('initial',${JSON.stringify(mobileTargetSelectors('initial'))})`);
+  assertMobileTargets(targets,'initial');
+  assert.equal(targets.viewport.width,profile.width);assert.equal(targets.viewport.height,profile.height);
+  return targets;
 }
 async function tapSelector(cdp,selector,id=1){
   const point=await evaluate(cdp,`(()=>{const element=document.querySelector(${JSON.stringify(selector)});if(!element)return null;const r=element.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`);
@@ -318,8 +336,9 @@ async function mapGeometrySnapshot(cdp){
       const width=Math.min(first.right,second.right)-Math.max(first.left,second.left),height=Math.min(first.bottom,second.bottom)-Math.max(first.top,second.top);
       if(width>1&&height>1)overlaps.push({first:a,second:b,width,height});
     }
-    const available=map?{left:Math.max(0,map.left),right:Math.min(innerWidth,map.right),top:Math.max(0,map.top),bottom:Math.min(innerHeight,map.bottom,root?.dataset.sheetState==='closed'&&sheet?sheet.top:Infinity)}:null;
-    return{width:innerWidth,height:innerHeight,coarse:matchMedia('(pointer:coarse)').matches,state:root?.dataset.sheetState,layout,atlas:map,available,overlays,targets,overlaps};
+    const sheetOverlapsMap=!!map&&!!sheet&&Math.min(map.right,sheet.right)-Math.max(map.left,sheet.left)>1;
+    const available=map?{left:Math.max(0,map.left),right:Math.min(innerWidth,map.right),top:Math.max(0,map.top),bottom:Math.min(innerHeight,map.bottom,root?.dataset.sheetState==='closed'&&sheetOverlapsMap?sheet.top:Infinity)}:null;
+    return{width:innerWidth,height:innerHeight,coarse:matchMedia('(pointer:coarse)').matches,state:root?.dataset.sheetState,layout,atlas:map,sheet,available,overlays,targets,overlaps};
   })()`);
 }
 async function layerMenuState(cdp,expanded){
@@ -337,17 +356,25 @@ async function checkMapGeometry(cdp,profile){
   assert.deepEqual(geometry.overlaps,[],`${profile.name}: map controls, stories or context overlap`);
   const inside=(rect,bounds)=>rect.left>=bounds.left-1&&rect.right<=bounds.right+1&&rect.top>=bounds.top-1&&rect.bottom<=bounds.bottom+1;
   for(const [name,rect] of Object.entries(geometry.overlays))assert.ok(inside(rect,geometry.available),`${profile.name}: ${name} escapes the usable map above the closed sheet: ${JSON.stringify({rect,available:geometry.available})}`);
-  for(const label of ['Увеличить масштаб','Уменьшить масштаб','Моё местоположение','Показать Россию целиком','Слои'])assert.ok(geometry.targets.some(target=>target.label===label),`${profile.name}: missing enabled map control ${label}`);
+  for(const label of ['Увеличить масштаб','Уменьшить масштаб','Моё местоположение','Настройки карты'])assert.ok(geometry.targets.some(target=>target.label===label),`${profile.name}: missing enabled map control ${label}`);
   for(const target of geometry.targets)assert.deepEqual(target.blocked,[],`${profile.name}: ${target.label} is obscured in the map hit-test`);
   if(profile.name==='phone-landscape'){
     assert.equal(geometry.coarse,true,'Landscape verification must use a coarse pointer');
-    assert.ok(Math.abs(geometry.atlas.left-geometry.layout.left)<=1&&Math.abs(geometry.atlas.width-geometry.layout.width)<=1&&geometry.atlas.width>=geometry.width-2,`${profile.name}: the map retained a sidebar column: ${JSON.stringify({atlas:geometry.atlas,layout:geometry.layout,width:geometry.width})}`);
+    const {atlas,sheet,layout}=geometry;
+    assert.ok(sheet&&inside(atlas,layout)&&sheet.left>=layout.left-1&&sheet.right<=layout.right+1,`${profile.name}: split map or sheet escapes the layout`);
+    assert.ok(Math.min(atlas.right,sheet.right)-Math.max(atlas.left,sheet.left)<=1&&Math.abs(sheet.right-atlas.left)<=1,`${profile.name}: landscape sheet and map must form adjacent non-overlapping columns`);
+    assert.ok(sheet.width<=Math.min(320,geometry.width*.42)+1&&atlas.width>=geometry.width*.55&&Math.abs(atlas.right-layout.right)<=1,`${profile.name}: landscape map does not occupy the remaining usable width`);
+    assert.ok(Math.abs(atlas.top-layout.top)<=1&&Math.abs(atlas.bottom-layout.bottom)<=1,`${profile.name}: landscape map lost available height`);
+  }else{
+    assert.ok(Math.abs(geometry.atlas.left-geometry.layout.left)<=1&&Math.abs(geometry.atlas.width-geometry.layout.width)<=1,`${profile.name}: portrait map must retain the full-width composition`);
   }
   assert.equal(await tapSelector(cdp,'.layer-button',10),true,`${profile.name}: Layers button is absent`);
   const opened=await layerMenuState(cdp,true);
+  const settings=await layerMenuFrame(cdp);
+  for(const label of ['Север сверху','Показать Россию целиком'])assert.ok(settings.controls.some(control=>control.tag==='BUTTON'&&control.label===label),`${profile.name}: relocated map action ${label} is missing from Settings`);
   assert.equal(await tapSelector(cdp,'.layer-button',11),true);
   const closed=await layerMenuState(cdp,false);
-  return{...geometry,layersInteraction:{opened,closed}};
+  return{...geometry,layersInteraction:{opened,closed},settingsControls:settings.controls.map(({tag,label})=>({tag,label}))};
 }
 async function dismissMapMessage(cdp){
   const dismissible=await evaluate(cdp,`document.querySelector('.map-message button')?.textContent?.trim()==='Понятно'`);
@@ -401,7 +428,7 @@ async function waitValue(label,read,accept,timeout=12000){
   throw new Error(`${label}: ${JSON.stringify(last).slice(0,2500)}`);
 }
 async function selectionState(cdp){
-  return evaluate(cdp,`(()=>{const params=new URLSearchParams(location.search),active=document.activeElement;return{region:params.get('region')||'',route:params.get('route')||'',title:document.querySelector('.explore-panel h1')?.textContent?.replace(/\\s+/g,' ').trim()||'',sheet:document.querySelector('.explore-layout')?.dataset.sheetState,history:{length:history.length,level:history.state?.tropnikExploreLevel,pushed:history.state?.tropnikExplorePushed,explore:history.state?.tropnikExplore},activeElement:active?{tag:active.tagName,classes:active.getAttribute('class'),label:active.getAttribute('aria-label')}:null};})()`);
+  return evaluate(cdp,`(()=>{const params=new URLSearchParams(location.search),active=document.activeElement,root=document.querySelector('.explore-layout'),heading=[...document.querySelectorAll('.explore-panel h1')].find(element=>!element.closest('[hidden]'));return{region:params.get('region')||'',route:params.get('route')||'',title:heading?.textContent?.replace(/\\s+/g,' ').trim()||'',sheet:root?.dataset.sheetState,view:root?.dataset.panelView,origin:root?.dataset.routeOrigin,history:{length:history.length,level:history.state?.tropnikExploreLevel,pushed:history.state?.tropnikExplorePushed,explore:history.state?.tropnikExplore},activeElement:active?{tag:active.tagName,classes:active.getAttribute('class'),label:active.getAttribute('aria-label')}:null};})()`);
 }
 async function expectSelection(cdp,expected){
   return waitValue(`Map selection did not become ${JSON.stringify(expected)}`,()=>selectionState(cdp),state=>Object.entries(expected).every(([key,value])=>state[key]===value));
@@ -512,7 +539,7 @@ async function layerMenuFrame(cdp){
   return evaluate(cdp,`(()=>{
     const box=element=>{const r=element.getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};
     const root=document.querySelector('.explore-layout'),atlas=document.querySelector('.atlas-wrap'),panel=document.querySelector('.explore-panel'),menu=document.querySelector('.layer-menu'),button=document.querySelector('.layer-button');
-    if(!menu||!atlas||!button)return null;const map=box(atlas),sheet=box(panel),rect=box(menu),usable={left:Math.max(0,map.left),right:Math.min(innerWidth,map.right),top:Math.max(0,map.top),bottom:Math.min(innerHeight,map.bottom,sheet.top)};usable.width=usable.right-usable.left;usable.height=usable.bottom-usable.top;
+    if(!menu||!atlas||!button)return null;const map=box(atlas),sheet=box(panel),rect=box(menu),overlaps=Math.min(map.right,sheet.right)-Math.max(map.left,sheet.left)>1,usable={left:Math.max(0,map.left),right:Math.min(innerWidth,map.right),top:Math.max(0,map.top),bottom:Math.min(innerHeight,map.bottom,overlaps?sheet.top:Infinity)};usable.width=usable.right-usable.left;usable.height=usable.bottom-usable.top;
     const controls=[...menu.querySelectorAll('button,input,a')].map((element,index)=>{const r=box(element),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y),inside=r.top>=rect.top-1&&r.bottom<=rect.bottom+1&&r.left>=rect.left-1&&r.right<=rect.right+1;return{index,tag:element.tagName,label:(element.getAttribute('aria-label')||(element.tagName==='INPUT'?element.closest('label')?.textContent:element.textContent)||'').trim(),rect:r,inside,unobscured:!!hit&&element.contains(hit),point:{x,y},hit:hit?{tag:hit.tagName,classes:hit.getAttribute('class'),label:(hit.closest('button,a,label')?.textContent||'').trim()}:null};});
     return{sheet:root.dataset.sheetState,map,usable,menu:rect,button:box(button),scrollTop:menu.scrollTop,scrollHeight:menu.scrollHeight,clientHeight:menu.clientHeight,scrollY,controls};
   })()`);
@@ -553,17 +580,17 @@ async function browserBack(cdp,expected){
 async function overviewCounts(cdp){
   return evaluate(cdp,`(()=>{
     const number=text=>Number((text||'').match(/[0-9][0-9\\s\\u00a0]*/)?.[0].replace(/\\D/g,'')||0);
-    const catalog=[...document.querySelectorAll('.region-option')].map(element=>({id:[...element.querySelector('.region-thumbnail').classList].find(name=>name.startsWith('region-thumbnail-'))?.slice('region-thumbnail-'.length),name:element.querySelector('strong')?.textContent?.trim(),count:number(element.querySelector('small')?.textContent)}));
+    const catalog=[...document.querySelectorAll('.region-option[data-region-id]')].map(element=>({id:element.dataset.regionId,name:element.querySelector('strong')?.textContent?.trim(),count:number(element.querySelector('small')?.textContent)}));
     const markers=[...document.querySelectorAll('.region-marker:not([hidden])')].map(element=>{const countText=element.querySelector('.region-marker-count')?.textContent?.trim()||'';return{id:element.dataset.regionId,name:element.querySelector('.region-marker-name')?.textContent?.trim(),count:countText?number(countText):null,countText,groupKey:element.dataset.mapGroupKey,cluster:element.classList.contains('direction-cluster'),ariaLabel:element.getAttribute('aria-label')};});
-    return{region:new URLSearchParams(location.search).get('region')||'',catalog,markers,total:number(document.querySelector('.sheet-peek-copy>span')?.textContent),mapTotal:number(document.querySelector('.map-context>span:last-child')?.textContent)};
+    return{region:new URLSearchParams(location.search).get('region')||'',catalog,markers,total:number(document.querySelector('[data-overview-count="sheet"]')?.textContent),mapTotal:number(document.querySelector('[data-overview-count="map"]')?.textContent)};
   })()`);
 }
 async function filterState(cdp){
-  return evaluate(cdp,`(()=>({pressed:document.querySelector('.filter-row button[aria-pressed]')?.getAttribute('aria-pressed')??null,count:Number(document.querySelector('.explore-panel .section-heading>span')?.textContent?.replace(/\\D/g,'')||0),expanded:document.querySelector('.filter-row button[aria-expanded]')?.getAttribute('aria-expanded'),empty:!!document.querySelector('.catalog-empty')}))()`);
+  return evaluate(cdp,`(()=>({pressed:document.querySelector('[data-filter-action="saved"]')?.getAttribute('aria-pressed')??null,count:Number(document.querySelector('[data-result-count]')?.textContent?.replace(/\\D/g,'')||0),expanded:document.querySelector('[data-filter-action="expand"]')?.getAttribute('aria-expanded'),empty:!!document.querySelector('.catalog-empty')}))()`);
 }
 async function checkSavedFilterReset(cdp,profile,receipt){
   receipt.baseline=await filterState(cdp);assert.equal(receipt.baseline.pressed,'false');assert.ok(receipt.baseline.count>0);
-  receipt.enabled=await recordedClick(cdp,'.filter-row button[aria-pressed]',profile);
+  receipt.semantics='explicit-all-directions-reset';receipt.enabled=await recordedClick(cdp,'[data-filter-action="saved"]',profile);
   receipt.filtered=await waitValue('Saved filter did not become active',()=>filterState(cdp),state=>state.pressed==='true'&&state.count===0&&state.empty);
   receipt.parent=await recordedClick(cdp,'.explore-panel .back-link',profile);await expectSelection(cdp,{region:'',route:''});await closeMapSheet(cdp,profile);await settledMap(cdp,profile.engine);
   currentExploreExperience.step='overview-after';receipt.overviewAfter=await overviewCounts(cdp);
@@ -591,7 +618,7 @@ async function checkRequestOwnership(cdp,profile,route){
   return{...result,mapLayout:layout};
 }
 async function performRequestOwnership(cdp,profile,route){
-  const action='.route-actions button.primary',scrolls=await revealNative(cdp,action,'.explore-panel-content',profile),opened=await recordedClick(cdp,action,profile);
+  const action='[data-route-action="request"]',scrolls=await revealNative(cdp,action,'.explore-panel-content',profile),opened=await recordedClick(cdp,action,profile);
   const first=await waitValue('Route request did not open',()=>requestDialogState(cdp),state=>state.open&&state.routeTitle===route.title);
   await recordedClick(cdp,'[role="dialog"] textarea',profile);await evaluate(cdp,'window.__tropnikFormInputs=[]');
   const note='Проверка принадлежности запроса маршруту';await cdp.call('Input.insertText',{text:note});
@@ -600,7 +627,7 @@ async function performRequestOwnership(cdp,profile,route){
   const reopened=await recordedClick(cdp,action,profile);const same=await waitValue('Same-route draft was not restored',()=>requestDialogState(cdp),state=>state.open&&state.note===note);
   const back=await browserBack(cdp,{region:'altai',route:'',title:'Алтай'}),afterBack=await waitValue('Browser Back retained the previous route request',()=>requestDialogState(cdp),state=>!state.open);
   if(profile.mobile)await settledSheet(cdp,'open');
-  const next=await evaluate(cdp,`(()=>{const cards=[...document.querySelectorAll('.trail-card')],index=cards.findIndex(element=>element.querySelector('h3')?.textContent!==${JSON.stringify(route.title)}&&!element.querySelector('.source-status')?.textContent?.includes('Закрыт'));return index<0?null:{selector:'.trail-list .trail-card:nth-child('+(index+1)+') .trail-card-main',title:cards[index].querySelector('h3').textContent};})()`);assert.ok(next,'No sibling route is available for request ownership');
+  const next=await evaluate(cdp,`(()=>{const card=[...document.querySelectorAll('.trail-card[data-route-id]')].find(element=>element.dataset.routeId!==${JSON.stringify(route.id)}&&!element.querySelector('.source-status')?.textContent?.includes('Закрыт'));return card?{id:card.dataset.routeId,selector:'.trail-card[data-route-id='+JSON.stringify(card.dataset.routeId)+'] .trail-card-main',title:card.querySelector('h3').textContent}:null;})()`);assert.ok(next,'No sibling route is available for request ownership');
   const nextScrolls=await revealNative(cdp,next.selector,'.explore-panel-content',profile),nextSelected=await recordedClick(cdp,next.selector,profile);
   const nextSelection=await expectSelection(cdp,{region:'altai',title:next.title});assert.ok(nextSelection.route);assert.notEqual(nextSelection.route,route.id);
   const beforeNext=await requestDialogState(cdp);assert.equal(beforeNext.open,false);
@@ -865,7 +892,7 @@ const server=serve(ROOT);
 await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(httpPort,'127.0.0.1',resolve);});
 const userData=join(tmpdir(),`tropnik-chrome-${process.pid}`);
 const browserLaunchStarted=performance.now();
-let browser,cdp,network,environment,terrainMask,currentProfile,failure,currentExploreExperience=null;
+let browser,cdp,network,environment,terrainMask,currentProfile,failure,currentExploreExperience=null,mobileExperience=null;
 const results=[],desktopProfiles=[],mapInteractions=[],zoomDesigns=[],satelliteAudits=[],siteSmoothness=[],profilePerformance=[],performanceIssues=[];
 // GitHub can terminate this process before catch/finally. Preserve completed
 // interactions before the long zoom matrix, without marking them as a release.
@@ -873,7 +900,7 @@ const progressDirectory=new URL('../../web/pages-preview/design-qa/',import.meta
 async function checkpoint(phase){
   await mkdir(progressDirectory,{recursive:true});
   const temporary=new URL('browser-progress.tmp',progressDirectory);
-  await writeFile(temporary,JSON.stringify({verified:false,releaseEligible:false,environment,sourceCommit:process.env.GITHUB_SHA||null,catalogue,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMapInteractions:mapInteractions,completedSiteSmoothness:siteSmoothness,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
+  await writeFile(temporary,JSON.stringify({verified:false,releaseEligible:false,environment,sourceCommit:process.env.GITHUB_SHA||null,catalogue,updatedAt:new Date().toISOString(),profile:currentProfile,phase,performanceIssues,profilePerformance,completedMobileExperience:mobileExperience,completedMapInteractions:mapInteractions,completedSiteSmoothness:siteSmoothness,completedDesktopProfiles:desktopProfiles,completedProfiles:results.map(({name,engine,sheet,touch})=>({name,engine,sheetTested:sheet.available,storyTested:touch.available,layoutShift:touch.cls,longestTaskMs:touch.longest})),completedZoomProfiles:zoomDesigns.map(({profile,geometryPassed,performance})=>({profile,geometryPassed,performance}))},null,2)+'\n');
   await rename(temporary,new URL('browser-progress.json',progressDirectory));
 }
 try{
@@ -971,6 +998,7 @@ try{
       await checkpoint('profile-complete');
       continue;
     }
+    const mobileTargets=await checkMobilePrimaryTargets(cdp,profile);
     await diagnosticPhase(cdp,'sheet-before');
     const sheet=await touchSheet(cdp);
     await diagnosticPhase(cdp,'sheet-after');
@@ -1003,7 +1031,13 @@ try{
     }
     const interaction=profile.mapInteraction?await mapInteraction(cdp,profile,performanceIssues):null;
     if(interaction)mapInteractions.push(interaction);
-    results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction});
+    if(profile.name==='android-portrait'){
+      await diagnosticPhase(cdp,'mobile-experience');
+      mobileExperience=await runMobileExperience(cdp,profile,{loadProfile,evaluate,waitValue,settledSheet,settledMap,mapState,recordedClick,scrollContainer,revealNative,browserBack,freeCanvasPoint,sleep,url:`http://127.0.0.1:${httpPort}/tropnik/`},await mobileExperienceBinding());
+      performanceIssues.push(...performanceBudgetIssues(mobileExperience.performance,profile,'mobile-experience'));
+      await checkpoint('mobile-experience-complete');
+    }
+    results.push({...profile,geometry,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction,mobileTargets});
     profilePerformance.push({profile:profile.name,...await performanceDiagnostics(cdp)});
     await checkpoint(interaction?'before-zoom-audit':'profile-complete');
     if(profile.mapInteraction){
@@ -1024,7 +1058,7 @@ try{
   // Keep all pointer and zoom images for diagnosis even when a performance
   // budget fails. Both original strict limits still block verified output/upload.
   assert.deepEqual(performanceIssues,[],'Rendering exceeded the unchanged CLS/long-task budgets');
-  const report={verified:true,environment,terrainMask,catalogue,mapInteractionSchemaVersion:6,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,siteSmoothness,offlineSafety,sourceCommit:process.env.GITHUB_SHA||null};
+  const report={verified:true,environment,terrainMask,catalogue,mapInteractionSchemaVersion:6,browser:'system Chromium via CDP',profiles:results.map(({name,width,height,engine,sheet,sheetGestures,mapGeometry,layerMenus,touch,interaction,mobileTargets})=>({name,width,height,engine,interactionTested:touch.available,sheetTested:sheet.available,sheetHeightDelta:sheet.heightDelta??0,sheetGestures,mapGeometry,layerMenus,mobileTargets,layoutShift:Math.max(touch.cls??0,sheet.cls??0),longestTaskMs:Math.max(touch.longest??0,sheet.longest??0,interaction?.longestTaskMs??0)})),desktopProfiles,mapInteractions,zoomDesigns,siteSmoothness,offlineSafety,mobileExperience,sourceCommit:process.env.GITHUB_SHA||null};
   await writeFile(REPORT,JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
   }
@@ -1034,6 +1068,8 @@ try{
   if(network)failure.network=network.snapshot();
   if(error.layerMenuAudit)failure.layerMenuAudit=error.layerMenuAudit;
   if(error.smoothnessAudit)failure.smoothnessAudit=error.smoothnessAudit;
+  if(error.mobileExperience)failure.mobileExperience=error.mobileExperience;
+  else if(mobileExperience)failure.completedMobileExperience=mobileExperience;
   if(siteSmoothness.length)failure.completedSiteSmoothness=siteSmoothness;
   if(error.nativeScroll)failure.nativeScroll=error.nativeScroll;
   if(error.mapWheelOwnership)failure.mapWheelOwnership=error.mapWheelOwnership;

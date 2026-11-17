@@ -12,8 +12,8 @@ const checkStyle=receipt=>assertStyleCameraRoundtrip(receipt,'desktop-webgl');
 
 test('portrait Layers validates closed and expanded geometry with real native scroll progress',()=>{
  const receipt=layerMenusFixture();assert.equal(checkLayers(receipt),receipt);
- assert.equal(receipt.states[0].frames[0].controls.length,5);
- assert.equal(receipt.states[0].scrolls.length,0);
+ assert.equal(receipt.states[0].frames[0].controls.length,8);
+ assert.equal(receipt.states[0].scrolls.length,1);
  assert.equal(receipt.states[1].scrolls.length,2);
  assert.ok(receipt.states[1].frames[0].controls.some(control=>!control.inside));
  assert.ok(receipt.states[1].scrolls[0].events.length<receipt.states[1].scrolls[0].commands.length,'Coalesced trusted touch moves are valid');
@@ -28,6 +28,8 @@ test('Layers rejects clipping, incomplete reachability and unsupported pass flag
   ['fake containment',value=>value.states[1].frames[0].controls.at(-1).inside=true],
   ['always obscured final link',value=>{for(const frame of value.states[1].frames)frame.controls.at(-1).unobscured=false;}],
   ['missing control',value=>value.states[0].frames[0].controls.pop()],
+  ['relocated North missing',value=>value.states[0].frames[0].controls.splice(1,1)],
+  ['relocated country fit missing',value=>value.states[0].frames[0].controls.splice(2,1)],
   ['changed control between frames',value=>value.states[1].frames[1].controls[0].label='Другой слой'],
   ['inconsistent rectangle',value=>value.states[0].frames[0].menu.width+=2],
   ['invented control point',value=>value.states[0].frames[0].controls[0].point.y+=4],
@@ -121,6 +123,7 @@ test('Saved reset always needs delivered native expansion and an ordinary Altai 
 test('hidden Saved filters cannot pass when overview counts or reentered controls disagree',()=>{
  rejectsEach(exploreExperienceFixture,checkExplore(true),[
   ['Saved did not activate',value=>value.filterReset.filtered.pressed='false'],
+  ['reset semantic missing',value=>delete value.filterReset.semantics],
   ['filtered catalogue was not empty',value=>value.filterReset.filtered.count=11],
   ['Saved stayed active',value=>value.filterReset.restored.pressed='true'],
   ['filter panel stayed expanded',value=>value.filterReset.restored.expanded='true'],

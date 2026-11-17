@@ -66,7 +66,7 @@ assert.equal(verification.pages, build.pages);
 const pages = JSON.parse((await request('page-manifest.json')).text);
 assert.equal(pages.length, build.pages);
 const browser = JSON.parse((await request('browser-verification.json', 32 * 1024 * 1024)).text);
-assertBrowserReport(browser,expectedCommit,build.catalogue);
+assertBrowserReport(browser,expectedCommit,build.catalogue,build);
 const workerUpdate = JSON.parse((await request('browser-service-worker-update-verification.json')).text);
 assertServiceWorkerUpdateReceipt(workerUpdate, {sourceCommit:expectedCommit, buildId:expectedBuild, environment:browser.environment});
 for (const path of ['web/components/ServiceWorker.tsx','web/lib/service-worker-registration.ts','web/public/sw.js','tools/pages-preview/browser-service-worker-update.mjs']) {

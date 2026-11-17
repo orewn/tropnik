@@ -29,6 +29,8 @@ EXPECTED = {
     "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
     "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
     "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+    "mobileNavigationRetainsMapAndSavedContext",
+    "mobileSearchAndCompactPanelsKeepActionsReachable",
 }
 CLASS_NAME = "ru.tropa.app.LocalExperienceTest"
 

@@ -199,7 +199,7 @@ export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1,
   await wait('Native search click did not focus its input',`document.activeElement===document.querySelector(${JSON.stringify(selector)})`,Boolean);
   await sendNativeText(cdp,text,{sleep});
  };
- const searchState=()=>inspect("({value:document.querySelector('.search-field input')?.value,busy:document.querySelector('.explore-panel-content')?.getAttribute('aria-busy'),regions:[...document.querySelectorAll('.region-option strong')].map(node=>node.textContent)})");
+ const searchState=()=>inspect("({value:document.querySelector('[data-map-search-input]')?.value,busy:document.querySelector('.explore-panel-content')?.getAttribute('aria-busy'),regions:[...document.querySelectorAll('.region-option strong')].map(node=>node.textContent)})");
  try{
   await cdp.call('Emulation.setCPUThrottlingRate',{rate:cpuSlowdownRate});
   await loadProfile(cdp,url,profile);await clearMapStories(cdp,profile);
@@ -207,22 +207,23 @@ export async function runSmoothnessAudit(cdp,profile,helpers,{cpuSlowdownRate=1,
    if(profile.mobile){await pointerSelector(cdp,'.sheet-handle',profile);await settledSheet(cdp,'open');await pointerSelector(cdp,'.sheet-handle',profile);await settledSheet(cdp,'closed');await pointerSelector(cdp,'.sheet-handle',profile);await settledSheet(cdp,'open');}
    else{await pointerSelector(cdp,'.layer-button',profile);await wait('Layers did not open',"!!document.querySelector('.layer-menu')",Boolean);await pointerSelector(cdp,'.layer-button',profile);await wait('Layers did not close',"!document.querySelector('.layer-menu')",Boolean);await sleep(150);}
   });
-  await revealNative(cdp,'.search-field input','.explore-panel-content',profile);
+  await revealNative(cdp,'[data-map-search-input]','.explore-panel-content',profile);
   await measure('explore-search',async()=>{
-   await type('.search-field input','Байкал');
+   await type('[data-map-search-input]','Байкал');
    await waitValue('Explore search did not settle',searchState,state=>state.value==='Байкал'&&state.busy==='false'&&state.regions.some(value=>value.includes('Байкал')));
    await pointerSelector(cdp,'.search-field button[aria-label="Очистить поиск"]',profile);
-   await type('.search-field input','Алтай');
+   await type('[data-map-search-input]','Алтай');
    await waitValue('Altai search did not settle',searchState,state=>state.value==='Алтай'&&state.busy==='false'&&state.regions.includes('Алтай'));
   });
-  const regionSelector=await inspect("(()=>{const nodes=[...document.querySelectorAll('.region-option')],index=nodes.findIndex(node=>node.querySelector('strong')?.textContent==='Алтай');return index<0?null:'.region-option:nth-child('+(index+1)+')'})()");
+  const regionSelector='.region-option[data-region-id="altai"]';
   assert.ok(regionSelector);await revealNative(cdp,regionSelector,'.explore-panel-content',profile);await pointerSelector(cdp,regionSelector,profile);
   await wait('Altai did not open',"new URL(location.href).searchParams.get('region')",value=>value==='altai');await settledMap(cdp,profile.engine);if(profile.mobile)await settledSheet(cdp,'open');
-  await revealNative(cdp,'.filter-row button[aria-expanded]','.explore-panel-content',profile);
+  await revealNative(cdp,'[data-filter-action="expand"]','.explore-panel-content',profile);
   await measure('explore-filters',async()=>{
-   await pointerSelector(cdp,'.filter-row button[aria-expanded]',profile);await wait('Filter panel did not open',"document.querySelector('.filter-row button[aria-expanded]')?.getAttribute('aria-expanded')",value=>value==='true');
-   await pointerSelector(cdp,'.filter-row button[aria-pressed]',profile);await wait('Saved filter did not activate',"document.querySelector('.filter-row button[aria-pressed]')?.getAttribute('aria-pressed')",value=>value==='true');
-   await pointerSelector(cdp,'.filter-row button[aria-pressed]',profile);await pointerSelector(cdp,'.filter-row button[aria-expanded]',profile);await wait('Filter panel did not close',"document.querySelector('.filter-row button[aria-expanded]')?.getAttribute('aria-expanded')",value=>value==='false');await sleep(150);
+   await pointerSelector(cdp,'[data-filter-action="expand"]',profile);await wait('Filter panel did not open',"document.querySelector('[data-filter-action=expand]')?.getAttribute('aria-expanded')",value=>value==='true');
+   await pointerSelector(cdp,'[data-filter-action="apply"]',profile);await wait('Filter panel did not close',"document.querySelector('[data-filter-action=expand]')?.getAttribute('aria-expanded')",value=>value==='false');
+   await pointerSelector(cdp,'[data-filter-action="saved"]',profile);await wait('Saved filter did not activate',"document.querySelector('[data-filter-action=saved]')?.getAttribute('aria-pressed')",value=>value==='true');
+   await pointerSelector(cdp,'[data-filter-action="saved"]',profile);await wait('Saved filter did not clear',"document.querySelector('[data-filter-action=saved]')?.getAttribute('aria-pressed')",value=>value==='false');
   });
   await measure('catalog-scroll',async()=>{await scrollContainer(cdp,'.explore-panel-content',profile);});
   await closeMapSheet(cdp,profile);const before=await settledMap(cdp,profile.engine),start=await freeCanvasPoint(cdp,before);

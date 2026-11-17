@@ -99,7 +99,7 @@ jobs:
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
           assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(build.hasApk, true);
-          assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue);
+          assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue, build);
           const mask = JSON.parse(readFileSync('web/pages-preview/dist/browser-terrain-mask-verification.json', 'utf8'));
           assert.equal(mask.verified, true);
           assert.equal(mask.sourceCommit, process.env.GITHUB_SHA);

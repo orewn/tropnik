@@ -5,6 +5,7 @@ import {browserTraceEnabled} from '../browser-trace.mjs';
 import {browserAuditRunPolicy} from '../browser-zoom-audit.mjs';
 import {assertBrowserReport} from '../browser-report.mjs';
 import {satellitePerformanceIssues} from '../browser-satellite-audit.mjs';
+import {performanceBudgetIssues} from '../browser-smoothness.mjs';
 
 // Execute the actual profile dispatch loop with audit boundaries substituted.
 // This checks option forwarding and invocation counts, not browser rendering.
@@ -25,10 +26,10 @@ const profiles=[
 async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(undefined),issues=[],offlineAudit,satelliteAudit){
  const unavailable=async()=>({available:false});
  const notInvoked=()=>assert.fail('The routing test must not invoke browser helpers');
- const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],satelliteCalls=[],smoothnessCalls=[],cdpCalls=[];
+ const layerMenuCalls=[],loadCalls=[],mapCalls=[],reports=[],offlineCalls=[],satelliteCalls=[],smoothnessCalls=[],mobileCalls=[],targetCalls=[],cdpCalls=[];
  const bindings={
   environment:{routingFixture:true},terrainMask:{routingFixture:true},assert,profiles,runPolicy:policy,traceEnabled,cdp:{call:async(method,parameters)=>cdpCalls.push({method,parameters})},httpPort:4200,
-  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],satelliteAudits:[],siteSmoothness:[],profilePerformance:[],performanceIssues:issues,catalogue:{schemaVersion:1,total:21},
+  results:[],desktopProfiles:[],mapInteractions:[],zoomDesigns:[],satelliteAudits:[],siteSmoothness:[],profilePerformance:[],performanceIssues:issues,catalogue:{schemaVersion:1,total:21},mobileExperience:null,
   REPORT:policy.reportFile,reports,loadCalls,mapCalls,process:{env:{GITHUB_SHA:'a'.repeat(40)}},console:{log(){}},writeFile:async(path,text)=>reports.push({path,report:JSON.parse(text)}),
   runZoomDesignAudit:audit,
   smoothnessCalls,siteSmoothnessAudit:async(_cdp,profile,rate=1)=>{smoothnessCalls.push({profile:profile.name,rate});return{profile:profile.name,performanceIssues:[]};},
@@ -37,11 +38,14 @@ async function dispatchProfiles(traceEnabled,audit,policy=browserAuditRunPolicy(
   offlineCalls,cdpCalls,runOfflineSafetyAudit:async(cdp,helpers)=>{offlineCalls.push({cdp,helpers});return offlineAudit?offlineAudit(cdp,helpers):{schemaVersion:1,profile:'android-portrait',passed:true};},
   loadProfile:async(_cdp,_url,profile)=>{loadCalls.push(profile.name);return{engine:profile.engine,width:profile.width,scrollWidth:profile.width,escaping:[],undersized:[]};},
   evaluate:async()=>false,mapInteraction:async(_cdp,profile)=>{mapCalls.push(profile.name);return{profile:profile.name,passed:true};},
+  mobileCalls,targetCalls,checkMobilePrimaryTargets:async(_cdp,profile)=>{targetCalls.push(profile.name);return{profile:profile.name};},
+  mobileExperienceBinding:async()=>({sourceCommit:'a'.repeat(40),buildId:'d'.repeat(16)}),
+  runMobileExperience:async(_cdp,profile,helpers,binding)=>{mobileCalls.push({profile:profile.name,binding});return{profile:profile.name,passed:true,performance:{layoutShift:0,longestTaskMs:100}};},performanceBudgetIssues,
   performanceDiagnostics:async()=>({}),checkpoint:async()=>{},diagnosticPhase:async()=>{},
   touchSheet:unavailable,touchSheetGestures:async()=>({}),checkMapGeometry:async()=>({}),touchPrevious:unavailable,
   layerMenuCalls,checkPortraitLayerMenus:async(_cdp,profile)=>{layerMenuCalls.push(profile.name);return{profile:profile.name,passed:true};},
   waitValue:notInvoked,sleep:notInvoked,settledMap:notInvoked,closeMapSheet:notInvoked,clearMapStories:notInvoked,
-  elementPoint:notInvoked,pointerAt:notInvoked,pointerSelector:notInvoked,mapState:notInvoked,
+  elementPoint:notInvoked,pointerAt:notInvoked,pointerSelector:notInvoked,mapState:notInvoked,settledSheet:notInvoked,recordedClick:notInvoked,scrollContainer:notInvoked,revealNative:notInvoked,browserBack:notInvoked,freeCanvasPoint:notInvoked,
  };
  await new AsyncFunction(...Object.keys(bindings),`let currentProfile;\n${dispatch}`)(...Object.values(bindings));
  return bindings;
@@ -67,8 +71,10 @@ for(const [label,flag] of [['default',undefined],['explicit opt-in','1']]){
    {profile:'android-portrait',passed:true},{profile:'compact-android',passed:true},{profile:'iphone-portrait',passed:true},null,
   ],'The profile results must retain each portrait Layers receipt');
   assert.equal(result.offlineCalls.length,1,'The full matrix must retain the existing final offline audit');
+  assert.deepEqual(result.mobileCalls,[{profile:'android-portrait',binding:{sourceCommit:'a'.repeat(40),buildId:'d'.repeat(16)}}],'Mobile UX runs once with the built source binding');
+  assert.deepEqual(result.targetCalls,['android-portrait','compact-android','iphone-portrait','phone-landscape'],'Every mobile geometry profile retains the 48px primary-target gate');
   assert.equal(result.reports.length,1);assert.equal(result.reports[0].path,'browser-verification.json');
-  assert.equal(result.reports[0].report.verified,true);assert.equal(result.reports[0].report.offlineSafety.passed,true);
+  assert.equal(result.reports[0].report.verified,true);assert.equal(result.reports[0].report.offlineSafety.passed,true);assert.equal(result.reports[0].report.mobileExperience.passed,true);
  });
 }
 
@@ -105,6 +111,7 @@ for(const [mode,names,rate]of [['ui-smoothness',['desktop-webgl','android-portra
   const run=await dispatchProfiles(false,()=>assert.fail('Short smoothness must not invoke zoom matrix'),policy);
   assert.deepEqual(run.smoothnessCalls,names.map(profile=>({profile,rate})));
   assert.deepEqual(run.mapCalls,[]);assert.deepEqual(run.loadCalls,[]);assert.equal(run.offlineCalls.length,0);assert.deepEqual(run.zoomDesigns,[]);
+  assert.deepEqual(run.mobileCalls,[]);assert.deepEqual(run.targetCalls,[]);
   const report=run.reports.at(-1).report;assert.equal(report.status,'completed');assert.equal(report.diagnosticOnly,true);assert.equal(report.verified,false);assert.equal(report.releaseEligible,false);assert.equal(report.performancePassed,true);assert.equal(report.profiles.length,names.length);
   assert.throws(()=>assertBrowserReport(report,'a'.repeat(40)));
  });

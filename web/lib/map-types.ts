@@ -15,6 +15,8 @@ export type PlannerMapPoint = {
   onSelect?: () => void;
 };
 export type AtlasProps = {
+  /** Independent mobile destinations retain their manually chosen camera. */
+  workspace?: 'map' | 'saved';
   region?: MapRegion;
   trail?: Trail;
   visibleTrails?: readonly Trail[];

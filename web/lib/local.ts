@@ -21,6 +21,12 @@ export async function packs():Promise<SavedPack[]> {
   try{return await transaction<SavedPack[]>(db,'readonly',store=>store.getAll());}
   finally{db.close();}
 }
+/** Open one saved snapshot without cloning every package into the map. */
+export async function savedPack(id:string):Promise<SavedPack|undefined> {
+  const db=await database();
+  try{return await transaction<SavedPack|undefined>(db,'readonly',store=>store.get(id));}
+  finally{db.close();}
+}
 /** The map needs saved membership only. Read index keys without cloning every
  * saved route and its full geometry into the interactive catalogue. */
 export async function savedPackIds():Promise<string[]> {

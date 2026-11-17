@@ -13,24 +13,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
-private val controlShape = CutCornerShape(topStart = 4.dp, topEnd = 12.dp, bottomEnd = 4.dp, bottomStart = 12.dp)
+private val controlShape = RoundedCornerShape(12.dp)
 
 @Composable
 internal fun TrailButton(onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true,
-    shape: Shape = controlShape, contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+    shape: Shape = controlShape, contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
     content: @Composable RowScope.() -> Unit) {
     Button(onClick, modifier.heightIn(min = 48.dp), enabled, shape = shape,
         colors = ButtonDefaults.buttonColors(containerColor = Palette.Forest, contentColor = Palette.Surface,
             disabledContainerColor = Palette.Line, disabledContentColor = Palette.Muted), contentPadding = contentPadding) {
         content()
-        Spacer(Modifier.width(8.dp))
-        TropaIcon(Glyph.NEXT, Modifier.size(18.dp), color = if (enabled) Palette.Surface else Palette.Muted)
     }
 }
 
 @Composable
 internal fun TrailOutlineButton(onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true,
-    shape: Shape = controlShape, contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+    shape: Shape = controlShape, contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
     content: @Composable RowScope.() -> Unit) {
     OutlinedButton(onClick, modifier.heightIn(min = 48.dp), enabled, shape = shape,
         border = BorderStroke(1.dp, if (enabled) Palette.Muted else Palette.Line),
@@ -60,7 +58,7 @@ internal fun TrailIconButton(onClick: () -> Unit, modifier: Modifier = Modifier,
 internal fun TrailChoice(selected: Boolean, onClick: () -> Unit, label: @Composable () -> Unit,
     modifier: Modifier = Modifier, enabled: Boolean = true, leadingIcon: (@Composable () -> Unit)? = null) {
     FilterChip(selected, onClick, label, modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp), enabled,
-        leadingIcon = leadingIcon, shape = CutCornerShape(topStart = 3.dp, topEnd = 8.dp, bottomEnd = 3.dp, bottomStart = 8.dp),
+        leadingIcon = leadingIcon, shape = RoundedCornerShape(8.dp),
         border = BorderStroke(1.dp, if (!enabled) Palette.Line else if (selected) Palette.Forest else Palette.Muted),
         colors = FilterChipDefaults.filterChipColors(containerColor = Palette.Surface, labelColor = Palette.Muted,
             selectedContainerColor = Palette.Land, selectedLabelColor = Palette.Forest, selectedLeadingIconColor = Palette.Forest))

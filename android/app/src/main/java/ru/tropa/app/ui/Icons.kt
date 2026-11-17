@@ -14,7 +14,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
-enum class Glyph { MOUNTAIN, MAP, SAVE, PEOPLE, USER, BACK, NEXT, SEARCH, LOCATE, CHECK, INFO, CLOSE, TRASH, BOOKMARK, ZOOM_IN, ZOOM_OUT }
+enum class Glyph { MOUNTAIN, MAP, SAVE, PEOPLE, USER, BACK, NEXT, SEARCH, LOCATE, CHECK, INFO, CLOSE, TRASH, BOOKMARK, ZOOM_IN, ZOOM_OUT, MORE }
 
 /** Small original geometric line icons; no external icon font is fetched. */
 @Composable
@@ -30,6 +30,7 @@ fun TropaIcon(glyph: Glyph, modifier: Modifier = Modifier, color: Color = Palett
         }
         fun circle(x: Float, y: Float, radius: Float) = drawCircle(color, radius * scale, Offset(x * scale, y * scale), style = stroke)
         when (glyph) {
+            Glyph.MORE -> { circle(5f, 12f, 1.5f); circle(12f, 12f, 1.5f); circle(19f, 12f, 1.5f) }
             Glyph.ZOOM_IN -> { path(5f to 12f, 19f to 12f); path(12f to 5f, 12f to 19f) }
             Glyph.ZOOM_OUT -> path(5f to 12f, 19f to 12f)
             Glyph.MOUNTAIN -> { path(2f to 19f, 9f to 5f, 15f to 15f, 19f to 8f, 23f to 19f); path(8f to 19f, 13f to 19f) }

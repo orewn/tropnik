@@ -15,6 +15,7 @@ import "./map-sheet.css";
 import "./map-detail.css";
 import "./map-direction-marker.css";
 import "./custom-map.css";
+import "./mobile-workspace.css";
 import '@fontsource/manrope/cyrillic-400.css';
 import '@fontsource/manrope/cyrillic-500.css';
 import '@fontsource/manrope/cyrillic-600.css';

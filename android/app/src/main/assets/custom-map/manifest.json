@@ -285,7 +285,7 @@
     {
       "path": "web/package.json",
       "sizeBytes": 1896,
-      "sha256": "2140f2b536d8303ba3c2c15f2074a953553a73d6822d1d87435a26f890dae2e3"
+      "sha256": "a2669612a5645ce9af3d317540b03c13f0a821a66afa4050d53c9b14bcb63f7c"
     },
     {
       "path": "web/pnpm-lock.yaml",
@@ -328,7 +328,7 @@
       "sha256": "f517da00a930a788e9e454924267b759cfb650e4e9f73db90378a84ec6f4636d"
     }
   ],
-  "sourceInputsSha256": "8825416add42c5647665ec617edce87558e9caa4ccc6aaf2323f36a222693106",
+  "sourceInputsSha256": "26af625349b6cd64e23160b92bbf88ff1fac38992f257d6ec873669603bb41b7",
   "files": [
     {
       "path": "android-bootstrap.js",

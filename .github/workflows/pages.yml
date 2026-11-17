@@ -186,7 +186,7 @@ jobs:
           assert.match(build.buildId, /^[a-f0-9]{16}$/);
           assert.equal(build.sourceCommit, process.env.GITHUB_SHA);
           assert.equal(build.hasApk, true);
-          assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue);
+          assertBrowserReport(browser, process.env.GITHUB_SHA, build.catalogue, build);
           const tileOpacity = JSON.parse(readFileSync('web/pages-preview/dist/browser-map-tile-opacity-verification.json', 'utf8'));
           assertTileOpacityReceipt(tileOpacity, {sourceCommit:process.env.GITHUB_SHA, buildId:build.buildId, environment:browser.environment});
           assertTileOpacityFiles(tileOpacity, {build});

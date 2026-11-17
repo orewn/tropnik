@@ -24,7 +24,7 @@ import ru.tropa.app.data.toRoute
 import ru.tropa.app.data.PublishedRoute
 import ru.tropa.app.data.toTrailRoute
 
-enum class Screen { EXPLORE, SAVED, TRIPS, PROFILE }
+enum class Screen { EXPLORE, SAVED, MORE, TRIPS, PROFILE }
 
 data class AppState(
     val screen: Screen = Screen.EXPLORE,
@@ -41,6 +41,10 @@ data class AppState(
     val notice: String? = null,
     val offlineSnapshot: OfflineRegionSnapshot? = null,
     val server: ServerState = ServerState.NotConfigured,
+    val browsePanel: BrowsePanel = BrowsePanel.MAP,
+    val routeParentPanel: BrowsePanel = BrowsePanel.MAP,
+    val navigationContexts: Map<Screen, BrowsingContext> = emptyMap(),
+    val navigationParents: Map<Screen, Screen> = emptyMap(),
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -59,21 +63,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { app.connectivity.changes.collect { status -> mutableState.update { it.copy(connection = status) } } }
     }
 
-    fun switchScreen(screen: Screen) { navigationVersion++; mutableState.update { it.copy(screen = screen, routeId = null, regionId = null, search = "", offlineSnapshot = null) } }
-    fun selectRegion(id: String) {
-        if (catalog.region(id) != null) { navigationVersion++; mutableState.update { it.copy(screen = Screen.EXPLORE, regionId = id, routeId = null, search = "", offlineSnapshot = null) } }
+    fun switchScreen(screen: Screen) {
+        val next = mutableState.value.navigateTo(screen)
+        if (next == mutableState.value) return
+        navigationVersion++
+        mutableState.update { it.navigateTo(screen) }
     }
-    fun selectRoute(id: String) { if (route(id) != null) { navigationVersion++; mutableState.update { it.copy(routeId = id,
+    fun showBrowsePanel(panel: BrowsePanel) { mutableState.update { it.copy(browsePanel = panel) } }
+    fun selectRegion(id: String, panel: BrowsePanel = BrowsePanel.CONTENT) {
+        if (catalog.region(id) != null) { navigationVersion++; mutableState.update { it.navigateTo(Screen.EXPLORE).copy(regionId = id, routeId = null, search = "", offlineSnapshot = null, browsePanel = panel) } }
+    }
+    fun selectRoute(id: String, panel: BrowsePanel = BrowsePanel.CONTENT) { if (route(id) != null) { navigationVersion++; mutableState.update { it.copy(routeId = id,
+        browsePanel = panel, routeParentPanel = if (it.routeId == null) it.browsePanel else it.routeParentPanel,
         offlineSnapshot = it.offlineSnapshot?.takeIf { snapshot -> snapshot.catalog.route(id) != null }) } } }
     fun selectPublishedRoute(route: PublishedRoute) {
         navigationVersion++
         val snapshot = route.toTrailRoute()
         loadedPublishedRoutes[snapshot.id] = snapshot
-        mutableState.update { it.copy(routeId = snapshot.id, offlineSnapshot = null) }
+        mutableState.update { it.copy(routeId = snapshot.id, offlineSnapshot = null,
+            browsePanel = BrowsePanel.CONTENT, routeParentPanel = it.browsePanel) }
     }
-    fun back() { navigationVersion++; mutableState.update { if (it.routeId != null) it.copy(routeId = null)
-        else it.copy(screen = if (it.offlineSnapshot != null) Screen.SAVED else it.screen, regionId = null, search = "", offlineSnapshot = null) } }
-    fun search(query: String) { mutableState.update { it.copy(search = query.take(100)) } }
+    fun back() { navigationVersion++; mutableState.update { it.navigateBack() } }
+    fun search(query: String) { mutableState.update { it.copy(search = query.take(100), browsePanel = BrowsePanel.CONTENT) } }
     fun showTerritories(enabled: Boolean) { mutableState.update { it.copy(catalogTerritories = enabled, search = "") } }
     fun clearNotice() { mutableState.update { it.copy(notice = null) } }
     fun region(id: String?) = displayCatalog.region(id)
@@ -126,7 +137,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         screen = if (removedOpenRegion) Screen.SAVED else current.screen,
                         regionId = if (removedOpenRegion) null else current.regionId,
                         routeId = if (removedOpenRegion) null else current.routeId,
-                        offlineSnapshot = if (removedOpenRegion) null else current.offlineSnapshot)
+                        offlineSnapshot = if (removedOpenRegion) null else current.offlineSnapshot,
+                        navigationContexts = current.navigationContexts.mapValues { (_, context) ->
+                            if (context.offlineSnapshot?.pack?.regionId == pack.regionId)
+                                context.copy(regionId = null, routeId = null, search = "", offlineSnapshot = null)
+                            else context
+                        })
                 }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) { mutableState.update { it.copy(notice = "Не удалось удалить данные области. Попробуйте ещё раз.") }
@@ -157,9 +173,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (revision != navigationVersion) return@launch
                 val snapshot = result.snapshot
                 if (snapshot == null) mutableState.update { it.copy(notice = availabilityMessage(result.availability)) }
-                else mutableState.update { it.copy(screen = Screen.EXPLORE, regionId = snapshot.pack.regionId,
-                    routeId = null, search = "", catalogTerritories = snapshot.catalog.region(snapshot.pack.regionId)?.territory == true,
-                    offlineSnapshot = snapshot) }
+                else mutableState.update { it.openSavedRegion(snapshot) }
             } catch (cancelled: CancellationException) { throw cancelled
             } catch (_: Exception) { if (revision == navigationVersion) mutableState.update { it.copy(notice = "Сохранённую область не удалось открыть. Повторите попытку.") } }
             finally { mutableState.update { it.copy(busyId = null) } }

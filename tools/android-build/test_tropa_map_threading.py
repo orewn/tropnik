@@ -21,8 +21,8 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
 
     def test_full_route_io_and_parsing_leave_main_before_native_bridge_update(self) -> None:
         effect = between(self.source,
-            "LaunchedEffect(mapView, mapReady, countryBounds, selected?.id,",
-            "LaunchedEffect(mapView, mapReady, position) {")
+            "LaunchedEffect(mapView, mapReady, active, viewportReady, countryBounds, focusScope, selected?.id,",
+            "LaunchedEffect(mapView, mapReady, active, position) {")
         read = effect.index("withContext(Dispatchers.IO)")
         parse = effect.index("withContext(Dispatchers.Default)")
         update = effect.index("mapView.setRoute(route?.id, routeData?.utf8)")
@@ -41,13 +41,13 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         self.assertIn('mapView.command("fit"', effect[update:])
 
     def test_source_changes_refresh_route_without_coupling_to_marker_filter(self) -> None:
-        key = self.source.split("LaunchedEffect(mapView, mapReady, countryBounds, selected?.id", 1)[1].split(" {", 1)[0]
+        key = self.source.split("LaunchedEffect(mapView, mapReady, active, viewportReady, countryBounds, focusScope, selected?.id", 1)[1].split(" {", 1)[0]
         for field in ("route?.id", "route?.apiRevisionId", "route?.geometryAsset", "route?.inlineGeometry", "routeAttempt"):
             self.assertIn(field, key)
         for field in ("regions", "hashCode", "visibleTrailIds", "mode", "paths"):
             self.assertNotIn(field, key)
-        effect = between(self.source, "LaunchedEffect(mapView, regions, selected?.id) {",
-                         "LaunchedEffect(mapView, mapReady, countryBounds")
+        effect = between(self.source, "LaunchedEffect(mapView, regions, selected?.id, active) {",
+                         "LaunchedEffect(mapView, mapReady, active, viewportReady, countryBounds")
         self.assertIn("mapView.setMarkers", effect)
         self.assertNotIn("setRoute", effect)
         self.assertNotIn('command("fit"', effect)
@@ -83,7 +83,7 @@ class TropaMapThreadingSourceTest(unittest.TestCase):
         self.assertIn('mode == "detail"', self.source)
         self.assertIn('mode == "satellite"', self.source)
         self.assertIn("mapView.setCatalogue(visibleTrailIds)", self.source)
-        position = between(self.source, "LaunchedEffect(mapView, mapReady, position) {", "Box(modifier.background")
+        position = between(self.source, "LaunchedEffect(mapView, mapReady, active, position) {", "Box(modifier.background")
         self.assertIn("lastPositionTime != point.measuredAt", position)
         self.assertIn("mapView.release()", self.source)
         self.assertIn("mapView.setActive(false)", self.source)

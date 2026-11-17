@@ -19,9 +19,23 @@ import android.webkit.WebView
 import androidx.compose.ui.test.*
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.ViewModelProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Before
@@ -43,6 +57,7 @@ import ru.tropa.app.data.InstalledPackEntity
 import ru.tropa.app.ui.CustomMapWebView
 import ru.tropa.app.ui.OnlineProfileScreen
 import ru.tropa.app.ui.TropaTheme
+import ru.tropa.app.ui.TropaApp
 import java.io.File
 import java.security.MessageDigest
 import kotlinx.coroutines.Dispatchers
@@ -64,9 +79,257 @@ class LocalExperienceTest {
             check(app.onAllNodesWithTag("catalog_startup_error").fetchSemanticsNodes().isEmpty()) {
                 "Bundled catalogue startup failed"
             }
-            app.onAllNodesWithTag("explore_list").fetchSemanticsNodes().size == 1
+            app.onAllNodesWithTag("map_workspace").fetchSemanticsNodes().size == 1
         }
-        app.onNodeWithTag("explore_list").assertIsDisplayed()
+        app.onNodeWithTag("map_workspace").assertIsDisplayed()
+    }
+
+    @Test fun mobileNavigationRetainsMapAndSavedContext() {
+        lateinit var model: MainViewModel
+        app.runOnUiThread { model = ViewModelProvider(app.activity)[MainViewModel::class.java] }
+        val map = readyMap()
+        val createdBookmarks = mutableListOf<String>()
+        val routes = model.catalog.referenceRoutes(regionId = "krasnodar").take(4)
+        assertTrue("The real catalogue must provide a scrollable saved list", routes.size >= 4)
+        exploreList().performScrollToNode(hasTestTag("region_krasnodar"))
+        app.onNodeWithTag("region_krasnodar").performTouchInput { click() }
+        for (route in routes) {
+            exploreList().performScrollToNode(hasTestTag("route_${route.id}"))
+            app.onNodeWithTag("route_${route.id}").performTouchInput { click() }
+            app.onNodeWithTag("route_detail").assertExists()
+            if (model.state.value.savedRoutes.none { it.routeId == route.id }) {
+                app.onNodeWithTag("save_route").assertIsDisplayed().performTouchInput { click() }
+                app.waitUntil(10_000) { model.state.value.busyId == null && model.state.value.savedRoutes.any { it.routeId == route.id } }
+                createdBookmarks += route.id
+            }
+            app.onNodeWithTag("go_back").performTouchInput { click() }
+        }
+        val target = model.state.value.savedRoutes.last { saved -> routes.any { it.id == saved.routeId } }.routeId
+        val query = requireNotNull(model.route(target)).title.substringBefore(" — ")
+        app.onNodeWithTag("region_search").performClick().performTextReplacement(query)
+        app.onNodeWithTag("region_search").performImeAction()
+        app.onNodeWithTag("region_search").assertIsNotFocused()
+        exploreList().performScrollToNode(hasTestTag("route_$target"))
+        app.onNodeWithTag("route_$target").performTouchInput { click() }
+        assertSame(map, readyMap())
+        app.onNodeWithTag("map_zoom_in").performTouchInput { click() }
+        var before = JSONObject()
+        app.waitUntil(15_000) { before = mapSnapshot(map); mapInputReady(before) }
+        app.onNodeWithTag("nav_saved").performTouchInput { click() }
+        app.onNodeWithTag("saved_routes_tab").assertIsSelected()
+        var paused = JSONObject()
+        app.runOnIdle {
+            paused = map.debugDiagnostics()
+            assertTrue("The hidden map must be paused", !paused.getBoolean("active"))
+            assertTrue("The hidden map must not receive input", !map.isEnabled)
+            assertEquals(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS, map.importantForAccessibility)
+            assertEquals("The hidden map must not cover Saved", 0, map.height)
+        }
+        app.onNodeWithTag("saved_list").performScrollToNode(hasTestTag("route_$target"))
+        val savedPosition = app.onNodeWithTag("route_$target").fetchSemanticsNode().boundsInRoot
+        app.onNodeWithTag("route_$target").performTouchInput { click() }
+        app.onNodeWithTag("route_detail").assertExists()
+        app.onNodeWithTag("nav_saved").assertIsSelected()
+        assertSame("Saved route maps use the same native host", map, readyMap())
+        app.onNodeWithTag("map_zoom_out").performTouchInput { click() }
+        var savedCamera = JSONObject()
+        app.waitUntil(15_000) { savedCamera = mapSnapshot(map); mapInputReady(savedCamera) && !sameMapView(before, savedCamera) }
+        app.onNodeWithTag("go_back").performTouchInput { click() }
+        app.onNodeWithTag("saved_routes_tab").assertIsSelected()
+        app.onNodeWithTag("route_$target").assertIsDisplayed()
+        val restoredPosition = app.onNodeWithTag("route_$target").fetchSemanticsNode().boundsInRoot
+        assertEquals("Back must restore the saved list position", savedPosition.top, restoredPosition.top, 2f)
+        app.onNodeWithTag("nav_saved").performTouchInput { click() }
+        assertEquals("Reselecting the saved list must keep its scroll", savedPosition.top,
+            app.onNodeWithTag("route_$target").fetchSemanticsNode().boundsInRoot.top, 2f)
+        app.onNodeWithTag("route_$target").performTouchInput { click() }
+        app.onNodeWithTag("route_detail").assertExists()
+        app.onNodeWithTag("nav_saved").performTouchInput { click() }
+        app.onNodeWithTag("saved_list").assertIsDisplayed()
+        assertEquals("The Saved tab must leave a child without losing scroll", savedPosition.top,
+            app.onNodeWithTag("route_$target").fetchSemanticsNode().boundsInRoot.top, 2f)
+        screenshot("mobile-saved-return")
+        app.onNodeWithTag("nav_explore").performTouchInput { click() }
+        assertSame("Tab changes must keep one attached map", map, readyMap())
+        assertEquals(target, model.state.value.routeId)
+        assertEquals(query, model.state.value.search)
+        assertEquals("krasnodar", model.state.value.regionId)
+        var returned = JSONObject()
+        app.waitUntil(15_000) { returned = mapSnapshot(map); mapInputReady(returned) && sameMapView(before, returned) }
+        app.onNodeWithTag("nav_explore").performTouchInput { click() }
+        assertSame(map, awaitReadyMap())
+        assertEquals(query, model.state.value.search)
+        assertTrue("Reselecting the active destination must not reset the camera", sameMapView(returned, mapSnapshot(map)))
+        File(app.activity.filesDir, "qa/mobile-navigation-context.json").apply { parentFile!!.mkdirs() }.writeText(JSONObject()
+            .put("query", query).put("regionId", model.state.value.regionId).put("sameNativeMap", true)
+            .put("savedListPositionRestored", true).put("hiddenMap", paused)
+            .put("before", before).put("savedRouteCamera", savedCamera).put("returned", returned)
+            .put("destinationCamerasAreIndependent", true).put("sameTabIsNoOp", true)
+            .put("savedTabClosesChildAndKeepsScroll", true).toString(2))
+        app.onNodeWithTag("go_back").performTouchInput { click() }
+        app.onNodeWithTag("region_search").assertTextContains(query)
+        // The suite shares local storage. Remove only the cards this journey
+        // saved, through the same visible action; preserve pre-existing cards.
+        app.onNodeWithTag("nav_saved").performTouchInput { click() }
+        for (id in createdBookmarks) {
+            app.onNodeWithTag("saved_list").performScrollToNode(hasTestTag("route_$id"))
+            app.onNodeWithTag("route_$id").performTouchInput { click() }
+            app.onNodeWithTag("save_route").performTouchInput { click() }
+            app.waitUntil(10_000) { model.state.value.busyId == null && model.state.value.savedRoutes.none { it.routeId == id } }
+            app.onNodeWithTag("go_back").performTouchInput { click() }
+        }
+        app.onNodeWithTag("nav_more").performTouchInput { click() }
+        app.onNodeWithTag("more_list").performScrollToNode(hasTestTag("nav_profile"))
+        app.onNodeWithTag("nav_profile").performTouchInput { click() }
+        app.onNodeWithTag("profile_list").assertExists()
+        app.onNodeWithTag("nav_more").performTouchInput { click() }
+        app.onNodeWithTag("more_list").assertIsDisplayed()
+        app.onNodeWithTag("nav_more").performTouchInput { click() }
+        app.onNodeWithTag("more_list").assertIsDisplayed()
+    }
+
+    @Test fun mobileSearchAndCompactPanelsKeepActionsReachable() {
+        lateinit var model: MainViewModel
+        lateinit var online: OnlineViewModel
+        app.runOnUiThread {
+            model = ViewModelProvider(app.activity)[MainViewModel::class.java]
+            online = ViewModelProvider(app.activity)[OnlineViewModel::class.java]
+        }
+        val map = readyMap()
+        val density = app.activity.resources.displayMetrics.density
+        val reports = JSONArray()
+        val keyboardReceipts = JSONArray()
+        reports.put(reachableControls("mobile-map-portrait", listOf("region_search", "show_results", "map_layers", "map_zoom_in",
+            "map_zoom_out", "locate", "map_sources", "nav_explore", "nav_saved", "nav_more"), density, mapVisible = true))
+        screenshot("mobile-map-portrait")
+        keyboardReceipts.put(submitSearchWithVisibleKeyboard("Чёрный ключ"))
+        app.onNodeWithTag("nav_explore").assertIsDisplayed()
+        exploreList().performScrollToNode(hasTestTag("route_kolyma-black-creek"))
+        app.onNodeWithTag("route_kolyma-black-creek").performTouchInput { click() }
+        reports.put(reachableControls("mobile-route-portrait", listOf("go_back", "show_map", "save_route", "nav_explore", "nav_saved", "nav_more"), density))
+        screenshot("mobile-route-portrait")
+        assertSame(map, readyMap())
+        val orientation = app.activity.requestedOrientation
+        val configuration = app.activity.resources.configuration.orientation
+        try {
+            app.runOnUiThread { app.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
+            app.waitUntil(10_000) { app.activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE }
+            assertSame("Rotation must keep the same native map", map, awaitReadyMap())
+            app.waitUntil(15_000) { mapInputReady(mapSnapshot(map)) }
+            reports.put(reachableControls("mobile-map-landscape", listOf("go_back", "map_layers", "map_zoom_in", "map_zoom_out",
+                "locate", "map_sources", "save_route", "show_route_details", "nav_explore", "nav_saved", "nav_more"), density, mapVisible = true))
+            screenshot("mobile-map-landscape")
+        } finally {
+            app.runOnUiThread { app.activity.requestedOrientation = orientation }
+            app.waitUntil(10_000) { app.activity.resources.configuration.orientation == configuration }
+        }
+        // This is a real rendered 320×568 dp container with 200% Compose text,
+        // not an assertion about the emulator's physical screen resolution.
+        app.runOnUiThread {
+            app.activity.setContent {
+                CompositionLocalProvider(LocalDensity provides Density(density, 2f)) {
+                    TropaTheme { Box(Modifier.fillMaxSize()) {
+                        Box(Modifier.width(320.dp).height(568.dp).testTag("compact_test_root")) { TropaApp(model, online) }
+                    } }
+                }
+            }
+        }
+        val compactMap = awaitReadyMap()
+        app.waitUntil(15_000) { mapInputReady(mapSnapshot(compactMap)) }
+        reports.put(reachableControls("mobile-map-320dp-font200", listOf("go_back", "map_layers", "map_zoom_in", "map_zoom_out",
+            "locate", "map_sources", "save_route", "show_route_details", "nav_explore", "nav_saved", "nav_more"), density, mapVisible = true))
+        assertFullDestinationLabels()
+        screenshot("mobile-map-320dp-font200")
+        app.onNodeWithTag("show_route_details").performTouchInput { click() }
+        app.onNodeWithTag("save_route").assertIsDisplayed()
+        app.onNodeWithTag("go_back").performTouchInput { click() }
+        keyboardReceipts.put(submitSearchWithVisibleKeyboard("Алтай"))
+        app.onNodeWithTag("nav_saved").assertIsDisplayed()
+        assertFullDestinationLabels()
+        reports.put(reachableControls("mobile-search-320dp-font200", listOf("region_search", "show_map", "nav_explore", "nav_saved", "nav_more"), density))
+        screenshot("mobile-search-320dp-font200")
+        File(app.activity.filesDir, "qa/mobile-compact-layout.json").apply { parentFile!!.mkdirs() }.writeText(JSONObject()
+            .put("realOrientationChange", true).put("renderedContainerDp", JSONArray(listOf(320, 568)))
+            .put("fontScale", 2).put("imeSearchDismissesKeyboard", true).put("fullDestinationLabels", true)
+            .put("keyboard", keyboardReceipts).put("layouts", reports).toString(2))
+    }
+
+    private fun submitSearchWithVisibleKeyboard(query: String): JSONObject {
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        fun shell(command: String) = ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command))
+            .bufferedReader().use { it.readText().trim() }
+        val previous = shell("settings get secure show_ime_with_hard_keyboard")
+        check(previous in setOf("0", "1", "null", "")) { "Unexpected keyboard preference" }
+        shell("settings put secure show_ime_with_hard_keyboard 1")
+        fun ime() = ViewCompat.getRootWindowInsets(app.activity.window.decorView)
+        try {
+            app.onNodeWithTag("region_search").performClick().performTextReplacement(query)
+            app.onNodeWithTag("region_search").assertIsFocused()
+            var beforeHeight = 0
+            app.waitUntil(10_000) {
+                var visible = false
+                app.runOnUiThread {
+                    val insets = ime()
+                    beforeHeight = insets?.getInsets(WindowInsetsCompat.Type.ime())?.bottom ?: 0
+                    visible = insets?.isVisible(WindowInsetsCompat.Type.ime()) == true && beforeHeight > 0
+                }
+                visible
+            }
+            app.onNodeWithTag("region_search").performImeAction()
+            app.waitUntil(10_000) {
+                var hidden = false
+                app.runOnUiThread { hidden = ime()?.isVisible(WindowInsetsCompat.Type.ime()) == false &&
+                    ime()?.getInsets(WindowInsetsCompat.Type.ime())?.bottom == 0 }
+                hidden
+            }
+            app.onNodeWithTag("region_search").assertIsNotFocused().assertTextContains(query)
+            return JSONObject().put("query", query).put("editorAction", "performImeAction")
+                .put("imeVisibleBefore", true).put("imeHeightBeforePx", beforeHeight)
+                .put("imeVisibleAfter", false).put("imeHeightAfterPx", 0).put("focusReleased", true)
+        } finally {
+            shell(if (previous == "0" || previous == "1") "settings put secure show_ime_with_hard_keyboard $previous"
+                else "settings delete secure show_ime_with_hard_keyboard")
+        }
+    }
+
+    private fun reachableControls(name: String, tags: List<String>, density: Float, mapVisible: Boolean = false): JSONObject {
+        val root = if (app.onAllNodesWithTag("compact_test_root").fetchSemanticsNodes().isNotEmpty())
+            app.onNodeWithTag("compact_test_root").fetchSemanticsNode().boundsInRoot else app.onRoot().fetchSemanticsNode().boundsInRoot
+        val controls = tags.associateWith { tag ->
+            val bounds = app.onNodeWithTag(tag).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            assertTrue("$name: $tag is narrower than 48 dp", bounds.width / density >= 47.5f)
+            assertTrue("$name: $tag is shorter than 48 dp", bounds.height / density >= 47.5f)
+            assertTrue("$name: $tag is clipped by the viewport", bounds.left >= root.left - 1 && bounds.top >= root.top - 1 &&
+                bounds.right <= root.right + 1 && bounds.bottom <= root.bottom + 1)
+            bounds
+        }
+        for ((index, first) in tags.withIndex()) for (second in tags.drop(index + 1)) {
+            assertTrue("$name: $first overlaps $second", !controls.getValue(first).overlaps(controls.getValue(second)))
+        }
+        val canvas = if (mapVisible) app.onNodeWithTag("map_canvas").fetchSemanticsNode().boundsInRoot else null
+        val credits = if (mapVisible) app.onNodeWithTag("map_credits").fetchSemanticsNode().boundsInRoot else null
+        if (canvas != null) {
+            assertTrue("$name: the map must receive a visible viewport", canvas.width > 0 && canvas.height > 0)
+            controls.forEach { (tag, bounds) -> assertTrue("$name: $tag covers the map viewport", !bounds.overlaps(canvas)) }
+            assertTrue("$name: attribution covers the map viewport", credits != null && !credits.overlaps(canvas))
+        }
+        fun bounds(value: androidx.compose.ui.geometry.Rect) = JSONArray(listOf(value.left, value.top, value.right, value.bottom))
+        val evidence = JSONObject().put("name", name).put("density", density).put("rootBoundsPx", bounds(root))
+            .put("controlsPx", JSONObject().apply { controls.forEach { (tag, value) -> put(tag, bounds(value)) } })
+        if (canvas != null) evidence.put("canvasPx", bounds(canvas)).put("attributionPx", bounds(requireNotNull(credits)))
+        return evidence
+    }
+
+    private fun assertFullDestinationLabels() {
+        for ((tag, label) in listOf("nav_explore" to "Карта", "nav_saved" to "Сохранено", "nav_more" to "Ещё")) {
+            val text = app.onNode(hasText(label) and hasAnyAncestor(hasTestTag(tag)), useUnmergedTree = true).assertIsDisplayed()
+            val results = mutableListOf<TextLayoutResult>()
+            text.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action -> assertTrue(action(results)) }
+            assertTrue("$label must have real laid out text", results.isNotEmpty())
+            assertTrue("$label must remain complete at 200%", results.none { it.hasVisualOverflow })
+            val bounds = text.fetchSemanticsNode().boundsInRoot
+            assertTrue("$label must not be clipped by its tab", bounds.height >= results.maxOf { it.size.height } - 1f)
+        }
     }
 
     @Test fun sessionTransitionsFailClosedAndDiscardLatePrivateWork() {
@@ -261,6 +524,7 @@ class LocalExperienceTest {
             return requireNotNull(current)
         }
         fun savedAction(tag: String) {
+            app.onNodeWithTag("saved_offline_tab").performClick()
             app.onNodeWithTag("saved_list").performScrollToNode(hasTestTag(tag))
             app.onNodeWithTag(tag).assertIsEnabled().performClick()
         }
@@ -273,14 +537,14 @@ class LocalExperienceTest {
         }
         fun refreshThroughButtons(previousDirectory: String): InstalledPackEntity {
             savedAction("update_pack_$regionId")
-            app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("save_pack"))
+            exploreList().performScrollToNode(hasTestTag("save_pack"))
             app.onNodeWithTag("save_pack").assertIsEnabled().performClick()
             return awaitPublished(previousDirectory)
         }
         assertNull("A clean device must not already have this region", readPack())
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_$regionId"))
+        exploreList().performScrollToNode(hasTestTag("region_$regionId"))
         app.onNodeWithTag("region_$regionId").performClick()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("save_pack"))
+        exploreList().performScrollToNode(hasTestTag("save_pack"))
         app.onNodeWithTag("save_pack").assertIsEnabled().performClick()
         val installed = awaitPublished()
         val directory = File(installed.directory)
@@ -300,7 +564,7 @@ class LocalExperienceTest {
         verifyThroughButton()
         savedAction("open_pack_$regionId")
         app.waitUntil(timeoutMillis = 15_000) { model.state.value.offlineSnapshot != null && model.state.value.busyId == null }
-        app.onNodeWithTag("explore_list").performScrollToIndex(0)
+        exploreList().performScrollToNode(hasTestTag("saved_region_snapshot"))
         app.onNodeWithTag("saved_region_snapshot").assertIsDisplayed()
         val snapshot = requireNotNull(model.state.value.offlineSnapshot)
         assertEquals(installed.directory, snapshot.pack.directory)
@@ -310,12 +574,11 @@ class LocalExperienceTest {
         // A verified snapshot must own its bytes. Removing the on-disk source
         // now cannot make card→map fall back to an unverified mutable path.
         assertTrue(geometryFile.delete())
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_${sourceRoute.id}"))
+        exploreList().performScrollToNode(hasTestTag("route_${sourceRoute.id}"))
         app.onNodeWithTag("route_${sourceRoute.id}").performClick()
         app.onNodeWithTag("saved_route_snapshot").assertExists()
         assertEquals(originalGeometry, model.route(sourceRoute.id)?.inlineGeometry)
-        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("route_map"))
-        val map = awaitReadyMap()
+        val map = readyMap()
         var opened = JSONObject()
         val openedDeadline = SystemClock.uptimeMillis() + 15_000
         app.waitUntil(timeoutMillis = 15_000) {
@@ -326,7 +589,6 @@ class LocalExperienceTest {
                 SystemClock.uptimeMillis() <= openedDeadline
         }
         val openedPixels = waitForRoutePixels("offline-pack-opened-snapshot", map, originalGeometry, opened, openedDeadline)
-        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("save_route"))
         app.onNodeWithTag("save_route").assertIsEnabled().performClick()
         app.waitUntil(timeoutMillis = 10_000) {
             runBlocking(Dispatchers.IO) { dao.savedRoute(sourceRoute.id) } != null && model.state.value.busyId == null
@@ -367,9 +629,12 @@ class LocalExperienceTest {
         assertEquals("Removing region data must keep separately saved cards", bookmark,
             runBlocking(Dispatchers.IO) { dao.savedRoute(sourceRoute.id) })
         app.onNodeWithTag("nav_explore").performClick()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_$regionId"))
+        // Destination selection retains its region; Back deliberately returns
+        // to the overview before reinstalling through the original entry.
+        app.onNodeWithTag("go_back").performClick()
+        exploreList().performScrollToNode(hasTestTag("region_$regionId"))
         app.onNodeWithTag("region_$regionId").performClick()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("save_pack"))
+        exploreList().performScrollToNode(hasTestTag("save_pack"))
         app.onNodeWithTag("save_pack").assertIsEnabled().performClick()
         val repeated = awaitPublished(refreshed.directory)
         app.onNodeWithTag("nav_saved").performClick()
@@ -395,30 +660,30 @@ class LocalExperienceTest {
         val territory = requireNotNull(catalogue.region(route.regionId))
         assertTrue(territory.territory)
         readyMap()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("catalog_territories"))
+        exploreList().performScrollToNode(hasTestTag("catalog_territories"))
         app.onNodeWithTag("catalog_territories").performClick()
         app.onNodeWithTag("catalog_territories").assertIsSelected()
         tapRegionMarker(territory.id, "catalog-national-map")
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_${route.id}"))
+        exploreList().performScrollToNode(hasTestTag("route_${route.id}"))
         app.onNodeWithTag("route_${route.id}").performClick()
         app.onNodeWithTag("route_detail").assertExists()
         app.onNodeWithText(route.title).assertExists()
         screenshot("catalog-national-route")
-        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("save_route"))
         app.onNodeWithTag("save_route").assertIsEnabled().performClick()
         app.waitUntil(timeoutMillis = 10_000) {
-            app.onAllNodes(hasTestTag("save_route") and hasText("Сохранено · убрать")).fetchSemanticsNodes().isNotEmpty()
+            app.onAllNodes(hasTestTag("save_route") and hasText("Сохранено")).fetchSemanticsNodes().isNotEmpty()
         }
         app.onNodeWithTag("go_back").performClick()
         app.onNodeWithTag("explore_list").assertExists()
         app.onNodeWithTag("go_back").performClick()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("catalog_territories"))
+        exploreList().performScrollToNode(hasTestTag("catalog_territories"))
         app.onNodeWithTag("catalog_territories").assertIsSelected()
         screenshot("catalog-national-territories")
     }
 
     @Test fun browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp() {
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("open_planner"))
+        app.onNodeWithTag("nav_more").performClick()
+        app.onNodeWithTag("more_list").performScrollToNode(hasTestTag("open_planner"))
         app.onNodeWithTag("open_planner").performClick()
         app.onNodeWithTag("planner_explanation").assertExists()
         app.onNodeWithText("Конструктор откроется в браузере. Для загрузки нужна сеть.").assertExists()
@@ -428,11 +693,12 @@ class LocalExperienceTest {
         screenshot("planner-browser-main-dialog")
         app.onNodeWithTag("planner_cancel").performClick()
         app.onNodeWithTag("planner_explanation").assertDoesNotExist()
-        app.onNodeWithTag("nav_explore").assertIsSelected()
+        app.onNodeWithTag("nav_more").assertIsSelected()
+        app.onNodeWithTag("nav_explore").performClick()
 
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_krasnodar"))
+        exploreList().performScrollToNode(hasTestTag("region_krasnodar"))
         app.onNodeWithTag("region_krasnodar").performClick()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
+        exploreList().performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("open_route_planner"))
         app.onNodeWithTag("open_route_planner").performClick()
@@ -446,18 +712,36 @@ class LocalExperienceTest {
 
     @Test fun canOpenRegionAndReadOfficialRestrictionWithoutAnAccount() {
         tapRegionMarker("krasnodar")
-        app.onNodeWithText("Обзор района").assertExists()
+        app.onNodeWithTag("explore_list").assertExists()
         app.onNodeWithTag("go_back").assertExists()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
+        exploreList().performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithText("Ограничение доступа").assertExists()
-        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("save_route"))
         app.onNodeWithTag("save_route").assertIsEnabled()
     }
 
+    private fun exploreList(): SemanticsNodeInteraction {
+        if (app.onAllNodesWithTag("explore_list").fetchSemanticsNodes().isEmpty()) {
+            app.onNodeWithTag("show_results").assertIsDisplayed().performTouchInput { click() }
+        }
+        return app.onNodeWithTag("explore_list")
+    }
+
     private fun readyMap(): CustomMapWebView {
-        app.onNodeWithTag("explore_list").performScrollToIndex(2)
+        if (app.onAllNodesWithTag("show_map").fetchSemanticsNodes().isNotEmpty()) {
+            app.onNodeWithTag("show_map").assertIsDisplayed().performTouchInput { click() }
+        }
         return awaitReadyMap()
+    }
+
+    private fun togglePaths(expectSelected: Boolean? = null) {
+        app.onNodeWithTag("map_layers").assertIsDisplayed().performTouchInput { click() }
+        val paths = app.onNodeWithTag("map_paths").assertIsDisplayed()
+        if (expectSelected == true) paths.assertIsSelected()
+        if (expectSelected == false) paths.assertIsNotSelected()
+        paths.performTouchInput { click() }
+        app.onNodeWithTag("map_layers_done").performScrollTo().performTouchInput { click() }
+        app.waitUntil(10_000) { app.onAllNodesWithTag("map_layers_done").fetchSemanticsNodes().isEmpty() }
     }
 
     private fun awaitReadyMap(): CustomMapWebView {
@@ -471,7 +755,7 @@ class LocalExperienceTest {
             var ready = false
             app.runOnUiThread {
                 view = findMap(app.activity.window.decorView)
-                ready = view?.isAttachedToWindow == true && view?.ready == true
+                ready = view?.isAttachedToWindow == true && view?.ready == true && (view?.height ?: 0) > 0 && (view?.width ?: 0) > 0 && view?.isEnabled == true
             }
             ready && app.onAllNodes(hasText("Открываем карту России…")).fetchSemanticsNodes().isEmpty()
         }
@@ -522,7 +806,7 @@ class LocalExperienceTest {
         screenshot("map-recoverable-error-actions")
         app.onNodeWithTag("map_error_close").performTouchInput { click() }
         app.waitUntil(10_000) { app.onAllNodesWithTag("map_error_panel").fetchSemanticsNodes().isEmpty() }
-        app.onNodeWithTag("map_paths").assertIsDisplayed()
+        app.onNodeWithTag("map_layers").assertIsDisplayed()
         app.runOnUiThread { map.onFailure?.invoke("Линия маршрута не загрузилась. Повторите загрузку карты.", false) }
         app.waitUntil(10_000) { app.onAllNodesWithTag("map_retry").fetchSemanticsNodes().isNotEmpty() }
         app.onNodeWithTag("map_retry").assertIsDisplayed().assertIsEnabled().performTouchInput { click() }
@@ -534,7 +818,7 @@ class LocalExperienceTest {
 
         // Real Compose controls must reach the shared raster, preserve the
         // camera and restore the same catalogue after paths are hidden.
-        app.onNodeWithTag("map_paths").assertIsSelected().performClick()
+        togglePaths(expectSelected = true)
         var hidden = JSONObject()
         app.waitUntil(timeoutMillis = 10_000) {
             hidden = mapSnapshot(map)
@@ -542,7 +826,7 @@ class LocalExperienceTest {
                 hidden.getJSONObject("rendered").getJSONObject("catalogueOverlay").getInt("preparedSources") == 0
         }
         assertTrue("Hiding trails changed the map camera", sameMapView(full, hidden))
-        app.onNodeWithTag("map_paths").performClick()
+        togglePaths(expectSelected = false)
         app.waitUntil(timeoutMillis = 10_000) {
             val state = mapSnapshot(map)
             state.getJSONObject("catalogue").getBoolean("paths") &&
@@ -564,11 +848,9 @@ class LocalExperienceTest {
         val query = "Чёрный ключ"
         val expectedIds = catalogue.referenceRoutes(query).map { it.id }.toSet()
         assertTrue("The real reviewed route must be discoverable", "kolyma-black-creek" in expectedIds)
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_search"))
         app.onNodeWithTag("region_search").performClick().performTextReplacement(query)
-        app.waitForIdle()
-        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
-        app.onNodeWithTag("explore_list").performScrollToIndex(2)
+        app.onNodeWithTag("region_search").performImeAction()
+        assertSame("Search must retain the one map view", map, readyMap())
         var filtered = JSONObject()
         app.waitUntil(timeoutMillis = 10_000) {
             filtered = mapSnapshot(map)
@@ -592,9 +874,9 @@ class LocalExperienceTest {
                 hit.getJSONObject("rendered").getJSONObject("reviewedCoastal").optInt("overlaySources") > 0
         }
         val touch = tapMapTrail(map, hit, sourceRoute.id)
+        app.onNodeWithTag("show_route_details").assertIsDisplayed().performTouchInput { click() }
         app.onNodeWithTag("route_detail").assertExists()
-        app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("route_map"))
-        val selectedMap = awaitReadyMap()
+        val selectedMap = readyMap()
         app.runOnUiThread { selectedMap.setOnline(false) }
         var selected = JSONObject()
         app.waitUntil(timeoutMillis = 15_000) {
@@ -816,8 +1098,8 @@ class LocalExperienceTest {
                 .put("snapshot", snapshot).put("diagnostics", diagnostics).toString(2))
             if (!prepared || !finalTap.optBoolean("trustedClick")) screenshot("$screenshotPrefix-selection-failed")
         }
-        app.waitUntil(timeoutMillis = 10_000) {app.onAllNodes(hasText("Обзор района")).fetchSemanticsNodes().isNotEmpty()}
-        app.onNodeWithTag("explore_list").performScrollToIndex(0)
+        app.waitUntil(timeoutMillis = 10_000) { app.onAllNodesWithTag("go_back").fetchSemanticsNodes().isNotEmpty() }
+        exploreList()
         app.onNodeWithText(region.name).assertExists()
         screenshot("$screenshotPrefix-after-tap")
     }
@@ -1141,6 +1423,8 @@ class LocalExperienceTest {
     }
 
     @Test fun noServerMeansExplicitConfigurationNotInventedSocialActivity() {
+        app.onNodeWithTag("nav_more").performClick()
+        app.onNodeWithTag("more_list").performScrollToNode(hasTestTag("nav_profile"))
         app.onNodeWithTag("nav_profile").performClick()
         app.onNodeWithTag("configure_service").assertExists()
         app.onNodeWithTag("profile_list").performScrollToNode(hasTestTag("auth_submit"))
@@ -1148,9 +1432,9 @@ class LocalExperienceTest {
     }
 
     @Test fun bundledLandscapeCanOpenAndReturnToTheSameRoute() {
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_krasnodar"))
+        exploreList().performScrollToNode(hasTestTag("region_krasnodar"))
         app.onNodeWithTag("region_krasnodar").performClick()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
+        exploreList().performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("open_landscape"))
         waitForLandscapeWarmup("scene-warmup")
@@ -1193,9 +1477,9 @@ class LocalExperienceTest {
     }
 
     @Test fun rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable() {
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_krasnodar"))
+        exploreList().performScrollToNode(hasTestTag("region_krasnodar"))
         app.onNodeWithTag("region_krasnodar").performClick()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
+        exploreList().performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("open_landscape"))
         waitForLandscapeWarmup("renderer-exit-warmup")
@@ -1213,9 +1497,9 @@ class LocalExperienceTest {
     }
 
     @Test fun terminalDocumentFailureAfterFirstFrameCanPrepareANewView() {
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("region_krasnodar"))
+        exploreList().performScrollToNode(hasTestTag("region_krasnodar"))
         app.onNodeWithTag("region_krasnodar").performClick()
-        app.onNodeWithTag("explore_list").performScrollToNode(hasTestTag("route_kavkaz-8a"))
+        exploreList().performScrollToNode(hasTestTag("route_kavkaz-8a"))
         app.onNodeWithTag("route_kavkaz-8a").performClick()
         app.onNodeWithTag("route_detail").performScrollToNode(hasTestTag("open_landscape"))
         waitForLandscapeWarmup("recovery-warmup")

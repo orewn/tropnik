@@ -50,17 +50,18 @@ async function productionFixture(){
    ts.forEachChild(node,visit);
   };visit(tree);assert.equal(parts.size,wanted.size,`${filename}: the production subtrees are missing`);return parts;
  };
- const parts=subtrees(atlas,'CustomAtlas.tsx',['map-controls','layer-control','map-style-switch']),peek=subtrees(explore,'Explore.tsx',['sheet-peek-summary']);
+ const parts=subtrees(atlas,'CustomAtlas.tsx',['map-controls','layer-control','map-style-switch']),peek=subtrees(explore,'Explore.tsx',['sheet-peek-summary','mobile-sheet-toolbar']);
  const iconSource=await readFile(join(web,'components/MapIcon.tsx'),'utf8'),{MapIcon}=compile(iconSource,'MapIcon.tsx');
- const iconSet=await readFile(join(web,'components/TropnikIcons.tsx'),'utf8'),{ArrowRight}=compile(iconSet,'TropnikIcons.tsx');
+ const iconSet=await readFile(join(web,'components/TropnikIcons.tsx'),'utf8'),{ArrowRight,MagnifyingGlass,MapTrifold,List}=compile(iconSet,'TropnikIcons.tsx');
  // Render the real TSX subtrees, not a copied button count or a CSS formula.
  // Transport, camera effects and React event execution do not affect this
  // layout fixture; the full browser audit exercises their actual behavior.
- const noOperation=()=>{},scope={MapIcon,planning:false,trail:null,offline:false,paths:true,relief:true,boundaries:true,engine:{current:null}};
+ const noOperation=()=>{},scope={MapIcon,planning:false,trail:null,offline:false,paths:true,relief:true,boundaries:true,engine:{current:null},layerControl:{current:null}};
  for(const name of ['locate','fitAll','setLayers','changeMode','setPaths','setRelief','setBoundaries'])scope[name]=noOperation;
  const {Controls}=compile(`export function Controls({layers=false,ready=true}){const state={ready,mode:'detail'},satellite=state.mode==='satellite';return <>${[...parts.values()].join('\n')}</>;}`,'ControlsFixture.tsx',scope);
  const {Peek}=compile(`export function Peek({kind='Каталог',title='Все направления',meta='680 маршрутов'}){const sheetOpen=false,sheetPreviewKind=kind,sheetPreviewTitle=title,sheetPreviewMeta=meta;return ${peek.get('sheet-peek-summary')};}`,'PeekFixture.tsx',{ArrowRight,sheetPreview:{current:null},setSheetOpen:noOperation});
- const html=({layers=false,...copy}={})=>`<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body><header style="height:var(--header)"></header><main><div class="explore-layout sheet-closed" data-sheet-state="closed"><aside class="explore-panel"><button class="sheet-handle"><span></span></button>${renderToStaticMarkup(jsx.jsx(Peek,copy))}</aside><div class="atlas-wrap tropnik-custom-atlas"><div class="atlas-canvas"></div>${renderToStaticMarkup(jsx.jsx(Controls,{layers}))}</div></div></main></body></html>`;
+ const {Toolbar}=compile(`export function Toolbar(){const sheetOpen=false,query='',sheetPanelId='fixture-sheet';return ${peek.get('mobile-sheet-toolbar')};}`,'ToolbarFixture.tsx',{MagnifyingGlass,MapTrifold,List,sheetHandle:{current:null},openSearch:noOperation,setSheetOpen:noOperation,closeMapOverlays:noOperation});
+ const html=({layers=false,...copy}={})=>`<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body><header style="height:var(--header)"></header><main><div class="explore-layout sheet-closed" data-sheet-state="closed"><aside class="explore-panel">${renderToStaticMarkup(jsx.jsx(Toolbar,{}))}<div class="sheet-peek-row">${renderToStaticMarkup(jsx.jsx(Peek,copy))}</div></aside><div class="atlas-wrap tropnik-custom-atlas"><div class="atlas-canvas"></div>${renderToStaticMarkup(jsx.jsx(Controls,{layers}))}</div></div></main></body></html>`;
  return{html,sources:{atlasSHA256:createHash('sha256').update(atlas).digest('hex'),exploreSHA256:createHash('sha256').update(explore).digest('hex'),cssSHA256:createHash('sha256').update(css).digest('hex'),cssFiles:files}};
 }
 
@@ -69,7 +70,7 @@ test('production control fixture renders both menu states, actual peek icons and
  assert.doesNotMatch(closed,/class="layer-menu"/);assert.match(open,/class="layer-menu"/);
  assert.match(closed,/aria-label="Рельеф"[^>]*aria-pressed="true"/);assert.match(closed,/aria-label="Спутник"[^>]*aria-pressed="false"/);
  assert.doesNotMatch(open,/Рельеф всей карты|Карта сверху|Сохранённый обзор|Тропы и ландшафт/);assert.match(closed,/data-tropnik-icon="ArrowRight"/);
- assert.match(closed,/<small>Каталог<\/small><strong>Все направления<\/strong><span>680 маршрутов<\/span>/);
+ assert.match(closed,/<small>Каталог<\/small><strong>Все направления<\/strong><span data-overview-count="sheet">680 маршрутов<\/span>/);
  assert.equal(fixture.sources.cssFiles.filter(file=>file.startsWith('@fontsource/manrope/')).length,8);
  assert.match(closed,/data:font\/woff2;base64,/);assert.doesNotMatch(closed,/url\(["']?\.\/files\/manrope/);
 });
@@ -115,35 +116,37 @@ test('production landscape map controls and collapsed peek keep readable text an
    if(scenario.name==='closed'){
     // Negative control: reproduce the exact 31px production overlap before
     // checking the corrected stylesheet. This override exists only here.
-    report.previousReservation=await evaluate(`(()=>{const style=document.createElement('style');style.textContent='.explore-layout .layer-control{right:calc(var(--map-right) + 208px)!important}';document.head.appendChild(style);const rail=document.querySelector('.map-controls').getBoundingClientRect(),layers=document.querySelector('.layer-button').getBoundingClientRect();const result={railWidth:rail.width,overlapWidth:Math.min(rail.right,layers.right)-Math.max(rail.left,layers.left),overlapHeight:Math.min(rail.bottom,layers.bottom)-Math.max(rail.top,layers.top)};style.remove();return result})()`);
+    report.previousReservation=await evaluate(`(()=>{const style=document.createElement('style');style.textContent='.explore-layout .map-controls{width:239px!important;height:52px!important;padding:4px!important}.explore-layout:is(.sheet-open,.sheet-closed) .map-controls>button[aria-label]{display:grid!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important}.explore-layout:is(.sheet-open,.sheet-closed) .atlas-wrap .map-controls>span{display:block!important;width:1px!important;height:24px!important;margin:0 4px!important}.explore-layout:is(.sheet-open,.sheet-closed) .atlas-wrap .layer-control{left:auto!important;right:calc(var(--map-right) + 208px)!important}.explore-layout .layer-button{height:44px!important;min-height:44px!important}';document.head.appendChild(style);const rail=document.querySelector('.map-controls').getBoundingClientRect(),layers=document.querySelector('.layer-button').getBoundingClientRect();const result={railWidth:rail.width,overlapWidth:Math.min(rail.right,layers.right)-Math.max(rail.left,layers.left),overlapHeight:Math.min(rail.bottom,layers.bottom)-Math.max(rail.top,layers.top)};style.remove();return result})()`);
     assert.deepEqual(report.previousReservation,{railWidth:239,overlapWidth:31,overlapHeight:44},'The production CSS/JSX fixture must reproduce the observed landscape defect');
    }
    const geometry=await evaluate(`(()=>{
     const box=element=>{const r=element.getBoundingClientRect();return{left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height}};
     const rail=document.querySelector('.map-controls'),layers=document.querySelector('.layer-button'),atlas=box(document.querySelector('.atlas-wrap')),sheet=box(document.querySelector('.explore-panel'));
-    const targets=[...rail.querySelectorAll('button'),layers].map(element=>{const rect=box(element);return{label:element.getAttribute('aria-label')||element.textContent.trim(),rect,blocked:[[.5,.5],[.3,.3],[.7,.3],[.3,.7],[.7,.7]].some(([x,y])=>!element.contains(document.elementFromPoint(rect.left+rect.width*x,rect.top+rect.height*y)))}});
+    const targets=[...rail.querySelectorAll('button'),layers].filter(element=>getComputedStyle(element).display!=='none').map(element=>{const rect=box(element);return{label:element.getAttribute('aria-label')||element.textContent.trim(),rect,blocked:[[.5,.5],[.3,.3],[.7,.3],[.3,.7],[.7,.7]].some(([x,y])=>!element.contains(document.elementFromPoint(rect.left+rect.width*x,rect.top+rect.height*y)))}});
     const preview=document.querySelector('.sheet-peek-summary'),copy=preview.querySelector('.sheet-peek-copy'),copyStyle=getComputedStyle(copy),rows=[...copy.children].map(element=>{const style=getComputedStyle(element);return{rect:box(element),fontSize:parseFloat(style.fontSize),lineHeight:parseFloat(style.lineHeight),fontFamily:style.fontFamily,whiteSpace:style.whiteSpace,textOverflow:style.textOverflow,overflowX:style.overflowX,clientWidth:element.clientWidth,scrollWidth:element.scrollWidth}});
-    return{viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio,coarse:matchMedia('(pointer:coarse)').matches},rail:box(rail),layers:box(layers),available:{left:atlas.left,right:atlas.right,top:atlas.top,bottom:Math.min(atlas.bottom,sheet.top)},targets,menu:document.querySelector('.layer-menu')?box(document.querySelector('.layer-menu')):null,peek:{rect:box(preview),copy:box(copy),display:copyStyle.display,direction:copyStyle.flexDirection,rows,arrow:box(preview.querySelector('svg')),handle:box(document.querySelector('.sheet-handle'))}};
+    return{viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio,coarse:matchMedia('(pointer:coarse)').matches},rail:box(rail),layers:box(layers),available:{left:atlas.left,right:atlas.right,top:atlas.top,bottom:Math.min(atlas.bottom,sheet.right>atlas.left&&sheet.left<atlas.right?sheet.top:Infinity)},targets,menu:document.querySelector('.layer-menu')?box(document.querySelector('.layer-menu')):null,peek:{rect:box(preview),copy:box(copy),display:copyStyle.display,direction:copyStyle.flexDirection,rows,arrow:box(preview.querySelector('svg')),handle:box(document.querySelector('.sheet-handle'))}};
    })()`);
    const screenshot=await cdp.call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const png=Buffer.from(screenshot.data,'base64'),file=`${name}.png`;
    await writeFile(join(pictures,file),png);report.cases.push({name,...geometry,fonts,screenshot:{file,sha256:createHash('sha256').update(png).digest('hex')}});
    assert.deepEqual(geometry.viewport,{width:844,height:390,dpr:2,coarse:true});
-   assert.equal(geometry.targets.length,6,'The actual five rail controls and Layers must all remain present');
+   assert.deepEqual(geometry.targets.map(target=>target.label),['Увеличить масштаб','Уменьшить масштаб','Моё местоположение','Настройки карты'],'The essential controls remain present; North and fit are reachable in Settings');
+   assert.ok(geometry.available.right-geometry.available.left>=844*.58-1,'The split landscape map keeps its full right-hand workspace');
    const gap=geometry.rail.left-geometry.layers.right;
    assert.ok(gap>=8-.01,`Layers must keep the 8px spacing beside the whole ready rail; actual gap ${gap}px`);
    for(const target of geometry.targets){
-    const r=target.rect,b=geometry.available;assert.ok(r.width>=44&&r.height>=44,`${target.label}: touch target shrank`);
+    const r=target.rect,b=geometry.available;assert.ok(r.width>=48&&r.height>=48,`${target.label}: touch target shrank`);
     assert.ok(r.left>=b.left&&r.right<=b.right&&r.top>=b.top&&r.bottom<=b.bottom,`${target.label}: control escapes usable map`);
     assert.equal(target.blocked,false,`${target.label}: actual hit target is obscured`);
    }
+   if(geometry.menu){const r=geometry.menu,b=geometry.available;assert.ok(r.left>=b.left&&r.right<=b.right&&r.top>=geometry.rail.bottom+8&&r.bottom<=b.bottom,'Settings must remain inside the real map and below essential controls');}
    const {peek}=geometry;assert.equal(peek.display,'flex');assert.equal(peek.direction,'column');assert.equal(peek.rows.length,3);
-   assert.equal(peek.handle.height,44);assert.equal(peek.rect.height,68);assert.ok(peek.rect.bottom<=390+.01);
-   assert.deepEqual(peek.rows.map(row=>[row.fontSize,row.lineHeight]),[[12,16],[18,28],[12,16]],'The peek must retain the named caption/title hierarchy');
+   assert.equal(peek.handle.height,48);assert.equal(peek.rect.height,56);assert.ok(peek.rect.bottom<=390+.01);
+   assert.deepEqual(peek.rows.map(row=>[row.fontSize,row.lineHeight]),[[12,16],[14,20],[12,16]],'The peek must retain the named caption/title hierarchy');
    for(let index=0;index<peek.rows.length;index++){
     const r=peek.rows[index].rect;assert.ok(r.left>=peek.rect.left&&r.right<=peek.rect.right&&r.top>=peek.rect.top&&r.bottom<=peek.rect.bottom,'Peek text must stay inside its fixed touch target');
-    if(index)assert.ok(r.top-peek.rows[index-1].rect.bottom>=2-.01,'Peek copy must occupy separate rows');
+    if(index)assert.ok(r.top-peek.rows[index-1].rect.bottom>=-.01,'Peek copy must occupy separate rows');
    }
-   assert.ok(peek.arrow.left-peek.copy.right>=12-.01,'The actual ArrowRight must keep its own column');
+   assert.ok(peek.arrow.left-peek.copy.right>=8-.01,'The actual ArrowRight must keep its own column');
    for(const row of peek.rows.slice(1)){
     assert.equal(row.whiteSpace,'nowrap');assert.equal(row.textOverflow,'ellipsis');assert.equal(row.overflowX,'hidden');
     if(scenario.name==='long-copy')assert.ok(row.scrollWidth>row.clientWidth,'Long real title/meta nodes must actually exercise ellipsis');

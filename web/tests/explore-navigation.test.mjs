@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DEFAULT_EXPLORE_FILTERS, exploreFiltersForRegion, exploreParentSelection, exploreTrailSelection, writeExploreHistory} from '../lib/explore-navigation.ts';
+import {DEFAULT_EXPLORE_FILTERS, exploreFiltersForRegion, exploreParentSelection, exploreTrailSelection, writeExploreHistory, writeExploreContext, readExploreContext} from '../lib/explore-navigation.ts';
 import {filterMapTrails, mapDirectionCounts} from '../lib/map-catalog.ts';
 
 function browserHistory(href = 'https://example.test/') {
@@ -113,4 +113,42 @@ test('overview results and direction counts ignore stale region-only filters on 
   assert.deepEqual(overview.map(trail => trail.id), ['first', 'second']);
   assert.deepEqual([...mapDirectionCounts(overview)], [['altai', 1], ['baikal', 1]]);
   assert.equal(filters.expanded, false, 'the reset also closes the regional filter panel');
+});
+
+
+test('Saved visits and saved route Back preserve the independent Map query and scroll context', () => {
+  const browser = browserHistory('https://example.test/tropnik/?map=canvas#map');
+  const map = {regionId: 'altai', query: 'Алтай', filters: {...DEFAULT_EXPLORE_FILTERS, difficulty: 'unknown'}, sheetOpen: true, page: {key: 'altai:Алтай:unknown:any:false', limit: 24}};
+  const context = {query: map.query, filters: map.filters, sheetOpen: true, page: map.page, scroll: [{key: 'list:altai:Алтай:unknown:any:false', top: 640}], mapContext: map};
+  writeExploreHistory(browser, {regionId: 'altai'});
+  writeExploreContext(browser, context);
+  writeExploreHistory(browser, {regionId: 'altai', view: 'saved'});
+  writeExploreContext(browser, {...context, scroll: [...context.scroll, {key: 'saved', top: 256}]});
+  writeExploreHistory(browser, {regionId: 'baikal', trailId: 'saved-baikal', from: 'saved'});
+  assert.equal(new URL(browser.location.href).searchParams.get('from'), 'saved');
+  assert.equal(new URL(browser.location.href).searchParams.get('view'), null);
+  assert.equal(browser.history.state.framework, 'retained');
+  browser.history.back();
+  assert.equal(new URL(browser.location.href).searchParams.get('view'), 'saved');
+  assert.equal(readExploreContext(browser.history.state).scroll.find(item => item.key === 'saved').top, 256);
+  assert.deepEqual(readExploreContext(browser.history.state).mapContext, map, 'a different saved route cannot replace the Map destination');
+  browser.history.back();
+  assert.equal(new URL(browser.location.href).searchParams.get('view'), null);
+  assert.deepEqual(readExploreContext(browser.history.state), context);
+  assert.equal(new URL(browser.location.href).pathname, '/tropnik/');
+  assert.equal(new URL(browser.location.href).searchParams.get('map'), 'canvas');
+  assert.equal(new URL(browser.location.href).hash, '#map');
+});
+
+test('persisting list context replaces one visit and restores bounded page/scroll after a reload', () => {
+  const browser = browserHistory('https://example.test/?region=altai');
+  const context = {query: 'перевал', filters: {...DEFAULT_EXPLORE_FILTERS, difficulty: 'unknown'}, sheetOpen: true, listOrigin: {regionId: 'altai', query: 'перевал', filters: DEFAULT_EXPLORE_FILTERS}, page: {key: 'altai:перевал:unknown:any:false', limit: 36}, scroll: [{key: 'list:altai:перевал:unknown:any:false', top: 834.5}]};
+  writeExploreContext(browser, context);
+  writeExploreContext(browser, context);
+  assert.equal(browser.history.length, 1, 'scroll persistence must not create navigation entries');
+  assert.deepEqual(readExploreContext(JSON.parse(JSON.stringify(browser.history.state))), context);
+  assert.equal(browser.history.scrollRestoration, 'manual');
+  for (const malformed of [null, {}, {tropnikExploreUi: {...context, scroll: [null]}}, {tropnikExploreUi: {...context, scroll: [{key: 'list', top: Infinity}]}}, {tropnikExploreUi: {...context, page: {key: '', limit: -1}}}, {tropnikExploreUi: {...context, mapContext: {query: '', filters: DEFAULT_EXPLORE_FILTERS, sheetOpen: true}}}]) {
+    assert.equal(readExploreContext(malformed), undefined, 'stale or malformed history fails closed to the URL selection');
+  }
 });
