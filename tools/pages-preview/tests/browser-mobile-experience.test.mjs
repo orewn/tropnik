@@ -1,9 +1,38 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assertMobileExperience,assertMobileTargets,MOBILE_EXPERIENCE_SOURCES} from '../browser-mobile-experience.mjs';
+import {assertMobileExperience,assertMobileTargets,dispatchMobileKey,inspectMobileRouteCandidates,selectMobileRouteCandidate,MOBILE_EXPERIENCE_SOURCES} from '../browser-mobile-experience.mjs';
 import {mobileExperienceFixture,mobileTargetsFixture,mobileBuildFixture} from './mobile-experience-fixture.mjs';
 
 const build=mobileBuildFixture(),binding={sourceCommit:build.sourceCommit,buildId:build.buildId,sources:Object.fromEntries(build.inputs.map(input=>[input.path,input.sha256]))};
+
+test('native Enter delivers its carriage return only on keyDown and records the exact CDP payload',async()=>{
+ const calls=[],cdp={call:async(method,params)=>{calls.push({method,params});}};
+ const commands=await dispatchMobileKey(cdp,'Enter','Enter',13);
+ assert.deepEqual(calls,[
+  {method:'Input.dispatchKeyEvent',params:{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'}},
+  {method:'Input.dispatchKeyEvent',params:{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13}},
+ ]);
+ assert.deepEqual(commands,calls.map(({method,params})=>({method,...params,status:'fulfilled'})));
+});
+
+test('Tab, End and Escape retain native non-text control-key semantics',async()=>{
+ for(const [key,code] of [['Tab',9],['End',35],['Escape',27]]){
+  const calls=[],cdp={call:async(method,params)=>{calls.push({method,params});}};
+  await dispatchMobileKey(cdp,key,key,code);
+  assert.deepEqual(calls,['keyDown','keyUp'].map(type=>({method:'Input.dispatchKeyEvent',params:{type,key,code:key,windowsVirtualKeyCode:code}})));
+ }
+});
+
+test('line scenarios retain the real list order while skipping cards without source geometry, closed cards and hidden rows',()=>{
+ const card=(id,geometry,{closed=false,hidden=false}={})=>({dataset:{routeId:id,routeGeometry:geometry},getClientRects:()=>[{}],closest:()=>hidden?{}:null,querySelector:selector=>({textContent:selector==='h3'?id:closed?'Закрыт для посещения':'Описание из источника'})});
+ const elements=[card('without-line','missing'),card('closed-line','available',{closed:true}),card('hidden-line','available',{hidden:true}),card('line-a','available'),card('line-b','available')];
+ const document={querySelectorAll:selector=>{assert.equal(selector,'.trail-card[data-route-id]');return elements;}};
+ const candidates=new Function('document','getComputedStyle',`return (${inspectMobileRouteCandidates.toString()})();`)(document,()=>({display:'block',visibility:'visible'}));
+ assert.deepEqual(candidates.map(value=>value.id),['without-line','closed-line','hidden-line','line-a','line-b']);
+ assert.equal(candidates[0].geometry,'missing');assert.equal(candidates[1].closed,true);assert.equal(candidates[2].present,false);
+ assert.equal(selectMobileRouteCandidate(candidates).id,'line-a');assert.equal(selectMobileRouteCandidate(candidates,'line-a').id,'line-b');
+ assert.throws(()=>selectMobileRouteCandidate(candidates.slice(0,3)),/source geometry/);
+});
 
 test('two native mobile scenarios preserve distinct route contexts and bind their evidence to the build inputs',()=>{
  const receipt=mobileExperienceFixture();assert.equal(assertMobileExperience(receipt,binding),receipt);
@@ -16,11 +45,21 @@ test('two native mobile scenarios preserve distinct route contexts and bind thei
   ['missing scenario',value=>value.scenarios.pop()],
   ['emulation reported as physical device',value=>value.physicalDevice=true],
   ['same saved and map route',value=>value.scenarios[1].route.id=value.scenarios[0].route.id],
+  ['missing candidate evidence',value=>delete value.scenarios[0].route.candidates],
+  ['source-less selected card',value=>value.scenarios[0].route.geometry='missing'],
+  ['candidate has no source line',value=>value.scenarios[0].route.candidates[1].geometry='missing'],
+  ['selected row is hidden',value=>value.scenarios[0].route.candidates[1].present=false],
+  ['candidate list excludes source-less rows',value=>value.scenarios[0].route.candidates.shift()],
   ['programmatic typing',value=>value.scenarios[0].typing.method='setInputValue'],
   ['synthetic text input',value=>value.scenarios[0].typing.events[1].trusted=false],
   ['wrong typed text',value=>value.scenarios[0].typing.events.findLast(event=>event.type==='input').value='Байкал'],
   ['input not focused',value=>value.scenarios[0].focused.focus.search=false],
   ['search keyboard retained',value=>value.scenarios[0].submit.after.search=true],
+  ['Enter character payload missing',value=>delete value.scenarios[0].submit.commands[0].text],
+  ['Enter unmodified payload missing',value=>delete value.scenarios[0].submit.commands[0].unmodifiedText],
+  ['Enter character payload empty',value=>value.scenarios[0].submit.commands[0].text=''],
+  ['Enter character sent on keyUp',value=>value.scenarios[0].submit.commands[1].text='\r'],
+  ['End inserts text',value=>value.scenarios[0].filter.end.commands[0].text='\r'],
   ['input obscured',value=>value.scenarios[0].focused.focus.unobscured=false],
   ['synthetic keyboard',value=>value.scenarios[0].filter.end.events[0].trusted=false],
   ['no native filter change',value=>value.scenarios[0].filter.end.events.splice(1,1)],
@@ -33,6 +72,7 @@ test('two native mobile scenarios preserve distinct route contexts and bind thei
   ['show map selected another route',value=>value.scenarios[0].onMap.route='different'],
   ['show map kept sheet open',value=>value.scenarios[0].onMap.sheet='open'],
   ['show map lacks completed paint',value=>value.scenarios[0].onMap.map.rendering.painted=false],
+  ['available geometry never painted',value=>value.scenarios[0].onMap.map.rendering.drawnRoute=''],
   ['show map hides camera delta',value=>value.scenarios[0].framing.cameraDelta.zoom=1],
   ['browser Back replaced by state mutation',value=>value.scenarios[0].back.method='history.replaceState'],
   ['history target differs from actual URL',value=>value.scenarios[0].back.target.url+='&wrong=1'],

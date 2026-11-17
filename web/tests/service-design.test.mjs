@@ -36,7 +36,7 @@ test('header has one calm desktop navigation surface and a bounded mobile menu',
 test('production CSS minification retains standard backdrop cancellation for Chromium',async()=>{
   const require=createRequire(import.meta.url),viteRequire=createRequire(require.resolve('vite'));
   const {transform}=viteRequire('lightningcss');
-  for(const path of ['app/custom-map.css','app/final-polish.css','app/map-ui-release.css','components/Header.module.css','components/HomeEditorial.module.css']){
+  for(const path of ['app/custom-map.css','app/final-polish.css','app/map-ui-release.css','app/mobile-workspace.css','components/Header.module.css','components/HomeEditorial.module.css']){
     const source=await read(path);
     for(const targets of [{chrome:107<<16},{chrome:107<<16,safari:17<<16}]){
       const compiled=transform({filename:path,code:Buffer.from(source),minify:true,targets}).code.toString();

@@ -89,6 +89,7 @@ class LocalExperienceTest {
         app.runOnUiThread { model = ViewModelProvider(app.activity)[MainViewModel::class.java] }
         val map = readyMap()
         val createdBookmarks = mutableListOf<String>()
+        var feedbackReceipt: JSONObject? = null
         val routes = model.catalog.referenceRoutes(regionId = "krasnodar").take(4)
         assertTrue("The real catalogue must provide a scrollable saved list", routes.size >= 4)
         exploreList().performScrollToNode(hasTestTag("region_krasnodar"))
@@ -101,9 +102,26 @@ class LocalExperienceTest {
                 app.onNodeWithTag("save_route").assertIsDisplayed().performTouchInput { click() }
                 app.waitUntil(10_000) { model.state.value.busyId == null && model.state.value.savedRoutes.any { it.routeId == route.id } }
                 createdBookmarks += route.id
+                if (feedbackReceipt == null) {
+                    app.waitUntil(10_000) {
+                        app.onNodeWithTag("app_feedback").fetchSemanticsNode().boundsInRoot.height > 0 &&
+                            app.onAllNodesWithText("Карточка сохранена на этом устройстве").fetchSemanticsNodes().isNotEmpty()
+                    }
+                    app.onNodeWithText("Карточка сохранена на этом устройстве").assertIsDisplayed()
+                    val feedback = app.onNodeWithTag("app_feedback").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+                    val save = app.onNodeWithTag("save_route").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+                    screenshot("mobile-save-feedback")
+                    feedbackReceipt = JSONObject().put("message", "Карточка сохранена на этом устройстве").put("feedbackPx", JSONArray(listOf(feedback.left, feedback.top, feedback.right, feedback.bottom)))
+                        .put("savePx", JSONArray(listOf(save.left, save.top, save.right, save.bottom)))
+                        .put("disjoint", !feedback.overlaps(save))
+                    File(app.activity.filesDir, "qa/mobile-save-feedback.json").writeText(feedbackReceipt!!.toString(2))
+                    assertTrue("Visible feedback must not cover the next Save action", !feedback.overlaps(save))
+                    assertTrue("Feedback must reserve space below route actions", feedback.top >= save.bottom)
+                }
             }
             app.onNodeWithTag("go_back").performTouchInput { click() }
         }
+        assertNotNull("This journey must observe feedback from a real save", feedbackReceipt)
         val target = model.state.value.savedRoutes.last { saved -> routes.any { it.id == saved.routeId } }.routeId
         val query = requireNotNull(model.route(target)).title.substringBefore(" — ")
         app.onNodeWithTag("region_search").performClick().performTextReplacement(query)
@@ -162,7 +180,7 @@ class LocalExperienceTest {
         assertTrue("Reselecting the active destination must not reset the camera", sameMapView(returned, mapSnapshot(map)))
         File(app.activity.filesDir, "qa/mobile-navigation-context.json").apply { parentFile!!.mkdirs() }.writeText(JSONObject()
             .put("query", query).put("regionId", model.state.value.regionId).put("sameNativeMap", true)
-            .put("savedListPositionRestored", true).put("hiddenMap", paused)
+            .put("savedListPositionRestored", true).put("hiddenMap", paused).put("visibleSaveFeedback", feedbackReceipt)
             .put("before", before).put("savedRouteCamera", savedCamera).put("returned", returned)
             .put("destinationCamerasAreIndependent", true).put("sameTabIsNoOp", true)
             .put("savedTabClosesChildAndKeepsScroll", true).toString(2))
@@ -201,13 +219,11 @@ class LocalExperienceTest {
         val keyboardReceipts = JSONArray()
         reports.put(reachableControls("mobile-map-portrait", listOf("region_search", "show_results", "map_layers", "map_zoom_in",
             "map_zoom_out", "locate", "map_sources", "nav_explore", "nav_saved", "nav_more"), density, mapVisible = true))
-        screenshot("mobile-map-portrait")
         keyboardReceipts.put(submitSearchWithVisibleKeyboard("Чёрный ключ"))
         app.onNodeWithTag("nav_explore").assertIsDisplayed()
         exploreList().performScrollToNode(hasTestTag("route_kolyma-black-creek"))
         app.onNodeWithTag("route_kolyma-black-creek").performTouchInput { click() }
         reports.put(reachableControls("mobile-route-portrait", listOf("go_back", "show_map", "save_route", "nav_explore", "nav_saved", "nav_more"), density))
-        screenshot("mobile-route-portrait")
         assertSame(map, readyMap())
         val orientation = app.activity.requestedOrientation
         val configuration = app.activity.resources.configuration.orientation
@@ -218,7 +234,6 @@ class LocalExperienceTest {
             app.waitUntil(15_000) { mapInputReady(mapSnapshot(map)) }
             reports.put(reachableControls("mobile-map-landscape", listOf("go_back", "map_layers", "map_zoom_in", "map_zoom_out",
                 "locate", "map_sources", "save_route", "show_route_details", "nav_explore", "nav_saved", "nav_more"), density, mapVisible = true))
-            screenshot("mobile-map-landscape")
         } finally {
             app.runOnUiThread { app.activity.requestedOrientation = orientation }
             app.waitUntil(10_000) { app.activity.resources.configuration.orientation == configuration }
@@ -239,7 +254,6 @@ class LocalExperienceTest {
         reports.put(reachableControls("mobile-map-320dp-font200", listOf("go_back", "map_layers", "map_zoom_in", "map_zoom_out",
             "locate", "map_sources", "save_route", "show_route_details", "nav_explore", "nav_saved", "nav_more"), density, mapVisible = true))
         assertFullDestinationLabels()
-        screenshot("mobile-map-320dp-font200")
         app.onNodeWithTag("show_route_details").performTouchInput { click() }
         app.onNodeWithTag("save_route").assertIsDisplayed()
         app.onNodeWithTag("go_back").performTouchInput { click() }
@@ -247,7 +261,10 @@ class LocalExperienceTest {
         app.onNodeWithTag("nav_saved").assertIsDisplayed()
         assertFullDestinationLabels()
         reports.put(reachableControls("mobile-search-320dp-font200", listOf("region_search", "show_map", "nav_explore", "nav_saved", "nav_more"), density))
-        screenshot("mobile-search-320dp-font200")
+        assertSame("Large-text overview keeps the native host", compactMap, readyMap())
+        reports.put(reachableControls("mobile-map-overview-320dp-font200", listOf("region_search", "show_results", "map_layers",
+            "map_zoom_in", "map_zoom_out", "locate", "map_sources", "nav_explore", "nav_saved", "nav_more"), density, mapVisible = true))
+        assertFullDestinationLabels()
         File(app.activity.filesDir, "qa/mobile-compact-layout.json").apply { parentFile!!.mkdirs() }.writeText(JSONObject()
             .put("realOrientationChange", true).put("renderedContainerDp", JSONArray(listOf(320, 568)))
             .put("fontScale", 2).put("imeSearchDismissesKeyboard", true).put("fullDestinationLabels", true)
@@ -293,6 +310,8 @@ class LocalExperienceTest {
     }
 
     private fun reachableControls(name: String, tags: List<String>, density: Float, mapVisible: Boolean = false): JSONObject {
+        // Preserve the actual frame even if a geometry assertion below fails.
+        screenshot(name)
         val root = if (app.onAllNodesWithTag("compact_test_root").fetchSemanticsNodes().isNotEmpty())
             app.onNodeWithTag("compact_test_root").fetchSemanticsNode().boundsInRoot else app.onRoot().fetchSemanticsNode().boundsInRoot
         val controls = tags.associateWith { tag ->
@@ -321,10 +340,21 @@ class LocalExperienceTest {
     }
 
     private fun assertFullDestinationLabels() {
+        val evidence = JSONArray()
         for ((tag, label) in listOf("nav_explore" to "Карта", "nav_saved" to "Сохранено", "nav_more" to "Ещё")) {
             val text = app.onNode(hasText(label) and hasAnyAncestor(hasTestTag(tag)), useUnmergedTree = true).assertIsDisplayed()
             val results = mutableListOf<TextLayoutResult>()
             text.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action -> assertTrue(action(results)) }
+            val textBounds = text.fetchSemanticsNode().boundsInRoot
+            evidence.put(JSONObject().put("label", label)
+                .put("boundsPx", JSONArray(listOf(textBounds.left, textBounds.top, textBounds.right, textBounds.bottom)))
+                .put("layouts", JSONArray(results.map { result -> JSONObject()
+                    .put("widthPx", result.size.width).put("heightPx", result.size.height).put("lines", result.lineCount)
+                    .put("constraintWidthPx", result.layoutInput.constraints.maxWidth)
+                    .put("constraintHeightPx", result.layoutInput.constraints.maxHeight)
+                    .put("density", result.layoutInput.density.density).put("fontScale", result.layoutInput.density.fontScale)
+                    .put("overflowWidth", result.didOverflowWidth).put("overflowHeight", result.didOverflowHeight) })))
+            File(app.activity.filesDir, "qa/mobile-destination-labels.json").apply { parentFile!!.mkdirs() }.writeText(evidence.toString(2))
             assertTrue("$label must have real laid out text", results.isNotEmpty())
             assertTrue("$label must remain complete at 200%", results.none { it.hasVisualOverflow })
             val bounds = text.fetchSemanticsNode().boundsInRoot

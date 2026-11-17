@@ -142,6 +142,21 @@ function readMap(cdp){return evaluate(cdp,`(()=>{
  return{engine:value.engine,camera:value.camera,state:value.state,routeId:value.routeId,drawnRoute:value.drawnRoute,catalogueOverlay:value.catalogueOverlay,drawRevision:value.drawRevision,moving:host.dataset.mapMoving,rect:{left:rect.left,top:rect.top,width:rect.width,height:rect.height},scrollY:window.scrollY,url:location.href};
 })()`);}
 const stable=value=>value?.state.ready&&value.moving!=='true'&&value.drawRevision>0&&value.catalogueOverlay.currentViewportReady===true&&!value.catalogueOverlay.error;
+// The closed flag commits before the drawer transition. Wait for its physical
+// endpoint before reading the map again: transitionend can schedule a refit.
+async function settledClosedSheet(cdp){
+  let previous=null,idle=0;
+  return waitValue('closed trail-overlay sheet before capture',()=>evaluate(cdp,`(()=>{
+    const root=document.querySelector('.explore-layout'),panel=document.querySelector('.explore-panel');
+    if(!root||!panel)return null;const rect=panel.getBoundingClientRect();let animating=false;
+    for(let node=panel;node;node=node.parentElement)if(node.getAnimations().some(animation=>animation.pending||animation.playState==='running'))animating=true;
+    return{state:root.dataset.sheetState,animating,dragging:root.dataset.sheetDragging==='true'||panel.dataset.sheetDragging==='true',rect:{left:rect.left,top:rect.top,width:rect.width,height:rect.height}};
+  })()`),current=>{
+    const ready=current?.state==='closed'&&!current.animating&&!current.dragging&&current.rect?.width>0&&current.rect?.height>0;
+    const same=ready&&previous&&['left','top','width','height'].every(key=>Number.isFinite(current.rect[key])&&Math.abs(current.rect[key]-previous.rect[key])<.25);
+    idle=ready?(same?idle+1:1):0;previous=ready?current:null;return idle>=3;
+  },4000);
+}
 async function pointer(cdp,profile,point){
   if(profile.mobile){await cdp.call('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:point.x,y:point.y,id:41,radiusX:2,radiusY:2,force:1}]});await cdp.call('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}
   else{await cdp.call('Input.dispatchMouseEvent',{type:'mouseMoved',x:point.x,y:point.y,pointerType:'mouse'});await cdp.call('Input.dispatchMouseEvent',{type:'mousePressed',x:point.x,y:point.y,button:'left',buttons:1,clickCount:1,pointerType:'mouse'});await cdp.call('Input.dispatchMouseEvent',{type:'mouseReleased',x:point.x,y:point.y,button:'left',buttons:0,clickCount:1,pointerType:'mouse'});}
@@ -252,6 +267,7 @@ async function run(){
         result.lineHit={...witness,pointerType:input?.pointerType,trusted:input?.trusted,target:input?.target,actualX:input?.x,actualY:input?.y};
         assert.ok(witness.acceptableIds.includes(result.selected.routeId),'Native line click opened another source');
         if(profile.mobile&&await evaluate(cdp,'document.querySelector(".explore-layout")?.dataset.sheetState==="open"'))await pointerSelector(cdp,profile,'.sheet-handle');
+        if(profile.mobile)await settledClosedSheet(cdp);
         result.selected=await waitValue('selected route after panel transition',()=>readMap(cdp),value=>stable(value)&&value.routeId===result.selected.routeId);
         result.screenshots.push(await screenshot(cdp,profile,'selected'));
         const options=await evaluate(cdp,'({relief:!!document.querySelector(".map-style-switch button[aria-label=Рельеф]"),satellite:!!document.querySelector(".map-style-switch button[aria-label=Спутник]")})');result.reliefOption=options.relief;result.satelliteOption=options.satellite;

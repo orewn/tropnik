@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.FlowRow
@@ -111,7 +112,6 @@ fun TropaApp(model: MainViewModel, online: OnlineViewModel) {
 
     Scaffold(
         containerColor = Palette.Background,
-        snackbarHost = { SnackbarHost(snackbars) },
         bottomBar = {
             if (!landscape && !imeVisible) MobileDestinationBar(state.screen, model::switchScreen)
         },
@@ -126,25 +126,30 @@ fun TropaApp(model: MainViewModel, online: OnlineViewModel) {
             if (route?.apiOrigin != null && route.apiOrigin != connected.serverUrl) model.switchScreen(Screen.PROFILE)
             else { route?.apiRouteId?.let(online::composeRecruitment); model.switchScreen(Screen.TRIPS) }
         }
-        Box(Modifier.fillMaxSize().padding(padding).imePadding()) {
-            MobileMapWorkspace(model, state, workspaceActive, presentation, landscape, { landscape = it },
-                serviceMatches = route?.apiOrigin == null || route?.apiOrigin == connected.serverUrl,
-                onTrips = onTrips, onRecruitment = onRecruitment,
-                onLocation = { permissions.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) },
-                modifier = if (workspaceActive) Modifier.fillMaxSize()
-                    else Modifier.requiredSize(0.dp).clipToBounds().clearAndSetSemantics { })
-            if (!workspaceActive) Column(Modifier.fillMaxSize().background(Palette.Background)) {
-                BrandBar(state, onBack = model::back)
-                destinations.SaveableStateProvider(state.screen.name) {
-                    when (state.screen) {
-                        Screen.SAVED -> SavedScreen(model, state)
-                        Screen.MORE -> MoreScreen(model) { showSources = true }
-                        Screen.TRIPS -> OnlineTripsScreen(online, connected, onProfile = { model.switchScreen(Screen.PROFILE) }, onRoute = model::selectPublishedRoute)
-                        Screen.PROFILE -> OnlineProfileScreen(online, connected, onSources = { showSources = true })
-                        Screen.EXPLORE -> Unit
+        Column(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding).imePadding()) {
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                MobileMapWorkspace(model, state, workspaceActive, presentation, landscape, { landscape = it },
+                    serviceMatches = route?.apiOrigin == null || route?.apiOrigin == connected.serverUrl,
+                    onTrips = onTrips, onRecruitment = onRecruitment,
+                    onLocation = { permissions.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) },
+                    modifier = if (workspaceActive) Modifier.fillMaxSize()
+                        else Modifier.requiredSize(0.dp).clipToBounds().clearAndSetSemantics { })
+                if (!workspaceActive) Column(Modifier.fillMaxSize().background(Palette.Background)) {
+                    BrandBar(state, onBack = model::back)
+                    destinations.SaveableStateProvider(state.screen.name) {
+                        when (state.screen) {
+                            Screen.SAVED -> SavedScreen(model, state)
+                            Screen.MORE -> MoreScreen(model) { showSources = true }
+                            Screen.TRIPS -> OnlineTripsScreen(online, connected, onProfile = { model.switchScreen(Screen.PROFILE) }, onRoute = model::selectPublishedRoute)
+                            Screen.PROFILE -> OnlineProfileScreen(online, connected, onSources = { showSources = true })
+                            Screen.EXPLORE -> Unit
+                        }
                     }
                 }
             }
+            // Feedback owns measured space above navigation/IME, so it cannot
+            // cover Save or the route actions while the next card is opened.
+            SnackbarHost(snackbars, Modifier.fillMaxWidth().testTag("app_feedback"))
         }
     }
 

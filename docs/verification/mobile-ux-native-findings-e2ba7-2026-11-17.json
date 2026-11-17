@@ -1,0 +1,67 @@
+{
+  "sourceCommit": "e2ba7ecd55bc75e07c296a5f3796b27cccc9499f",
+  "workflowRunId": "44001611975",
+  "build": {
+    "unitTests": 89,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "debugAndInstrumentationCompiled": true,
+    "unsignedMinifiedProductionCompiled": true
+  },
+  "device": {
+    "tests": 13,
+    "passed": 10,
+    "failures": 3,
+    "skipped": 0,
+    "missing": 0,
+    "installedApkBytesVerified": true,
+    "accepted": false
+  },
+  "findings": [
+    {
+      "observed": "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline timed out waiting for the saved bookmark after Save at candidate line 593; the owned-geometry/pixel assertions before it passed.",
+      "evidence": "device/screenshots/qa/offline-pack-opened-snapshot.png",
+      "visibleDefect": "The verification Snackbar covers the complete Save/Card action row."
+    },
+    {
+      "observed": "mobileNavigationRetainsMapAndSavedContext timed out after Save at candidate line 102, before Back/camera checks.",
+      "evidence": "device/raw-instrumentation.log",
+      "sourceInference": "The same overlaid Snackbar can intercept the next card action; the measured-feedback slot removes this overlap."
+    },
+    {
+      "observed": "mobileSearchAndCompactPanelsKeepActionsReachable reached 320dp/200% and failed the unchanged assertion that the Карта label has no visual overflow.",
+      "evidence": "device/raw-instrumentation.log",
+      "sourceInference": "The intrinsic-height destination row did not provide enough text height. Follow-up measures each label using actual style/density/font scale/available width."
+    },
+    {
+      "observed": "Landscape Save visibly wraps the word into Сохрани / ть inside the narrow context panel.",
+      "evidence": "device/screenshots/qa/mobile-map-landscape.png",
+      "fix": "Use the existing compact 56dp bookmark action with full accessibility label in narrow panels."
+    }
+  ],
+  "followup": {
+    "files": [
+      "ui/TropaApp.kt",
+      "ui/MobileDestinationBar.kt",
+      "ui/MobileWorkspace.kt",
+      "androidTest/LocalExperienceTest.kt"
+    ],
+    "changes": [
+      "Feedback reserves its measured space above navigation/IME.",
+      "Full destination labels measured with TextMeasurer; no font-scale/line-count limits.",
+      "Narrow action rows use the labelled compact Save control.",
+      "Large-text map header avoids duplicate route naming; large action/advisory space uses actual line measurements.",
+      "Country/region peek uses natural content measurement; the existing device case reaches the 200% overview.",
+      "Feedback evidence requires the actual successful Save message. Screenshots precede geometry assertions; label layout constraints are recorded."
+    ],
+    "localChecks": {
+      "threadingSourceTests": 4,
+      "passed": 4,
+      "diffCheck": "clean",
+      "scenarioCount": 13,
+      "existingCoreAssertionLinesRemoved": 0
+    },
+    "ciExecuted": false
+  }
+}

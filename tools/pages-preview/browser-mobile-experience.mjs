@@ -7,13 +7,26 @@ import {assertSourceEndPanInput} from './browser-source-end-pan.mjs';
 
 export const MOBILE_EXPERIENCE_SOURCES=Object.freeze([
  'tools/pages-preview/browser-mobile-experience.mjs','tools/pages-preview/browser-smoke.mjs','tools/pages-preview/browser-report.mjs',
- 'web/components/Explore.tsx','web/components/Header.tsx','web/components/Offline.tsx',
+ 'web/components/Explore.tsx','web/components/Header.tsx','web/components/Offline.tsx','web/components/TrailCard.tsx',
 ]);
 const NAV=[['map','Карта'],['saved','Сохранено'],['more','Ещё']];
 const INPUT='[data-map-search-input]',CONTENT='.explore-panel-content';
 const selectorForRoute=id=>`.trail-card[data-route-id=${JSON.stringify(id)}] .trail-card-main`;
 const selectorForSaved=(id,action)=>`.saved-card[data-saved-route-id=${JSON.stringify(id)}] [data-saved-action="${action}"]`;
 const destination=id=>`[data-mobile-destination="${id}"]`;
+
+/** Geometry availability is the card's source-data predicate. The subsequent
+ * native reveal/click and map inspection separately prove the target and line. */
+export function inspectMobileRouteCandidates(){
+ return [...document.querySelectorAll('.trail-card[data-route-id]')].map(element=>{
+  const style=getComputedStyle(element);
+  return{id:element.dataset.routeId,title:element.querySelector('h3')?.textContent?.trim()||'',geometry:element.dataset.routeGeometry||null,closed:!!element.querySelector('.source-status')?.textContent?.includes('Закрыт'),present:!!element.getClientRects().length&&style.visibility!=='hidden'&&style.display!=='none'&&!element.closest('[hidden],[inert]')};
+ });
+}
+export function selectMobileRouteCandidate(candidates,exclude=''){
+ const route=candidates.find(value=>value.id&&value.id!==exclude&&value.geometry==='available'&&!value.closed&&value.present);
+ assert.ok(route,'The mobile line scenario needs two distinct present catalogue cards with source geometry');return route;
+}
 
 export function mobileTargetSelectors(stage,routeId){
  const nav=NAV.map(([id])=>[`destination-${id}`,destination(id)]);
@@ -84,6 +97,18 @@ export function installMobileInputRecorder(){
  return{read:()=>events.slice(),clear:()=>{events.length=0;},stop:()=>{for(const type of types)document.removeEventListener(type,record,true);}};
 }
 
+/** Enter needs a character payload for Chromium's native keypress/default
+ * implicit form submission. Key-up and non-text control keys carry no text. */
+export async function dispatchMobileKey(cdp,key,code,windowsVirtualKeyCode){
+ const commands=[];
+ for(const type of ['keyDown','keyUp']){
+  const params={type,key,code,windowsVirtualKeyCode,...(type==='keyDown'&&key==='Enter'?{text:'\r',unmodifiedText:'\r'}:{})};
+  await cdp.call('Input.dispatchKeyEvent',params);
+  commands.push({method:'Input.dispatchKeyEvent',...params,status:'fulfilled'});
+ }
+ return commands;
+}
+
 export function inspectMobileFrame(){
  const root=document.querySelector('.explore-layout'),content=document.querySelector('.explore-panel-content'),params=new URLSearchParams(location.search);
  const input=document.querySelector('[data-map-search-input]'),filter=document.querySelector('[data-filter-action="expand"]'),saved=document.querySelector('[data-filter-action="saved"]');
@@ -123,16 +148,14 @@ export async function runMobileExperience(cdp,profile,helpers,binding){
  };
  const key=async(value,code,virtualKey)=>{
   const before=await read();await inspect('window.__tropnikMobileInput.clear()');
-  const commands=[];
-  for(const type of ['keyDown','keyUp']){await cdp.call('Input.dispatchKeyEvent',{type,key:value,code,windowsVirtualKeyCode:virtualKey});commands.push({method:'Input.dispatchKeyEvent',type,key:value,status:'fulfilled'});}
+  const commands=await dispatchMobileKey(cdp,value,code,virtualKey);
   const events=await waitValue(`Native ${value} key was not delivered`,()=>inspect('window.__tropnikMobileInput.read()'),events=>events.some(event=>event.type==='keyup'&&event.key===value));
   return{key:value,commands,events,before:before.focus,after:(await read()).focus};
  };
  const choose=async(exclude='')=>{
-  const candidates=await inspect(`(()=>[...document.querySelectorAll('.trail-card[data-route-id]')].filter(element=>!element.querySelector('.source-status')?.textContent?.includes('Закрыт')).map(element=>({id:element.dataset.routeId,title:element.querySelector('h3')?.textContent?.trim()})))()`);
-  const route=candidates.find(value=>value.id&&value.id!==exclude);assert.ok(route,'The mobile experience needs two distinct visible catalogue routes');
+  const candidates=await inspect(`(${inspectMobileRouteCandidates.toString()})()`),route=selectMobileRouteCandidate(candidates,exclude);
   const selector=selectorForRoute(route.id),scrolls=await revealNative(cdp,selector,CONTENT,profile);
-  return{...route,selector,scrolls};
+  return{...route,candidates,selector,scrolls};
  };
  try{
   // A public deep link supplies a repeatable starting region; every change
@@ -244,7 +267,8 @@ function assertContext(before,after,context,{history=false,camera=true}={}){
  if(history)assert.equal(after.historyLength,before.historyLength,`${context}: repeated current destination pushed history`);
 }
 function assertKey(receipt,key,context){
- assert.equal(receipt?.key,key);assert.deepEqual(receipt.commands?.map(command=>[command.method,command.type,command.key,command.status]),['keyDown','keyUp'].map(type=>['Input.dispatchKeyEvent',type,key,'fulfilled']));
+ const windowsVirtualKeyCode={Enter:13,End:35,Tab:9,Escape:27}[key];assert.ok(windowsVirtualKeyCode,`${context}: unsupported native control key`);
+ assert.equal(receipt?.key,key);assert.deepEqual(receipt.commands,['keyDown','keyUp'].map(type=>({method:'Input.dispatchKeyEvent',type,key,code:key,windowsVirtualKeyCode,...(type==='keyDown'&&key==='Enter'?{text:'\r',unmodifiedText:'\r'}:{}),status:'fulfilled'})),`${context}: native key command encoding differs from the required input`);
  assert.ok(Array.isArray(receipt.events)&&receipt.events.length>=2&&receipt.events.length<=128);
  const events=receipt.events.filter(event=>['keydown','keyup'].includes(event.type));
  assert.deepEqual(events.map(event=>[event.type,event.key]),[['keydown',key],['keyup',key]],`${context}: native key events are missing`);
@@ -254,6 +278,18 @@ function assertBack(receipt,before,after,context){
  assert.equal(receipt?.method,'Page.navigateToHistoryEntry');assert.ok(Number.isInteger(receipt.from?.id)&&Number.isInteger(receipt.target?.id));assert.notEqual(receipt.from.id,receipt.target.id);
  assert.equal(receipt.from.url,before.url);assert.equal(receipt.target.url,after.url);assert.equal(receipt.url,after.url);
  for(const key of ['region','route','view','title'])assert.equal(receipt.after[key],after[key],`${context}: browser Back restored another ${key}`);
+}
+function assertRouteChoice(route,frame,exclude,context){
+ assert.ok(Array.isArray(route?.candidates)&&route.candidates.length>=2,`${context}: missing DOM candidate evidence`);
+ assert.equal(new Set(route.candidates.map(candidate=>candidate.id)).size,route.candidates.length,`${context}: duplicate candidate identity`);
+ for(const candidate of route.candidates){
+  assert.ok(typeof candidate.id==='string'&&candidate.id&&typeof candidate.title==='string'&&candidate.title);
+  assert.ok(['available','missing'].includes(candidate.geometry));assert.equal(typeof candidate.closed,'boolean');assert.equal(typeof candidate.present,'boolean');
+ }
+ assert.deepEqual(route.candidates.map(({id,title})=>({id,title})),frame.cards,`${context}: candidate evidence differs from the actual list`);
+ const selected=selectMobileRouteCandidate(route.candidates,exclude);
+ for(const key of ['id','title','geometry','closed','present'])assert.equal(route[key],selected[key],`${context}: selected card differs from the eligible DOM candidate`);
+ assert.equal(route.selector,selectorForRoute(route.id));
 }
 
 export function assertMobileExperience(receipt,binding={}){
@@ -278,7 +314,7 @@ export function assertMobileExperience(receipt,binding={}){
  assert.equal(search.filter.tabs.at(-1).after.field,'difficulty');assertKey(search.filter.end,'End','mobile/difficulty-end');assert.equal(search.filter.end.before.field,'difficulty');assertKey(search.filter.leave,'Tab','mobile/difficulty-leave');assert.equal(search.filter.leave.after.field,'duration');assert.ok([...search.filter.end.events,...search.filter.leave.events].some(event=>['input','change'].includes(event.type)&&event.field==='difficulty'&&event.value==='unknown'),'Mobile difficulty needs its delivered native change event');assert.equal(search.filter.selected.values.difficulty,'unknown');assert.equal(search.filter.selected.values.duration,'any');
  click(search.filter.applied,'[data-filter-action="apply"]','mobile/filter-apply');
  assertExperienceScrolls([search.scroll],'touch','mobile/list-scroll');assert.ok(search.scroll.after.scrollTop-search.scroll.before.scrollTop>=24);
- assertExperienceScrolls(search.route?.scrolls,'touch','mobile/route-reveal');assert.ok(search.route.id&&search.route.title);
+ assertExperienceScrolls(search.route?.scrolls,'touch','mobile/route-reveal');assertRouteChoice(search.route,search.before,'','mobile/route-choice');
  click(search.selected,selectorForRoute(search.route.id),'mobile/route-open');
  for(const frame of [search.before,search.detail,search.saved,search.onMap,search.restored])assertFrame(frame,'mobile/search-route');
  assert.equal(search.before.query,'Алтай');assert.equal(search.before.filters.saved,'false');assert.equal(search.before.filters.expanded,'false');assert.ok(search.before.count>=2);
@@ -289,6 +325,7 @@ export function assertMobileExperience(receipt,binding={}){
  assert.equal(search.framing?.policy,'automatic-sheet-refit');for(const key of ['longitude','latitude','zoom'])assert.equal(search.framing.cameraDelta?.[key],search.onMap.map.camera[key]-search.saved.map.camera[key],'ShowMap must record its automatic camera change honestly');
  assertBack(search.back,search.onMap,search.restored,'mobile/route-back');assertContext(search.before,search.restored,'mobile/search-return');
  assert.ok(workspace.route?.id&&workspace.route.id!==search.route.id,'Saved context must be tested with a different Map route');
+ assertRouteChoice(workspace.route,workspace.before,search.route.id,'mobile/second-route-choice');
  assertExperienceScrolls(workspace.route.scrolls,'touch','mobile/second-route-reveal');click(workspace.selected,selectorForRoute(workspace.route.id),'mobile/second-route');
  click(workspace.pan?.showMap,'[data-route-action="map"]','mobile/manual-map');assertFrame(workspace.pan.before,'mobile/pan-before');assertFrame(workspace.pan.after,'mobile/pan-after');
  assert.equal(workspace.pan.before.route,workspace.route.id);assert.equal(workspace.pan.after.route,workspace.route.id);assert.equal(workspace.pan.before.sheet,'closed');assert.equal(workspace.pan.after.sheet,'closed');

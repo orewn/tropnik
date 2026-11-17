@@ -25,6 +25,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Constraints
@@ -65,7 +67,19 @@ internal fun MobileMapWorkspace(
     val holder = rememberSaveableStateHolder()
     val focus = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
-    val fontScale = LocalDensity.current.fontScale
+    val density = LocalDensity.current
+    val fontScale = density.fontScale
+    val textMeasurer = rememberTextMeasurer()
+    val largeText = fontScale >= 1.6f
+    val routeAdvisoryLabel = route?.currentStatusLabel
+        ?: if (route?.accessStatus == "closed") "Посещение приостановлено"
+        else if (route?.currentAdvisory != null) "Есть условия посещения — откройте карточку" else null
+    val largeActionHeight = with(density) {
+        textMeasurer.measure(AnnotatedString("Карточка"), style = MaterialTheme.typography.labelLarge).size.height.toDp() + 16.dp
+    }.coerceAtLeast(48.dp)
+    val advisoryLineHeight = with(density) {
+        textMeasurer.measure(AnnotatedString("Условия посещения"), style = MaterialTheme.typography.bodySmall).size.height.toDp()
+    }
     val showMap = active && !landscape && state.browsePanel == BrowsePanel.MAP
     val mapAction = {
         focus.clearFocus()
@@ -101,8 +115,9 @@ internal fun MobileMapWorkspace(
                     Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TrailIconButton(onClick = model::back, modifier = Modifier.testTag("go_back")) { TropaIcon(Glyph.BACK, description = "Назад к результатам") }
-                        Text(region?.name ?: "Маршрут", Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
-                            maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(if (showMap && compact) route.title else region?.name ?: "Маршрут",
+                            Modifier.weight(1f), style = MaterialTheme.typography.titleSmall,
+                            maxLines = if (compact) 1 else 2, overflow = TextOverflow.Ellipsis)
                         if (!showMap) TrailTextButton(onClick = mapAction, modifier = Modifier.testTag("show_map")) { Text("На карту") }
                     }
                 }
@@ -110,8 +125,9 @@ internal fun MobileMapWorkspace(
             // The first slot always owns the same map. The second receives
             // a settled amount of real space: below in portrait, beside it in
             // landscape. Nothing covers the WebView or changes per drag frame.
-            MapViewportLayout(visible = showMap, sideBySide = sideBySide,
-                peekHeight = if (route == null) { if (fontScale >= 1.6f) 128.dp else 88.dp }
+            MapViewportLayout(visible = showMap, sideBySide = sideBySide, naturalPeek = route == null,
+                peekHeight = if (route == null) 88.dp
+                    else if (largeText) 24.dp + largeActionHeight + (if (routeAdvisoryLabel == null) 0.dp else 8.dp + advisoryLineHeight)
                     else if (compact) 160.dp else if (route.currentAdvisory != null) 196.dp else 164.dp,
                 modifier = if (showMap) Modifier.fillMaxWidth().weight(1f)
                     else Modifier.fillMaxWidth().height(0.dp).clipToBounds().clearAndSetSemantics { },
@@ -122,28 +138,29 @@ internal fun MobileMapWorkspace(
                         active = showMap, presentation = presentation, focusScope = state.screen.destination().name, onLocation = onLocation,
                         modifier = Modifier.fillMaxSize().testTag(if (route == null) "explore_map" else "route_map"))
                 }, peek = {
-                    Surface(Modifier.fillMaxSize().testTag("map_context"), color = Palette.Surface, tonalElevation = 0.dp) {
-                        Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val peekModifier = if (route == null && !sideBySide) Modifier.fillMaxWidth() else Modifier.fillMaxSize()
+                    Surface(peekModifier.testTag("map_context"), color = Palette.Surface, tonalElevation = 0.dp) {
+                        Column(peekModifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             if (route == null) {
-                                Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
+                                Row(if (sideBySide) Modifier.fillMaxSize() else Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                                         Text(region?.name ?: "Маршруты по России", style = MaterialTheme.typography.titleSmall,
                                             maxLines = if (compact) 1 else 2, overflow = TextOverflow.Ellipsis)
-                                        Text("${trails.size} ${routeCountLabel(trails.size)}", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
+                                        if (!largeText) Text("${trails.size} ${routeCountLabel(trails.size)}", style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                                     }
                                     TrailButton(onClick = contentAction, modifier = Modifier.testTag("show_results")) { Text("Список") }
                                 }
                             } else {
-                                Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    Text(route.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                                    if (!compact) RouteEssentialMetrics(route)
-                                    val advisoryLabel = route.currentStatusLabel
-                                        ?: if (route.accessStatus == "closed") "Посещение приостановлено"
-                                        else if (route.currentAdvisory != null) "Есть условия посещения — откройте карточку" else null
-                                    advisoryLabel?.let { Text(it, style = MaterialTheme.typography.bodySmall,
-                                        color = if (route.accessStatus == "closed") Palette.Alert else Palette.Ochre) }
+                                if (!largeText || routeAdvisoryLabel != null) {
+                                    Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        if (!largeText) Text(route.title, style = MaterialTheme.typography.titleSmall,
+                                            maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                        if (!compact) RouteEssentialMetrics(route)
+                                        routeAdvisoryLabel?.let { Text(it, style = MaterialTheme.typography.bodySmall,
+                                            color = if (route.accessStatus == "closed") Palette.Alert else Palette.Ochre) }
+                                    }
                                 }
                                 RouteActionBar(route, model, state, onDetails = contentAction)
                             }
@@ -186,7 +203,7 @@ internal fun MobileMapWorkspace(
 
 /** Two stable composition slots with an actual free canvas rectangle. */
 @Composable
-private fun MapViewportLayout(visible: Boolean, sideBySide: Boolean, peekHeight: Dp,
+private fun MapViewportLayout(visible: Boolean, sideBySide: Boolean, naturalPeek: Boolean, peekHeight: Dp,
     modifier: Modifier, map: @Composable () -> Unit, peek: @Composable () -> Unit) {
     Layout(content = {
         Box(Modifier.clipToBounds()) { map() }
@@ -195,12 +212,16 @@ private fun MapViewportLayout(visible: Boolean, sideBySide: Boolean, peekHeight:
         val width = constraints.maxWidth
         val height = constraints.maxHeight
         val sideWidth = if (visible && sideBySide) minOf(288.dp.roundToPx(), (width * .4f).toInt()) else 0
-        val bottomHeight = if (visible && !sideBySide) minOf(peekHeight.roundToPx(), height) else 0
+        val peekPlaceable = when {
+            !visible -> null
+            sideBySide -> children[1].measure(Constraints.fixed(sideWidth, height))
+            naturalPeek -> children[1].measure(Constraints(minWidth = width, maxWidth = width, maxHeight = height))
+            else -> children[1].measure(Constraints.fixed(width, minOf(peekHeight.roundToPx(), height)))
+        }
+        val bottomHeight = if (visible && !sideBySide) peekPlaceable?.height ?: 0 else 0
         val mapWidth = (width - sideWidth).coerceAtLeast(0)
         val mapHeight = (height - bottomHeight).coerceAtLeast(0)
         val mapPlaceable = children[0].measure(Constraints.fixed(mapWidth, mapHeight))
-        val peekPlaceable = if (visible) children[1].measure(Constraints.fixed(
-            if (sideBySide) sideWidth else width, if (sideBySide) height else bottomHeight)) else null
         layout(width, height) {
             mapPlaceable.placeRelative(0, 0)
             peekPlaceable?.placeRelative(if (sideBySide) mapWidth else 0, if (sideBySide) 0 else mapHeight)
@@ -223,21 +244,24 @@ private fun RouteActionBar(route: TrailRoute, model: MainViewModel, state: AppSt
     modifier: Modifier = Modifier, onDetails: (() -> Unit)? = null) {
     val saved = state.savedRoutes.any { it.routeId == route.id }
     val largeText = LocalDensity.current.fontScale >= 1.6f
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        val saveModifier = if (largeText && onDetails != null) Modifier.width(56.dp) else Modifier.weight(1f)
-        TrailButton(onClick = { model.toggleSaved(route) }, enabled = state.busyId == null,
-            modifier = saveModifier.testTag("save_route").semantics {
-                contentDescription = if (saved) "Убрать маршрут из сохранённого" else "Сохранить маршрут на телефоне"
-                stateDescription = if (saved) "Сохранено" else "Не сохранено"
-            }) {
-            TropaIcon(if (saved) Glyph.CHECK else Glyph.BOOKMARK, color = Palette.Surface)
-            if (!largeText || onDetails == null) {
-                Spacer(Modifier.width(8.dp))
-                Text(if (state.busyId == "bookmark:${route.id}") "Сохраняем…" else if (saved) "Сохранено" else "Сохранить")
+    BoxWithConstraints(modifier.fillMaxWidth()) {
+        val compactSave = onDetails != null && (largeText || maxWidth < 360.dp)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            val saveModifier = if (compactSave) Modifier.width(56.dp) else Modifier.weight(1f)
+            TrailButton(onClick = { model.toggleSaved(route) }, enabled = state.busyId == null,
+                modifier = saveModifier.testTag("save_route").semantics {
+                    contentDescription = if (saved) "Убрать маршрут из сохранённого" else "Сохранить маршрут на телефоне"
+                    stateDescription = if (saved) "Сохранено" else "Не сохранено"
+                }) {
+                TropaIcon(if (saved) Glyph.CHECK else Glyph.BOOKMARK, color = Palette.Surface)
+                if (!compactSave) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (state.busyId == "bookmark:${route.id}") "Сохраняем…" else if (saved) "Сохранено" else "Сохранить")
+                }
             }
+            if (onDetails != null) TrailOutlineButton(onClick = onDetails,
+                modifier = Modifier.weight(1f).testTag("show_route_details")) { Text("Карточка") }
         }
-        if (onDetails != null) TrailOutlineButton(onClick = onDetails,
-            modifier = Modifier.weight(1f).testTag("show_route_details")) { Text("Карточка") }
     }
 }
 
