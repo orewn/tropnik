@@ -1,0 +1,313 @@
+{
+  "sourceCommit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+  "workflowRun": 44071007674,
+  "runAttempt": 1,
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/44071007674",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 133996914101,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-11-17T11:06:47Z",
+      "completedAt": "2026-11-17T11:12:57Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:06:48Z",
+          "completedAt": "2026-11-17T11:06:49Z"
+        },
+        {
+          "number": 2,
+          "name": "Check out the exact source revision",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:06:49Z",
+          "completedAt": "2026-11-17T11:06:54Z"
+        },
+        {
+          "number": 3,
+          "name": "Set up Node.js",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:06:54Z",
+          "completedAt": "2026-11-17T11:06:55Z"
+        },
+        {
+          "number": 4,
+          "name": "Install the pinned package manager and frozen dependencies",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:06:55Z",
+          "completedAt": "2026-11-17T11:07:09Z"
+        },
+        {
+          "number": 5,
+          "name": "Restore and verify the public Android preview",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:07:09Z",
+          "completedAt": "2026-11-17T11:07:09Z"
+        },
+        {
+          "number": 6,
+          "name": "Verify APK download failure boundaries",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:07:09Z",
+          "completedAt": "2026-11-17T11:07:24Z"
+        },
+        {
+          "number": 7,
+          "name": "Verify reviewed Telegram reference boundaries",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:07:24Z",
+          "completedAt": "2026-11-17T11:07:25Z"
+        },
+        {
+          "number": 8,
+          "name": "Verify reviewed route geometry against pinned sources",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:07:25Z",
+          "completedAt": "2026-11-17T11:07:25Z"
+        },
+        {
+          "number": 9,
+          "name": "Reproduce recovered routes against the pinned full boundary",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:07:25Z",
+          "completedAt": "2026-11-17T11:08:08Z"
+        },
+        {
+          "number": 10,
+          "name": "Run web regression checks",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:08:08Z",
+          "completedAt": "2026-11-17T11:09:03Z"
+        },
+        {
+          "number": 11,
+          "name": "Check web lint",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:09:03Z",
+          "completedAt": "2026-11-17T11:09:19Z"
+        },
+        {
+          "number": 12,
+          "name": "Check static client types",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:09:19Z",
+          "completedAt": "2026-11-17T11:09:28Z"
+        },
+        {
+          "number": 13,
+          "name": "Read the configured Pages destination",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:09:28Z",
+          "completedAt": "2026-11-17T11:09:28Z"
+        },
+        {
+          "number": 14,
+          "name": "Require the intended public destination",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:09:28Z",
+          "completedAt": "2026-11-17T11:09:28Z"
+        },
+        {
+          "number": 15,
+          "name": "Build and verify the static site",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:09:28Z",
+          "completedAt": "2026-11-17T11:10:03Z"
+        },
+        {
+          "number": 16,
+          "name": "Check cold offline emergency access before the full browser audit",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:10:03Z",
+          "completedAt": "2026-11-17T11:10:19Z"
+        },
+        {
+          "number": 17,
+          "name": "Verify manual service worker updates and the real activation deadline",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:10:19Z",
+          "completedAt": "2026-11-17T11:10:45Z"
+        },
+        {
+          "number": 18,
+          "name": "Verify native map progress while one real DEM halo is delayed",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:10:45Z",
+          "completedAt": "2026-11-17T11:11:17Z"
+        },
+        {
+          "number": 19,
+          "name": "Verify complete trail overlay and native line selection",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:11:17Z",
+          "completedAt": "2026-11-17T11:11:29Z"
+        },
+        {
+          "number": 20,
+          "name": "Verify worker trail pixels against the direct renderer",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:11:29Z",
+          "completedAt": "2026-11-17T11:11:38Z"
+        },
+        {
+          "number": 21,
+          "name": "Check UI smoothness before the full browser audit",
+          "conclusion": "failure",
+          "startedAt": "2026-11-17T11:11:38Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 22,
+          "name": "Verify production map controls in phone landscape",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 23,
+          "name": "Verify source credit geometry across satellite loading",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 24,
+          "name": "Verify native worker tile opacity with exact pixels",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 25,
+          "name": "Verify production Canvas underlay pixel parity",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 26,
+          "name": "Verify Russia mask pixels and GPU context recovery",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 27,
+          "name": "Verify full-mask shader pixel parity at both device pixel ratios",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 28,
+          "name": "Verify completed-frame presentation against the immutable direct renderer",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 29,
+          "name": "Verify unmasked Android terrain, GPU allocation and resize pixel parity",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 30,
+          "name": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 31,
+          "name": "Record the verified build identity",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:52Z"
+        },
+        {
+          "number": 32,
+          "name": "Preserve browser failure evidence",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:12:52Z",
+          "completedAt": "2026-11-17T11:12:53Z"
+        },
+        {
+          "number": 33,
+          "name": "Preserve map design checks across zoom levels",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:12:53Z",
+          "completedAt": "2026-11-17T11:12:55Z"
+        },
+        {
+          "number": 34,
+          "name": "Upload the verified static artifact",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:55Z",
+          "completedAt": "2026-11-17T11:12:55Z"
+        },
+        {
+          "number": 67,
+          "name": "Post Set up Node.js",
+          "conclusion": "skipped",
+          "startedAt": "2026-11-17T11:12:55Z",
+          "completedAt": "2026-11-17T11:12:55Z"
+        },
+        {
+          "number": 68,
+          "name": "Post Check out the exact source revision",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:12:55Z",
+          "completedAt": "2026-11-17T11:12:55Z"
+        },
+        {
+          "number": 69,
+          "name": "Complete job",
+          "conclusion": "success",
+          "startedAt": "2026-11-17T11:12:55Z",
+          "completedAt": "2026-11-17T11:12:55Z"
+        }
+      ]
+    },
+    {
+      "id": 134000196666,
+      "name": "deploy",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-17T11:12:58Z",
+      "completedAt": "2026-11-17T11:12:57Z",
+      "steps": []
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 14323655838,
+      "name": "tropnik-pages-design-1",
+      "sizeBytes": 10059489,
+      "digest": "sha256:a7a1c3bb777dae23f821128cc06ec53f33b83e7600eb712b61a3493d3ab96bcd",
+      "localArchive": "tropnik-pages-design-1.zip",
+      "extracted": "design",
+      "downloadedOnce": true,
+      "digestVerified": true
+    },
+    {
+      "id": 14323645820,
+      "name": "tropnik-pages-browser-failure-1",
+      "sizeBytes": 476098,
+      "digest": "sha256:3485c6e41290f08e0ad4324d14b47fe125d253c2b3635ee460469f8bc64f1114",
+      "localArchive": "tropnik-pages-browser-failure-1.zip",
+      "extracted": "failure",
+      "downloadedOnce": true,
+      "digestVerified": true
+    }
+  ],
+  "publicDeployment": {
+    "executed": false,
+    "reason": "build stopped at unchanged UI smoothness gate; deploy skipped"
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-declared-native-dependency-and-release-audit",
+  "sourceCommit": "b8ac705c9a13d96fc4716aef746c7938ecc5c2a1",
+  "scope": "Android Gradle declarations, native Kotlin imports/platform use, bundled font notices, manifest and production verification receipts. Map data, terrain/imagery provider terms and self-hosting are separately audited by parent. No resolved transitive SBOM was produced here.",
+  "runtimeDependencies": [
+    {
+      "components": [
+        "AndroidX core-ktx 1.17.0",
+        "activity-compose 1.11.0",
+        "lifecycle runtime-ktx/runtime-compose/viewmodel-compose 2.9.4",
+        "Compose UI/Material3 via BOM 2025.10.01",
+        "Room runtime/ktx 2.8.5"
+      ],
+      "declaredLicense": "Apache-2.0",
+      "source": "android/app/build.gradle.kts:112-121",
+      "licenseSource": "https://github.com/androidx/androidx/blob/androidx-main/LICENSE.txt"
+    },
+    {
+      "components": [
+        "kotlinx-coroutines-android 1.10.2",
+        "Kotlin standard runtime through Kotlin Android 2.2.21"
+      ],
+      "declaredLicense": "Apache-2.0",
+      "source": "android/app/build.gradle.kts:123; android/build.gradle.kts:3",
+      "licenseSource": "https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE.txt"
+    },
+    {
+      "components": [
+        "OkHttp 4.12.1",
+        "Okio as transport dependency"
+      ],
+      "declaredLicense": "Apache-2.0",
+      "source": "android/app/build.gradle.kts:109,124; android/app/src/main/assets/SOURCES.txt:12",
+      "licenseSource": "https://github.com/square/okhttp/blob/master/README.md",
+      "qualification": "Direct OkHttp version is source-pinned; this audit does not claim to have resolved the transitive Okio version."
+    },
+    {
+      "components": [
+        "Manrope bundled native variable font",
+        "Manrope local-scene subsets"
+      ],
+      "declaredLicense": "SIL-OFL-1.1",
+      "source": "android/app/src/main/assets/licenses/Manrope-OFL.txt:1-9; android/app/src/main/assets/SOURCES.txt:67-78",
+      "licenseSource": "https://github.com/google/fonts/blob/main/ofl/manrope/OFL.txt"
+    }
+  ],
+  "proprietarySdkScan": {
+    "glob": [
+      "*.kt",
+      "*.kts",
+      "*.xml"
+    ],
+    "pattern": "mapbox|maplibre|play.services|com.google.android.gms|firebase|appmetrica|crashlytics|sentry|onesignal|amplitude|yandex|billingclient|facebook.sdk",
+    "matches": [],
+    "conclusion": "No direct commercial map, Google Play Services, Firebase, analytics or billing SDK declaration/import found in the scanned native source. This is not a complete resolved-binary/transitive license certification."
+  },
+  "implementation": [
+    {
+      "component": "Map rendering",
+      "fact": "Own bundled Tropnik Canvas inside platform android.webkit.WebView; native broker controls asset/network requests. The remaining MapLibre license is explicitly recorded as historical, not a current Gradle/runtime SDK declaration.",
+      "source": "android/app/src/main/java/ru/tropa/app/ui/CustomMapWebView.kt:20-26,48-50,90-112,145; android/app/src/main/assets/SOURCES.txt:10-12"
+    },
+    {
+      "component": "Location",
+      "fact": "Platform LocationManager with optional GPS/network providers; accepts recent <=30s fix or subscribes for one fix with 20s timeout and removes listeners. No fused Play Services location dependency.",
+      "source": "android/app/src/main/java/ru/tropa/app/data/LocationReader.kt:27-66"
+    },
+    {
+      "component": "Background navigation",
+      "fact": "Manifest declares foreground coarse/fine location only; no background-location permission or location foreground service. Existing capability is locate-on-map, not tested continuous turn-by-turn guidance.",
+      "source": "android/app/src/main/AndroidManifest.xml:3-8,9-37"
+    },
+    {
+      "component": "Device platform",
+      "fact": "App uses Android platform WebView and AndroidKeyStore. Owning application code is not ownership of the device OS/WebView implementation.",
+      "source": "android/app/src/main/java/ru/tropa/app/ui/CustomMapWebView.kt:145; android/app/src/main/java/ru/tropa/app/data/SessionVault.kt:105-122"
+    },
+    {
+      "component": "Build supply",
+      "fact": "Build tools are AGP 8.13.2, Kotlin 2.2.21, KSP 2.2.21-2.0.4. Dependency resolution uses Google Maven and Maven Central; plugin resolution additionally uses Gradle Plugin Portal.",
+      "source": "android/build.gradle.kts:1-5; android/settings.gradle.kts:1-14"
+    }
+  ],
+  "licenseEvidenceLimit": {
+    "fact": "A generic Apache-2.0 text and Manrope OFL texts are bundled; SOURCES identifies the main runtime families. Packaging excludes duplicate META-INF/AL2.0 and META-INF/LGPL2.1 resources. No versioned resolved runtime-component license/NOTICE manifest or SBOM was found in tracked Android source.",
+    "source": "android/app/build.gradle.kts:80-84; android/app/src/main/assets/SOURCES.txt:12,67-78",
+    "interpretation": "No violation is asserted from duplicate-license exclusion alone. Before describing all dependencies as cleared, compare resolved components and required notices with the distributed APK."
+  },
+  "releaseGaps": [
+    {
+      "id": "remaining-mobile-device-case",
+      "status": "observed-fail",
+      "fact": "b8 executes 13 device cases, passes12, fails compact font200 label overflow. Narrow fix is prepared but not yet accepted on a new device run.",
+      "evidence": "native-findings.json"
+    },
+    {
+      "id": "production-signature",
+      "status": "not-verified",
+      "fact": "b8 production receipt is unsigned-production-build-check, signatureVerified=false, signingCertificateSha256=null and productionPublished=false. A signed candidate needs externally managed keystore, both passwords, non-debug alias and independently pinned certificate SHA256.",
+      "source": "tools/android-build/verify-production.py:24-62,236-241",
+      "evidence": "production-verification.json"
+    },
+    {
+      "id": "production-api-and-upgrade",
+      "status": "not-verified",
+      "fact": "Signed preflight requires configured HTTPS TROPA_API_BASE_URL. Receipt marks liveApiVerified=false and upgradeVerified=false. Source supports own API origin and explicit unconfigured state; the passing fixture case does not prove live hosted service.",
+      "source": "tools/android-build/verify-production.py:43-47,239-241; android/app/src/main/java/ru/tropa/app/data/SessionVault.kt:21-28; android/app/src/main/java/ru/tropa/app/data/ApiClient.kt:27-31,117-120",
+      "evidence": "production-verification.json"
+    },
+    {
+      "id": "real-device-gps-gpu-battery",
+      "status": "not-verified",
+      "fact": "Actual CI uses x86_64 API35 emulator with ANGLE/SwiftShader. Receipt explicitly marks ARM64/physical device execution false and excludes GPS, battery and online satellite-provider verification.",
+      "evidence": "device/device-result.json"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "android/app/build.gradle.kts",
+      "bytes": 6178,
+      "sha256": "d6a47b62d78df416c23b485d97111bbb1c959a3e80a3b6b82ebd2d1dfb30a6a6"
+    },
+    {
+      "path": "android/build.gradle.kts",
+      "bytes": 287,
+      "sha256": "9cfd9ab9b9e4847287ab59cfbba7d93c88b3b63b0d6e003e41cbdc7fabb561a5"
+    },
+    {
+      "path": "android/settings.gradle.kts",
+      "bytes": 332,
+      "sha256": "341603f187096b8cda32e646541ffde184bc426947850dcd52c3da47a405fb41"
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "bytes": 1903,
+      "sha256": "8c4acce94e79887232188284a42bb96272597744662e35a78ffa13a6cf72e577"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/data/LocationReader.kt",
+      "bytes": 3981,
+      "sha256": "b067609c118fcc43ac68c6618bac0f34687f0e84d8410ff5049183408d4d8b5f"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/data/SessionVault.kt",
+      "bytes": 7726,
+      "sha256": "67387f2e553ccd50bedb6df62e95ee8f3bfd130b400a09aa6b5ef47b131b2194"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/data/ApiClient.kt",
+      "bytes": 14121,
+      "sha256": "abaee99c1b62cb74e183d445b628f9f91bbf43ff80f320806d83ef7414fd6423"
+    },
+    {
+      "path": "android/app/src/main/java/ru/tropa/app/ui/CustomMapWebView.kt",
+      "bytes": 22881,
+      "sha256": "3dacd02c315d510af0d1584c2f24a02c74ef7162f6e6b176b00efe14bd8b1437"
+    },
+    {
+      "path": "android/app/src/main/assets/SOURCES.txt",
+      "bytes": 13638,
+      "sha256": "c467fad01458ab9d425bb32ebb26b0f199a4e2f564f2825f8d6a8ca4a4ac211c"
+    },
+    {
+      "path": "android/app/src/main/assets/licenses/Manrope-OFL.txt",
+      "bytes": 4387,
+      "sha256": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b"
+    },
+    {
+      "path": "android/app/src/main/assets/licenses/Apache-2.0.txt",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "tools/android-build/verify-production.py",
+      "bytes": 16139,
+      "sha256": "e3d180f5fcb489c0b1fe9d36070d226fd376de7d92ef5e06933a4b4b68e2f079"
+    }
+  ],
+  "changesMade": "None for this inventory; native UX fix is separate."
+}

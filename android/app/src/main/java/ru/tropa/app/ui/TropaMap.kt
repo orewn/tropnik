@@ -310,7 +310,7 @@ internal fun TropaMap(
             Column(Modifier.fillMaxWidth().background(Palette.Surface).padding(horizontal = 8.dp, vertical = 4.dp)) {
                 if (status != null && !compactControls && problem == null) Text(status, style = MaterialTheme.typography.bodySmall, color = Palette.Muted)
                 Text(if (committedMode == "satellite") if (imagerySource == "eox-bluemarble") "© OSM · NASA Blue Marble · EOX"
-                    else "© OSM · EOX · Sentinel · CC BY 4.0" else "© OpenStreetMap contributors", Modifier.testTag("map_credits"),
+                    else "© OSM · EOX · Sentinel · CC BY 4.0" else "© OpenStreetMap", Modifier.testTag("map_credits"),
                     style = MaterialTheme.typography.labelSmall, color = Palette.Muted)
             }
         }

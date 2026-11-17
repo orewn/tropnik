@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -162,6 +163,70 @@ class ReleaseFixture(unittest.TestCase):
     @staticmethod
     def json(path, obj):
         path.write_text(json.dumps(obj, indent=2) + "\n")
+
+    def test_failed_installed_pull_retains_bounded_diagnostics_without_receipt_or_retry(self):
+        output = self.device / "failed-capture" / "installed-apks.json"
+        calls, errors = [], []
+        stdout = b"pull started\n" + b"x" * 8192 + b"OMITTED_STDOUT_TAIL"
+        stderr = b"adb: error: permission denied\xff\n" + b"y" * 8192 + b"OMITTED_STDERR_TAIL"
+        actual_run = subprocess.run
+
+        def run(command, **kwargs):
+            if command[0] != "fixture-adb":
+                return actual_run(command, **kwargs)
+            if command[3:6] == ["shell", "pm", "path"]:
+                return subprocess.CompletedProcess(command, 0, f"package:/data/app/{command[-1]}/base.apk\n")
+            self.assertEqual(command[3], "pull")
+            calls.append(command)
+            if artifacts.TEST_ID in command[4]:
+                Path(command[5]).write_bytes(b"incomplete pull")
+                error = subprocess.CalledProcessError(23, command, output=stdout, stderr=stderr)
+                errors.append(error)
+                raise error
+            Path(command[5]).write_bytes((self.dist / artifacts.UNIVERSAL).read_bytes())
+            return subprocess.CompletedProcess(command, 0, b"", b"")
+
+        logged = io.StringIO()
+        with patch.object(artifacts.subprocess, "run", side_effect=run), patch.object(artifacts.sys, "stderr", logged):
+            with self.assertRaises(subprocess.CalledProcessError) as raised:
+                artifacts.capture_installed(self.dist, self.root, Path("fixture-adb"), "emulator-fixture", output)
+        self.assertIs(raised.exception, errors[0])
+        self.assertEqual(len(calls), 2)
+        self.assertFalse(output.exists())
+        diagnostic = json.loads(output.with_name(f"installed-apk-pull-{artifacts.TEST_ID}.json").read_text())
+        self.assertEqual(diagnostic["stage"], "installed-apk-pull")
+        self.assertEqual(diagnostic["package"], artifacts.TEST_ID)
+        self.assertEqual(diagnostic["sourceCommit"], self.commit)
+        self.assertEqual(diagnostic["exitCode"], 23)
+        self.assertTrue(diagnostic["stderr"].startswith("adb: error: permission denied\ufffd"))
+        for stream, value in (("stdout", stdout), ("stderr", stderr)):
+            self.assertEqual(diagnostic[stream + "Bytes"], len(value))
+            self.assertTrue(diagnostic[stream + "Truncated"])
+            self.assertLessEqual(len(diagnostic[stream]), 4096)
+            self.assertNotIn("OMITTED_", diagnostic[stream])
+        self.assertEqual(json.loads(logged.getvalue()), diagnostic)
+
+    def test_successful_pull_with_changed_installed_bytes_still_fails_closed(self):
+        output = self.device / "changed-capture" / "installed-apks.json"
+        actual_run = subprocess.run
+        pulls = []
+
+        def run(command, **kwargs):
+            if command[0] != "fixture-adb":
+                return actual_run(command, **kwargs)
+            if command[3:6] == ["shell", "pm", "path"]:
+                return subprocess.CompletedProcess(command, 0, f"package:/data/app/{command[-1]}/base.apk\n")
+            self.assertEqual(command[3], "pull")
+            pulls.append(command)
+            Path(command[5]).write_bytes(b"different installed bytes")
+            return subprocess.CompletedProcess(command, 0, b"", b"")
+
+        with patch.object(artifacts.subprocess, "run", side_effect=run):
+            with self.assertRaisesRegex(ValueError, "Installed bytes differ"):
+                artifacts.capture_installed(self.dist, self.root, Path("fixture-adb"), "emulator-fixture", output)
+        self.assertEqual(len(pulls), 1)
+        self.assertFalse(output.exists())
+        self.assertFalse(output.parent.exists())
 
     def test_missing_forged_or_legacy_renderer_proof_fails_before_promotion(self):
         report = self.dist / "tropnik-preview.verification.json"

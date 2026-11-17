@@ -1,0 +1,548 @@
+{
+  "sources": {
+    "before": {
+      "commit": "b8ac705c9a13d96fc4716aef746c7938ecc5c2a1",
+      "run": 44004886095
+    },
+    "after": {
+      "commit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+      "run": 44071007674,
+      "attempt": 1
+    }
+  },
+  "unchangedBudgetMs": 35,
+  "environment": [
+    {
+      "sourceCommit": "b8ac705c9a13d96fc4716aef746c7938ecc5c2a1",
+      "browser": {
+        "product": "Chrome/157.0.8103.50",
+        "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+        "protocolVersion": "1.3",
+        "jsVersion": "15.7.112.23",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+      },
+      "gpu": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "runner": {
+        "os": {
+          "platform": "linux",
+          "release": "7.0.0-1017-azure",
+          "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+          "arch": "x64"
+        },
+        "cpu": {
+          "models": [
+            "AMD EPYC 9V74 80-Core Processor"
+          ],
+          "logicalCount": 4,
+          "availableParallelism": 4
+        },
+        "totalMemoryBytes": 16760348672,
+        "image": {
+          "os": "ubuntu24",
+          "version": "20261111.370.1"
+        }
+      },
+      "requestedFlags": [
+        "--headless=new",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-default-apps",
+        "--disable-extensions",
+        "--disable-features=Translate,MediaRouter",
+        "--mute-audio",
+        "--no-first-run",
+        "--use-gl=angle",
+        "--use-angle=swiftshader-webgl",
+        "--enable-unsafe-swiftshader",
+        "--window-size=1920,1920",
+        "--ozone-override-screen-size=1920,1920"
+      ]
+    },
+    {
+      "sourceCommit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+      "browser": {
+        "product": "Chrome/157.0.8103.50",
+        "revision": "@049750111b1e5c11565c792b2aeed5541f332bad",
+        "protocolVersion": "1.3",
+        "jsVersion": "15.7.112.23",
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36"
+      },
+      "gpu": {
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.29097 git hash: 751417514a52)",
+        "skiaBackendType": "None",
+        "targetCpuBits": 64
+      },
+      "runner": {
+        "os": {
+          "platform": "linux",
+          "release": "7.0.0-1017-azure",
+          "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026",
+          "arch": "x64"
+        },
+        "cpu": {
+          "models": [
+            "AMD EPYC 7763 64-Core Processor"
+          ],
+          "logicalCount": 4,
+          "availableParallelism": 4
+        },
+        "totalMemoryBytes": 16760344576,
+        "image": {
+          "os": "ubuntu24",
+          "version": "20261111.370.1"
+        }
+      },
+      "requestedFlags": [
+        "--headless=new",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-background-networking",
+        "--disable-component-update",
+        "--disable-default-apps",
+        "--disable-extensions",
+        "--disable-features=Translate,MediaRouter",
+        "--mute-audio",
+        "--no-first-run",
+        "--use-gl=angle",
+        "--use-angle=swiftshader-webgl",
+        "--enable-unsafe-swiftshader",
+        "--window-size=1920,1920",
+        "--ozone-override-screen-size=1920,1920"
+      ]
+    }
+  ],
+  "sourceIdentity": {
+    "gitTrees": {
+      "web/lib": {
+        "before": "52e9717567caeaed93841f1a3b17216979220b43",
+        "after": "52e9717567caeaed93841f1a3b17216979220b43",
+        "identical": true
+      },
+      "web/components": {
+        "before": "215f35341d5772006bac95b39c3b63d4b90d1fd7",
+        "after": "215f35341d5772006bac95b39c3b63d4b90d1fd7",
+        "identical": true
+      },
+      "tools/pages-preview": {
+        "before": "8f659282e2eace19f7aa83367eced346cf2dff2c",
+        "after": "8f659282e2eace19f7aa83367eced346cf2dff2c",
+        "identical": true
+      }
+    },
+    "sha256": {
+      "web/lib/custom-map-engine.ts": {
+        "before": "bb7f6b59765dfded1e75b9d2cc90af3794ea3dbff67e6f11b28e286ca367bec7",
+        "after": "bb7f6b59765dfded1e75b9d2cc90af3794ea3dbff67e6f11b28e286ca367bec7",
+        "identical": true
+      },
+      "web/components/CustomAtlas.tsx": {
+        "before": "9d52baf96bf33607b2445d963bab7204e0266330c1be7c0a406cc14948881bd6",
+        "after": "9d52baf96bf33607b2445d963bab7204e0266330c1be7c0a406cc14948881bd6",
+        "identical": true
+      },
+      "tools/pages-preview/browser-smoothness.mjs": {
+        "before": "15de4ccaf3ce4872f692f0c98f342ef3ead5a256ff821db19d61cad298d51684",
+        "after": "15de4ccaf3ce4872f692f0c98f342ef3ead5a256ff821db19d61cad298d51684",
+        "identical": true
+      },
+      "tools/pages-preview/browser-smoke.mjs": {
+        "before": "5e42c823d2eb8410713ea2b06cfd8a5e0af16d1c8d0ae36ca0efb6ccffeebb5e",
+        "after": "5e42c823d2eb8410713ea2b06cfd8a5e0af16d1c8d0ae36ca0efb6ccffeebb5e",
+        "identical": true
+      }
+    },
+    "changedFiles": [
+      "android/app/src/androidTest/java/ru/tropa/app/LocalExperienceTest.kt",
+      "android/app/src/main/java/ru/tropa/app/ui/MobileDestinationBar.kt",
+      "docs/mobile-ux-2026-11-17.md",
+      "docs/verification/mobile-ux-android-b8ac705-2026-11-17.json",
+      "docs/verification/mobile-ux-native-findings-b8ac705-2026-11-17.json",
+      "docs/verification/mobile-ux-pages-b8ac705-2026-11-17.json",
+      "web/app/mobile-workspace.css"
+    ],
+    "desktopWebChange": "Only mobile-workspace.css rules inside max-width/coarse media conditions changed; they do not apply to the desktop profile."
+  },
+  "nativeInput": {
+    "sameMethodTypeAndCoordinates": true,
+    "commands": [
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 748.3499999999999,
+        "y": 489.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mousePressed",
+        "x": 748.3499999999999,
+        "y": 489.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 753.6833333333333,
+        "y": 490.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 759.0166666666665,
+        "y": 491.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 764.3499999999999,
+        "y": 492.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 769.6833333333333,
+        "y": 493.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 775.0166666666665,
+        "y": 494.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 780.3499999999999,
+        "y": 495.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 785.6833333333333,
+        "y": 496.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 791.0166666666665,
+        "y": 497.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 796.3499999999999,
+        "y": 498.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 801.6833333333333,
+        "y": 499.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 807.0166666666665,
+        "y": 500.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseMoved",
+        "x": 812.3499999999999,
+        "y": 501.6
+      },
+      {
+        "method": "Input.dispatchMouseEvent",
+        "type": "mouseReleased",
+        "x": 812.3499999999999,
+        "y": 501.6
+      }
+    ]
+  },
+  "measurements": [
+    {
+      "sourceCommit": "b8ac705c9a13d96fc4716aef746c7938ecc5c2a1",
+      "acquisitionCompleted": true,
+      "performanceAccepted": true,
+      "issues": [],
+      "pan": {
+        "durationMs": 3314.4000000000233,
+        "frames": {
+          "samples": 187,
+          "callbackHz": 56.42046825971479,
+          "isPresentedFps": false,
+          "p95Ms": 31.100000000034925,
+          "maxGapMs": 36.600000000034925,
+          "over50ms": 0
+        },
+        "gapCount": 186,
+        "gapsAbove35ms": 2,
+        "gapsAbove40ms": 0,
+        "medianGapMs": 16.70000000001164,
+        "meanGapMs": 17.739247311827956,
+        "inputToNextFrame": {
+          "count": 2,
+          "p95Ms": 45.899999999965075,
+          "maxMs": 45.899999999965075,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "previousBoundaryTasks": 0,
+        "pendingInputFrames": 0,
+        "slowFrameTimelineMs": [
+          {
+            "at": 613.7000000000116,
+            "gap": 35.90000000002328
+          },
+          {
+            "at": 1068.5,
+            "gap": 36.600000000034925
+          }
+        ],
+        "inputTimelineMs": [
+          {
+            "type": "pointerdown",
+            "at": 14.400000000023283,
+            "receivedAt": 16.600000000034925,
+            "nextFrameAt": 60.29999999998836
+          },
+          {
+            "type": "click",
+            "at": 604.0,
+            "receivedAt": 608.9000000000233,
+            "nextFrameAt": 649.6000000000349
+          }
+        ],
+        "gestureDurationMs": 609.0753509999995
+      },
+      "scenarios": [
+        {
+          "name": "panel",
+          "frameP95Ms": 16.800000000046566,
+          "maxGapMs": 17.199999999953434,
+          "longTaskCount": 0
+        },
+        {
+          "name": "explore-search",
+          "frameP95Ms": 18,
+          "maxGapMs": 23.79999999998836,
+          "longTaskCount": 0
+        },
+        {
+          "name": "explore-filters",
+          "frameP95Ms": 16.79999999998836,
+          "maxGapMs": 17.399999999965075,
+          "longTaskCount": 0
+        },
+        {
+          "name": "catalog-scroll",
+          "frameP95Ms": 17,
+          "maxGapMs": 20.20000000001164,
+          "longTaskCount": 0
+        },
+        {
+          "name": "map-pan",
+          "frameP95Ms": 31.100000000034925,
+          "maxGapMs": 36.600000000034925,
+          "longTaskCount": 0
+        },
+        {
+          "name": "map-zoom",
+          "frameP95Ms": 22.900000000023283,
+          "maxGapMs": 43,
+          "longTaskCount": 0
+        },
+        {
+          "name": "layer-switch",
+          "frameP95Ms": 16.800000000046566,
+          "maxGapMs": 50.100000000034925,
+          "longTaskCount": 1
+        },
+        {
+          "name": "site-search",
+          "frameP95Ms": 17.29999999998836,
+          "maxGapMs": 20.79999999998836,
+          "longTaskCount": 0
+        }
+      ]
+    },
+    {
+      "sourceCommit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+      "acquisitionCompleted": true,
+      "performanceAccepted": false,
+      "issues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 35.09999999997672,
+          "limit": 35
+        }
+      ],
+      "pan": {
+        "durationMs": 3847.5,
+        "frames": {
+          "samples": 213,
+          "callbackHz": 55.360623781676416,
+          "isPresentedFps": false,
+          "p95Ms": 35.09999999997672,
+          "maxGapMs": 42.20000000001164,
+          "over50ms": 0
+        },
+        "gapCount": 212,
+        "gapsAbove35ms": 11,
+        "gapsAbove40ms": 3,
+        "medianGapMs": 16.70000000001164,
+        "meanGapMs": 18.078773584905715,
+        "inputToNextFrame": {
+          "count": 2,
+          "p95Ms": 51.20000000001164,
+          "maxMs": 51.20000000001164,
+          "meaning": "native event to next rendering opportunity; not presented pixels or field INP"
+        },
+        "longTasks": {
+          "supported": true,
+          "count": 0,
+          "totalMs": 0,
+          "maxMs": 0
+        },
+        "previousBoundaryTasks": 0,
+        "pendingInputFrames": 0,
+        "slowFrameTimelineMs": [
+          {
+            "at": 30.100000000034925,
+            "gap": 35.09999999997672
+          },
+          {
+            "at": 197.70000000001164,
+            "gap": 35.29999999998836
+          },
+          {
+            "at": 233.0,
+            "gap": 36.100000000034925
+          },
+          {
+            "at": 269.1000000000349,
+            "gap": 35.5
+          },
+          {
+            "at": 304.6000000000349,
+            "gap": 36.399999999965075
+          },
+          {
+            "at": 376.0,
+            "gap": 40.79999999998836
+          },
+          {
+            "at": 416.79999999998836,
+            "gap": 36.5
+          },
+          {
+            "at": 650.4000000000233,
+            "gap": 40.5
+          },
+          {
+            "at": 1414.2999999999884,
+            "gap": 42.20000000001164
+          },
+          {
+            "at": 1896.2000000000116,
+            "gap": 38.0
+          },
+          {
+            "at": 2764.5,
+            "gap": 35.100000000034925
+          }
+        ],
+        "inputTimelineMs": [
+          {
+            "type": "pointerdown",
+            "at": 14.0,
+            "receivedAt": 16.600000000034925,
+            "nextFrameAt": 65.20000000001164
+          },
+          {
+            "type": "click",
+            "at": 643.7999999999884,
+            "receivedAt": 649.7000000000116,
+            "nextFrameAt": 691.0
+          }
+        ],
+        "gestureDurationMs": 649.7410630000013
+      },
+      "scenarios": [
+        {
+          "name": "panel",
+          "frameP95Ms": 16.900000000023283,
+          "maxGapMs": 17.20000000001164,
+          "longTaskCount": 0
+        },
+        {
+          "name": "explore-search",
+          "frameP95Ms": 21.599999999976717,
+          "maxGapMs": 33.100000000034925,
+          "longTaskCount": 0
+        },
+        {
+          "name": "explore-filters",
+          "frameP95Ms": 17.099999999976717,
+          "maxGapMs": 21,
+          "longTaskCount": 0
+        },
+        {
+          "name": "catalog-scroll",
+          "frameP95Ms": 16.900000000023283,
+          "maxGapMs": 19.900000000023283,
+          "longTaskCount": 0
+        },
+        {
+          "name": "map-pan",
+          "frameP95Ms": 35.09999999997672,
+          "maxGapMs": 42.20000000001164,
+          "longTaskCount": 0
+        },
+        {
+          "name": "map-zoom",
+          "frameP95Ms": 27.20000000001164,
+          "maxGapMs": 54.40000000002328,
+          "longTaskCount": 1
+        },
+        {
+          "name": "layer-switch",
+          "frameP95Ms": 16.800000000046566,
+          "maxGapMs": 62.5,
+          "longTaskCount": 2
+        },
+        {
+          "name": "site-search",
+          "frameP95Ms": 17.900000000023283,
+          "maxGapMs": 19.399999999965075,
+          "longTaskCount": 0
+        }
+      ]
+    }
+  ],
+  "interpretation": {
+    "confirmed": "CPU model differs; browser, SwiftShader driver and runner image match. Relevant desktop source and native input commands are unchanged.",
+    "supportedInference": "Broader slower map-pan and map-zoom windows are consistent with a changed execution environment; the receipt alone does not identify a rendering hot spot or exclude network/scheduling variance.",
+    "notClaimed": "No proof that the failure is solely random noise, no performance pass, no actual presented FPS or field INP claim.",
+    "allowedNextEvidence": "At most one source-identical diagnostic repeat after preserving the failing result; unchanged gates and arithmetic."
+  }
+}

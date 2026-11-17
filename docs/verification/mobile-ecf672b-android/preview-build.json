@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+  "workflowRunId": "44071007693",
+  "workflowRunAttempt": "1",
+  "signature": "development / debug",
+  "physicalDeviceVerified": false,
+  "version": "0.4.35-preview",
+  "versionCode": 18,
+  "applicationId": "ru.tropa.app.preview",
+  "signingCertificateSha256": "dc409aa635545a871fdcc534316fa3aaba92032d90b3906e4adceefe155aa996",
+  "files": {
+    "tropnik-preview.apk": {
+      "bytes": 69289290,
+      "sha256": "51fa8d4651e8b1a4ba13e44d3a5dd5a5963ffe8ff37faeb55965a4df5cc61124"
+    },
+    "tropnik-arm64-preview.apk": {
+      "bytes": 69280923,
+      "sha256": "dbe1229e2bf848b3ac97f87c4806c52c09c153b5f6d646d25bc9e32fee4664d7"
+    },
+    "tropnik-instrumentation-tests.apk": {
+      "bytes": 1209041,
+      "sha256": "45785ba26732ad02e62f60762c92ecbaf38c153112e4c2ad6084243d91e580c9"
+    },
+    "tropnik-preview.signature.txt": {
+      "bytes": 955,
+      "sha256": "2ee3ba816c71528f5c9e1222bed539b1b20268b1b18b5e574ad2a4215ad946e3"
+    },
+    "tropnik-preview.manifest.txt": {
+      "bytes": 5542,
+      "sha256": "c7d23f11bcd584ab9f8c9686e6224009b2e390ad8db129d8459c6bb3db0da8f6"
+    },
+    "tropnik-arm64-preview.signature.txt": {
+      "bytes": 955,
+      "sha256": "2ee3ba816c71528f5c9e1222bed539b1b20268b1b18b5e574ad2a4215ad946e3"
+    },
+    "tropnik-arm64-preview.manifest.txt": {
+      "bytes": 5519,
+      "sha256": "02188ada4474e655ea99eff21991fdcd865f9ed8286681baa34abed5818fa52e"
+    },
+    "tropnik-instrumentation-tests.signature.txt": {
+      "bytes": 955,
+      "sha256": "2ee3ba816c71528f5c9e1222bed539b1b20268b1b18b5e574ad2a4215ad946e3"
+    },
+    "tropnik-instrumentation-tests.manifest.txt": {
+      "bytes": 1152,
+      "sha256": "503bba452057f1ec91a7c148494c881a48133e51b187fb124ea0fe2ea8d15561"
+    },
+    "tropnik-preview.alignment.txt": {
+      "bytes": 137138,
+      "sha256": "2d48494a42869df5147f73caf7d03c765af13cab0a700dfb880c259a38550e09"
+    },
+    "tropnik-preview.compression.json": {
+      "bytes": 655,
+      "sha256": "0b5449421f74ed93a2328ab337544d133a16235fbc9b3bc4c3239e5e9b013afd"
+    },
+    "tropnik-preview.verification.json": {
+      "bytes": 9601,
+      "sha256": "47f638a980e541c8e16a5cf1f5c9aa490c31fb4b37b37175c6b79f4d684b334c"
+    },
+    "tropnik-arm64-preview.alignment.txt": {
+      "bytes": 137005,
+      "sha256": "46f0ba4e7906193519b255eddefb48ca6eee389b4ff994e450f19503d1e67c88"
+    },
+    "tropnik-arm64-preview.compression.json": {
+      "bytes": 655,
+      "sha256": "c5dc57ab9918ce7361046945bec6047723032afa40dd6d4e6a3dd26621cdeff7"
+    },
+    "tropnik-arm64-preview.verification.json": {
+      "bytes": 9520,
+      "sha256": "d372aaaa38bac4d330a891b616af52cd7de07a2f2feabb5b1605a152e498bb08"
+    },
+    "unit-tests.json": {
+      "bytes": 3884,
+      "sha256": "b85abaab3e014d660d42f0eaba2faa730b4ce66c2eead75edf7edc9714b99d51"
+    }
+  },
+  "jvmTestsPassed": 89,
+  "mapRuntime": {
+    "mapRenderer": "tropnik-canvas",
+    "mapRendererManifestSha256": "34bb0eee219f9def47c0535bc0b3abd4e2ead89b9c11ee31be8a5c8abc0de852",
+    "mapRendererSourceInputsSha256": "26af625349b6cd64e23160b92bbf88ff1fac38992f257d6ec873669603bb41b7",
+    "mapRendererFilesVerified": 11,
+    "mapRendererWorkersVerified": 3,
+    "mapRendererResourceAliasesVerified": 1746,
+    "mapRendererNativeSdkRequired": false,
+    "mapRendererSharedWithWeb": true,
+    "mapRendererBridge": "exact-origin-web-message-port-v1"
+  }
+}

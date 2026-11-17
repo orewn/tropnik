@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-source-bound-review",
+  "sourceCommit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+  "workflowRunId": "44071007693",
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/44071007693",
+  "build": {
+    "status": "success",
+    "jobId": 133996914725,
+    "unitTests": {
+      "tests": 89,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "instrumentationApkCompiled": true
+    },
+    "buildArchiveBytesVerified": true,
+    "builtApks": {
+      "tropnik-preview.apk": {
+        "bytes": 69289290,
+        "sha256": "51fa8d4651e8b1a4ba13e44d3a5dd5a5963ffe8ff37faeb55965a4df5cc61124"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1209041,
+        "sha256": "45785ba26732ad02e62f60762c92ecbaf38c153112e4c2ad6084243d91e580c9"
+      }
+    }
+  },
+  "device": {
+    "jobId": 134000607668,
+    "status": "failed-before-instrumentation",
+    "testsExecuted": 0,
+    "deviceExecutionVerified": false,
+    "installedArtifactBytesVerified": false,
+    "installedProofComplete": false,
+    "rawInstrumentationPresent": false,
+    "deviceResultPresent": false,
+    "cases": [],
+    "failure": {
+      "stage": "capture_installed: adb pull installed test base.apk",
+      "processExitCode": 1,
+      "exception": "subprocess.CalledProcessError",
+      "source": "tools/android-build/preview_artifacts.py:257",
+      "jobLogLines": [
+        490,
+        505
+      ],
+      "observed": "Both APK installs returned Success. The installed-byte roundtrip exited during the test APK pull, before device-preflight and am instrument. The first APK roundtrip had returned successfully, but the complete two-APK installed receipt was not written.",
+      "stderrUnavailable": true,
+      "underlyingPullCause": "unknown; capture_output=True did not relay adb stderr",
+      "relatedLogcatEvent": {
+        "time": "11:15:29.698",
+        "message": "adbd: host-17 connection terminated: write failed; offline",
+        "qualification": "This is after the job traceback timestamp 11:15:29.625, so causal attribution is not established."
+      }
+    },
+    "executionOrderSource": "tools/android-build/run-instrumentation-ci.sh:86-94",
+    "screenshotsArchiveStatus": "Contains only tar error: files directory absent; no app QA screenshots exist."
+  },
+  "production": {
+    "kind": "unsigned-production-build-check",
+    "sourceCommit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+    "applicationId": "ru.tropa.app",
+    "version": "0.4.35",
+    "versionCode": 18,
+    "bytes": 61058589,
+    "sha256": "d092b8065adaa0723164d8c34baba0b17c5ac7c9167e3db3e4ee889b3da1ad3b",
+    "debuggable": false,
+    "signatureVerified": false,
+    "signingCertificateSha256": null,
+    "productionPublished": false,
+    "deviceExecutionVerified": false,
+    "liveApiVerified": false,
+    "upgradeVerified": false
+  },
+  "notClaimed": [
+    "This run does not pass or fail any of the 13 app device scenarios; none started.",
+    "The full-width font200 fix remains unaccepted on device.",
+    "Built APK hashes are not labelled tested APK hashes; installed-byte verification was incomplete.",
+    "No device rerun or native product change was performed in response to this failure.",
+    "The local shorter OpenStreetMap credit change is outside ecf source and is not covered by this run."
+  ],
+  "artifacts": [
+    {
+      "id": 14322108525,
+      "name": "tropnik-android-api35-instrumentation-1",
+      "path": "device.zip",
+      "sha256": "f63ea740492e989d2b54c684d5c7187128de201fd3d4de5cfae49bb7d97f822b"
+    },
+    {
+      "id": 14322044771,
+      "name": "tropnik-android-preview-1",
+      "path": "preview.zip",
+      "sha256": "72321613aff2bd2715c4d2e083881db94facf0e591a36b384f0a776ceecd4d56"
+    },
+    {
+      "id": 14322024772,
+      "name": "tropnik-production-build-check-1",
+      "path": "production-check.zip",
+      "sha256": "a0259149f2b3329006b47a49ce1eccc37b72d8486b4c6897dfaf8c0198a3fdf3"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "build.log",
+      "bytes": 153615,
+      "sha256": "d0555c7d48c450a741740b1f40c015f0376b66a041d763291b79bab5e3645b6e"
+    },
+    {
+      "path": "device-job.log",
+      "bytes": 52434,
+      "sha256": "51010315d49e3e09b8fa47d04f1fa56dd9c376ae6e921b026e6bfadcfe716633"
+    },
+    {
+      "path": "preview-build.json",
+      "bytes": 3440,
+      "sha256": "731ed7f28de9d040ba42e1f211f7a330223bb12e97922ffcdff87c253596984d"
+    },
+    {
+      "path": "unit-tests-from-build-log.json",
+      "bytes": 3884,
+      "sha256": "b85abaab3e014d660d42f0eaba2faa730b4ce66c2eead75edf7edc9714b99d51"
+    },
+    {
+      "path": "production-verification.json",
+      "bytes": 11462,
+      "sha256": "eaab419e4bf02bca8b94981b58f0965a9d1999f8befb9ba54f22fb63f5f5cac9"
+    },
+    {
+      "path": "device/logcat.txt",
+      "bytes": 768458,
+      "sha256": "920b16801bb0a5179dabbd11740d405abd5aa5aeba2459b7ad36fb08ef09d793"
+    },
+    {
+      "path": "device/emulator.log",
+      "bytes": 10107,
+      "sha256": "c9e9b417e846333c0350ed7a526552ef82ef0890fa6465f0deb074e275aa8e2a"
+    },
+    {
+      "path": "device/test-screenshots.tar",
+      "bytes": 46,
+      "sha256": "c42aa6e0b0271ae1945db9ffd14797d4e0f23c0cbc0d90e63ec8fb41dc0f7fe2"
+    },
+    {
+      "path": "device/final-screen.png",
+      "bytes": 1309509,
+      "sha256": "272057eb61c8be99331c67bc64ba68e64fbf001aff27f65abdc96c8c5e74d396"
+    }
+  ]
+}

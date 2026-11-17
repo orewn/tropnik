@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tempfile
 
 APP_ID = "ru.tropa.app.preview"
@@ -254,7 +255,23 @@ def capture_installed(directory: Path, root: Path, adb: Path, serial: str, outpu
             require(len(paths) == 1 and paths[0].startswith("/data/app/") and paths[0].endswith("/base.apk"),
                     f"Expected one installed base APK for {package}")
             destination = Path(temporary) / name
-            subprocess.run([str(adb), "-s", serial, "pull", paths[0], str(destination)], check=True, capture_output=True)
+            try:
+                subprocess.run([str(adb), "-s", serial, "pull", paths[0], str(destination)], check=True, capture_output=True)
+            except subprocess.CalledProcessError as error:
+                # Retain the actual transport failure before failing closed.
+                # This is diagnostic evidence, never an installed-byte receipt.
+                failure = {"schemaVersion": 1, "stage": "installed-apk-pull", "package": package,
+                           "apk": name, "exitCode": error.returncode, "sourceCommit": receipt["sourceCommit"],
+                           "workflowRunId": receipt["workflowRunId"], "streamByteLimit": 4096}
+                for stream, value in (("stdout", error.stdout or b""), ("stderr", error.stderr or b"")):
+                    failure[stream] = value[:4096].decode("utf-8", errors="replace")
+                    failure[stream + "Bytes"] = len(value)
+                    failure[stream + "Truncated"] = len(value) > 4096
+                print(json.dumps(failure), file=sys.stderr)
+                output.parent.mkdir(parents=True, exist_ok=True)
+                output.with_name(f"installed-apk-pull-{package}.json").write_text(
+                    json.dumps(failure, indent=2) + "\n", encoding="utf-8")
+                raise
             actual = fingerprint(destination)
             require(actual == receipt["files"][name], f"Installed bytes differ from build artifact: {name}")
             installed[name] = actual

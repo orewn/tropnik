@@ -1,0 +1,169 @@
+{
+  "sourceCommit": "ecf672bff60983e764fcaa9a3d5b44f834b1f6d6",
+  "workflowRun": 44071007674,
+  "runAttempt": 1,
+  "result": "failure",
+  "failure": {
+    "step": 21,
+    "name": "Check UI smoothness before the full browser audit",
+    "issues": [
+      {
+        "profile": "desktop-webgl",
+        "phase": "ui-smoothness/map-pan",
+        "metric": "frameP95Ms",
+        "value": 35.09999999997672,
+        "limit": 35
+      }
+    ]
+  },
+  "performanceAccepted": false,
+  "profiles": [
+    {
+      "profile": "android-portrait",
+      "acquisitionCompleted": true,
+      "performanceAccepted": true,
+      "issues": [],
+      "scenarios": [
+        {
+          "name": "panel",
+          "samples": 130,
+          "frameP95Ms": 17,
+          "maxGapMs": 59.399999999965075,
+          "longTaskCount": 1
+        },
+        {
+          "name": "explore-search",
+          "samples": 117,
+          "frameP95Ms": 17.79999999998836,
+          "maxGapMs": 33.09999999997672,
+          "longTaskCount": 0
+        },
+        {
+          "name": "explore-filters",
+          "samples": 169,
+          "frameP95Ms": 17.20000000001164,
+          "maxGapMs": 27.100000000034925,
+          "longTaskCount": 0
+        },
+        {
+          "name": "catalog-scroll",
+          "samples": 55,
+          "frameP95Ms": 22.79999999998836,
+          "maxGapMs": 41,
+          "longTaskCount": 0
+        },
+        {
+          "name": "map-pan",
+          "samples": 82,
+          "frameP95Ms": 25.900000000023283,
+          "maxGapMs": 31.099999999976717,
+          "longTaskCount": 0
+        },
+        {
+          "name": "map-zoom",
+          "samples": 624,
+          "frameP95Ms": 23.70000000001164,
+          "maxGapMs": 40.5,
+          "longTaskCount": 0
+        },
+        {
+          "name": "layer-switch",
+          "samples": 262,
+          "frameP95Ms": 16.900000000023283,
+          "maxGapMs": 39.29999999998836,
+          "longTaskCount": 0
+        },
+        {
+          "name": "site-search",
+          "samples": 95,
+          "frameP95Ms": 17.79999999998836,
+          "maxGapMs": 19.900000000023283,
+          "longTaskCount": 0
+        }
+      ]
+    },
+    {
+      "profile": "desktop-webgl",
+      "acquisitionCompleted": true,
+      "performanceAccepted": false,
+      "issues": [
+        {
+          "profile": "desktop-webgl",
+          "phase": "ui-smoothness/map-pan",
+          "metric": "frameP95Ms",
+          "value": 35.09999999997672,
+          "limit": 35
+        }
+      ],
+      "scenarios": [
+        {
+          "name": "panel",
+          "samples": 73,
+          "frameP95Ms": 16.900000000023283,
+          "maxGapMs": 17.20000000001164,
+          "longTaskCount": 0
+        },
+        {
+          "name": "explore-search",
+          "samples": 98,
+          "frameP95Ms": 21.599999999976717,
+          "maxGapMs": 33.100000000034925,
+          "longTaskCount": 0
+        },
+        {
+          "name": "explore-filters",
+          "samples": 136,
+          "frameP95Ms": 17.099999999976717,
+          "maxGapMs": 21,
+          "longTaskCount": 0
+        },
+        {
+          "name": "catalog-scroll",
+          "samples": 28,
+          "frameP95Ms": 16.900000000023283,
+          "maxGapMs": 19.900000000023283,
+          "longTaskCount": 0
+        },
+        {
+          "name": "map-pan",
+          "samples": 213,
+          "frameP95Ms": 35.09999999997672,
+          "maxGapMs": 42.20000000001164,
+          "longTaskCount": 0
+        },
+        {
+          "name": "map-zoom",
+          "samples": 676,
+          "frameP95Ms": 27.20000000001164,
+          "maxGapMs": 54.40000000002328,
+          "longTaskCount": 1
+        },
+        {
+          "name": "layer-switch",
+          "samples": 221,
+          "frameP95Ms": 16.800000000046566,
+          "maxGapMs": 62.5,
+          "longTaskCount": 2
+        },
+        {
+          "name": "site-search",
+          "samples": 90,
+          "frameP95Ms": 17.900000000023283,
+          "maxGapMs": 19.399999999965075,
+          "longTaskCount": 0
+        }
+      ]
+    }
+  ],
+  "pendingEvidence": [
+    "Portrait Settings reanchor and unchanged8gesture traversal",
+    "Production phone controls and source credit gates on this exact revision",
+    "Full mobile search/filter/save/context/back flows",
+    "Public deployment"
+  ],
+  "comparison": "desktop-pan-comparison.json",
+  "sourceIdenticalRerunExecuted": false,
+  "thresholdsChanged": false,
+  "measurementMathChanged": false,
+  "rawArtifactsUnmodified": true
+}
