@@ -250,7 +250,11 @@ class LocalExperienceTest {
             }
         }
         val compactMap = awaitReadyMap()
-        app.waitUntil(15_000) { mapInputReady(mapSnapshot(compactMap)) }
+        app.waitUntil(15_000) {
+            val snapshot = mapSnapshot(compactMap)
+            snapshot.optString("routeId") == "kolyma-black-creek" &&
+                snapshot.getJSONObject("rendered").getJSONObject("reviewedCoastal").optBoolean("selected") && mapInputReady(snapshot)
+        }
         reports.put(reachableControls("mobile-map-320dp-font200", listOf("go_back", "map_layers", "map_zoom_in", "map_zoom_out",
             "locate", "map_sources", "save_route", "show_route_details", "nav_explore", "nav_saved", "nav_more"), density, mapVisible = true))
         assertFullDestinationLabels()
@@ -350,6 +354,7 @@ class LocalExperienceTest {
                 .put("boundsPx", JSONArray(listOf(textBounds.left, textBounds.top, textBounds.right, textBounds.bottom)))
                 .put("layouts", JSONArray(results.map { result -> JSONObject()
                     .put("widthPx", result.size.width).put("heightPx", result.size.height).put("lines", result.lineCount)
+                    .put("paragraphWidthPx", result.multiParagraph.width).put("paragraphHeightPx", result.multiParagraph.height)
                     .put("constraintWidthPx", result.layoutInput.constraints.maxWidth)
                     .put("constraintHeightPx", result.layoutInput.constraints.maxHeight)
                     .put("density", result.layoutInput.density.density).put("fontScale", result.layoutInput.density.fontScale)

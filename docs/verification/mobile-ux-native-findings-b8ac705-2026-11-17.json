@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-source-bound-review",
+  "sourceCommit": "b8ac705c9a13d96fc4716aef746c7938ecc5c2a1",
+  "workflowRunId": "44004885737",
+  "workflowUrl": "https://github.com/orewn/tropnik/actions/runs/44004885737",
+  "build": {
+    "status": "success",
+    "jobId": 133777696259,
+    "unitTests": {
+      "tests": 89,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "instrumentationApkCompiled": true,
+      "instrumentationExecuted": false
+    }
+  },
+  "device": {
+    "status": "failed",
+    "tests": 13,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "missingTests": [],
+    "parseErrors": [],
+    "installedArtifactBytesVerified": true,
+    "deviceExecutionVerified": false,
+    "releasePayloadDeviceVerified": false,
+    "testedArchitecture": "x86_64",
+    "arm64DeviceExecutionVerified": false,
+    "physicalDeviceVerified": false,
+    "environment": "GitHub-hosted Ubuntu / Android API 35 x86_64 / KVM / ANGLE + SwiftShader (swangle)",
+    "testedApks": {
+      "tropnik-preview.apk": {
+        "bytes": 69289290,
+        "sha256": "3e1ff681fc8224686f9ccc3ad4d26508a7b4fc4d2bb3eed2900de701f7a62b33"
+      },
+      "tropnik-instrumentation-tests.apk": {
+        "bytes": 1208857,
+        "sha256": "29363862274209704e1e673513cff08fb35e68bcac18ed31255ca84c32af22ff"
+      }
+    }
+  },
+  "deviceCases": [
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeLabelsRemainWholeAboveTheMaskAndRejectForeignAnchorsOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "browserPlannerExplainsStorageAndCanCancelWithoutLeavingTheApp",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nationalTerritoryCatalogueCanOpenSaveAndReturnToItsSourceRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "terminalDocumentFailureAfterFirstFrameCanPrepareANewView",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "mobileNavigationRetainsMapAndSavedContext",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "rendererExitHandlerReleasesTheViewAndKeepsNativeRouteAvailable",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "nativeCatalogueFiltersLayersAndCoastalTrackStayAvailableOffline",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "bundledLandscapeCanOpenAndReturnToTheSameRoute",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "mobileSearchAndCompactPanelsKeepActionsReachable",
+      "statusCode": -2,
+      "failed": true,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "canOpenRegionAndReadOfficialRestrictionWithoutAnAccount",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "sessionTransitionsFailClosedAndDiscardLatePrivateWork",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    },
+    {
+      "className": "ru.tropa.app.LocalExperienceTest",
+      "name": "noServerMeansExplicitConfigurationNotInventedSocialActivity",
+      "statusCode": 0,
+      "failed": false,
+      "error": false,
+      "skipped": false
+    }
+  ],
+  "resolvedSinceE2": [
+    {
+      "issue": "Snackbar overlapped pinned save action; original e2 offline-package frame shows obstruction",
+      "evidenceBefore": "../mobile-e2ba7-android/device/screenshots/qa/offline-pack-opened-snapshot.png",
+      "evidenceAfter": "device/screenshots/qa/mobile-save-feedback.png",
+      "measurement": {
+        "message": "Карточка сохранена на этом устройстве",
+        "feedbackPx": [
+          0,
+          1937,
+          1080,
+          2127
+        ],
+        "savePx": [
+          32,
+          1790,
+          1048,
+          1916
+        ],
+        "disjoint": true
+      },
+      "confirmedCases": [
+        "savedRegionPackCanInstallVerifyOpenRefreshAndRemoveOffline",
+        "mobileNavigationRetainsMapAndSavedContext"
+      ]
+    },
+    {
+      "issue": "Landscape narrow-panel Save text split into an awkward word wrap",
+      "fix": "Narrow panel uses an accessible 48dp save icon with state; full action remains named in semantics",
+      "evidenceAfter": "device/screenshots/qa/mobile-map-landscape.png"
+    }
+  ],
+  "confirmedJourneys": {
+    "navigation": {
+      "query": "Тисо-самшитовая роща",
+      "regionId": "krasnodar",
+      "sameNativeMap": true,
+      "savedListPositionRestored": true,
+      "destinationCamerasAreIndependent": true,
+      "sameTabIsNoOp": true,
+      "savedTabClosesChildAndKeepsScroll": true
+    },
+    "hiddenMapActive": false,
+    "offlineLifecycle": {
+      "regionId": "altai",
+      "routeId": "osm-relation-6040458",
+      "schemaVersion": 2,
+      "runtimeSha256": "34bb0eee219f9def47c0535bc0b3abd4e2ead89b9c11ee31be8a5c8abc0de852",
+      "snapshotSourceBytesVerified": true,
+      "missingGeometryRejectedOnNextOpen": true,
+      "oldRuntimeRequiresUpdate": true,
+      "bookmarkSurvivedRemoval": true,
+      "reinstalledAndVerified": true,
+      "networkState": "OFFLINE"
+    },
+    "ownedOfflinePixelsPassed": true
+  },
+  "remainingFailure": {
+    "case": "mobileSearchAndCompactPanelsKeepActionsReachable",
+    "assertion": "Карта must remain complete at 200%",
+    "observedLabels": [
+      {
+        "label": "Карта",
+        "boundsPx": [
+          49,
+          1279,
+          232,
+          1365
+        ],
+        "layouts": [
+          {
+            "widthPx": 183,
+            "heightPx": 86,
+            "lines": 1,
+            "constraintWidthPx": 238,
+            "constraintHeightPx": 170,
+            "density": 2.625,
+            "fontScale": 2,
+            "overflowWidth": true,
+            "overflowHeight": false
+          }
+        ]
+      }
+    ],
+    "screenshot": "device/screenshots/qa/mobile-map-320dp-font200.png",
+    "analysis": "Text height fits, width reports overflow on a shrink-wrapped paragraph despite spare allocated width. Narrow fix gives the Text its full allocated tab width; strict actual overflow assertion remains. Exact resulting candidate is not device-tested yet."
+  },
+  "pendingFollowUp": {
+    "files": [
+      "android/app/src/main/java/ru/tropa/app/ui/MobileDestinationBar.kt",
+      "android/app/src/androidTest/java/ru/tropa/app/LocalExperienceTest.kt"
+    ],
+    "changes": [
+      "Give destination Text the full allocated inner tab width.",
+      "Record fractional multiParagraph width/height in label diagnostic.",
+      "Within the existing 15s deadline, wait for the actual selected coastal route plus input-ready before the compact selected-map screenshot; b8 screenshot captured an earlier country frame."
+    ],
+    "localValidation": [
+      "test_tropa_map_threading.py: 4/4",
+      "git diff --check: clean"
+    ],
+    "actualDevicePass": false
+  },
+  "notClaimed": [
+    "The failed compact case is not accepted, including later large-font search/overview steps that were not reached.",
+    "CI verified preview APK on an x86_64 emulator, not ARM64 or a physical GPS/GPU/battery device.",
+    "Production check is unsigned, unpublished, not live-API-tested, not upgrade-tested."
+  ],
+  "production": {
+    "kind": "unsigned-production-build-check",
+    "sourceCommit": "b8ac705c9a13d96fc4716aef746c7938ecc5c2a1",
+    "applicationId": "ru.tropa.app",
+    "version": "0.4.35",
+    "versionCode": 18,
+    "bytes": 61058625,
+    "sha256": "dca99c406e9baa50cecd0671c1282ad97b2a5c3180a68462e757e9e0159469e1",
+    "debuggable": false,
+    "signatureVerified": false,
+    "signingCertificateSha256": null,
+    "productionPublished": false,
+    "deviceExecutionVerified": false,
+    "liveApiVerified": false,
+    "upgradeVerified": false
+  },
+  "evidence": [
+    {
+      "path": "device.zip",
+      "bytes": 7682315,
+      "sha256": "8b1d85898561c35178d05560ba33cda938917f5942192b3870f519adac7b2dc8"
+    },
+    {
+      "path": "production-check.zip",
+      "bytes": 5168,
+      "sha256": "c68149d97ab88f19025126eba35fccf5207d35dacb358ec1bcafd755786c4e6d"
+    },
+    {
+      "path": "build.log",
+      "bytes": 153033,
+      "sha256": "17d372dac3383e2bc2f460495ca6eb554c97e011e7336b803e11c686e9821012"
+    },
+    {
+      "path": "device-job.log",
+      "bytes": 67455,
+      "sha256": "b04b669f799790be49a13bd96b48aaca6a27f0902cc8df98e0bdb354beaedd22"
+    },
+    {
+      "path": "device/device-result.json",
+      "bytes": 4864,
+      "sha256": "deac2693c5f3a73981883a9b94b017dd0992498511923a47b770fb189947f038"
+    },
+    {
+      "path": "unit-tests-from-build-log.json",
+      "bytes": 3886,
+      "sha256": "95b551242fc0e4d492b6285caad0044d16189f57f21983a42782a7e2e0a6f27e"
+    },
+    {
+      "path": "production-verification.json",
+      "bytes": 11462,
+      "sha256": "c05f8d850546ac32598d9bec19f6cffb45582b3851fab00bfe292c5d8cf7e086"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-navigation-context.json",
+      "bytes": 46529,
+      "sha256": "4802e50328710c467d14e530e626ceaabd6e17d55f84a6c2e0d5384ba6e05ce3"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-save-feedback.json",
+      "bytes": 224,
+      "sha256": "e71ad936c4cbe8f5cc66e311c50967bd7ca3d29056821b2a509dd6046ef15921"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-destination-labels.json",
+      "bytes": 396,
+      "sha256": "b8748acc6610b6db04b18812cbe43864413ea809ba25e1a25455d8231e3e175f"
+    },
+    {
+      "path": "device/screenshots/qa/offline-pack-lifecycle.json",
+      "bytes": 34653,
+      "sha256": "d6d48046baa0739d1a697be23cd9a7c5e9b02fd6ba10b09d07f4a9fd8e7ec30f"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-save-feedback.png",
+      "bytes": 181376,
+      "sha256": "455b69f81f0ea3dc7453d42587cfb818bfdd7cf4a03df1807856cb73c0e14aab"
+    },
+    {
+      "path": "device/screenshots/qa/mobile-map-320dp-font200.png",
+      "bytes": 112922,
+      "sha256": "063913c2ccf5656a50c8ce9078a186dfed989e52146ab28d46d6206e917c3260"
+    }
+  ]
+}

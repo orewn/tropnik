@@ -1,0 +1,339 @@
+{
+  "sourceCommit": "b8ac705c9a13d96fc4716aef746c7938ecc5c2a1",
+  "workflowRun": 44004886095,
+  "result": "failure",
+  "failure": {
+    "step": 30,
+    "name": "Verify real mobile rendering and sheet interaction and desktop map interactions",
+    "profile": "compact-android",
+    "sheet": "open",
+    "error": "AssertionError [ERR_ASSERTION]: compact-android/open: not all Layers controls became reachable",
+    "menu": {
+      "left": 68,
+      "right": 308,
+      "top": 192,
+      "bottom": 286,
+      "width": 240,
+      "height": 94
+    },
+    "clientHeight": 92,
+    "scrollHeight": 478,
+    "maxScrollTop": 386,
+    "frames": [
+      {
+        "scrollTop": 0,
+        "fullyVisibleAndHitIndices": [
+          0
+        ]
+      },
+      {
+        "scrollTop": 31,
+        "fullyVisibleAndHitIndices": [
+          1
+        ]
+      },
+      {
+        "scrollTop": 62,
+        "fullyVisibleAndHitIndices": [
+          1
+        ]
+      },
+      {
+        "scrollTop": 93,
+        "fullyVisibleAndHitIndices": [
+          2
+        ]
+      },
+      {
+        "scrollTop": 124,
+        "fullyVisibleAndHitIndices": [
+          2
+        ]
+      },
+      {
+        "scrollTop": 155,
+        "fullyVisibleAndHitIndices": [
+          3
+        ]
+      },
+      {
+        "scrollTop": 186,
+        "fullyVisibleAndHitIndices": [
+          3,
+          4
+        ]
+      },
+      {
+        "scrollTop": 217,
+        "fullyVisibleAndHitIndices": [
+          4
+        ]
+      },
+      {
+        "scrollTop": 248,
+        "fullyVisibleAndHitIndices": [
+          4,
+          5
+        ]
+      }
+    ],
+    "reachedIndices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "notYetReached": [
+      {
+        "index": 6,
+        "label": "Подробная офлайн-карта"
+      },
+      {
+        "index": 7,
+        "label": "Источники карты"
+      }
+    ],
+    "nativeGestures": [
+      {
+        "distance": 46,
+        "delta": 31
+      },
+      {
+        "distance": 46,
+        "delta": 31
+      },
+      {
+        "distance": 46,
+        "delta": 31
+      },
+      {
+        "distance": 46,
+        "delta": 31
+      },
+      {
+        "distance": 46,
+        "delta": 31
+      },
+      {
+        "distance": 46,
+        "delta": 31
+      },
+      {
+        "distance": 46,
+        "delta": 31
+      },
+      {
+        "distance": 46,
+        "delta": 31
+      }
+    ]
+  },
+  "smoothness": {
+    "performanceAccepted": true,
+    "performanceIssues": [],
+    "profiles": [
+      {
+        "profile": "android-portrait",
+        "acquisitionCompleted": true,
+        "performanceAccepted": true,
+        "performanceIssues": [],
+        "scenarios": [
+          {
+            "name": "panel",
+            "samples": 132,
+            "frameP95Ms": 16.800000000017462,
+            "maxGapMs": 40.09999999997672,
+            "longTaskCount": 0
+          },
+          {
+            "name": "explore-search",
+            "samples": 110,
+            "frameP95Ms": 16.800000000017462,
+            "maxGapMs": 17.5,
+            "longTaskCount": 0
+          },
+          {
+            "name": "explore-filters",
+            "samples": 168,
+            "frameP95Ms": 16.800000000017462,
+            "maxGapMs": 20,
+            "longTaskCount": 0
+          },
+          {
+            "name": "catalog-scroll",
+            "samples": 55,
+            "frameP95Ms": 22.70000000001164,
+            "maxGapMs": 40.399999999965075,
+            "longTaskCount": 0
+          },
+          {
+            "name": "map-pan",
+            "samples": 81,
+            "frameP95Ms": 21.899999999965075,
+            "maxGapMs": 23.599999999976717,
+            "longTaskCount": 0
+          },
+          {
+            "name": "map-zoom",
+            "samples": 342,
+            "frameP95Ms": 21.79999999998836,
+            "maxGapMs": 34.100000000034925,
+            "longTaskCount": 0
+          },
+          {
+            "name": "layer-switch",
+            "samples": 252,
+            "frameP95Ms": 16.800000000046566,
+            "maxGapMs": 33.20000000001164,
+            "longTaskCount": 0
+          },
+          {
+            "name": "site-search",
+            "samples": 96,
+            "frameP95Ms": 16.800000000046566,
+            "maxGapMs": 18.100000000034925,
+            "longTaskCount": 0
+          }
+        ]
+      },
+      {
+        "profile": "desktop-webgl",
+        "acquisitionCompleted": true,
+        "performanceAccepted": true,
+        "performanceIssues": [],
+        "scenarios": [
+          {
+            "name": "panel",
+            "samples": 73,
+            "frameP95Ms": 16.800000000046566,
+            "maxGapMs": 17.199999999953434,
+            "longTaskCount": 0
+          },
+          {
+            "name": "explore-search",
+            "samples": 96,
+            "frameP95Ms": 18,
+            "maxGapMs": 23.79999999998836,
+            "longTaskCount": 0
+          },
+          {
+            "name": "explore-filters",
+            "samples": 135,
+            "frameP95Ms": 16.79999999998836,
+            "maxGapMs": 17.399999999965075,
+            "longTaskCount": 0
+          },
+          {
+            "name": "catalog-scroll",
+            "samples": 28,
+            "frameP95Ms": 17,
+            "maxGapMs": 20.20000000001164,
+            "longTaskCount": 0
+          },
+          {
+            "name": "map-pan",
+            "samples": 187,
+            "frameP95Ms": 31.100000000034925,
+            "maxGapMs": 36.600000000034925,
+            "longTaskCount": 0
+          },
+          {
+            "name": "map-zoom",
+            "samples": 577,
+            "frameP95Ms": 22.900000000023283,
+            "maxGapMs": 43,
+            "longTaskCount": 0
+          },
+          {
+            "name": "layer-switch",
+            "samples": 213,
+            "frameP95Ms": 16.800000000046566,
+            "maxGapMs": 50.100000000034925,
+            "longTaskCount": 1
+          },
+          {
+            "name": "site-search",
+            "samples": 90,
+            "frameP95Ms": 17.29999999998836,
+            "maxGapMs": 20.79999999998836,
+            "longTaskCount": 0
+          }
+        ]
+      }
+    ]
+  },
+  "landscapeControls": {
+    "verified": true,
+    "cases": 3,
+    "mapAvailableRect": {
+      "left": 320,
+      "right": 844,
+      "top": 56,
+      "bottom": 326
+    },
+    "primaryTargets": [
+      {
+        "label": "Увеличить масштаб",
+        "width": 48,
+        "height": 48,
+        "blocked": false
+      },
+      {
+        "label": "Уменьшить масштаб",
+        "width": 48,
+        "height": 48,
+        "blocked": false
+      },
+      {
+        "label": "Моё местоположение",
+        "width": 48,
+        "height": 48,
+        "blocked": false
+      },
+      {
+        "label": "Настройки карты",
+        "width": 48,
+        "height": 56,
+        "blocked": false
+      }
+    ]
+  },
+  "sourceCredits": {
+    "verified": true,
+    "cases": 40
+  },
+  "pendingEvidence": [
+    "Complete all real phone browser profiles",
+    "Full search/filter/route/save/back/Saved-vs-Map context scenario",
+    "Public deployment"
+  ],
+  "reviewedOriginalScreenshots": [
+    {
+      "file": "failure/browser-failure.png",
+      "sha256": "6cf21d35fe342e0752dafda5e62ba2e5c22d77d2c3a18ba17dca6f54c67af9e8",
+      "note": "Actual compact320x640 page at failed open-sheet Settings traversal."
+    },
+    {
+      "file": "design/map-controls/phone-landscape-closed.png",
+      "sha256": "84ef2f992f0f5a894ec41358a86c51bbb3e5765f105a4b160b3dd73fbae509fa",
+      "note": "Production JSX/CSS fixture; map-right split and visible48px targets. It is a geometry fixture, not a complete live application screen."
+    },
+    {
+      "file": "design/map-controls/phone-landscape-open.png",
+      "sha256": "bc485f79e2bcb071ca947e8b89ce51c554623f91f072ab7b2fca3e5bcbc8866c",
+      "note": "Production JSX/CSS fixture; Settings below primary rail, inside524x270 available map."
+    },
+    {
+      "file": "design/trail-overlay/phone-selected.png",
+      "sha256": "630737a4e2b6e16305fea5590c8f1e3e51a6430ac7805a6c5c40253f84911537",
+      "note": "Actual390x844 selected-route screenshot after the sheet animation barrier.104px peek Save and source credits remain visible; previous transient blank strip is absent."
+    }
+  ],
+  "triage": {
+    "finding": "The menu has real scrollable content. Eight native gestures move 31px each, ending at248 of386px. The bottom two links are not yet visited when the fixed traversal loop stops. Closed menu passed.",
+    "productionGeometryChanged": false,
+    "thresholdsChanged": false
+  }
+}

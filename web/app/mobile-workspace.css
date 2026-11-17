@@ -112,7 +112,7 @@
   .explore-layout:is(.sheet-open,.sheet-closed) .map-controls>button:not(.map-desktop-secondary){display:grid!important;width:48px;min-width:48px;height:48px!important;min-height:48px!important}
   .explore-layout:is(.sheet-open,.sheet-closed) .layer-control{left:var(--map-left)!important;top:calc(var(--map-top) + 64px)!important;right:auto!important;bottom:auto!important}
   .explore-layout:is(.sheet-open,.sheet-closed) .layer-button{width:48px;height:56px;min-height:56px;padding:0;font-size:0;border-radius:12px}
-  .explore-layout:is(.sheet-open,.sheet-closed) .layer-menu{left:0;right:auto;top:64px;bottom:auto;width:calc(100vw - var(--map-left) - var(--map-right) - 56px);max-width:320px;max-height:calc(100dvh - var(--header) - var(--mobile-nav-height) - var(--sheet-control-inset) - var(--map-top) - 136px);transform:translateX(56px);padding:12px;overflow:auto;overscroll-behavior:contain}
+  .explore-layout:is(.sheet-open,.sheet-closed) .layer-menu{left:0;right:auto;top:-64px;bottom:auto;width:calc(100vw - var(--map-left) - var(--map-right) - 56px);max-width:320px;max-height:calc(100dvh - var(--header) - var(--mobile-nav-height) - var(--sheet-control-inset) - var(--map-top) - 8px);transform:translateX(56px);padding:12px;overflow:auto;overscroll-behavior:contain}
   .explore-layout:has(.atlas-wrap .layer-menu)>:is(.fact-closed,.fact-card){visibility:hidden;pointer-events:none}
   .explore-layout .layer-menu label,.explore-layout .layer-menu>a,.explore-layout .layer-menu>.map-mobile-action{min-height:48px}
   .explore-layout .layer-menu>.map-mobile-action{display:flex;align-items:center;gap:8px;width:100%;padding:8px 0;text-align:left;font-size:14px;line-height:20px;color:var(--forest);border:0;border-bottom:1px solid var(--line);background:transparent}
@@ -135,7 +135,7 @@
   .explore-layout:is(.sheet-open,.sheet-closed){--mobile-landscape-panel:min(320px,42vw);--explore-panel-width:var(--mobile-landscape-panel);--sheet-peek:104px;--sheet-expanded-height:calc(100svh - var(--header) - var(--mobile-nav-height));--sheet-control-inset:0px;--map-footer-inset:8px;display:block}
   .explore-layout:is(.sheet-open,.sheet-closed) .explore-panel{right:auto!important;left:0!important;width:var(--mobile-landscape-panel)!important;max-height:100%!important;border-radius:0;border-right:1px solid var(--line)}
   .explore-layout:is(.sheet-open,.sheet-closed) .atlas-wrap{left:var(--mobile-landscape-panel);right:0;top:0;bottom:0;width:calc(100% - var(--mobile-landscape-panel));height:100%}
-  .explore-layout:is(.sheet-open,.sheet-closed) .layer-menu{width:calc(100vw - var(--mobile-landscape-panel) - var(--map-left) - var(--map-right) - 56px);max-height:calc(100dvh - var(--header) - var(--mobile-nav-height) - var(--map-top) - 136px)}
+  .explore-layout:is(.sheet-open,.sheet-closed) .layer-menu{top:64px;width:calc(100vw - var(--mobile-landscape-panel) - var(--map-left) - var(--map-right) - 56px);max-height:calc(100dvh - var(--header) - var(--mobile-nav-height) - var(--map-top) - 136px)}
   .explore-layout:is(.sheet-open,.sheet-closed) .map-footer-meta{position:relative;inset:auto;width:100%;max-width:100%;gap:8px}
   .explore-layout:is(.sheet-open,.sheet-closed) .map-footer>.map-preload-status{max-width:100%}
   .explore-layout:is(.sheet-open,.sheet-closed)>.fact-closed{left:calc(var(--mobile-landscape-panel) + var(--map-left) + 56px)}

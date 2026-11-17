@@ -56,7 +56,7 @@ internal fun MobileDestinationBar(screen: Screen, onSelect: (Screen) -> Unit) {
                             TropaIcon(glyph, color = if (selected) Palette.Forest else Palette.Muted)
                         }
                         Spacer(Modifier.height(4.dp))
-                        Text(label, style = labelStyle, color = if (selected) Palette.Forest else Palette.Muted,
+                        Text(label, Modifier.fillMaxWidth(), style = labelStyle, color = if (selected) Palette.Forest else Palette.Muted,
                             textAlign = TextAlign.Center)
                     }
                 }
